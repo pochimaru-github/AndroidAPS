@@ -15,7 +15,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AndroidAPS"
-include ':app'
 
-// appフォルダ内の設定ファイルを「build.gradle」として強制認識させる命令
+// 【超重要】混乱の元である「.kts」を完全に無視し、本物の「build.gradle」だけを読み込ませる絶対命令
+include ':app'
 project(':app').buildFileName = 'build.gradle'
