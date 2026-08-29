@@ -1,6 +1,6 @@
-apply {
-    plugin("com.android.application")
-    plugin("org.jetbrains.kotlin.android")
+plugins {
+    application
+    id("org.jetbrains.kotlin.android")
 }
 
 repositories {
