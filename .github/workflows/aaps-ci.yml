@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '11'
-          distribution: 'default'
+          distribution: 'temurin'
       - name: Build with Gradle
         run: ./gradlew assembleFullRelease
       - name: Upload APK
