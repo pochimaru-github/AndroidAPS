@@ -1,39 +1,33 @@
 plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'kotlin-kapt'
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
-    compileSdkVersion 34
+    compileSdk = 34
 
     defaultConfig {
-        applicationId "com.nightscout.androidaps"
-        minSdkVersion 21
-        targetSdkVersion 34
-        versionCode 3040206
-        versionName "3.4.2.6"
+        applicationId = "com.nightscout.androidaps"
+        minSdk = 21
+        targetSdk = 34
+        versionCode = 3040206
+        versionName = "3.4.2.6"
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = "11"
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
-        val output = File.createTempFile("git-remote", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().trim()
-    } catch (_: Exception) {
         return "NoGitSystemAvailable"
     }
 }
