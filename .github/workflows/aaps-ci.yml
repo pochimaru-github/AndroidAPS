@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'default'
       - name: Build with Gradle
         run: ./gradlew assembleFullRelease
       - name: Upload APK
