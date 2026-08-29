@@ -8,7 +8,8 @@ buildscript {
         google()
     }
     dependencies {
-        classpath(libs.com.android.tools.build)
+        // 環境のズレを強制修正するため、ここに最新の組み立てパーツを強制指定しました
+        classpath("com.android.tools.build:gradle:8.2.2")
         classpath(libs.com.google.gms)
         classpath(libs.com.google.firebase.gradle)
 
@@ -42,7 +43,7 @@ allprojects {
             freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
             freeCompilerArgs.add("-Xannotation-default-target=param-property")
             freeCompilerArgs.add("-Xjvm-default=all") //Support @JvmDefault
-            jvmTarget.set(Versions.jvmTarget)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
     gradle.projectsEvaluated {
