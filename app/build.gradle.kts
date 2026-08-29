@@ -8,7 +8,7 @@ repositories {
 }
 
 android {
-    compileSdk = 34
+    compileSdk(34)
 
     defaultConfig {
         applicationId = "com.nightscout.androidaps"
