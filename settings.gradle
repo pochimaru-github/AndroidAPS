@@ -16,16 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "AndroidAPS"
 include ':app'
-include ':pump:insight'
-include ':pump:medtrum'
-include ':pump:medtronic'
-include ':pump:omnipod:common'
-include ':pump:omnipod:eros'
-include ':pump:omnipod:dash'
-include ':pump:common'
-include ':pump:rileylink'
-include ':pump:virtual'
-include ':shared:impl'
-include ':shared:tests'
-include ':ui'
-include ':workflow'
+include ':core'
+include ':data'
