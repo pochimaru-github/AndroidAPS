@@ -16,5 +16,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "AndroidAPS"
 include ':app'
-include ':core'
-include ':data'
