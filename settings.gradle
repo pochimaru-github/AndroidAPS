@@ -15,7 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AndroidAPS"
-
-// 【超重要】混乱の元である「.kts」を完全に無視し、本物の「build.gradle」だけを読み込ませる絶対命令
 include ':app'
-project(':app').buildFileName = 'build.gradle'
