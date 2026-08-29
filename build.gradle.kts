@@ -19,23 +19,6 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-        google()
-        maven("https://jitpack.io")
-    }
-    tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions {
-            freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
-            freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
-            freeCompilerArgs.add("-Xannotation-default-target=param-property")
-            freeCompilerArgs.add("-Xjvm-default=all")
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-        }
-    }
-}
-
 tasks.register<Delete>("clean").configure {
     delete(rootProject.layout.buildDirectory)
 }
