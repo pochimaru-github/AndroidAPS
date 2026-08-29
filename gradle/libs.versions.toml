@@ -1,6 +1,7 @@
 [versions]
 agp = "7.4.2"
 kotlin = "1.8.20"
+ksp = "1.8.20-1.0.11"
 
 [libraries]
 com-android-tools-build = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -9,31 +10,14 @@ com-google-firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-allopen = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
 kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
-com-android-tools-build = { group = "com.android.tools.build", name = "gradle", version.ref = "gradlePlugin" }
-com-google-gms = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
 
-com-google-dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "dagger" }
-com-google-dagger-android = { group = "com.google.dagger", name = "dagger-android", version.ref = "dagger" }
-com-google-dagger-android-processor = { group = "com.google.dagger", name = "dagger-android-processor", version.ref = "dagger" }
-com-google-dagger-android-support = { group = "com.google.dagger", name = "dagger-android-support", version.ref = "dagger" }
-
-com-google-firebase-gradle = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version = "3.0.6" }
-com-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "34.7.0" }
-com-google-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
-com-google-firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
-com-google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
-com-google-firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
-com-google-firebase-database = { group = "com.google.firebase", name = "firebase-database" }
-com-google-firebase-config = { group = "com.google.firebase", name = "firebase-config" }
-com-google-android-gms-playservices-measurement = { group = "com.google.android.gms", name = "play-services-measurement-api", version = "23.0.0" }
-com-google-android-gms-playservices-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version = "19.0.0" }
-com-google-android-places = { group = "com.google.android.libraries.places", name = "places", version = "4.1.0" }
-com-google-android-gms-playservices-location = { group = "com.google.android.gms", name = "play-services-location", version = "21.3.0" }
-
-# Check for bugfix in MaterialDataPicker and remove workaround in DateUtil::mergeUtcDateToTimestamp
-# https://github.com/material-components/material-components-android/issues/4373
-com-google-android-material = { group = "com.google.android.material", name = "material", version = "1.13.0" }
-com-google-android-flexbox = { group = "com.google.android.flexbox", name = "flexbox", version = "3.0.0" }
+[plugins]
+klint = { id = "org.jlleitschuh.gradle.ktlint", version = "11.6.0" }
+moduleDependencyGraph = { id = "com.savvasdalkitsis.module-dependency-graph", version = "0.1.2" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-test = { id = "com.android.test", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
 com-google-android-wearable = { group = "com.google.android.wearable", name = "wearable", version.ref = "wearable" }
 com-google-android-wearable-support = { group = "com.google.android.support", name = "wearable", version.ref = "wearable" }
