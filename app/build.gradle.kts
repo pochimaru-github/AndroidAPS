@@ -1,12 +1,6 @@
 plugins {
-    application
-    id("org.jetbrains.kotlin.android")
-}
-
-repositories {
-    mavenCentral()
-    google()
-    maven("https://jitpack.io")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
