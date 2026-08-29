@@ -1,5 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+plugins {
+    id("com.android.application") version "7.4.2" apply false
+    id("org.jetbrains.kotlin.android") version "1.8.20" apply false
+    id("org.jetbrains.kotlin.kapt") version "1.8.20" apply false
+}
+
 buildscript {
     repositories {
         mavenCentral()
