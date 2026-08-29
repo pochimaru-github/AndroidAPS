@@ -11,11 +11,11 @@ android {
     compileSdk(34)
 
     defaultConfig {
-        applicationId = "com.nightscout.androidaps"
-        minSdk = 21
-        targetSdk = 34
-        versionCode = 3040206
-        versionName = "3.4.2.6"
+        applicationId("com.nightscout.androidaps")
+        minSdk(21)
+        targetSdk(34)
+        versionCode(3040206)
+        versionName("3.4.2.6")
     }
 
     compileOptions {
