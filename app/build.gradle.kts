@@ -1,39 +1,33 @@
-import org.gradle.kotlin.dsl.debugImplementation
-import java.text.SimpleDateFormat
-import java.util.Date
-
 plugins {
-    alias(libs.plugins.ksp)
-    id("com.android.application")
-    id("kotlin-android")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
-    id("android-app-dependencies")
-    id("test-app-dependencies")
-    id("jacoco-app-dependencies")
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
-repositories {
-    mavenCentral()
-    google()
-}
+android {
+    compileSdkVersion 34
 
-fun generateGitBuild(): String {
-    try {
-        val processBuilder = ProcessBuilder("git", "describe", "--always")
-        val output = File.createTempFile("git-build", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().trim()
-    } catch (_: Exception) {
-        return "NoGitSystemAvailable"
+    defaultConfig {
+        applicationId "com.nightscout.androidaps"
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode 3040206
+        versionName "3.4.2.6"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = '11'
     }
 }
 
-fun generateGitRemote(): String {
-    try {
-        val processBuilder = ProcessBuilder("git", "remote", "get-url", "origin")
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
         val output = File.createTempFile("git-remote", "")
         processBuilder.redirectOutput(output)
         val process = processBuilder.start()
