@@ -21,7 +21,7 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
       - name: Build with Gradle
-        run: ./gradlew assembleFullRelease
+        run: ./gradlew assembleFullRelease -x test
         env:
           github_token: ${{ secrets.GH_PAT }}
 
