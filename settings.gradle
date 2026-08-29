@@ -16,3 +16,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "AndroidAPS"
 include ':app'
+
+// appフォルダ内の設定ファイルを「build.gradle」として強制認識させる命令
+project(':app').buildFileName = 'build.gradle'
