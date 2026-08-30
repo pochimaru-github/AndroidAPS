@@ -13,6 +13,9 @@ android {
         targetSdk = 34
         versionCode = 3040206
         versionName = "3.4.2.6"
+        
+        // 【超重要】1分台の容量制限を完全に解除し、最後まで組み立てを走らせる絶対命令
+        multiDexEnabled = true
     }
 
     compileOptions {
@@ -34,12 +37,14 @@ android {
 }
 
 dependencies {
-    // 【解説】画面表示システム（Compose）を動かすための本物の必須基礎パーツを一式すべて追加しました
     implementation("androidx.compose.ui:ui:1.4.3")
     implementation("androidx.compose.material:material:1.4.3")
     implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+
+    // 容量制限の解除を裏側で強力にサポートする必須ライブラリ
+    implementation("androidx.multidex:multidex:2.0.1")
 
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
