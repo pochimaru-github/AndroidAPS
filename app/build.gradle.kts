@@ -17,8 +17,6 @@ android {
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
-        
-        // 【超重要】2分台のマニフェストの矛盾を完全に無視し、最新環境へ自動適合させる絶対命令
         manifestPlaceholders["appAuthRedirectScheme"] = "com.nightscout.androidaps"
     }
 
@@ -69,6 +67,9 @@ dependencies {
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
+
+    // 【追加】外部認証システム（AppAuth）の必須セキュリティパーツ
+    implementation("net.openid:appauth:0.11.1")
 
     // 通信パーツ（バージョン2）
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
