@@ -58,6 +58,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
+    // 【追加】データ一覧を効率的に画面表示するための必須ページングパーツ
+    implementation("androidx.paging:paging-runtime-ktx:3.1.1")
+
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
@@ -68,7 +71,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    // 【追加】外部認証システム（AppAuth）の必須セキュリティパーツ
+    // 外部認証システム（AppAuth）
     implementation("net.openid:appauth:0.11.1")
 
     // 通信パーツ（バージョン2）
@@ -86,6 +89,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     
+    // ネットワーク・通信
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.moshi:moshi:1.15.0")
