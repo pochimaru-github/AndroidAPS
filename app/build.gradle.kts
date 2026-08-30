@@ -11,16 +11,15 @@ android {
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.nightscout.androidaps"
+        // 【解説】内部ソースコードの身分チェックと100%完璧に合致する、3.4.2.6本来の純正の識別ネームに修復しました！
+        applicationId = "info.nightscout.androidaps"
+        
         minSdk = 21
         targetSdk = 33
-        
-        // 【解説】エラーの原因になっていた過大な数値を、3.4.2.6本来の純正な整数形式に完璧に修正しました
         versionCode = 304
-        
         versionName = "3.4.2.6"
         multiDexEnabled = true
-        manifestPlaceholders["appAuthRedirectScheme"] = "com.nightscout.androidaps"
+        manifestPlaceholders["appAuthRedirectScheme"] = "info.nightscout.androidaps"
     }
 
     compileOptions {
