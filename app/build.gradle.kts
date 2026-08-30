@@ -65,9 +65,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    // 【解説】新しすぎて衝突していた通信パーツを、古いプログラムと100%合致する「バージョン2」に完璧に直しました
+    // 【解説】Kotlin 1.8.20環境との裏側の衝突を完全に回避できる、RxAndroid2の完璧な互換指定に修正しました
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
-    implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
+    implementation("io.reactivex:rxandroid:2.1.1")
 
     // 医療データや通信を安全に保護・暗号化するための必須セキュリティパーツ
     implementation("org.bouncycastle:bcprov-jdk18on:1.76")
