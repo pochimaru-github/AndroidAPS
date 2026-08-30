@@ -58,8 +58,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
-    // 【追加】データ一覧を効率的に画面表示するための必須ページングパーツ
+    // データ一覧を効率的に画面表示するための必須ページングパーツ
     implementation("androidx.paging:paging-runtime-ktx:3.1.1")
+
+    // 【追加】古い内部コードを最新のJava11環境に完璧に合流させるための必須アノテーションパーツ
+    implementation("androidx.annotation:annotation:1.6.0")
 
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
