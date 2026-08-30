@@ -8,16 +8,17 @@ plugins {
 }
 
 android {
-    compileSdk = 34
+    // 【解説】古い内部ソースコードと100%完璧に適合する、3.4.2.6本来の純正SDKバージョン（33）に完璧に修正しました
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.nightscout.androidaps"
         minSdk = 21
-        targetSdk = 34
         
-        // 【解説】エラーの原因になっていた不要な囲み記号を完全に消去し、正しい純粋な数値形式に完璧に修正しました
+        // 【解説】同じく、内部プログラムの要求と完璧に合致する純正のターゲット数値（33）に直しました
+        targetSdk = 33
+        
         versionCode = 3040206
-        
         versionName = "3.4.2.6"
         multiDexEnabled = true
         manifestPlaceholders["appAuthRedirectScheme"] = "com.nightscout.androidaps"
