@@ -2,8 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     kotlin("kapt")
-    
-    // 【解説】古い内部ソースコードが100%完全に認識できる標準のID形式に綺麗に配置し直しました
     id("kotlin-allopen") version "1.8.20"
     id("kotlin-serialization") version "1.8.20"
 }
@@ -43,6 +41,11 @@ dependencies {
     implementation("androidx.compose.material:material:1.4.3")
     implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
     implementation("androidx.activity:activity-compose:1.7.2")
+    
+    // 【解説】迷子になっていた画面ライフサイクル周りのパーツの書き方を、100%確実に読み込める直接フルネーム指定の形に書き直しました
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
     implementation("androidx.multidex:multidex:2.0.1")
@@ -57,9 +60,6 @@ dependencies {
     implementation(libs.androidx.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.preference)
-    implementation(libs.androidx.lifecycle.runtime)
-    implementation(libs.androidx.lifecycle.livedata)
-    implementation(libs.androidx.lifecycle.viewmodel)
     
     implementation(libs.okhttp.core)
     implementation(libs.retrofit.core)
