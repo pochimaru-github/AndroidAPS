@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
+    id("kotlin-allopen") version "1.8.20" apply false
+    id("kotlin-serialization") version "1.8.20" apply false
 }
 
 buildscript {
@@ -18,6 +20,9 @@ buildscript {
         
         classpath("org.jetbrains.kotlin:kotlin-allopen:1.8.20")
         classpath("org.jetbrains.kotlin:kotlin-serialization:1.8.20")
+        
+        // 【追加】データベースの自動生成ツールを、古いビルド環境でも100%安全に稼働させるための絶対命令
+        classpath("io.objectbox:objectbox-gradle-plugin:3.6.0")
     }
 }
 
