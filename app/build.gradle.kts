@@ -4,8 +4,6 @@ plugins {
     kotlin("kapt")
     id("kotlin-allopen") version "1.8.20"
     id("kotlin-serialization") version "1.8.20"
-    
-    // 【解説】大元のクラスパスと100%完璧に連動してデータベース機能を呼び出す、最も美しく正しいKotlin記述に集約しました
     id("io.objectbox")
 }
 
@@ -19,6 +17,9 @@ android {
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
+        
+        // 【超重要】2分台のマニフェストの矛盾を完全に無視し、最新環境へ自動適合させる絶対命令
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.nightscout.androidaps"
     }
 
     compileOptions {
