@@ -22,10 +22,15 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    // 1分40秒台の壁を突破するための、画面表示（Compose）の有効化設定
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
-    // 【解説】画面パーツに加えて、データベース（ObjectBox等）や通信パーツを一式すべて完全に復元しました
+    // 【解説】不足していた画面表示システム（Compose）と、通信・データ解析用の必須ライブラリを完全復元しました
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.coroutines.core)
@@ -42,6 +47,9 @@ dependencies {
     
     implementation(libs.okhttp.core)
     implementation(libs.retrofit.core)
+    implementation(libs.moshi.core)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.coil.core)
     implementation(libs.objectbox.kotlin)
     
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
