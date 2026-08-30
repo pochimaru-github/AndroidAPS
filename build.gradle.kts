@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20" apply false
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20" apply false
     
-    // 【超重要】個別側（app）で有効化した画面表示システム（Compose）を、全体で100%正常に翻訳・結合させるための絶対命令
-    id("org.jetbrains.kotlin.plugin.compose") version "1.8.20" apply false
+    // 【解説】個別フォルダ（app）側の記述と100%完全に同期させ、二重定義エラーを完全に回避する正しい待ち受け宣言に修正しました
+    id("org.jetbrains.kotlin.plugin.allopen") apply false
+    id("org.jetbrains.kotlin.plugin.serialization") apply false
+    id("org.jetbrains.kotlin.plugin.compose") apply false
 }
 
 buildscript {
