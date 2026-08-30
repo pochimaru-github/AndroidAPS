@@ -91,3 +91,7 @@ androidx-test-espresso = { module = "androidx.test.espresso:espresso-core", vers
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
+# 【解説】個別側で呼び出した2つの管理名（alias）の、本物の登録定義を最下部に完璧に追加しました
+kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
