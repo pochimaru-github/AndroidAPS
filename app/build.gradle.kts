@@ -1,13 +1,12 @@
 plugins {
     id("com.android.application") version "7.4.2"
     id("org.jetbrains.kotlin.android") version "1.8.20"
-    
-    // 【解説】記述の混在による衝突を防ぐため、すべてのプラグインを確実な「id(...)」のフルネーム形式に完璧に統一しました
     id("org.jetbrains.kotlin.kapt") version "1.8.20"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
     
-    id("io.objectbox") version "3.6.0"
+    // 【解説】大元のクラスパス側とバージョン衝突を起こさないよう、不要なversion指定をきれいに削ぎ落としました
+    id("io.objectbox")
 }
 
 android {
@@ -73,7 +72,7 @@ dependencies {
     // Android基本パーツ
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
+    com.google.android.material:material:1.9.0
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
