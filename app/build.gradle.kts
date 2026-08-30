@@ -1,5 +1,6 @@
 plugins {
-    id("com.android.application")
+    // 【解説】大元の組み立てツールと100%確実に同期させるため、バージョン「7.4.2」を直接フルネーム指定に修正しました
+    id("com.android.application") version "7.4.2"
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("kotlin-allopen") version "1.8.20"
@@ -58,10 +59,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
-    // データ一覧を効率的に画面表示するための必須ページングパーツ
+    // 数据一覧を効率的に画面表示するための必須ページングパーツ
     implementation("androidx.paging:paging-runtime-ktx:3.1.1")
 
-    // 【追加】古い内部コードを最新のJava11環境に完璧に合流させるための必須アノテーションパーツ
+    // 古い内部コードを最新のJava11環境に完璧に合流させるための必須アノテーションパーツ
     implementation("androidx.annotation:annotation:1.6.0")
 
     // 容量制限の解除スイッチ
