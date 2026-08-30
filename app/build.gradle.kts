@@ -1,7 +1,7 @@
 plugins {
-    // 【解説】大元の組み立てツールと100%確実に同期させるため、バージョン「7.4.2」を直接フルネーム指定に修正しました
     id("com.android.application") version "7.4.2"
-    id("org.jetbrains.kotlin.android")
+    // 【解説】アプリ用ツールと同様に、Kotlinプラグインのバージョン「1.8.20」も直接フルネーム指定に修正しました
+    id("org.jetbrains.kotlin.android") version "1.8.20"
     kotlin("kapt")
     id("kotlin-allopen") version "1.8.20"
     id("kotlin-serialization") version "1.8.20"
