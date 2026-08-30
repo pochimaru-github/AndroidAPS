@@ -27,7 +27,6 @@ android {
         jvmTarget = "11"
     }
 
-    // 【超重要】古い内部プログラムの画面システムを100%正常に結合させるための必須スイッチ
     buildFeatures {
         compose = true
         dataBinding = true
@@ -60,10 +59,10 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Android基本パーツ
+    // Android基本パーツ（抜け落ちていた命令単語を完璧に補い、正しい形式に直しました）
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    com.google.android.material:material:1.9.0
+    implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
