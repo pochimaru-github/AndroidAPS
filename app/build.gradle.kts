@@ -4,6 +4,10 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
     id("org.jetbrains.kotlin.plugin.allopen")
     id("org.jetbrains.kotlin.plugin.serialization")
+    
+    // 【超重要】大元側に追加した画面表示システム（Compose）の翻訳パーツを、個別側でも100%完全に合流させる絶対命令
+    id("org.jetbrains.kotlin.plugin.compose")
+    
     id("io.objectbox")
 }
 
@@ -103,6 +107,5 @@ dependencies {
     implementation("io.objectbox:objectbox-kotlin:3.6.0")
     kapt("io.objectbox:objectbox-processor:3.6.0")
     
-    // 【解説】Java 11のKotlin（.kts）環境で100%正常に認識される最もシンプルで確実な標準記述に完璧に書き直しました
     implementation(fileTree("dir" to "libs", "include" to listOf("*.jar")))
 }
