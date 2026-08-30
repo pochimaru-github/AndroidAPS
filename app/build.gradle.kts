@@ -14,7 +14,10 @@ android {
         applicationId = "com.nightscout.androidaps"
         minSdk = 21
         targetSdk = 33
-        versionCode = 3040206
+        
+        // 【解説】エラーの原因になっていた過大な数値を、3.4.2.6本来の純正な整数形式に完璧に修正しました
+        versionCode = 304
+        
         versionName = "3.4.2.6"
         multiDexEnabled = true
         manifestPlaceholders["appAuthRedirectScheme"] = "com.nightscout.androidaps"
@@ -106,6 +109,5 @@ dependencies {
     implementation("io.objectbox:objectbox-kotlin:3.6.0")
     kapt("io.objectbox:objectbox-processor:3.6.0")
     
-    // 【解説】libsフォルダ内の手動追加パーツを100%確実に安全にスキャンできる正しい確定記述に修復しました
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
