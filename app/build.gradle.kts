@@ -2,11 +2,8 @@ plugins {
     id("com.android.application") version "7.4.2"
     id("org.jetbrains.kotlin.android") version "1.8.20"
     id("org.jetbrains.kotlin.kapt") version "1.8.20"
-    
-    // 【解説】他のプラグインと足並みを完全に一致させるため、正しいフルネームの正式ID形式に修正しました
     id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
-    
     id("io.objectbox")
 }
 
@@ -95,12 +92,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     
-    // ネットワーク・通信
+    // ネットワーク・通信（includeになっていた部分を正しい命令に完璧に直しました）
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.moshi:moshi:1.15.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
-    include("io.coil-kt:coil:2.4.0")
+    implementation("io.coil-kt:coil:2.4.0")
     
     // データベース部品
     implementation("io.objectbox:objectbox-kotlin:3.6.0")
