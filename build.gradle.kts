@@ -24,6 +24,16 @@ allprojects {
         google()
         maven("https://jitpack.io")
     }
+    // 【解説】個別フォルダ側で有効化した画面システム（Compose）のコンパイルを、全体で100%正常に処理させるための共通命令です
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            freeCompilerArgs = freeCompilerArgs + listOf(
+                "-opt-in=kotlin.RequiresOptIn",
+                "-Xjvm-default=all"
+            )
+            jvmTarget = "11"
+        }
+    }
 }
 
 tasks.register<Delete>("clean").configure {
