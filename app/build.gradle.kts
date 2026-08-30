@@ -27,8 +27,10 @@ android {
         jvmTarget = "11"
     }
 
+    // 【超重要】古い内部プログラムの画面システムを100%正常に結合させるための必須スイッチ
     buildFeatures {
         compose = true
+        dataBinding = true
     }
 
     composeOptions {
@@ -61,11 +63,11 @@ dependencies {
     // Android基本パーツ
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
+    com.google.android.material:material:1.9.0
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    // 【解説】Kotlin 1.8.20環境との裏側の衝突を完全に回避できる、RxAndroid2の完璧な互換指定に修正しました
+    // 通信パーツ（バージョン2で統一）
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation("io.reactivex:rxandroid:2.1.1")
 
