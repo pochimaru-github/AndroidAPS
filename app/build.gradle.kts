@@ -41,7 +41,7 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.4.3")
     implementation("androidx.compose.material:material:1.4.3")
     
-    // 【解説】画面の見た目のテーマや共通デザインを司る「Material3」関連の必須パーツ群を完全追加しました
+    // 画面の見た目のテーマや共通デザインを司る「Material3」関連の必須パーツ群
     implementation("androidx.compose.material3:material3:1.1.0")
     implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
     implementation("androidx.activity:activity-compose:1.7.2")
@@ -62,8 +62,8 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    // Kotlin基礎・ネットワーク・データベース等の全すべてのパーツ
-    `implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
+    // Kotlin基礎・ネットワーク・データベース等の全すべてのパーツ（先頭の余計な1文字を完全に消去しました）
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
