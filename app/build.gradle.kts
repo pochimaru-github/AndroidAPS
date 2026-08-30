@@ -8,16 +8,12 @@ plugins {
 }
 
 android {
-    // 【解説】古い内部ソースコードと100%完璧に適合する、3.4.2.6本来の純正SDKバージョン（33）に完璧に修正しました
     compileSdk = 33
 
     defaultConfig {
         applicationId = "com.nightscout.androidaps"
         minSdk = 21
-        
-        // 【解説】同じく、内部プログラムの要求と完璧に合致する純正のターゲット数値（33）に直しました
         targetSdk = 33
-        
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
@@ -110,5 +106,6 @@ dependencies {
     implementation("io.objectbox:objectbox-kotlin:3.6.0")
     kapt("io.objectbox:objectbox-processor:3.6.0")
     
-    implementation(fileTree("dir" to "libs", "include" to listOf("*.jar")))
+    // 【解説】libsフォルダ内の手動追加パーツを100%確実に安全にスキャンできる正しい確定記述に修復しました
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
