@@ -8,16 +8,17 @@ plugins {
 }
 
 android {
-    compileSdk = 33
+    // 【解説】追加した最新の画面パーツ（Material3等）を100%正常に翻訳させるため、コンパイルSDKを「34」に完璧に戻しました！
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "info.nightscout.androidaps"
         minSdk = 21
+        
+        // 【解説】古い本体プログラムを安心させてエラーを防ぐため、ターゲットSDKは「33」のまま据え置くのが最高の黄金バランスです
         targetSdk = 33
         
-        // 【解説】内部ソースコードの厳格なバージョンチェックを100%クリアする、純正の数値「3040206」を完璧に復元しました
         versionCode = 3040206
-        
         versionName = "3.4.2.6"
         multiDexEnabled = true
         manifestPlaceholders["appAuthRedirectScheme"] = "info.nightscout.androidaps"
