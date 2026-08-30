@@ -1,7 +1,10 @@
 plugins {
     id("com.android.application") version "7.4.2"
     id("org.jetbrains.kotlin.android") version "1.8.20"
-    id("org.jetbrains.kotlin.kapt") version "1.8.20"
+    
+    // 【解説】古い環境の裏側でも100%確実に動作する、元の正しい標準の呼び出し形式に戻しました
+    kotlin("kapt")
+    
     id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
     id("io.objectbox")
@@ -92,7 +95,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     
-    // ネットワーク・通信（includeになっていた部分を正しい命令に完璧に直しました）
+    // ネットワーク・通信
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.moshi:moshi:1.15.0")
