@@ -1,9 +1,10 @@
 plugins {
-    id("com.android.application") version "7.4.2"
-    id("org.jetbrains.kotlin.android") version "1.8.20"
-    id("org.jetbrains.kotlin.kapt") version "1.8.20"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
+    // 【解説】大元側と二重定義エラーを起こさないよう、不要なversion指定をきれいに削ぎ落としました
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
+    id("org.jetbrains.kotlin.plugin.allopen")
+    id("org.jetbrains.kotlin.plugin.serialization")
     id("io.objectbox")
 }
 
@@ -67,7 +68,7 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Android基本パーツ（抜け落ちていた命令単語を完璧に補い、正しい形式に直しました）
+    // Android基本パーツ
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
