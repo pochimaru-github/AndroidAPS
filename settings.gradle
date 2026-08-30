@@ -15,4 +15,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AndroidAPS"
+
+// 【解説】すべてのプログラム（app, core, data）が矛盾なく綺麗に手を結んで組み立てを走らせるための完全な登録宣言
 include ':app'
+include ':core'
+include ':data'
