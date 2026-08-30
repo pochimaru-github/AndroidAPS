@@ -3,9 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
     
-    // 【解説】大元の工具箱と100%完璧に同期し、古い環境の裏側でも絶対にエラーを起こさない本物のショートカット名に完璧に統一しました
-    id("kotlin-allopen")
-    id("kotlin-serialization")
+    // 【解説】大元の工具箱（クラスパス）に登録した正式名称と100%完璧に同期する正式なID形式に修正しました
+    id("org.jetbrains.kotlin.plugin.allopen")
+    id("org.jetbrains.kotlin.plugin.serialization")
     
     id("io.objectbox")
 }
