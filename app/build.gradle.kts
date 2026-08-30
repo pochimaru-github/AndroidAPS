@@ -1,10 +1,12 @@
 plugins {
     id("com.android.application") version "7.4.2"
-    // 【解説】アプリ用ツールと同様に、Kotlinプラグインのバージョン「1.8.20」も直接フルネーム指定に修正しました
     id("org.jetbrains.kotlin.android") version "1.8.20"
-    kotlin("kapt")
-    id("kotlin-allopen") version "1.8.20"
-    id("kotlin-serialization") version "1.8.20"
+    id("org.jetbrains.kotlin.kapt") version "1.8.20"
+    
+    // 【解説】他のプラグインと足並みを完全に一致させるため、正しいフルネームの正式ID形式に修正しました
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
+    
     id("io.objectbox")
 }
 
@@ -59,7 +61,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
-    // 数据一覧を効率的に画面表示するための必須ページングパーツ
+    // データ一覧を効率的に画面表示するための必須ページングパーツ
     implementation("androidx.paging:paging-runtime-ktx:3.1.1")
 
     // 古い内部コードを最新のJava11環境に完璧に合流させるための必須アノテーションパーツ
@@ -98,7 +100,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.moshi:moshi:1.15.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
-    implementation("io.coil-kt:coil:2.4.0")
+    include("io.coil-kt:coil:2.4.0")
     
     // データベース部品
     implementation("io.objectbox:objectbox-kotlin:3.6.0")
