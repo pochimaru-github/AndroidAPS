@@ -3,9 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     kotlin("kapt")
     
-    // 【追加】大元に追加した画面・通信の橋渡し命令を、個別フォルダ側でも100%有効化する宣言
-    kotlin("plugin.allopen") version "1.8.20"
-    kotlin("plugin.serialization") version "1.8.20"
+    // 【解説】管理データ（libs.versions.toml）に登録されている本物の管理名（alias）形式に完璧に書き直しました
+    alias(libs.plugins.kotlin.allopen)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
