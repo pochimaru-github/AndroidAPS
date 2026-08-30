@@ -46,6 +46,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
     implementation("androidx.activity:activity-compose:1.7.2")
     
+    // 【追加】画面同士をスムーズに切り替えるための必須ナビゲーションパーツ
+    implementation("androidx.navigation:navigation-compose:2.6.0")
+    
     // 画面ライフサイクル周りの必須パーツ
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
@@ -62,7 +65,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    // 【追加】内部ソースコードがバックグラウンドでデータ処理を行うための必須通信パーツ2行
+    // 内部データ処理・通信パーツ
     implementation("io.reactivex.rxjava3:rxjava:3.1.6")
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
 
