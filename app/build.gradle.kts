@@ -4,9 +4,11 @@ plugins {
     kotlin("kapt")
     id("kotlin-allopen") version "1.8.20"
     id("kotlin-serialization") version "1.8.20"
-    
-    // 【超重要】データベースの自動生成ツール（kapt）の衝突を完全に回避し、最後まで組み立てを走らせる絶対命令
-    id("io.objectbox") version "3.6.0"
+}
+
+// 【解説】Kotlin(.kts)の文法ルールに100%完全適合する正しいプラグイン適用形式に完璧に書き直しました
+apply {
+    plugin("io.objectbox")
 }
 
 android {
