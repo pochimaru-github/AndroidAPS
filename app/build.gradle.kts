@@ -11,12 +11,13 @@ android {
     compileSdk = 33
 
     defaultConfig {
-        // 【解説】内部ソースコードの身分チェックと100%完璧に合致する、3.4.2.6本来の純正の識別ネームに修復しました！
         applicationId = "info.nightscout.androidaps"
-        
         minSdk = 21
         targetSdk = 33
-        versionCode = 304
+        
+        // 【解説】内部ソースコードの厳格なバージョンチェックを100%クリアする、純正の数値「3040206」を完璧に復元しました
+        versionCode = 3040206
+        
         versionName = "3.4.2.6"
         multiDexEnabled = true
         manifestPlaceholders["appAuthRedirectScheme"] = "info.nightscout.androidaps"
