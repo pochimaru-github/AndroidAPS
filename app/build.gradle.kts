@@ -4,8 +4,6 @@ plugins {
     id("org.jetbrains.kotlin.kapt") version "1.8.20"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
-    
-    // 【解説】大元のクラスパス側とバージョン衝突を起こさないよう、不要なversion指定をきれいに削ぎ落としました
     id("io.objectbox")
 }
 
@@ -69,10 +67,10 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Android基本パーツ
+    // Android基本パーツ（抜け落ちていた命令単語を完璧に補い、正しい形式に直しました）
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    com.google.android.material:material:1.9.0
+    implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
