@@ -28,13 +28,19 @@ android {
         compose = true
     }
 
-    // 【追加】Kotlin 1.8.20と100%完璧に適合する、画面表示システムの専用コンパイラ指定
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.6"
     }
 }
 
 dependencies {
+    // 【解説】画面表示システム（Compose）を動かすための本物の必須基礎パーツを一式すべて追加しました
+    implementation("androidx.compose.ui:ui:1.4.3")
+    implementation("androidx.compose.material:material:1.4.3")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
+    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.coroutines.core)
