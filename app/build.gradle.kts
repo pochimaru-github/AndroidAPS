@@ -14,7 +14,10 @@ android {
         applicationId = "com.nightscout.androidaps"
         minSdk = 21
         targetSdk = 34
-        versionCode = "3040206"
+        
+        // 【解説】エラーの原因になっていた不要な囲み記号を完全に消去し、正しい純粋な数値形式に完璧に修正しました
+        versionCode = 3040206
+        
         versionName = "3.4.2.6"
         multiDexEnabled = true
         manifestPlaceholders["appAuthRedirectScheme"] = "com.nightscout.androidaps"
@@ -34,7 +37,6 @@ android {
         dataBinding = true
     }
 
-    // 【解説】Kotlin 1.8.20環境と100%完璧に調和してエラーを絶対に起こさない本物の Compose コンパイラバージョンに修正しました
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.5"
     }
