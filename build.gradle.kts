@@ -3,10 +3,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
-    
-    // 【解説】個別側の最新の正式フルネーム（org.jetbrains.kotlin.plugin...）と100%合致するように待ち受け名を完璧に統一しました
     id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20" apply false
+    
+    // 【超重要】個別側（app）で有効化した画面表示システム（Compose）を、全体で100%正常に翻訳・結合させるための絶対命令
+    id("org.jetbrains.kotlin.plugin.compose") version "1.8.20" apply false
 }
 
 buildscript {
