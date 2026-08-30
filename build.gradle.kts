@@ -15,6 +15,10 @@ buildscript {
         classpath("com.google.gms:google-services:4.3.15")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.4")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20")
+        
+        // 【追加】画面部品と通信システムを安全に裏側で合流させるための必須クラスパス
+        classpath("org.jetbrains.kotlin:kotlin-allopen:1.8.20")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:1.8.20")
     }
 }
 
@@ -24,7 +28,6 @@ allprojects {
         google()
         maven("https://jitpack.io")
     }
-    // 【解説】個別フォルダ側で有効化した画面システム（Compose）のコンパイルを、全体で100%正常に処理させるための共通命令です
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions {
             freeCompilerArgs = freeCompilerArgs + listOf(
