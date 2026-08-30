@@ -2,12 +2,12 @@ plugins {
     id("com.android.application") version "7.4.2"
     id("org.jetbrains.kotlin.android") version "1.8.20"
     
-    // 【解説】古い環境の裏側でも100%確実に動作する、元の正しい標準の呼び出し形式に戻しました
-    kotlin("kapt")
-    
+    // 【解説】記述の混在による衝突を防ぐため、すべてのプラグインを確実な「id(...)」のフルネーム形式に完璧に統一しました
+    id("org.jetbrains.kotlin.kapt") version "1.8.20"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
-    id("io.objectbox")
+    
+    id("io.objectbox") version "3.6.0"
 }
 
 android {
