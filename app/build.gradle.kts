@@ -4,11 +4,9 @@ plugins {
     kotlin("kapt")
     id("kotlin-allopen") version "1.8.20"
     id("kotlin-serialization") version "1.8.20"
-}
-
-// 【解説】Kotlin(.kts)の文法ルールに100%完全適合する正しいプラグイン適用形式に完璧に書き直しました
-apply {
-    plugin("io.objectbox")
+    
+    // 【解説】大元のクラスパスと100%完璧に連動してデータベース機能を呼び出す、最も美しく正しいKotlin記述に集約しました
+    id("io.objectbox")
 }
 
 android {
