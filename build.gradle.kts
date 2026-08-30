@@ -4,9 +4,9 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
     
-    // 【追加】個別フォルダ（app）側の記述と100%連動させるための、必須プラグインの待ち受け宣言
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20" apply false
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20" apply false
+    // 【解説】個別フォルダ側の古い標準名（kotlin-allopen等）と100%合致するように待ち受け名を完璧に直しました
+    id("kotlin-allopen") version "1.8.20" apply false
+    id("kotlin-serialization") version "1.8.20" apply false
 }
 
 buildscript {
