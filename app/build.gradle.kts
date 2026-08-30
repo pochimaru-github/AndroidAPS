@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     kotlin("kapt")
+    
+    // 【追加】大元に追加した画面・通信の橋渡し命令を、個別フォルダ側でも100%有効化する宣言
+    kotlin("plugin.allopen") version "1.8.20"
+    kotlin("plugin.serialization") version "1.8.20"
 }
 
 android {
@@ -13,8 +17,6 @@ android {
         targetSdk = 34
         versionCode = 3040206
         versionName = "3.4.2.6"
-        
-        // 【超重要】1分台の容量制限を完全に解除し、最後まで組み立てを走らせる絶対命令
         multiDexEnabled = true
     }
 
@@ -43,7 +45,6 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
-    // 容量制限の解除を裏側で強力にサポートする必須ライブラリ
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation(libs.kotlin.stdlib)
