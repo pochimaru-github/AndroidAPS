@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    kotlin("kapt") // 【追加】画面システムやデータベースを正常に結合するための必須プラグイン
 }
 
 android {
@@ -23,14 +24,12 @@ android {
         jvmTarget = "11"
     }
 
-    // 1分40秒台の壁を突破するための、画面表示（Compose）の有効化設定
     buildFeatures {
         compose = true
     }
 }
 
 dependencies {
-    // 【解説】不足していた画面表示システム（Compose）と、通信・データ解析用の必須ライブラリを完全復元しました
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.coroutines.core)
@@ -50,7 +49,10 @@ dependencies {
     implementation(libs.moshi.core)
     implementation(libs.moshi.kotlin)
     implementation(libs.coil.core)
+    
+    // 【解説】kaptに対応したObjectBox（データベース）の自動生成パーツを追加しました
     implementation(libs.objectbox.kotlin)
+    kapt("io.objectbox:objectbox-processor:3.6.0")
     
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
