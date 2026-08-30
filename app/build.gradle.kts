@@ -62,7 +62,11 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    // Kotlin基礎・ネットワーク・データベース等の全すべてのパーツ（先頭の余計な1文字を完全に消去しました）
+    // 【追加】内部ソースコードがバックグラウンドでデータ処理を行うための必須通信パーツ2行
+    implementation("io.reactivex.rxjava3:rxjava:3.1.6")
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
+
+    // Kotlin基礎・ネットワーク・データベース等の全すべてのパーツ
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
