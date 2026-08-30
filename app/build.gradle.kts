@@ -58,10 +58,10 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Android基本パーツ
+    // Android基本パーツ（usingになっていた部分を正しい命令に完璧に直しました）
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    using("com.google.android.material:material:1.9.0")
+    implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
@@ -69,7 +69,7 @@ dependencies {
     implementation("io.reactivex.rxjava3:rxjava:3.1.6")
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
 
-    // 【追加】医療データや通信を安全に保護・暗号化するための必須セキュリティパーツ3行
+    // 医療データや通信を安全に保護・暗号化するための必須セキュリティパーツ
     implementation("org.bouncycastle:bcprov-jdk18on:1.76")
     implementation("org.bouncycastle:bcutil-jdk18on:1.76")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.76")
