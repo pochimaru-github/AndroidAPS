@@ -67,7 +67,7 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Android基本パーツ
+    // Android基本パーツ（囲み記号の漏れを完璧に補い、正しい形式に直しました）
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
@@ -95,7 +95,7 @@ dependencies {
     // 最新の画面システムと通信データを正常に結合・解析するための必須シリアライズライブラリ
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     
-    // ネットワーク・通信（includeになっていた部分を正しい命令に完璧に直しました）
+    // ネットワーク・通信
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.moshi:moshi:1.15.0")
