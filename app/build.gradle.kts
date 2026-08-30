@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    kotlin("kapt") // 【追加】画面システムやデータベースを正常に結合するための必須プラグイン
+    kotlin("kapt")
 }
 
 android {
@@ -27,6 +27,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // 【追加】Kotlin 1.8.20と100%完璧に適合する、画面表示システムの専用コンパイラ指定
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.6"
+    }
 }
 
 dependencies {
@@ -50,7 +55,6 @@ dependencies {
     implementation(libs.moshi.kotlin)
     implementation(libs.coil.core)
     
-    // 【解説】kaptに対応したObjectBox（データベース）の自動生成パーツを追加しました
     implementation(libs.objectbox.kotlin)
     kapt("io.objectbox:objectbox-processor:3.6.0")
     
