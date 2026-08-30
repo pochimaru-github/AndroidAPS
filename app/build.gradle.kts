@@ -2,12 +2,10 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
-    id("org.jetbrains.kotlin.plugin.allopen")
-    id("org.jetbrains.kotlin.plugin.serialization")
     
-    // 【超重要】大元側に追加した画面表示システム（Compose）の翻訳パーツを、個別側でも100%完全に合流させる絶対命令
-    id("org.jetbrains.kotlin.plugin.compose")
-    
+    // 【解説】大元にクラスパス（工具）を揃えたため、古い環境の内部ソースコードと100%合致する標準の2行に綺麗に整えました
+    id("kotlin-allopen")
+    id("kotlin-serialization")
     id("io.objectbox")
 }
 
