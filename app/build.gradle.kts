@@ -2,11 +2,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
-    
-    // 【解説】大元の工具箱（クラスパス）に登録した正式名称と100%完璧に同期する正式なID形式に修正しました
     id("org.jetbrains.kotlin.plugin.allopen")
     id("org.jetbrains.kotlin.plugin.serialization")
-    
     id("io.objectbox")
 }
 
@@ -94,6 +91,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    
+    // 【追加】最新の画面システムと通信データを正常に結合・解析するための必須シリアライズライブラリ
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     
     // ネットワーク・通信
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
