@@ -46,7 +46,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
     implementation("androidx.activity:activity-compose:1.7.2")
     
-    // 【追加】画面同士をスムーズに切り替えるための必須ナビゲーションパーツ
+    // 画面同士をスムーズに切り替えるための必須ナビゲーションパーツ
     implementation("androidx.navigation:navigation-compose:2.6.0")
     
     // 画面ライフサイクル周りの必須パーツ
@@ -61,13 +61,18 @@ dependencies {
     // Android基本パーツ
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
+    using("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
     // 内部データ処理・通信パーツ
     implementation("io.reactivex.rxjava3:rxjava:3.1.6")
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
+
+    // 【追加】医療データや通信を安全に保護・暗号化するための必須セキュリティパーツ3行
+    implementation("org.bouncycastle:bcprov-jdk18on:1.76")
+    implementation("org.bouncycastle:bcutil-jdk18on:1.76")
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.76")
 
     // Kotlin基礎・ネットワーク・データベース等の全すべてのパーツ
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
