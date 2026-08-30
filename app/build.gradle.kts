@@ -37,29 +37,32 @@ android {
 }
 
 dependencies {
+    // 画面表示（Compose）の必須パーツ
     implementation("androidx.compose.ui:ui:1.4.3")
     implementation("androidx.compose.material:material:1.4.3")
     implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
     implementation("androidx.activity:activity-compose:1.7.2")
     
-    // 【解説】迷子になっていた画面ライフサイクル周りのパーツの書き方を、100%確実に読み込める直接フルネーム指定の形に書き直しました
+    // 画面ライフサイクル周りの必須パーツ
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
+    // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
+
+    // 【解説】残っていたすべての基本パーツ（core, appcompat, material等）を、100%安全な直接フルネーム指定に完璧に書き直しました
+    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.preference:preference-ktx:1.2.1")
 
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
-    
-    implementation(libs.androidx.core)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.material)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.preference)
     
     implementation(libs.okhttp.core)
     implementation(libs.retrofit.core)
