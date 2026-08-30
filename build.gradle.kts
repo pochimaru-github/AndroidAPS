@@ -3,8 +3,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
-    id("kotlin-allopen") version "1.8.20" apply false
-    id("kotlin-serialization") version "1.8.20" apply false
 }
 
 buildscript {
@@ -17,15 +15,9 @@ buildscript {
         classpath("com.google.gms:google-services:4.3.15")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.4")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20")
-    }
-}
-
-// 【超重要】coreやdataなど、すべてのフォルダのJavaバージョンをここで一括で強制的に11に統一する絶対命令
-subprojects {
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "11"
-        }
+        
+        classpath("org.jetbrains.kotlin:kotlin-allopen:1.8.20")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:1.8.20")
     }
 }
 
