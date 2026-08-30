@@ -8,16 +8,12 @@ plugins {
 }
 
 android {
-    // 【解説】追加した最新の画面パーツ（Material3等）を100%正常に翻訳させるため、コンパイルSDKを「34」に完璧に戻しました！
     compileSdk = 34
 
     defaultConfig {
         applicationId = "info.nightscout.androidaps"
         minSdk = 21
-        
-        // 【解説】古い本体プログラムを安心させてエラーを防ぐため、ターゲットSDKは「33」のまま据え置くのが最高の黄金バランスです
         targetSdk = 33
-        
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
@@ -106,9 +102,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
     implementation("io.coil-kt:coil:2.4.0")
     
-    // データベース部品
-    implementation("io.objectbox:objectbox-kotlin:3.6.0")
-    kapt("io.objectbox:objectbox-processor:3.6.0")
+    // 【解説】大元のプラグインと100%自動連動するため、個別側で衝突していた不要なObjectBoxの2行をきれいにスッキリ削除しました！
     
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
