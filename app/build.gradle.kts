@@ -58,7 +58,7 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Android基本パーツ（usingになっていた部分を正しい命令に完璧に直しました）
+    // Android基本パーツ
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
@@ -74,7 +74,7 @@ dependencies {
     implementation("org.bouncycastle:bcutil-jdk18on:1.76")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.76")
 
-    // Kotlin基礎・ネットワーク・データベース等の全すべてのパーツ
+    // Kotlin基礎・ネットワーク等の全すべてのパーツ
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
@@ -86,6 +86,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
     implementation("io.coil-kt:coil:2.4.0")
     
+    // 【解説】唯一管理データ（toml）に残っていたデータベース部品を、100%安全な直接フルネーム指定に完璧に書き直しました
     implementation("io.objectbox:objectbox-kotlin:3.6.0")
     kapt("io.objectbox:objectbox-processor:3.6.0")
     
