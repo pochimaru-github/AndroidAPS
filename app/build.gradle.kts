@@ -25,5 +25,14 @@ android {
 }
 
 dependencies {
+    // 1分台の壁を突破するための、本来の必須ライブラリ一式（過不足なし）
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.preference)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.lifecycle.livedata)
+    implementation(libs.androidx.lifecycle.viewmodel)
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
