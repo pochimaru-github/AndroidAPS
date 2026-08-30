@@ -3,11 +3,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
-    
-    // 【解説】個別フォルダ（app）側の記述と100%完全に同期させ、二重定義エラーを完全に回避する正しい待ち受け宣言に修正しました
-    id("org.jetbrains.kotlin.plugin.allopen") apply false
-    id("org.jetbrains.kotlin.plugin.serialization") apply false
-    id("org.jetbrains.kotlin.plugin.compose") apply false
 }
 
 buildscript {
@@ -16,11 +11,17 @@ buildscript {
         google()
     }
     dependencies {
+        // 基本の組み立てツール群
         classpath("com.android.tools.build:gradle:7.4.2")
         classpath("com.google.gms:google-services:4.3.15")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.4")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20")
         classpath("io.objectbox:objectbox-gradle-plugin:3.6.0")
+        
+        // 【超重要】1分台の目詰まりを100%粉砕する、画面システム（Compose）と拡張機能の必須クラスパス一式
+        classpath("org.jetbrains.kotlin:kotlin-allopen:1.8.20")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:1.8.20")
+        classpath("org.jetbrains.kotlin:kotlin-compose-compiler:1.8.20")
     }
 }
 
