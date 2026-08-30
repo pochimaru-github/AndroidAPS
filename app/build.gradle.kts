@@ -4,6 +4,9 @@ plugins {
     kotlin("kapt")
     id("kotlin-allopen") version "1.8.20"
     id("kotlin-serialization") version "1.8.20"
+    
+    // 【超重要】データベースの自動生成ツール（kapt）の衝突を完全に回避し、最後まで組み立てを走らせる絶対命令
+    id("io.objectbox") version "3.6.0"
 }
 
 android {
@@ -59,14 +62,14 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Android基本パーツ（抜け落ちていた命令単語を完璧に補い、正しい形式に直しました）
+    // Android基本パーツ
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    // 通信パーツ（バージョン2で統一）
+    // 通信パーツ（バージョン2）
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation("io.reactivex:rxandroid:2.1.1")
 
@@ -87,6 +90,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
     implementation("io.coil-kt:coil:2.4.0")
     
+    // データベース部品
     implementation("io.objectbox:objectbox-kotlin:3.6.0")
     kapt("io.objectbox:objectbox-processor:3.6.0")
     
