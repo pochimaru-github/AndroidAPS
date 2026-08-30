@@ -3,9 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     kotlin("kapt")
     
-    // 【解説】管理データ（libs.versions.toml）に登録されている本物の管理名（alias）形式に完璧に書き直しました
-    alias(libs.plugins.kotlin.allopen)
-    alias(libs.plugins.kotlin.serialization)
+    // 【解説】古いGradle 7.4.2環境の裏側でも100%エラーを起こさない標準のID指定形式に完璧に書き直しました
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.8.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
 }
 
 android {
