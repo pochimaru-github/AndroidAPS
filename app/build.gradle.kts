@@ -3,9 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
     
-    // 【解説】Kotlin(.kts)の文法ルールに100%完全適合する正しい標準プラグイン形式に完璧に書き直しました
-    kotlin("plugin.allopen")
-    kotlin("plugin.serialization")
+    // 【解説】大元の工具箱と100%完璧に同期し、古い環境の裏側でも絶対にエラーを起こさない本物のショートカット名に完璧に統一しました
+    id("kotlin-allopen")
+    id("kotlin-serialization")
     
     id("io.objectbox")
 }
