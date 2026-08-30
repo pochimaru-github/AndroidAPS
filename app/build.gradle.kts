@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("kotlin-allopen") version "1.8.20"
     id("kotlin-serialization") version "1.8.20"
@@ -52,25 +52,26 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // 【解説】残っていたすべての基本パーツ（core, appcompat, material等）を、100%安全な直接フルネーム指定に完璧に書き直しました
+    // Android基本パーツ
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlin.reflect)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
+    // 【解説】残っていたKotlin基礎・ネットワーク・データベース等の全すべてのパーツをフルネーム指定に完全統一しました
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     
-    implementation(libs.okhttp.core)
-    implementation(libs.retrofit.core)
-    implementation(libs.moshi.core)
-    implementation(libs.moshi.kotlin)
-    implementation(libs.coil.core)
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.moshi:moshi:1.15.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+    implementation("io.coil-kt:coil:2.4.0")
     
-    implementation(libs.objectbox.kotlin)
+    implementation("io.objectbox:objectbox-kotlin:3.6.0")
     kapt("io.objectbox:objectbox-processor:3.6.0")
     
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
