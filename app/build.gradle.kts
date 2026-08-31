@@ -3,8 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
     id("io.objectbox")
-    
-    // 【解説】大元の工具箱（クラスパス）と100%完璧に同期し、記述の混在エラーを完全に回避する正しい正式IDフルネーム形式に完璧に統一しました！
     id("org.jetbrains.kotlin.plugin.allopen")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
@@ -58,7 +56,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0")
+    
+    // 【解説】現在の画面システム（Compose 1.4.6）と100%美しく同期させるため、中継パーツを完璧な大安定バージョン「2.5.1」にアジャストしました！
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
 
     // データ一覧を効率的に画面表示するための必須ページングパーツ
     implementation("androidx.paging:paging-runtime-ktx:3.1.1")
@@ -72,7 +72,7 @@ dependencies {
     // Android基本パーツ
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
+    com.google.android.material:material:1.9.0
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
