@@ -26,11 +26,13 @@ android {
         ))
     }
 
+    // 【超重要】本物の文字やアプリアイコンデータが入っている「aaps」フォルダの資源（res）への直通通路を完璧に開通させました！
     sourceSets {
         getByName("main") {
             res.srcDirs(
                 "src/main/res",
-                "${rootProject.project(":core").projectDir}/src/main/res"
+                "${rootProject.project(":core").projectDir}/src/main/res",
+                "${rootProject.project(":aaps").projectDir}/src/main/res"
             )
         }
     }
@@ -55,7 +57,6 @@ android {
 }
 
 dependencies {
-    // 【超重要】別室（coreとapi）のプログラムそのものを本体アプリに100%完璧に結合させるための絶対命令！
     implementation(project(":core"))
     implementation(project(":api"))
 
