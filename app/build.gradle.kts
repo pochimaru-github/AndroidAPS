@@ -7,21 +7,23 @@ plugins {
 }
 
 android {
-    // 【解説】内部ソースコードに眠るすべての画面データ・文字データと100%完璧に合致させるため、純正の「com.」形式に修復しました！
     namespace = "com.nightscout.androidaps"
     
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "info.nightscout.androidaps"
+        // 【解説】内部データ・身代わり設定と100%完璧に同期させるため、識別IDもすべて純正の「com.」形式に一本化しました！
+        applicationId = "com.nightscout.androidaps"
+        
         minSdk = 21
         targetSdk = 34
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
         
+        // 【解説】すべてのすれ違いエラーを終わらせるため、身代わり設定を純正の「com.」形式に完璧に統一しました！
         manifestPlaceholders.putAll(mapOf(
-            "appAuthRedirectScheme" to "info.nightscout.androidaps",
+            "appAuthRedirectScheme" to "com.nightscout.androidaps",
             "appIcon" to "@mipmap/ic_launcher",
             "appIconRound" to "@mipmap/ic_launcher_round"
         ))
@@ -104,4 +106,4 @@ dependencies {
     implementation("io.coil-kt:coil:2.4.0")
     
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-} 
+}
