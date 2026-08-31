@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
@@ -19,27 +17,11 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20")
         classpath("io.objectbox:objectbox-gradle-plugin:3.6.0")
         
-        // 【解説】エラーの原因になっていた実在しない不要な古いシリアライズとコンパイラの指定（2行）をきれいにスッキリ削除しました！
         classpath("org.jetbrains.kotlin:kotlin-allopen:1.8.20")
     }
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-        google()
-        maven("https://jitpack.io")
-    }
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + listOf(
-                "-opt-in=kotlin.RequiresOptIn",
-                "-Xjvm-default=all"
-            )
-            jvmTarget = "11"
-        }
-    }
-}
+// 【解説】一括管理ルールと衝突していた個別の「allprojects { repositories { ... } }」のブロックをきれいにスッキリ削除しました！
 
 tasks.register<Delete>("clean").configure {
     delete(rootProject.layout.buildDirectory)
