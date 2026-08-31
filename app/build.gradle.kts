@@ -26,7 +26,6 @@ android {
         ))
     }
 
-    // 【超重要】本物の文字やアプリアイコンデータが入っている「aaps」フォルダの資源（res）への直通通路を完璧に開通させました！
     sourceSets {
         getByName("main") {
             res.srcDirs(
@@ -57,8 +56,10 @@ android {
 }
 
 dependencies {
+    // 【超重要】本物の文字やアイコンデータが眠る「aaps」部屋のプログラムを100%完璧に本体にドッキングさせました！
     implementation(project(":core"))
     implementation(project(":api"))
+    implementation(project(":aaps"))
 
     // 画面表示（Compose）の必須パーツ
     implementation("androidx.compose.ui:ui:1.4.3")
