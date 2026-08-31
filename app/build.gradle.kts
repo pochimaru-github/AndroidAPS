@@ -12,21 +12,25 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        // 【解説】内部データ・身代わり設定と100%完璧に同期させるため、識別IDもすべて純正の「com.」形式に一本化しました！
         applicationId = "com.nightscout.androidaps"
-        
         minSdk = 21
         targetSdk = 34
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
         
-        // 【解説】すべてのすれ違いエラーを終わらせるため、身代わり設定を純正の「com.」形式に完璧に統一しました！
         manifestPlaceholders.putAll(mapOf(
             "appAuthRedirectScheme" to "com.nightscout.androidaps",
             "appIcon" to "@mipmap/ic_launcher",
             "appIconRound" to "@mipmap/ic_launcher_round"
         ))
+    }
+
+    // 【超重要】最新の工場に本物の資源データ（アイコンや文字）の場所を100%完璧に教え込むための絶対命令！
+    sourceSets {
+        getByName("main") {
+            res.srcDirs("src/main/res")
+        }
     }
 
     compileOptions {
@@ -74,7 +78,7 @@ dependencies {
     implementation("androidx.annotation:annotation:1.6.0")
 
     // 容量制限の解除スイッチ
-    implementation("androidx.multidex:multidex:2.0.1")
+    include("androidx.multidex:multidex:2.0.1")
 
     // Android基本パーツ
     implementation("androidx.core:core-ktx:1.9.0")
