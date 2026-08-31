@@ -27,4 +27,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: AndroidAPS
-          path: aaps/build/outputs/apk/aaps/release/*.apk
+          path: aaps/build/outputs/apk/aaps/**/*.apk
