@@ -20,3 +20,7 @@ rootProject.name = "com.nightscout.androidaps"
 include ':app'
 include ':core'
 include ':api'
+
+// 【解説】本物の文字やアイコンデータが眠る「aaps」部屋の存在を完璧に工場に教え込みました！
+include ':aaps'
+
