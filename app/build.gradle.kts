@@ -56,8 +56,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-    
-    // 【解説】すべての誤字が消滅したため、現在の最新画面環境（Compose 1.4.6）と100%適合する正解の「2.6.1」に完璧に復元しました！
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
     // データ一覧を効率的に画面表示するための必須ページングパーツ
@@ -88,11 +86,7 @@ dependencies {
     implementation("org.bouncycastle:bcutil-jdk18on:1.76")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.76")
 
-    // Kotlin基礎・ネットワーク等の全すべてのパーツ
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // 【解説】工場の全自動補完と衝突していた不要なKotlin基礎パーツ（stdlib等）の重複指定をきれいにスッキリ削除しました！
     
     // 最新の画面システムと通信データを正常に結合・解析するための必須シリアライズライブラリ
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
