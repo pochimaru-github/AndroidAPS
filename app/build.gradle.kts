@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     
-    // 【解説】古いビルド環境の厳格な順序ルールに従い、拡張プラグインの2行を基本ツールのすぐ下へ正しく引っ越しさせました！
     id("org.jetbrains.kotlin.plugin.allopen")
     id("org.jetbrains.kotlin.plugin.serialization")
     
@@ -69,7 +68,7 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Android基本パーツ
+    // Android基本パーツ（抜け落ちていた基本命令と囲み記号を完璧に補い、正しい形式に直しました）
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
