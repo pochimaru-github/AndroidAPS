@@ -26,7 +26,6 @@ android {
         ))
     }
 
-    // 【超重要】大元の親プロジェクトから見たcoreフォルダの絶対パスを100%完璧に指定し、すべての見た目データを強制作集する最終確定命令！
     sourceSets {
         getByName("main") {
             res.srcDirs(
@@ -56,6 +55,10 @@ android {
 }
 
 dependencies {
+    // 【超重要】別室（coreとapi）のプログラムそのものを本体アプリに100%完璧に結合させるための絶対命令！
+    implementation(project(":core"))
+    implementation(project(":api"))
+
     // 画面表示（Compose）の必須パーツ
     implementation("androidx.compose.ui:ui:1.4.3")
     implementation("androidx.compose.material:material:1.4.3")
