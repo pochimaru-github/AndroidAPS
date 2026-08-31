@@ -14,6 +14,9 @@ dependencyResolutionManagement {
     }
 }
 
-// 【超重要】上空の設定を、本体プログラムのデータと100%完全に合致する純正の名前に修復しました！
 rootProject.name = "com.nightscout.androidaps"
+
+// 【超重要】工場がすべての別室データを正しく読み込めるよう、純正のすべての管理部屋を完全に登録しました！
 include ':app'
+include ':core'
+include ':api'
