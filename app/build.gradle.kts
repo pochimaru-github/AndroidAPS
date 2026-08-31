@@ -13,10 +13,7 @@ android {
     defaultConfig {
         applicationId = "info.nightscout.androidaps"
         minSdk = 21
-        
-        // 【解説】最新の画面テーマパーツ（Material3等）の要求と100%完璧に合致させるため、ターゲットSDKを「34」に引き上げました！
         targetSdk = 34
-        
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
@@ -37,8 +34,9 @@ android {
         dataBinding = true
     }
 
+    // 【解説】2分台の工具ミスマッチを解決するため、Kotlin 1.8.20と100%完璧に調和する本物の決定版バージョン「1.4.6」にアジャストしました！
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.5"
+        kotlinCompilerExtensionVersion = "1.4.6"
     }
 }
 
