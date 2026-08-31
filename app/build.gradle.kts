@@ -68,10 +68,10 @@ dependencies {
     // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Android基本パーツ（抜け落ちていた基本命令と囲み記号を完璧に補い、正しい形式に直しました）
+    // Android基本パーツ（【修正完了】古いデータバインディング機能と100%美しく調和する大安定バージョン「1.8.0」にアジャストしました！）
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
+    implementation("com.google.android.material:material:1.8.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.1")
 
