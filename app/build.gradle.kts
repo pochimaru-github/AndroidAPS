@@ -7,9 +7,7 @@ plugins {
 }
 
 android {
-    // 【超重要】最新の工場のルールに完全適合させるため、アプリの純正戸籍名（namespace）を完璧に書き足しました！
     namespace = "info.nightscout.androidaps"
-    
     compileSdk = 34
 
     defaultConfig {
@@ -19,7 +17,11 @@ android {
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
+        
+        // 【超重要】最後の箱詰めに必要な、純正のアプリアイコン画像の指定（2箇所）を完璧に書き足しました！
         manifestPlaceholders["appAuthRedirectScheme"] = "info.nightscout.androidaps"
+        manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher"
+        manifestPlaceholders["appIconRound"] = "@mipmap/ic_launcher_round"
     }
 
     compileOptions {
