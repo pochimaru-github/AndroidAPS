@@ -3,8 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
     id("io.objectbox")
-    
-    // 【解説】大元の工具箱（クラスパス）と100%完璧に同期し、ObjectBoxの自動生成データと完全に合流できる正式なID形式に修復しました！
     id("org.jetbrains.kotlin.plugin.allopen")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
@@ -15,7 +13,10 @@ android {
     defaultConfig {
         applicationId = "info.nightscout.androidaps"
         minSdk = 21
-        targetSdk = 33
+        
+        // 【解説】最新の画面テーマパーツ（Material3等）の要求と100%完璧に合致させるため、ターゲットSDKを「34」に引き上げました！
+        targetSdk = 34
+        
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
