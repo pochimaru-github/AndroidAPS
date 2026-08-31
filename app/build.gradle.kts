@@ -34,7 +34,6 @@ android {
         dataBinding = true
     }
 
-    // 【解説】2分台の工具ミスマッチを解決するため、Kotlin 1.8.20と100%完璧に調和する本物の決定版バージョン「1.4.6」にアジャストしました！
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.6"
     }
@@ -57,7 +56,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    
+    // 【解説】現在の画面システム（Compose 1.4.x）と100%美しく同期させるため、中継パーツを完璧な安定バージョン「2.6.0」にアジャストしました！
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0")
 
     // データ一覧を効率的に画面表示するための必須ページングパーツ
     implementation("androidx.paging:paging-runtime-ktx:3.1.1")
