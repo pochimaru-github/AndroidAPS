@@ -55,9 +55,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-    
-    // 【解説】現在の最新画面環境（Compose 1.4.6）と100%美しく同期させるため、中継パーツを完璧な安定バージョン「2.6.0」にアジャストしました！
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
     // データ一覧を効率的に画面表示するための必須ページングパーツ
     implementation("androidx.paging:paging-runtime-ktx:3.1.1")
@@ -78,9 +76,9 @@ dependencies {
     // 外部認証システム（AppAuth）
     implementation("net.openid:appauth:0.11.1")
 
-    // 通信パーツ（バージョン2）
+    // 【解説】ネットの倉庫（Maven）から100%確実に発見される、最新の正しいフルネーム形式に完璧に修復しました！
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
-    implementation("io.reactivex:rxandroid:2.1.1")
+    implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
     // 医療データや通信を安全に保護・暗号化するための必須セキュリティパーツ
     implementation("org.bouncycastle:bcprov-jdk18on:1.76")
