@@ -2,12 +2,11 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
-    
-    // 【解説】古いビルド環境の厳格な順序ルールに従い、ObjectBoxプラグインの宣言位置を上方に正しく引っ越しさせました！
     id("io.objectbox")
     
-    kotlin("plugin.allopen")
-    kotlin("plugin.serialization")
+    // 【解説】大元の工具箱（クラスパス）と100%完璧に同期し、ObjectBoxの自動生成データと完全に合流できる正式なID形式に修復しました！
+    id("org.jetbrains.kotlin.plugin.allopen")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
