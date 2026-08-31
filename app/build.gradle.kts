@@ -7,6 +7,9 @@ plugins {
 }
 
 android {
+    // 【超重要】最新の工場のルールに完全適合させるため、アプリの純正戸籍名（namespace）を完璧に書き足しました！
+    namespace = "info.nightscout.androidaps"
+    
     compileSdk = 34
 
     defaultConfig {
@@ -76,7 +79,7 @@ dependencies {
     // 外部認証システム（AppAuth）
     implementation("net.openid:appauth:0.11.1")
 
-    // 【解説】ネットの倉庫（Maven）から100%確実に発見される、最新の正しいフルネーム形式に完璧に修復しました！
+    // 通信パーツ
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
