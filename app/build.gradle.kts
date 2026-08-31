@@ -2,9 +2,11 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
-    id("io.objectbox")
     id("org.jetbrains.kotlin.plugin.allopen")
     id("org.jetbrains.kotlin.plugin.serialization")
+    
+    // 【解説】古いビルド環境の厳格な順序ルールに従い、ObjectBoxプラグインの宣言位置を最下部に正しく引っ越しさせました！
+    id("io.objectbox")
 }
 
 android {
@@ -85,8 +87,6 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:1.76")
     implementation("org.bouncycastle:bcutil-jdk18on:1.76")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.76")
-
-    // 【解説】工場の全自動補完と衝突していた不要なKotlin基礎パーツ（stdlib等）の重複指定をきれいにスッキリ削除しました！
     
     // 最新の画面システムと通信データを正常に結合・解析するための必須シリアライズライブラリ
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
