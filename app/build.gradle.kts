@@ -104,4 +104,4 @@ dependencies {
     implementation("io.coil-kt:coil:2.4.0")
     
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-}
+} 
