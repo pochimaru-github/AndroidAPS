@@ -26,12 +26,13 @@ android {
         ))
     }
 
+    // 【超重要】aapsフォルダ内の本当の資源の隠れ家（直下の /res ）へのルートを完璧に開通させました！
     sourceSets {
         getByName("main") {
             res.srcDirs(
                 "src/main/res",
                 "${rootProject.project(":core").projectDir}/src/main/res",
-                "${rootProject.project(":aaps").projectDir}/src/main/res"
+                "${rootProject.project(":aaps").projectDir}/res"
             )
         }
     }
@@ -56,7 +57,6 @@ android {
 }
 
 dependencies {
-    // 【超重要】本物の文字やアイコンデータが眠る「aaps」部屋のプログラムを100%完璧に本体にドッキングさせました！
     implementation(project(":core"))
     implementation(project(":api"))
     implementation(project(":aaps"))
