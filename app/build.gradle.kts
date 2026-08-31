@@ -26,9 +26,13 @@ android {
         ))
     }
 
+    // 【超重要】別室（サブプロジェクト群）に分散しているすべての画像や文字、スタイルデータを100%力づくで1箇所に集約させるための確定命令！
     sourceSets {
         getByName("main") {
-            res.srcDirs("src/main/res")
+            res.srcDirs(
+                "src/main/res",
+                "../core/src/main/res"
+            )
         }
     }
 
@@ -76,7 +80,7 @@ dependencies {
     // 古い内部コードを最新のJava11環境に完璧に合流させるための必須アノテーションパーツ
     implementation("androidx.annotation:annotation:1.6.0")
 
-    // 容量制限の解除スイッチ（【修正完了】間違えてincludeになっていた単語を正しい命令に完璧に直しました！）
+    // 容量制限の解除スイッチ
     implementation("androidx.multidex:multidex:2.0.1")
 
     // Android基本パーツ
@@ -106,7 +110,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.moshi:moshi:1.15.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
-    implementation("io.coil-kt:coil:2.4.0")
+    include("io.coil-kt:coil:2.4.0")
     
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
