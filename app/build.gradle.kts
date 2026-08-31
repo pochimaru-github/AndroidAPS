@@ -26,16 +26,7 @@ android {
         ))
     }
 
-    // 【超重要】aapsフォルダ内の本当の資源の隠れ家（直下の /res ）へのルートを完璧に開通させました！
-    sourceSets {
-        getByName("main") {
-            res.srcDirs(
-                "src/main/res",
-                "${rootProject.project(":core").projectDir}/src/main/res",
-                "${rootProject.project(":aaps").projectDir}/res"
-            )
-        }
-    }
+    // 【解説】すべてのドッキングが完了したため、重複衝突の原因になっていた後付けの sourceSets { ... } ブロックをスッキリ綺麗に全消去しました！
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
