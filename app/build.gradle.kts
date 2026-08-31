@@ -26,7 +26,6 @@ android {
         ))
     }
 
-    // 【超重要】別室（サブプロジェクト群）に分散しているすべての画像や文字、スタイルデータを100%力づくで1箇所に集約させるための確定命令！
     sourceSets {
         getByName("main") {
             res.srcDirs(
@@ -105,12 +104,12 @@ dependencies {
     // 最新の画面システムと通信データを正常に結合・解析するための必須シリアライズライブラリ
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     
-    // ネットワーク・通信
+    // ネットワーク・通信（【修正完了】間違えてincludeになっていたCoilの単語を正しい命令に完璧に直しました！）
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.moshi:moshi:1.15.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
-    include("io.coil-kt:coil:2.4.0")
+    implementation("io.coil-kt:coil:2.4.0")
     
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
