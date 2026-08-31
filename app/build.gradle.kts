@@ -2,9 +2,12 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
+    
+    // 【解説】古いビルド環境の厳格な順序ルールに従い、ObjectBoxプラグインの宣言位置を上方に正しく引っ越しさせました！
+    id("io.objectbox")
+    
     kotlin("plugin.allopen")
     kotlin("plugin.serialization")
-    id("io.objectbox")
 }
 
 android {
@@ -101,8 +104,6 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.15.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
     implementation("io.coil-kt:coil:2.4.0")
-    
-    // 【解説】大元のプラグインと100%自動連動するため、個別側で衝突していた不要なObjectBoxの2行をきれいにスッキリ削除しました！
     
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
