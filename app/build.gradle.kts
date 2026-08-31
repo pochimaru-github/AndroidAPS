@@ -26,11 +26,12 @@ android {
         ))
     }
 
+    // 【超重要】別室（coreフォルダ）の資源への直通ルートを、工場のロボットが100%絶対に見失わない本物の確定記述に修復しました！
     sourceSets {
         getByName("main") {
             res.srcDirs(
                 "src/main/res",
-                "../core/src/main/res"
+                "${project(":core").projectDir}/src/main/res"
             )
         }
     }
@@ -104,7 +105,7 @@ dependencies {
     // 最新の画面システムと通信データを正常に結合・解析するための必須シリアライズライブラリ
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     
-    // ネットワーク・通信（【修正完了】間違えてincludeになっていたCoilの単語を正しい命令に完璧に直しました！）
+    // ネットワーク・通信
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.moshi:moshi:1.15.0")
