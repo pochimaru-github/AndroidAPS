@@ -1,12 +1,12 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.kapt")
     
-    // 【解説】大元のプラグインと100%全自動で連携するため、個別側で二重に衝突していた不要なObjectBoxの宣言をきれいにスッキリ削除しました！
-    
+    // 【解説】古いビルド環境の厳格な順序ルールに従い、拡張プラグインの2行を基本ツールのすぐ下へ正しく引っ越しさせました！
     id("org.jetbrains.kotlin.plugin.allopen")
     id("org.jetbrains.kotlin.plugin.serialization")
+    
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
