@@ -20,7 +20,7 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
       - name: Build with Gradle
-        run: ./gradlew assembleRelease -PskipTests=true
+        run: ./gradlew :aaps:assembleRelease -PskipTests=true
       - name: Upload APK
         uses: actions/upload-artifact@v5
         with:
