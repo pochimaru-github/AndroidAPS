@@ -26,7 +26,6 @@ android {
         ))
     }
 
-    // 【超重要】最新の工場に本物の資源データ（アイコンや文字）の場所を100%完璧に教え込むための絶対命令！
     sourceSets {
         getByName("main") {
             res.srcDirs("src/main/res")
@@ -77,12 +76,12 @@ dependencies {
     // 古い内部コードを最新のJava11環境に完璧に合流させるための必須アノテーションパーツ
     implementation("androidx.annotation:annotation:1.6.0")
 
-    // 容量制限の解除スイッチ
-    include("androidx.multidex:multidex:2.0.1")
+    // 容量制限の解除スイッチ（【修正完了】間違えてincludeになっていた単語を正しい命令に完璧に直しました！）
+    implementation("androidx.multidex:multidex:2.0.1")
 
     // Android基本パーツ
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.preference:preference-ktx:1.2.0")
