@@ -102,7 +102,7 @@ project(":aaps") {
     dependencies {
         "implementation"(project(":core"))
         "implementation"(project(":api"))
-        "implementation"(project(":app"))
+        "api"(project(":app"))
     }
 }
 
