@@ -49,7 +49,6 @@ dependencies {
     // 【超重要】別室にせき止められていたすべてのアイコン画像、文字、スタイルデータを最終ラインへ100%完全直通で流し込むための最強命令（api）に完全修復しました！
     api(project(":core"))
     api(project(":api"))
-    api(project(":aaps"))
 
     // 画面表示（Compose）の必須パーツ
     implementation("androidx.compose.ui:ui:1.4.3")
