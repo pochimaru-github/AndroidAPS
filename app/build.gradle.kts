@@ -14,6 +14,6 @@ android {
 
 // 【ここに書き足し！】core部屋とapi部屋に眠るすべてのテーマ（AppTheme）やアイコンを一滴残らず主役へ直通ドッキングさせました！
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":api"))
+        "api"(project(":core"))
+        "api"(project(":api"))
 }
