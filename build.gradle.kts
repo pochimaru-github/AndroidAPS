@@ -60,4 +60,4 @@ project(":app") {
         "implementation"(project(":api"))
         "implementation"(project(":aaps"))
     }
-}
+} 
