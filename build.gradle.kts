@@ -23,8 +23,8 @@ subprojects {
     }
 }
 
-// 部品部屋の設定をこれ以上ないほどスマートに完全一本化
-configure(subprojects.filter { it.name in listOf("core", "api", "apps") }) {
+// 共通の部品部屋（core, api）の設定を完全一本化
+configure(subprojects.filter { it.name in listOf("core", "api") }) {
     apply(plugin = "com.android.library")
     apply(plugin = "org.jetbrains.kotlin.android")
     
@@ -35,15 +35,15 @@ configure(subprojects.filter { it.name in listOf("core", "api", "apps") }) {
     }
 }
 
-// 【真の王座大復活】app を本物の主役アプリとして完璧に設定し直しました！迷子パスはすべて不要になり消滅します
+// 【真の最終形態】幻のaapsを完全に排除し、本物のappフォルダを完成品アプリの主役として完璧に王座へ据えました！
 project(":app") {
     apply(plugin = "com.android.application")
     apply(plugin = "org.jetbrains.kotlin.android")
-
+    
     configure<com.android.build.gradle.BaseExtension> {
         namespace = "com.nightscout.androidaps"
         compileSdkVersion(34)
-
+        
         defaultConfig {
             applicationId = "info.nightscout.androidaps"
             minSdkVersion(21)
@@ -53,11 +53,10 @@ project(":app") {
             multiDexEnabled = true
         }
     }
-
-    // 本物の主役（:app）が、すべての部品部屋（:core, :api, :aaps）を吸い込んで最終合体します！
+    
+    // 物理的に存在する本物の部品部屋（:core, :api）だけを吸い込んで、出荷ラインを走ります！
     dependencies {
         "implementation"(project(":core"))
         "implementation"(project(":api"))
-        "implementation"(project(":aaps"))
     }
-} 
+}
