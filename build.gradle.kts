@@ -66,13 +66,22 @@ project(":aaps") {
         namespace = "info.nightscout.androidaps"
         compileSdkVersion(34)
         
+
         defaultConfig {
-            applicationId = "com.nightscout.androidaps"
+            applicationId = "info.nightscout.androidaps"
             minSdkVersion(21)
             targetSdkVersion(34)
             versionCode = 3040206
             versionName = "3.4.2.6"
             multiDexEnabled = true
+            
+            // 【ここに書き足し！】身分証明書が要求している本物のアイコン指定を完璧に注入しました！
+            manifestPlaceholders.putAll(mapOf(
+                "appIcon" to "@mipmap/ic_launcher",
+                "appIconRound" to "@mipmap/ic_launcher_round"
+            ))
+        }
+
         }
         
         sourceSets {
