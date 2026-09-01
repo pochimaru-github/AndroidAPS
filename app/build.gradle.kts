@@ -35,6 +35,13 @@ android {
         jvmTarget = "11"
     }
 
+    // 【ここに書き足し！】app部屋自身の出荷ラインが動くときも、100%確実に本物のアイコンデータを吸い込ませる絶対命令です！
+    sourceSets {
+        getByName("main") {
+            res.srcDirs("src/main/res")
+        }
+    }
+
     buildFeatures {
         compose = true
         dataBinding = true
