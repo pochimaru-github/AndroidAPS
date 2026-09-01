@@ -84,7 +84,7 @@ project(":aaps") {
         
         sourceSets {
             getByName("main") {
-                manifest.srcFile("AndroidManifest.xml")
+                manifest.srcFile("../app/src/main/AndroidManifest.xml")
                 
                 // 【ここに書き足し！】主役の部屋の奥底に眠る本物のアイコンや文字データを完璧に合流させました！
                    res.srcDirs("src/main/res", "${rootProject.project(":app").projectDir}/src/main/res")
