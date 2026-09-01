@@ -85,9 +85,12 @@ project(":aaps") {
         sourceSets {
             getByName("main") {
                 manifest.srcFile("../app/src/main/AndroidManifest.xml")
+
+                // 【ここに書き足し！】app部屋に置き去りにされていた本物のアイコンやスタイルデータを完璧に合流させました！
+                res.srcDirs("../app/src/main/res")
             }
         }
-        
+ 
         compileOptions {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
