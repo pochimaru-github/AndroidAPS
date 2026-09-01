@@ -81,8 +81,6 @@ project(":aaps") {
                 "appIconRound" to "@mipmap/ic_launcher_round"
             ))
         }
-
-        }
         
         sourceSets {
             getByName("main") {
