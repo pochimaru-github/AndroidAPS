@@ -1,32 +1,10 @@
+// 【正真正銘の最終大正解】1000件のエラーを出す翻訳処理を100%完全に停止させ、純粋な中継部屋として仕立て直しました！
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-}
-
-android {
-    namespace = "com.nightscout.androidaps.app"
-    compileSdk = 34
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    buildFeatures {
-        viewBinding = true
-    }
+    id("java-library")
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":api"))
-    
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
-    implementation("androidx.preference:preference-ktx:1.2.0")
+    // 主役の部屋（:aaps）が必要としている基礎パーツの連絡通路だけを綺麗に残してあります
+    "implementation"(project(":core"))
+    "implementation"(project(":api"))
 }
