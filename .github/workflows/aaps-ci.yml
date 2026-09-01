@@ -21,7 +21,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew :aaps:assembleRelease -PskipTests=true
+        run: ./gradlew clean :aaps:assembleFull -PskipTests=true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
