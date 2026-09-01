@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.android) apply false
+    id("com.android.library") version "7.4.2" apply false
 }
 
 buildscript {
@@ -53,7 +53,6 @@ project(":aaps") {
             multiDexEnabled = true
         }
         
-        // 🌟ここが神バランス！aaps部屋の直下の標準ルートのまま、すべてのアイコンやマニフェストを読み込ませます
         sourceSets {
             getByName("main") {
                 manifest.srcFile("src/main/AndroidManifest.xml")
