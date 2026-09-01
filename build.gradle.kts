@@ -73,22 +73,27 @@ project(":aaps") {
             versionCode = 3040206
             versionName = "3.4.2.6"
             multiDexEnabled = true
+            
+            // 【修復完了】アイコン指定と、エラーの原因になっていた外部連携指定を完璧に一本化して注入しました！
+            manifestPlaceholders.putAll(mapOf(
+                "appIcon" to "@mipmap/ic_launcher",
+                "appIconRound" to "@mipmap/ic_launcher_round",
+                "appAuthRedirectScheme" to "info.nightscout.androidaps"
+            ))
+        }
+        
+        sourceSets {
+            getByName("main") {
+                manifest.srcFile("../app/src/main/AndroidManifest.xml")
+            }
         }
         
         compileOptions {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
         }
-
-        // 【ここに書き足し！】本物の身分証明書（マニフェスト）の場所を100%完璧に工場に教え込みました！
-        sourceSets {
-            getByName("main") {
-                manifest.srcFile("../app/src/main/AndroidManifest.xml")
-            }
-        }
     }
     
-    // 【修正完了】大元の親ファイルでも100%文法エラーを起こさずに確実にドッキングできる正しい文法（ダブルクォーテーション囲み）に完璧に修復しました！
     dependencies {
         "implementation"(project(":core"))
         "implementation"(project(":api"))
