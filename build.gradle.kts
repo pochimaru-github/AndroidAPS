@@ -54,9 +54,8 @@ project(":app") {
         }
     }
     
-    // 物理的に存在する本物の部品部屋（:core, :api）だけを吸い込んで、出荷ラインを走ります！
     dependencies {
-        "implementation"(project(":core"))
-        "implementation"(project(":api"))
+        "api"(project(":core"))
+        "api"(project(":api"))
     }
 }
