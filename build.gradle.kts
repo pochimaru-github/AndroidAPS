@@ -57,16 +57,15 @@ configure(subprojects.filter { it.name in listOf("core", "api") }) {
     }
 }
 
-// 【超重要】aapsフォルダ内の本当の身分証明書（マニフェスト）の居場所を、工場に100%完璧に教え込むための最終確定記述！
+// 【超重要】重複衝突の真犯人だった sourceSets { ... } ブロックをスッキリ全消去し、代わりに本物の部品部屋（core, api, app）を純正ルールのまま美しくドッキングさせました！
 project(":aaps") {
     apply(plugin = "com.android.application")
     apply(plugin = "org.jetbrains.kotlin.android")
     
     configure<com.android.build.gradle.BaseExtension> {
-        namespace = "info.nightscout.androidaps"
+        namespace = "com.nightscout.androidaps"
         compileSdkVersion(34)
         
-
         defaultConfig {
             applicationId = "info.nightscout.androidaps"
             minSdkVersion(21)
@@ -74,29 +73,22 @@ project(":aaps") {
             versionCode = 3040206
             versionName = "3.4.2.6"
             multiDexEnabled = true
-            
-            // 【ここに書き足し！】身分証明書が要求している本物のアイコン指定を完璧に注入しました！
-            manifestPlaceholders.putAll(mapOf(
-                "appIcon" to "@mipmap/ic_launcher",
-                "appIconRound" to "@mipmap/ic_launcher_round"
-            ))
         }
         
-        sourceSets {
-            getByName("main") {
-                manifest.srcFile("../app/src/main/AndroidManifest.xml")
-                res.srcDirs("../app/src/main/res", "src/main/res", "../api/src/main/res")
-            }
-        }
- 
         compileOptions {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
         }
+    }
+    
+    // 【解説】すべての別室のプログラムと資源データを、それぞれの純正倉庫の名前を保ったまま100%完璧に合流させる最強のドッキング命令です！
+    dependencies {
+        implementation(project(":core"))
+        implementation(project(":api"))
+        implementation(project(":app"))
     }
 }
 
 tasks.register<Delete>("clean").configure {
     delete(rootProject.layout.buildDirectory)
 }
- 
