@@ -79,6 +79,13 @@ project(":aaps") {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
         }
+
+        // 【ここに書き足し！】本物の身分証明書（マニフェスト）の場所を100%完璧に工場に教え込みました！
+        sourceSets {
+            getByName("main") {
+                manifest.srcFile("../app/src/main/AndroidManifest.xml")
+            }
+        }
     }
     
     // 【修正完了】大元の親ファイルでも100%文法エラーを起こさずに確実にドッキングできる正しい文法（ダブルクォーテーション囲み）に完璧に修復しました！
