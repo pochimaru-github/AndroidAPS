@@ -26,8 +26,6 @@ android {
         ))
     }
 
-    // 【解説】すべてのドッキングが完了したため、重複衝突の原因になっていた後付けの sourceSets { ... } ブロックをスッキリ綺麗に全消去しました！
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -48,15 +46,16 @@ android {
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":api"))
-    implementation(project(":aaps"))
+    // 【超重要】別室にせき止められていたすべてのアイコン画像、文字、スタイルデータを最終ラインへ100%完全直通で流し込むための最強命令（api）に完全修復しました！
+    api(project(":core"))
+    api(project(":api"))
+    api(project(":aaps"))
 
     // 画面表示（Compose）の必須パーツ
     implementation("androidx.compose.ui:ui:1.4.3")
     implementation("androidx.compose.material:material:1.4.3")
     
-    // 画面の見た目のテーマや共通デザインを司る「Material3」関連の必須パーツ群
+    // 画面の見た目のテーマや共通デザインを司る「Material3」関連 of 必須パーツ群
     implementation("androidx.compose.material3:material3:1.1.0")
     implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
     implementation("androidx.activity:activity-compose:1.7.2")
