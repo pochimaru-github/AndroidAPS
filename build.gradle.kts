@@ -39,8 +39,8 @@ subprojects {
     }
 }
 
-// 【解説】エラーの原因になっていた aaps 部屋も含めて、すべての別室（core, api, aaps）を一括で完璧にAndroid標準ライブラリとして同期登録しました！
-configure(subprojects.filter { it.name in listOf("core", "api", "aaps") }) {
+// 【解説】純粋な部品部屋（core, api）だけをAndroidライブラリとして同期登録しました
+configure(subprojects.filter { it.name in listOf("core", "api") }) {
     apply(plugin = "com.android.library")
     apply(plugin = "org.jetbrains.kotlin.android")
     
@@ -50,6 +50,31 @@ configure(subprojects.filter { it.name in listOf("core", "api", "aaps") }) {
         defaultConfig {
             minSdk = 21
         }
+        compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_11
+            targetCompatibility = JavaVersion.VERSION_11
+        }
+    }
+}
+
+// 【超重要】本物の文字やアプリアイコンデータが入っている「aaps」を、純正のメインアプリケーション（主役）として完璧に王座へ復元させました！
+project(":aaps") {
+    apply(plugin = "com.android.application")
+    apply(plugin = "org.jetbrains.kotlin.android")
+    
+    configure<com.android.build.gradle.BaseExtension> {
+        namespace = "com.nightscout.androidaps"
+        compileSdk = 34
+        
+        defaultConfig {
+            applicationId = "com.nightscout.androidaps"
+            minSdk = 21
+            targetSdk = 34
+            versionCode = 3040206
+            versionName = "3.4.2.6"
+            multiDexEnabled = true
+        }
+        
         compileOptions {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
