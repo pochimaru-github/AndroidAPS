@@ -45,7 +45,7 @@ project(":app") {
         compileSdkVersion(34)
         
         defaultConfig {
-            applicationId = "info.nightscout.androidaps"
+            applicationId = "com.nightscout.androidaps"
             minSdkVersion(21)
             targetSdkVersion(34)
             versionCode = 3040206
