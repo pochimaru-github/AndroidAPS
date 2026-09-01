@@ -37,6 +37,12 @@ subprojects {
             jvmTarget = "11"
         }
     }
+
+    // 【ここに書き足し！】すべての部屋の出荷ラインが動くときも、自分の部屋のアイコンを100%確実に吸い込ませる絶対法律です！
+    extensions.configure<com.android.build.gradle.BaseExtension> {
+        sourceSets.getByName("main").res.srcDirs("src/main/res")
+    }
+
 }
 
 // 部品部屋（core, api）のAndroidライブラリ登録
