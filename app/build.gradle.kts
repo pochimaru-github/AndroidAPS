@@ -3,20 +3,7 @@ android {
     
     compileSdk = 34
 
-    defaultConfig {
-        applicationId = "com.nightscout.androidaps"
-        minSdk = 21
-        targetSdk = 34
-        versionCode = 3040206
-        versionName = "3.4.2.6"
-        multiDexEnabled = true
-        
-        manifestPlaceholders.putAll(mapOf(
-            "appAuthRedirectScheme" to "com.nightscout.androidaps",
-            "appIcon" to "@mipmap/ic_launcher",
-            "appIconRound" to "@mipmap/ic_launcher_round"
-        ))
-    }
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
