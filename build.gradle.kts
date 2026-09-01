@@ -63,7 +63,7 @@ project(":aaps") {
     apply(plugin = "org.jetbrains.kotlin.android")
     
     configure<com.android.build.gradle.BaseExtension> {
-        namespace = "com.nightscout.androidaps"
+        namespace = "info.nightscout.androidaps"
         compileSdkVersion(34)
         
         defaultConfig {
