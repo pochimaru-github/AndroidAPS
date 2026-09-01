@@ -1,4 +1,1 @@
-plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-}
+// 大元の設計図と同期させるため、この部屋の中身は完全に空っぽ（白紙）にするのが100%の大正解です！
