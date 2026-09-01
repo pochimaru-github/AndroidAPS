@@ -8,10 +8,7 @@ plugins {
 }
 
 buildscript {
-    repositories {
-        mavenCentral()
-        google()
-    }
+    repositories { mavenCentral(); google() }
     dependencies {
         classpath("com.android.tools.build:gradle:7.4.2")
         classpath("com.google.gms:google-services:4.3.15")
@@ -22,48 +19,31 @@ buildscript {
     }
 }
 
-// 共通の翻訳ターゲット設定
 subprojects {
-    repositories {
-        mavenCentral()
-        google()
-    }
+    repositories { mavenCentral(); google() }
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + listOf(
-                "-opt-in=kotlin.RequiresOptIn",
-                "-Xjvm-default=all"
-            )
+            freeCompilerArgs = freeCompilerArgs + listOf("-opt-in=kotlin.RequiresOptIn", "-Xjvm-default=all")
             jvmTarget = "11"
         }
     }
-
-    // 【ここに書き足し！】すべての部屋の出荷ラインが動くときも、自分の部屋のアイコンを100%確実に吸い込ませる絶対法律です！
-    extensions.configure<com.android.build.gradle.BaseExtension> {
-        sourceSets.getByName("main").res.srcDirs("src/main/res")
-    }
-
 }
 
-// 部品部屋（core, api）のAndroidライブラリ登録
-configure(subprojects.filter { it.name in listOf("core", "api") }) {
+// 部品部屋（core, api, app）のAndroidライブラリ登録と資源ルートの完全一本化！
+configure(subprojects.filter { it.name in listOf("core", "api", "app") }) {
     apply(plugin = "com.android.library")
     apply(plugin = "org.jetbrains.kotlin.android")
     
     configure<com.android.build.gradle.LibraryExtension> {
         namespace = "com.nightscout.androidaps.${project.name}"
         compileSdk = 34
-        defaultConfig {
-            minSdk = 21
-        }
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_11
-            targetCompatibility = JavaVersion.VERSION_11
-        }
+        defaultConfig { minSdk = 21 }
+        sourceSets { getByName("main") { res.srcDirs("src/main/res") } }
+        compileOptions { sourceCompatibility = JavaVersion.VERSION_11; targetCompatibility = JavaVersion.VERSION_11 }
     }
 }
 
-// 主役プロジェクトの設定
+// 主役プロジェクト（aaps）を本当のメインアプリ王座として完全結合！
 project(":aaps") {
     apply(plugin = "com.android.application")
     apply(plugin = "org.jetbrains.kotlin.android")
@@ -80,7 +60,6 @@ project(":aaps") {
             versionName = "3.4.2.6"
             multiDexEnabled = true
             
-            // 【修復完了】アイコン指定と、エラーの原因になっていた外部連携指定を完璧に一本化して注入しました！
             manifestPlaceholders.putAll(mapOf(
                 "appIcon" to "@mipmap/ic_launcher",
                 "appIconRound" to "@mipmap/ic_launcher_round",
@@ -91,18 +70,11 @@ project(":aaps") {
         sourceSets {
             getByName("main") {
                 manifest.srcFile("../app/src/main/AndroidManifest.xml")
-                
-                // 【ここに書き足し！】主役の部屋の奥底に眠る本物のアイコンや文字データを完璧に合流させました！
-                   res.srcDirs("src/main/res", "${rootProject.project(":app").projectDir}/src/main/res")
-
+                res.srcDirs("src/main/res", "../app/src/main/res")
             }
         }
-
         
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_11
-            targetCompatibility = JavaVersion.VERSION_11
-        }
+        compileOptions { sourceCompatibility = JavaVersion.VERSION_11; targetCompatibility = JavaVersion.VERSION_11 }
     }
     
     dependencies {
@@ -112,6 +84,4 @@ project(":aaps") {
     }
 }
 
-tasks.register<Delete>("clean").configure {
-    delete(rootProject.layout.buildDirectory)
-} 
+tasks.register<Delete>("clean").configure { delete(rootProject.layout.buildDirectory) }
