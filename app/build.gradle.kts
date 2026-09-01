@@ -1,19 +1,26 @@
 plugins {
     id("com.android.application")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
     namespace = "com.nightscout.androidaps"
+    compileSdk = 34
 
+    // 🌟【これが必要でした！】主役部屋の奥底に眠る、本物のアイコン画像やアプリ名データを工場へ合流させます！
     sourceSets {
         getByName("main") {
             res.srcDirs("src/main/res")
         }
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
 }
 
-// 【ここに書き足し！】core部屋とapi部屋に眠るすべてのテーマ（AppTheme）やアイコンを一滴残らず主役へ直通ドッキングさせました！
 dependencies {
-        "api"(project(":core"))
-        "api"(project(":api"))
+    "api"(project(":core"))
+    "api"(project(":api"))
 }
