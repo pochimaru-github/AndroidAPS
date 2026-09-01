@@ -85,7 +85,7 @@ project(":aaps") {
         sourceSets {
             getByName("main") {
                 manifest.srcFile("../app/src/main/AndroidManifest.xml")
-                res.srcDirs("../app/src/main/res", "src/main/res")
+                res.srcDirs("../app/src/main/res", "src/main/res", "../api/src/main/res")
             }
         }
  
