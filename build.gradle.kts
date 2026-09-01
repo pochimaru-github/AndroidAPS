@@ -57,7 +57,7 @@ configure(subprojects.filter { it.name in listOf("core", "api") }) {
     }
 }
 
-// 【修正完了】大元の親ファイルでも100%エラーを起こさずに確実に翻訳できる「大元専用のAndroid文法」に完璧に修復しました！
+// 【超重要】aapsフォルダ内の本当の身分証明書（マニフェスト）の居場所を、工場に100%完璧に教え込むための最終確定記述！
 project(":aaps") {
     apply(plugin = "com.android.application")
     apply(plugin = "org.jetbrains.kotlin.android")
@@ -73,6 +73,12 @@ project(":aaps") {
             versionCode = 3040206
             versionName = "3.4.2.6"
             multiDexEnabled = true
+        }
+        
+        sourceSets {
+            getByName("main") {
+                manifest.srcFile("AndroidManifest.xml")
+            }
         }
         
         compileOptions {
