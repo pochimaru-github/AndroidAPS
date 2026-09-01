@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nightscout.androidaps" 
+    namespace = "com.nightscout.androidaps.app" 
     
     compileSdk = 34
 
