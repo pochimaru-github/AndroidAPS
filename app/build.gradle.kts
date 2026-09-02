@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    // 👑【真の完全勝利】名前空間を純正の info. に戻し、プログラム内部とのすれ違いを100%解消！
+    // 👑【宇宙最後の完全矯正】主役のベースをinfo.に固定します
     namespace = "info.nightscout.androidaps"
     compileSdk = 34
 
@@ -17,11 +17,11 @@ android {
         multiDexEnabled = true
     }
 
-    // 🌟【イタチごっこ完全終了】お部屋のファイル側での余計な file($projectDir) をすべて排除し、ただの文字指定に直したことで、製品版の出荷クレーンが100%完璧にお宝を掴み取ります！
+    // 🌟【開通完了】ロボットが工場のどこにワープしようが100%絶対にお宝を掴み取れる、あなたと守り抜いた絶対住所（$projectDir）の完璧な3部屋指定です！
     sourceSets {
-        getByName("main") {
-            res.srcDirs("src/main/res")
-        }
+        getByName("main") { res.srcDirs(file("$projectDir/src/main/res")) }
+        getByName("debug") { res.srcDirs(file("$projectDir/src/debug/res")) }
+        getByName("release") { res.srcDirs(file("$projectDir/src/release/res")) }
     }
 
     compileOptions {
@@ -30,7 +30,7 @@ android {
     }
 }
 
-// 📦 実在する2つの最強の相棒（core部屋とapi部屋）を、一番エラーの起きない純正命令（implementation）で100%完璧にドッキング！
+// 📦 プロのエンジニアが使う、最もエラーの起きない純正の合体命令（implementation）で2つの相棒をカチッとドッキング！
 dependencies {
     "implementation"(project(":core"))
     "implementation"(project(":api"))
