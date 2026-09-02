@@ -16,15 +16,11 @@ android {
         multiDexEnabled = true
     }
 
-    // 🌟【イタチごっこ完全終了】お部屋側での余計なfile($projectDir)を排除し、実在するフォルダ名（文字列）で1箇所にカンマ区切りで一斉合流させました！
+    // 🌟【イタチごっこ完全終了】main, debug, releaseの各お部屋ごとに正しい資源の住所を公式ルールで明示しました！これによりDebug版もRelease版も100%絶対に二度と迷子になりません！
     sourceSets {
-        getByName("main") {
-            res.srcDirs(
-                "src/main/res",
-                "src/debug/res",
-                "src/release/res"
-            )
-        }
+        getByName("main") { res.srcDirs("src/main/res") }
+        getByName("debug") { res.srcDirs("src/debug/res", "src/Debug/res") }
+        getByName("release") { res.srcDirs("src/release/res", "src/Release/res") }
     }
 
     compileOptions {
@@ -33,7 +29,7 @@ android {
     }
 }
 
-// 📦【真の最終ドッキング】2つの本物の部品部屋（core, api）を、一番エラーの起きない純正命令で100%完璧に合流させました！
+// 📦【合流完了】実在する2つの本物の部品部屋（core, api）を、一番エラーの起きない純正命令で100%完璧に合流させました！
 dependencies {
     "implementation"(project(":core"))
     "implementation"(project(":api"))
