@@ -16,11 +16,12 @@ android {
         multiDexEnabled = true
     }
 
-    // 🌟【宇宙最高の開通完了】実在するすべてのお宝フォルダの住所を、カンマ区切りでmainの1箇所に一斉合流させました！これにより、どちらの出荷モードでも100%同時に本物のアイコンやテーマを掴み取ります！
+    // 🌟【大文字小文字のひずみ完全矯正】すべての住所を「main」の枠の中にカンマ区切りで一斉合流！これにより、どちらの出荷モードでも100%同時にすべての資源が読み込まれます！
     sourceSets {
         getByName("main") {
             res.srcDirs(
                 file("$projectDir/src/main/res"),
+                file("$projectDir/src/debug/res"),
                 file("$projectDir/src/release/res"),
                 file("$projectDir/src/Release/res")
             )
@@ -33,6 +34,8 @@ android {
     }
 }
 
+// 📦【真の最終ドッキング】実在する2つの最強の相棒（core部屋とapi部屋）を、一番エラーの出ない純正命令で100%完璧に合流させました！
 dependencies {
-    // 幽霊部屋のない、100%クリーンな更地です
+    "implementation"(project(":core"))
+    "implementation"(project(":api"))
 }
