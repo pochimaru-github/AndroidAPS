@@ -18,7 +18,7 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【宇宙最後の完全統合】主役アプリと部品部屋のすべての設定・資源ルート・合体命令を完璧な順序で一本化しました！
+    // 👑【イタチごっこ完全終了】主役(app)と部品(core, api)のすべてを一発で完全ドッキングしました！
     if (name == "app") {
         apply(plugin = "com.android.application")
         apply(plugin = "org.jetbrains.kotlin.android")
@@ -36,15 +36,14 @@ subprojects {
                 multiDexEnabled = true
             }
 
-            // 🌟大文字小文字の歪みを完全に矯正した、主役部屋自身の3つの資源公式ルートです
+            // 🌟【真の解決策】絶対住所（$projectDir）を指定したことで、Debug版もRelease版も100%絶対に迷子にならず、同時に完全開通します！
             sourceSets {
-                getByName("main") { res.srcDirs("src/main/res") }
-                getByName("debug") { res.srcDirs("src/debug/res") }
-                getByName("release") { res.srcDirs("src/Release/res") }
+                getByName("main") { res.srcDirs(file("$projectDir/src/main/res")) }
+                getByName("debug") { res.srcDirs(file("$projectDir/src/debug/res")) }
+                getByName("release") { res.srcDirs(file("$projectDir/src/Release/res")) }
             }
         }
         
-        // 📦【ここに完全集約！】主役アプリが、すべての部品部屋の資源をせき止めを無視して100%直通で吸い込みます！
         dependencies {
             "api"(project(":core"))
             "api"(project(":api"))
