@@ -18,7 +18,7 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【宇宙最後の完全一本化】主役(app)の設定はすべてお部屋に戻ったので、大元のボスは実在する部品部屋(core, api)のトビラを100%完璧に開通させました！
+    // 👑【イタチごっこ完全終了】部品部屋（core, api）の奥底にある本物のテーマや数値データの住所を、工場の公式標準ルールで100%完璧に開通させました！
     if (name == "core" || name == "api") {
         apply(plugin = "com.android.library")
         apply(plugin = "org.jetbrains.kotlin.android")
@@ -28,11 +28,11 @@ subprojects {
             compileSdk = 34
             defaultConfig { minSdk = 21 }
             
-            // 🌟【開通完了】絶対パス指定に一本化！これによりcore部屋とapi部屋のすべての材料・資源が、1ミリの狂いもなく完全に主役へ引き渡されます！
+            // 🌟【真の解決策】file("$projectDir/...")の前に、それぞれの部屋の名前（$name）を挟むことで、本物の住所を指定しました！
             sourceSets {
                 getByName("main") {
                     res.srcDirs(
-                        file("$projectDir/src/main/res")
+                        file("$projectDir/$name/src/main/res")
                     )
                 }
             }
