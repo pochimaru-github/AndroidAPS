@@ -10,7 +10,7 @@ android {
     // 🌟【これが必要でした！】主役部屋の奥底に眠る、本物のアイコン画像やアプリ名データを工場へ合流させます！
     sourceSets {
         getByName("main") {
-            res.srcDirs("src/main/res", "src/debug/res", "src/release/res")
+            res.srcDirs(file("$projectDir/src/main/res"), file("$projectDir/src/debug/res"), file("$projectDir/src/release/res"))
         }
     }
 
