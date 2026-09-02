@@ -38,9 +38,9 @@ subprojects {
 
             // 🌟大文字小文字の歪みを完全に矯正した、主役部屋自身の3つの資源公式ルートです
             sourceSets {
-                getByName("main") { res.srcDirs("app/src/main/res") }
-                getByName("debug") { res.srcDirs("app/src/debug/res") }
-                getByName("release") { res.srcDirs("app/src/Release/res") }
+                getByName("main") { res.srcDirs("src/main/res") }
+                getByName("debug") { res.srcDirs("src/debug/res") }
+                getByName("release") { res.srcDirs("src/Release/res") }
             }
         }
         
