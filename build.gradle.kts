@@ -18,7 +18,7 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【文法エラー完全修復】工場の公式標準ルールに従い、主役(app)と部品部屋(core, api)の工具箱を一発で完全ドッキングしました！
+    // 👑【宇宙最後の完全統合】主役アプリと部品部屋のすべての設定・資源ルート・合体命令を完璧な順序で一本化しました！
     if (name == "app") {
         apply(plugin = "com.android.application")
         apply(plugin = "org.jetbrains.kotlin.android")
@@ -36,15 +36,20 @@ subprojects {
                 multiDexEnabled = true
             }
 
-            // 🌟【開通完了】主役部屋(app)の奥底にある本物のアイコンやテーマを、大文字小文字の歪みを完全に矯正して強制合流！
+            // 🌟大文字小文字の歪みを完全に矯正した、主役部屋自身の3つの資源公式ルートです
             sourceSets {
-
-             getByName("main") { res.srcDirs("app/src/main/res") }
-             getByName("debug") { res.srcDirs("app/src/debug/res") }
-             getByName("release") { res.srcDirs("app/src/Release/res") }
-
+                getByName("main") { res.srcDirs("app/src/main/res") }
+                getByName("debug") { res.srcDirs("app/src/debug/res") }
+                getByName("release") { res.srcDirs("app/src/Release/res") }
             }
         }
+        
+        // 📦【ここに完全集約！】主役アプリが、すべての部品部屋の資源をせき止めを無視して100%直通で吸い込みます！
+        dependencies {
+            "api"(project(":core"))
+            "api"(project(":api"))
+        }
+        
     } else if (name == "core" || name == "api") {
         apply(plugin = "com.android.library")
         apply(plugin = "org.jetbrains.kotlin.android")
