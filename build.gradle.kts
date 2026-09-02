@@ -40,7 +40,7 @@ subprojects {
             sourceSets {
 
              getByName("main") { res.srcDirs("app/src/main/res") }
-             getByName("debug") { res.srcDirs("app/src/Debug/res") }
+             getByName("debug") { res.srcDirs("app/src/debug/res") }
              getByName("release") { res.srcDirs("app/src/Release/res") }
 
             }
