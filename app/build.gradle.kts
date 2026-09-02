@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    // 👑【宇宙最後の完全矯正】主役のベースをinfo.に固定します
-    namespace = "info.nightscout.androidaps"
+    // 👑【真の完全勝利形態】名前空間とアプリIDを本物の「com.」へ一斉大復帰させ、すべての部屋のトビラを完全開通しました！
+    namespace = "com.nightscout.androidaps"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "info.nightscout.androidaps"
+        applicationId = "com.nightscout.androidaps"
         minSdk = 21
         targetSdk = 34
         versionCode = 3040206
@@ -17,7 +17,7 @@ android {
         multiDexEnabled = true
     }
 
-    // 🌟【開通完了】ロボットが工場のどこにワープしようが100%絶対にお宝を掴み取れる、あなたと守り抜いた絶対住所（$projectDir）の完璧な3部屋指定です！
+    // 🌟【絶対パスの維持】ロボットがどこにワープしようが100%絶対にお宝を掴み取れる、あなたと守り抜いた絶対住所の完璧な3部屋指定です！
     sourceSets {
         getByName("main") { res.srcDirs(file("$projectDir/src/main/res")) }
         getByName("debug") { res.srcDirs(file("$projectDir/src/debug/res")) }
