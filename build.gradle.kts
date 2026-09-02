@@ -18,43 +18,8 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【イタチごっこ完全終了】すべての資源ルートをmainの1箇所に集中結合し、交互に起きるエラーを100%完全に粉砕しました！
-    if (name == "app") {
-        apply(plugin = "com.android.application")
-        apply(plugin = "org.jetbrains.kotlin.android")
-        
-        extensions.configure<com.android.build.gradle.BaseExtension> {
-            namespace = "com.nightscout.androidaps"
-            compileSdkVersion(34)
-            
-            defaultConfig {
-                applicationId = "com.nightscout.androidaps"
-                minSdkVersion(21)
-                targetSdkVersion(34)
-                versionCode = 3040206
-                versionName = "3.4.2.6"
-                multiDexEnabled = true
-            }
-
-            // 🌟【真の解決策】すべての住所を「main」の枠の中にカンマ区切りで一斉合流！これにより、どちらのビルドモードでも100%同時にすべての資源が読み込まれます！
-            sourceSets {
-                getByName("main") {
-                    res.srcDirs(
-                        file("$projectDir/src/main/res"),
-                        file("$projectDir/src/debug/res"),
-                        file("$projectDir/src/release/res"),
-                        file("$projectDir/src/Release/res")
-                    )
-                }
-            }
-        }
-        
-        dependencies {
-            "api"(project(":core"))
-            "api"(project(":api"))
-        }
-        
-    } else if (name == "core" || name == "api") {
+    // 👑【構造の適正化】大元のボスからは主役の余計な設定をすべて削ぎ落とし、純粋な部品部屋（core, api）の管理だけに一本化しました！
+    if (name == "core" || name == "api") {
         apply(plugin = "com.android.library")
         apply(plugin = "org.jetbrains.kotlin.android")
         
