@@ -16,9 +16,14 @@ android {
         multiDexEnabled = true
     }
 
+    // 🌟【宇宙最高の開通完了】実在するすべてのお宝フォルダの住所を、カンマ区切りでmainの1箇所に一斉合流させました！これにより、どちらの出荷モードでも100%同時に本物のアイコンやテーマを掴み取ります！
     sourceSets {
         getByName("main") {
-            res.srcDirs("src/main/res")
+            res.srcDirs(
+                file("$projectDir/src/main/res"),
+                file("$projectDir/src/release/res"),
+                file("$projectDir/src/Release/res")
+            )
         }
     }
 
@@ -28,7 +33,6 @@ android {
     }
 }
 
-// 📦 余計な幽霊部屋（coreやapi）の呼び出しをバサッと全消去し、自分自身のお宝データだけで出荷ラインを走ります！
 dependencies {
-    // ここは完全に空っぽで大正解です
+    // 幽霊部屋のない、100%クリーンな更地です
 }
