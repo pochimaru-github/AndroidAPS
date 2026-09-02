@@ -29,8 +29,8 @@ android {
     }
 }
 
-// 📦【合流完了】主役アプリ自身が、core部屋とapi部屋の資源をせき止めを無視して100%直通で吸い込みます！
 dependencies {
-    "api"(project(":core"))
-    "api"(project(":api"))
+    "implementation"(project(":core"))
+    "implementation"(project(":api"))
 }
+
