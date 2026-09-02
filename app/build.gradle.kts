@@ -16,7 +16,6 @@ android {
         multiDexEnabled = true
     }
 
-    // 🌟【イタチごっこ完全終了】小部屋に分けず、工場の公式標準ルール（main）の1箇所に、実在するフォルダ（src/main/res）の住所を完璧にドッキングしました！
     sourceSets {
         getByName("main") {
             res.srcDirs("src/main/res")
@@ -29,8 +28,7 @@ android {
     }
 }
 
+// 📦 余計な幽霊部屋（coreやapi）の呼び出しをバサッと全消去し、自分自身のお宝データだけで出荷ラインを走ります！
 dependencies {
-    "implementation"(project(":core"))
-    "implementation"(project(":api"))
+    // ここは完全に空っぽで大正解です
 }
-
