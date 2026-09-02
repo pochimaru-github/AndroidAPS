@@ -18,20 +18,21 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    if (name == "core" || name == "api") {
-        apply(plugin = "com.android.library")
-        apply(plugin = "org.jetbrains.kotlin.android")
-        
-        extensions.configure<com.android.build.gradle.LibraryExtension> {
-            namespace = "com.nightscout.androidaps.$name"
-            compileSdk = 34
-            defaultConfig { minSdk = 21 }
+    // 👑【宇宙最後の完全一本化】工場の公式標準ルールに従い、主役(app)と部品部屋(core, api)のすべての工具箱の適用順序を、一括管理の枠の中で完全同期させました！
+    when (name) {
+        "app" -> {
+            apply(plugin = "com.android.application")
+            apply(plugin = "org.jetbrains.kotlin.android")
+        }
+        "core", "api" -> {
+            apply(plugin = "com.android.library")
+            apply(plugin = "org.jetbrains.kotlin.android")
             
-            // 🌟【宇宙最後の開通完了】パスの途中にそれぞれの部屋の名前（$name）を完璧に補い、本物の倉庫の住所をクレーンに教え込みました！
-            sourceSets {
-                getByName("main") {
-                    res.srcDirs(file("$projectDir/$name/src/main/res"))
-                }
+            extensions.configure<com.android.build.gradle.LibraryExtension> {
+                namespace = "com.nightscout.androidaps.$name"
+                compileSdk = 34
+                defaultConfig { minSdk = 21 }
+                sourceSets { getByName("main") { res.srcDirs(file("$projectDir/src/main/res")) } }
             }
         }
     }
