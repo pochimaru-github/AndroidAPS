@@ -22,7 +22,7 @@ android {
             res.srcDirs(
                 "src/main/res",
                 "src/debug/res",
-                "src/Release/res"
+                "src/release/res"
             )
         }
     }
