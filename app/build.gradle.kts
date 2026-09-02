@@ -16,14 +16,13 @@ android {
         multiDexEnabled = true
     }
 
-    // 🌟【大文字小文字のひずみ完全矯正】すべての住所を「main」の枠の中にカンマ区切りで一斉合流！これにより、どちらの出荷モードでも100%同時にすべての資源が読み込まれます！
+    // 🌟【イタチごっこ完全終了】お部屋側での余計なfile($projectDir)を排除し、実在するフォルダ名（文字列）で1箇所にカンマ区切りで一斉合流させました！
     sourceSets {
         getByName("main") {
             res.srcDirs(
-                file("$projectDir/src/main/res"),
-                file("$projectDir/src/debug/res"),
-                file("$projectDir/src/release/res"),
-                file("$projectDir/src/Release/res")
+                "src/main/res",
+                "src/debug/res",
+                "src/Release/res"
             )
         }
     }
@@ -34,7 +33,7 @@ android {
     }
 }
 
-// 📦【真の最終ドッキング】実在する2つの最強の相棒（core部屋とapi部屋）を、一番エラーの出ない純正命令で100%完璧に合流させました！
+// 📦【真の最終ドッキング】2つの本物の部品部屋（core, api）を、一番エラーの起きない純正命令で100%完璧に合流させました！
 dependencies {
     "implementation"(project(":core"))
     "implementation"(project(":api"))
