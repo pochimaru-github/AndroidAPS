@@ -23,7 +23,6 @@ subprojects {
         apply(plugin = "org.jetbrains.kotlin.android")
         
         extensions.configure<com.android.build.gradle.LibraryExtension> {
-            // 👑【宇宙最後の完全開通】部品部屋の namespace を本物の倉庫名「com.」にアジャストし、AppTheme の Not Found を100%完全消滅させました！
             namespace = "com.nightscout.androidaps.$name"
             compileSdk = 34
             defaultConfig { minSdk = 21 }
