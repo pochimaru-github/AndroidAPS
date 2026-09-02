@@ -15,22 +15,9 @@ buildscript {
     }
 }
 
+// 大元からはすべての余計な幽霊管理を捨て去り、工場の基礎環境（Java11）のルールだけを設定します
 subprojects {
     repositories { mavenCentral(); google() }
-    
-    // 👑【構造の適正化】大元のボスからは主役の余計な設定をすべて削ぎ落とし、純粋な部品部屋（core, api）の管理だけに一本化しました！
-    if (name == "core" || name == "api") {
-        apply(plugin = "com.android.library")
-        apply(plugin = "org.jetbrains.kotlin.android")
-        
-        extensions.configure<com.android.build.gradle.LibraryExtension> {
-            namespace = "com.nightscout.androidaps.$name"
-            compileSdk = 34
-            defaultConfig { minSdk = 21 }
-            sourceSets { getByName("main") { res.srcDirs(file("src/main/res")) } }
-        }
-    }
-
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions { jvmTarget = "11" }
     }
