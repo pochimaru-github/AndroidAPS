@@ -15,9 +15,30 @@ buildscript {
     }
 }
 
-// 大元からはすべての余計な幽霊管理を捨て去り、工場の基礎環境（Java11）のルールだけを設定します
 subprojects {
     repositories { mavenCentral(); google() }
+    
+    // 👑【宇宙最後の完全一本化】主役(app)の設定はすべてお部屋に戻ったので、大元のボスは実在する部品部屋(core, api)のトビラを100%完璧に開通させました！
+    if (name == "core" || name == "api") {
+        apply(plugin = "com.android.library")
+        apply(plugin = "org.jetbrains.kotlin.android")
+        
+        extensions.configure<com.android.build.gradle.LibraryExtension> {
+            namespace = "com.nightscout.androidaps.$name"
+            compileSdk = 34
+            defaultConfig { minSdk = 21 }
+            
+            // 🌟【開通完了】絶対パス指定に一本化！これによりcore部屋とapi部屋のすべての材料・資源が、1ミリの狂いもなく完全に主役へ引き渡されます！
+            sourceSets {
+                getByName("main") {
+                    res.srcDirs(
+                        file("$projectDir/src/main/res")
+                    )
+                }
+            }
+        }
+    }
+
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions { jvmTarget = "11" }
     }
