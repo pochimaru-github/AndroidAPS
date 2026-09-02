@@ -36,7 +36,16 @@ subprojects {
                     versionName = "3.4.2.6"
                     multiDexEnabled = true
                 }
+
+                // 🌟【ここに書き足し！】主役の部屋（app）の奥底にある本物のアイコンやテーマを、大文字小文字の歪みを完全に矯正して一括パッケージングラインへ流し込みました！
+                sourceSets {
+                    getByName("main") { res.srcDirs(file("app/src/main/res")) }
+                    getByName("debug") { res.srcDirs(file("app/src/Debug/res")) }
+                    getByName("release") { res.srcDirs(file("app/src/Release/res")) }
+                }
             }
+        }
+
         }
         "core", "api" -> {
             apply(plugin = "com.android.library")
