@@ -18,24 +18,16 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【イタチごっこ完全終了】部品部屋（core, api）の奥底にある本物のテーマや数値データの住所を、工場の公式標準ルールで100%完璧に開通させました！
+    // 👑部品部屋側も、本来の純正パッケージ名（info.）に美しく統一します
     if (name == "core" || name == "api") {
         apply(plugin = "com.android.library")
         apply(plugin = "org.jetbrains.kotlin.android")
         
         extensions.configure<com.android.build.gradle.LibraryExtension> {
-            namespace = "com.nightscout.androidaps.$name"
+            namespace = "info.nightscout.androidaps.$name"
             compileSdk = 34
             defaultConfig { minSdk = 21 }
-            
-            // 🌟【真の解決策】file("$projectDir/...")の前に、それぞれの部屋の名前（$name）を挟むことで、本物の住所を指定しました！
-            sourceSets {
-                getByName("main") {
-                    res.srcDirs(
-                        file("$projectDir/$name/src/main/res")
-                    )
-                }
-            }
+            sourceSets { getByName("main") { res.srcDirs("src/main/res") } }
         }
     }
 
