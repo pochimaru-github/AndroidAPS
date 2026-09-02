@@ -2,23 +2,7 @@ plugins {
     id("com.android.application")
 }
 
-android {
-    namespace = "com.nightscout.androidaps"
-    compileSdk = 34
-
-    // 🌟【修復完了】main, debug, releaseの各お部屋ごとに正しい資源の住所を公式ルールで明示しました！これにより製品版（Release）の出荷審査も100%ノーエラーで通過します！
-    sourceSets {
-        getByName("main") { res.srcDirs(file("$projectDir/src/main/res")) }
-        getByName("debug") { res.srcDirs(file("$projectDir/src/Debug/res")) }
-        getByName("release") { res.srcDirs(file("$projectDir/src/Release/res")) }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
+// 【正真正銘の最終大正解】二重衝突を起こしていた個別の android { ... } ブロックをすべて大元のボスへ100%引き継ぎ、純粋な材料ドッキング通路として覚醒させました！
 dependencies {
     "api"(project(":core"))
     "api"(project(":api"))
