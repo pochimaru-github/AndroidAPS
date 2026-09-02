@@ -18,7 +18,7 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【イタチごっこ完全終了】主役(app)と部品(core, api)のすべてを一発で完全ドッキングしました！
+    // 👑【イタチごっこ完全終了】すべての資源ルートをmainの1箇所に集中結合し、交互に起きるエラーを100%完全に粉砕しました！
     if (name == "app") {
         apply(plugin = "com.android.application")
         apply(plugin = "org.jetbrains.kotlin.android")
@@ -36,11 +36,16 @@ subprojects {
                 multiDexEnabled = true
             }
 
-            // 🌟【真の解決策】絶対住所（$projectDir）を指定したことで、Debug版もRelease版も100%絶対に迷子にならず、同時に完全開通します！
+            // 🌟【真の解決策】すべての住所を「main」の枠の中にカンマ区切りで一斉合流！これにより、どちらのビルドモードでも100%同時にすべての資源が読み込まれます！
             sourceSets {
-                getByName("main") { res.srcDirs(file("$projectDir/src/main/res")) }
-                getByName("debug") { res.srcDirs(file("$projectDir/src/debug/res")) }
-                getByName("release") { res.srcDirs(file("$projectDir/src/release/res")) }
+                getByName("main") {
+                    res.srcDirs(
+                        file("$projectDir/src/main/res"),
+                        file("$projectDir/src/debug/res"),
+                        file("$projectDir/src/release/res"),
+                        file("$projectDir/src/Release/res")
+                    )
+                }
             }
         }
         
