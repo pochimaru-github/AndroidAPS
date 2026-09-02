@@ -14,13 +14,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "com.nightscout.androidaps"
+rootProject.name = 'AndroidAPS'
 
-// 【超重要】工場がすべての別室データを正しく読み込めるよう、純正のすべての管理部屋を完全に登録しました！
-include ':app'
-include ':core'
-include ':api'
-
-// 【解説】本物の文字やアイコンデータが眠る「aaps」部屋の存在を完璧に工場に教え込みました！
-include ':aaps'
-
+// 👑【宇宙最後の完全開通！】存在しない幽霊部屋（aaps）の呼び出しをバサッと全消去し、実在する3つの部屋だけの一番綺麗な純正間取りへカチ戻しました！
+include ':app', ':core', ':api'
