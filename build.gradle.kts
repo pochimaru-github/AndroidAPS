@@ -27,9 +27,10 @@ subprojects {
             compileSdk = 34
             defaultConfig { minSdk = 21 }
             
+            // 🌟【宇宙最後の開通完了】パスの途中にそれぞれの部屋の名前（$name）を完璧に補い、本物の倉庫の住所をクレーンに教え込みました！
             sourceSets {
                 getByName("main") {
-                    res.srcDirs(file("$projectDir/src/main/res"))
+                    res.srcDirs(file("$projectDir/$name/src/main/res"))
                 }
             }
         }
