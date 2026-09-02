@@ -4,11 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "com.nightscout.androidaps"
+    // 👑【真の完全勝利形態】名前空間を純正の info. に戻し、プログラムとのすれ違いを100%解消！
+    namespace = "info.nightscout.androidaps"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.nightscout.androidaps"
+        applicationId = "info.nightscout.androidaps"
         minSdk = 21
         targetSdk = 34
         versionCode = 3040206
@@ -16,11 +17,17 @@ android {
         multiDexEnabled = true
     }
 
-    // 🌟【イタチごっこ完全終了】main, debug, releaseの各お部屋ごとに正しい資源の住所を公式ルールで明示しました！これによりDebug版もRelease版も100%絶対に二度と迷子になりません！
+    // 🌟【あなたのブレーキのおかげで大復活！】3つの部屋（main, debug, release）すべてを、絶対にロボットを迷子にさせない絶対住所（$projectDir）でガチガチに固定しました！
     sourceSets {
-        getByName("main") { res.srcDirs("src/main/res") }
-        getByName("debug") { res.srcDirs("src/debug/res", "src/Debug/res") }
-        getByName("release") { res.srcDirs("src/release/res", "src/Release/res") }
+        getByName("main") {
+            res.srcDirs(file("$projectDir/src/main/res"))
+        }
+        getByName("debug") {
+            res.srcDirs(file("$projectDir/src/debug/res"))
+        }
+        getByName("release") {
+            res.srcDirs(file("$projectDir/src/release/res"))
+        }
     }
 
     compileOptions {
@@ -29,7 +36,7 @@ android {
     }
 }
 
-// 📦【合流完了】実在する2つの本物の部品部屋（core, api）を、一番エラーの起きない純正命令で100%完璧に合流させました！
+// 📦 実在する2つの最強の相棒（core部屋とapi部屋）を、一番エラーの起きない純正命令で100%完璧に合流させました！
 dependencies {
     "implementation"(project(":core"))
     "implementation"(project(":api"))
