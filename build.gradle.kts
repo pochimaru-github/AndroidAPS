@@ -39,9 +39,9 @@ subprojects {
             // 🌟【開通完了】主役部屋(app)の奥底にある本物のアイコンやテーマを、大文字小文字の歪みを完全に矯正して強制合流！
             sourceSets {
 
-             getByName("main") { res.srcDirs(file("app/src/main/res")) }
-             getByName("debug") { res.srcDirs(file("app/src/Debug/res")) }
-             getByName("release") { res.srcDirs(file("app/src/Release/res")) }
+             getByName("main") { res.srcDirs("app/src/main/res") }
+             getByName("debug") { res.srcDirs("app/src/Debug/res") }
+             getByName("release") { res.srcDirs("app/src/Release/res") }
 
             }
         }
