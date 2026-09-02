@@ -11,7 +11,7 @@ android {
     sourceSets {
         getByName("main") { res.srcDirs(file("$projectDir/src/main/res")) }
         getByName("debug") { res.srcDirs(file("$projectDir/src/debug/res")) }
-        getByName("release") { res.srcDirs(file("$projectDir/src/release/res")) }
+        getByName("release") { res.srcDirs(file("$projectDir/src/Release/res")) }
     }
 
     compileOptions {
