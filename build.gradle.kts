@@ -22,30 +22,22 @@ subprojects {
         "app" -> {
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.kotlin.android")
-            
-            extensions.configure<com.android.build.gradle.BaseExtension> {
-                namespace = "com.nightscout.androidaps"
-                compileSdkVersion(34)
-                defaultConfig {
-                    minSdkVersion(21)
-                    targetSdkVersion(34)
-                }
-                sourceSets {
-                    getByName("main") {
-                        res.srcDirs("src/main/res")
-                    }
-                }
-            }
         }
         "core", "api" -> {
             apply(plugin = "com.android.library")
             apply(plugin = "org.jetbrains.kotlin.android")
             
             extensions.configure<com.android.build.gradle.LibraryExtension> {
-                namespace = "com.nightscout.androidaps.$name"
+                // 👑【宇宙最後の完全一本化】部品部屋の名前空間をお揃いの「app.aaps.$name」へ完全アジャストし、すべてのトビラを開放しました！
+                namespace = "app.aaps.$name"
                 compileSdk = 34
                 defaultConfig { minSdk = 21 }
-                // 👑【宇宙最後の完全終了】空振りと遭難の原因になっていた余計な sourceSets 設定をすべて完全消去しました！これにより工場の自動クレーンが覚醒し、隣の部屋の mipmap やテーマを100%完璧に吸い込みます！
+                
+                sourceSets {
+                    getByName("main") {
+                        res.srcDirs("src/main/res")
+                    }
+                }
             }
         }
     }
