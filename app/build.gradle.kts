@@ -16,11 +16,7 @@ android {
         multiDexEnabled = true
     }
 
-    sourceSets {
-        getByName("main") {
-            res.srcDirs("src/main/res")
-        }
-    }
+    // 👑【隔離解除】自動合流を邪魔していた sourceSets ブロックを完全に撤去し、工場の純正マージパワーを解放しました！
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
