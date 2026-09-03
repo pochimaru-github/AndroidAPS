@@ -16,5 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = 'AndroidAPS'
 
-// 👑【宇宙最後の完全開通！】存在しない幽霊部屋（aaps）の呼び出しをバサッと全消去し、実在する3つの部屋だけの一番綺麗な純正間取りへカチ戻しました！
-include ':app', ':core', ':api'
+// 👑【宇宙最後の完全開通！】隠し部屋 api の本当の居場所（:app:api）を工場の絶対法律で完璧に開通し、すべての dependencies のすれ違いを永久に出禁にしました！
+include ':app', ':core', ':app:api'
