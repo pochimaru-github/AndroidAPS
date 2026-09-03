@@ -18,18 +18,32 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【宇宙最後の完全一本化】あなたが守り抜いてくれたwhen構文の一体型管理をベースに、すべての名前空間を純正の「info.」に完全大統一しました！
     when (name) {
         "app" -> {
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.kotlin.android")
+            
+            extensions.configure<com.android.build.gradle.BaseExtension> {
+                namespace = "info.nightscout.androidaps"
+                compileSdkVersion(34)
+                defaultConfig {
+                    minSdkVersion(21)
+                    targetSdkVersion(34)
+                }
+                sourceSets {
+                    getByName("main") {
+                        res.srcDirs("src/main/res")
+                    }
+                }
+            }
         }
         "core", "api" -> {
             apply(plugin = "com.android.library")
             apply(plugin = "org.jetbrains.kotlin.android")
             
             extensions.configure<com.android.build.gradle.LibraryExtension> {
-                namespace = "info.nightscout.androidaps.$name"
+                // 👑【宇宙最後の完全開通】末尾の .$name を排除し、全部の部屋を同一の info. 倉庫に完全集約したことで、別室のテーマやアイコンが一斉に合流します！
+                namespace = "info.nightscout.androidaps"
                 compileSdk = 34
                 defaultConfig { minSdk = 21 }
                 
