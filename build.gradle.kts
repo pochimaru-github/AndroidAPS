@@ -28,12 +28,6 @@ subprojects {
             compileSdk = 34
             defaultConfig { minSdk = 21 }
 
-            sourceSets {
-                getByName("main") {
-                    java.srcDirs(file("$projectDir"))
-                }
-            }
-
         }
     }
 
