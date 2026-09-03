@@ -24,7 +24,7 @@ subprojects {
         apply(plugin = "org.jetbrains.kotlin.android")
         
         extensions.configure<com.android.build.gradle.LibraryExtension> {
-            namespace = "info.nightscout.androidaps.$name"
+            namespace = "info.nightscout.AndroidAPS.$name"
             compileSdk = 34
             defaultConfig { minSdk = 21 }
 
