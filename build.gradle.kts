@@ -22,7 +22,6 @@ subprojects {
     if (name == "core" || name == "api") {
         apply(plugin = "com.android.library")
         apply(plugin = "org.jetbrains.kotlin.android")
-        apply(plugin = "com.android.application")
         
         extensions.configure<com.android.build.gradle.LibraryExtension> {
             namespace = "info.nightscout.androidaps.$name"
