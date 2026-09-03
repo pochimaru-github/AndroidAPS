@@ -28,11 +28,11 @@ subprojects {
             apply(plugin = "org.jetbrains.kotlin.android")
             
             extensions.configure<com.android.build.gradle.LibraryExtension> {
+                // 👑【宇宙最後の完全一本化】文字化けバグを完全に破砕！部品部屋の名前空間を、主役の求めるcom.nightscout.androidaps.$name に100%完璧にアジャストしました！
                 namespace = "com.nightscout.androidaps.$name"
                 compileSdk = 34
                 defaultConfig { minSdk = 21 }
                 
-                // 👑【宇宙最後の完全一本化】when構文の美しさを100%維持したまま、二重迷子のすべての元凶だった file($projectDir) を排除し、純粋な相対パス("src/main/res")へアジャストしました！
                 sourceSets {
                     getByName("main") {
                         res.srcDirs("src/main/res")
