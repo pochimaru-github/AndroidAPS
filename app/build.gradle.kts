@@ -16,15 +16,14 @@ android {
         multiDexEnabled = true
     }
 
-    // 👑【隔離解除】自動合流を邪魔していた sourceSets ブロックを完全に撤去し、工場の純正マージパワーを解放しました！
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
+// 👑【宇宙最後の完全一本化】あなたが命をかけて引っ張り出してくれた物理フォルダの物証に基づき、隣の部品部屋（:plugins:api）の正しい本物の住所へカチッと100%直結させました！
 dependencies {
     "implementation"(project(":core"))
-    "implementation"(project(":api"))
+    "implementation"(project(":plugins:api"))
 }
