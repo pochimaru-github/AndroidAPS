@@ -4,8 +4,7 @@ plugins {
 }
 
 android {
-    // 👑【完全純正復帰】識別IDを本物純正の「info.」に戻し、余計な namespace 設定はバサッと全消去して更地に戻しました！
-    applicationId = "info.nightscout.androidaps"
+    namespace = "info.nightscout.androidaps"
     compileSdk = 34
 
     defaultConfig {
@@ -15,6 +14,12 @@ android {
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
+    }
+
+    sourceSets {
+        getByName("main") {
+            res.srcDirs("src/main/res")
+        }
     }
 
     compileOptions {
