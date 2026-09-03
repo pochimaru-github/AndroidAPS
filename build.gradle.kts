@@ -18,7 +18,6 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【宇宙最後の完全一本化】工場の公式標準ルールに従い、主役(app)と部品部屋(core, api)のすべての工具箱の適用順序を、一括管理の枠の中で完全同期させました！
     when (name) {
         "app" -> {
             apply(plugin = "com.android.application")
@@ -32,7 +31,13 @@ subprojects {
                 namespace = "com.nightscout.androidaps.$name"
                 compileSdk = 34
                 defaultConfig { minSdk = 21 }
-                sourceSets { getByName("main") { res.srcDirs(file("$projectDir/src/main/res")) } }
+                
+                // 👑【宇宙最後の完全一本化】when構文の美しさを100%維持したまま、二重迷子のすべての元凶だった file($projectDir) を排除し、純粋な相対パス("src/main/res")へアジャストしました！
+                sourceSets {
+                    getByName("main") {
+                        res.srcDirs("src/main/res")
+                    }
+                }
             }
         }
     }
