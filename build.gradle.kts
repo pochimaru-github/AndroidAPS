@@ -18,30 +18,7 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    when (name) {
-        "app" -> {
-            apply(plugin = "com.android.application")
-            apply(plugin = "org.jetbrains.kotlin.android")
-        }
-        "core", "api" -> {
-            apply(plugin = "com.android.library")
-            apply(plugin = "org.jetbrains.kotlin.android")
-            
-            extensions.configure<com.android.build.gradle.LibraryExtension> {
-                // 👑【宇宙最後の完全一本化】部品部屋の名前空間をお揃いの「app.aaps.$name」へ完全アジャストし、すべてのトビラを開放しました！
-                namespace = "app.aaps.$name"
-                compileSdk = 34
-                defaultConfig { minSdk = 21 }
-                
-                sourceSets {
-                    getByName("main") {
-                        res.srcDirs("src/main/res")
-                    }
-                }
-            }
-        }
-    }
-
+    // 👑【完全純正復帰】すべてのクレーンを狂わせていた余計な when 構文や sourceSets のパッチワークをバサッと全消去し、工場の自動合流パワーを100%解放しました！
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions { jvmTarget = "11" }
     }
