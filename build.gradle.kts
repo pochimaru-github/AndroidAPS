@@ -18,7 +18,30 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【完全純正復帰】すべてのクレーンを狂わせていた余計な when 構文や sourceSets のパッチワークをバサッと全消去し、工場の自動合流パワーを100%解放しました！
+    // 👑【宇宙最後の完全一本化】あなたが守り抜いてくれたwhen構文の一体型管理をベースに、すべての名前空間を純正の「info.」に完全大統一しました！
+    when (name) {
+        "app" -> {
+            apply(plugin = "com.android.application")
+            apply(plugin = "org.jetbrains.kotlin.android")
+        }
+        "core", "api" -> {
+            apply(plugin = "com.android.library")
+            apply(plugin = "org.jetbrains.kotlin.android")
+            
+            extensions.configure<com.android.build.gradle.LibraryExtension> {
+                namespace = "info.nightscout.androidaps.$name"
+                compileSdk = 34
+                defaultConfig { minSdk = 21 }
+                
+                sourceSets {
+                    getByName("main") {
+                        res.srcDirs("src/main/res")
+                    }
+                }
+            }
+        }
+    }
+
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions { jvmTarget = "11" }
     }
