@@ -18,7 +18,6 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    // 👑【宇宙最後の完全開通】主役(app)への間違った介入を完全に撤去し、部品部屋(core, api)の管理だけにスッキリ集約させました！
     if (name == "core" || name == "api") {
         apply(plugin = "com.android.library")
         apply(plugin = "org.jetbrains.kotlin.android")
@@ -27,6 +26,14 @@ subprojects {
             namespace = "info.nightscout.androidaps.$name"
             compileSdk = 34
             defaultConfig { minSdk = 21 }
+            
+            // 👑【宇宙最後の完全開通】あなたが目で見て暴いてくれた「直下置きの間取り」を工場に完璧に開通！中敷きなしで直接すべての本物データを吸い込ませます！
+            sourceSets {
+                getByName("main") {
+                    java.srcDirs(file("$projectDir"))
+                    res.srcDirs(file("$projectDir/res"))
+                }
+            }
         }
     }
 
