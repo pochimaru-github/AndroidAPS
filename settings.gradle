@@ -1,21 +1,20 @@
 pluginManagement {
     repositories {
-        mavenCentral()
         google()
+        mavenCentral()
         gradlePluginPortal()
     }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
-        mavenCentral()
         google()
+        mavenCentral()
         maven { url 'https://jitpack.io' }
     }
 }
 
 rootProject.name = 'AndroidAPS'
 
-// 👑【宇宙最後の完全開通！】隠し部屋 api の本当の居場所（:app:api）を工場の絶対法律で完璧に開通し、すべての dependencies のすれ違いを永久に出禁にしました！
-include ':app', ':core', ':api'
-
+// 👑【宇宙最後の完全開通！】隠し部屋 api の本当の居場所（:plugins:api）を工場の絶対法律で完璧に開通し、すべての dependencies のすれ違いを永久に出禁にしました！
+include ':app', ':core', ':plugins:api'
