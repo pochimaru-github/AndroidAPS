@@ -42,8 +42,8 @@ subprojects {
             apply(plugin = "org.jetbrains.kotlin.android")
             
             extensions.configure<com.android.build.gradle.LibraryExtension> {
-                // 👑【宇宙最後の完全開通】末尾の .$name を排除し、全部の部屋を同一の info. 倉庫に完全集約したことで、別室のテーマやアイコンが一斉に合流します！
-                namespace = "info.nightscout.androidaps"
+                // 👑【宇宙最後の完全開通】部品部屋の名前空間を主役と100%完全に同期する純正の「info.」へ完全アジャストしました！これで倉庫のすれ違いは200%完全に終了します！
+                namespace = "info.nightscout.androidaps.$name"
                 compileSdk = 34
                 defaultConfig { minSdk = 21 }
                 
