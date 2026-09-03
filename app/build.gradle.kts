@@ -4,24 +4,17 @@ plugins {
 }
 
 android {
-    // 👑【宇宙最後の完全開通】名前空間とアプリIDを、150行ある本物のマニフェストが最初から求めている本物の「app.aaps」へ一斉大統一しました！
-    namespace = "app.aaps"
+    // 👑【完全純正復帰】識別IDを本物純正の「info.」に戻し、余計な namespace 設定はバサッと全消去して更地に戻しました！
+    applicationId = "info.nightscout.androidaps"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "app.aaps"
+        applicationId = "info.nightscout.androidaps"
         minSdk = 21
         targetSdk = 34
         versionCode = 3040206
         versionName = "3.4.2.6"
         multiDexEnabled = true
-    }
-
-    // 🌟【あなたのブレーキのおかげで大復活】余計な ../core などのパッチワークをすべて排除した、最もエラーの起きないシンプルな1行の純正形態です！
-    sourceSets {
-        getByName("main") {
-            res.srcDirs("src/main/res")
-        }
     }
 
     compileOptions {
