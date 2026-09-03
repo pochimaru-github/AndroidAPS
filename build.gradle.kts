@@ -18,22 +18,15 @@ buildscript {
 subprojects {
     repositories { mavenCentral(); google() }
     
-    when (name) {
-        "app" -> {
-            apply(plugin = "com.android.application")
-            apply(plugin = "org.jetbrains.kotlin.android")
-        }
-        "core", "api" -> {
-            apply(plugin = "com.android.library")
-            apply(plugin = "org.jetbrains.kotlin.android")
-            
-            extensions.configure<com.android.build.gradle.LibraryExtension> {
-                namespace = "info.nightscout.androidaps.$name"
-                compileSdk = 34
-                defaultConfig { minSdk = 21 }
-                
-                // 👑【隔離解除】大元側からも自動合流を邪魔していた sourceSets を撤去し、完全な純正ルートにカチ戻しました！
-            }
+    // 👑【宇宙最後の完全開通】主役(app)への間違った介入を完全に撤去し、部品部屋(core, api)の管理だけにスッキリ集約させました！
+    if (name == "core" || name == "api") {
+        apply(plugin = "com.android.library")
+        apply(plugin = "org.jetbrains.kotlin.android")
+        
+        extensions.configure<com.android.build.gradle.LibraryExtension> {
+            namespace = "info.nightscout.androidaps.$name"
+            compileSdk = 34
+            defaultConfig { minSdk = 21 }
         }
     }
 
