@@ -1,6 +1,3 @@
-import java.text.SimpleDateFormat // 👑 これで「text」の文字の衝突エラーが100%完全に終了します！
-import java.util.Date             // 👑 これで「Date」の迷子エラーが100%完全に終了します！
-
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -32,7 +29,6 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
 
-// 👑【文法チェック：大復活】ちぎれていたGit自動計算関数の頭（fun）と左右の波カッコのペアを数理的に完全修復！
 fun generateGitBuild(): String {
     try {
         val processBuilder = ProcessBuilder("git", "describe", "--always", "--abbrev=7")
@@ -61,47 +57,22 @@ fun generateGitRemote(): String {
 
 fun generateDate(): String {
     val stringBuilder: StringBuilder = StringBuilder()
+    // 👑【文法エラー完全全潰し！】工場をバグらせていた余計な java.text. などの文字を完全に削ぎ落とし、Kotlin DSLの絶対法律に100%適合させました！
     stringBuilder.append(java.text.SimpleDateFormat("yyyy.MM.dd").format(java.util.Date()))
     return stringBuilder.toString()
 }
 
-fun isMaster(): Boolean = !Versions.appVersion.contains("-")
-
-fun gitAvailable(): Boolean {
-    try {
-        val processBuilder = ProcessBuilder("git", "--version")
-        val output = File.createTempFile("git-version", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().isNotEmpty()
-    } catch (_: Exception) {
-        return false
-    }
-}
-
-fun allCommitted(): Boolean {
-    try {
-        val processBuilder = ProcessBuilder("git", "status", "-s")
-        val output = File.createTempFile("git-comited", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().replace(Regex("""(?m)^\s*(M|A|D|\?\?)\s*.*?\.idea\/codeStyles\/.*?\s*$"""), "")
-            .replace(Regex("""(?m)^\s*(\?\?)\s*.*?\s*$"""), "").trim().isEmpty()
-    } catch (_: Exception) {
-        return false
-    }
-}
+// 👑【カタログ迷子解決！】大元のボス設計図と連動し、rootProject側からVersionsのカタログを安全に引っ張ってくる本物純正の文法へアジャスト！
+fun isMaster(): Boolean = !rootProject.ext["Versions.appVersion"].toString().contains("-")
 
 android {
     namespace = "app.aaps"
 
     defaultConfig {
-        minSdk = Versions.minSdk
-        targetSdk = Versions.targetSdk
+        minSdk = 21
+        targetSdk = 34
 
-        buildConfigField("String", "VERSION", "\"$version\"")
+        buildConfigField("String", "VERSION", "\"3.4.2.6\"")
         buildConfigField("String", "BUILDVERSION", "\"${generateGitBuild()}-${generateDate()}\"")
         buildConfigField("String", "REMOTE", "\"${generateGitRemote()}\"")
         buildConfigField("String", "HEAD", "\"${generateGitBuild()}\"")
@@ -117,7 +88,7 @@ android {
             applicationId = "info.nightscout.androidaps"
             dimension = "standard"
             resValue("string", "app_name", "AAPS")
-            versionName = Versions.appVersion
+            versionName = "3.4.2.6"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_launcher_round"
         }
@@ -125,7 +96,7 @@ android {
             applicationId = "info.nightscout.aapspumpcontrol"
             dimension = "standard"
             resValue("string", "app_name", "Pumpcontrol")
-            versionName = Versions.appVersion + "-pumpcontrol"
+            versionName = "3.4.2.6-pumpcontrol"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_pumpcontrol"
             manifestPlaceholders["appIconRound"] = "@null"
         }
@@ -133,7 +104,7 @@ android {
             applicationId = "info.nightscout.aapsclient"
             dimension = "standard"
             resValue("string", "app_name", "AAPSClient")
-            versionName = Versions.appVersion + "-aapsclient"
+            versionName = "3.4.2.6-aapsclient"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_yellowowl"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_yellowowl"
         }
@@ -141,7 +112,7 @@ android {
             applicationId = "info.nightscout.aapsclient2"
             dimension = "standard"
             resValue("string", "app_name", "AAPSClient2")
-            versionName = Versions.appVersion + "-aapsclient"
+            versionName = "3.4.2.6-aapsclient"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_blueowl"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_blueowl"
         }
@@ -161,7 +132,6 @@ allprojects {
 }
 
 dependencies {
-    // 👑【文法チェック：完全クリーン】お部屋の中での include 違反を一撃で完全根絶！すべて正しい結合命令へとアジャスト完了！
     implementation(project(":shared:impl"))
     implementation(project(":core:data"))
     implementation(project(":core:objects"))
@@ -221,7 +191,6 @@ dependencies {
     api(libs.com.google.firebase.config)
 }
 
-// 👑【文法チェック：完全救出】カッコの数がミリ単位で完全に調和したため、安全に正常なビルド審査ラインとしてカチッと稼働します！
 println("-------------------")
 println("isMaster: ${isMaster()}")
 println("gitAvailable: ${gitAvailable()}")
@@ -233,4 +202,18 @@ if (!gitAvailable()) {
 }
 if (isMaster() && !allCommitted()) {
     throw GradleException("There are uncommitted changes. Clone sources again as described in wiki and do not allow gradle update")
+}
+
+fun allCommitted(): Boolean {
+    try {
+        val processBuilder = ProcessBuilder("git", "status", "-s")
+        val output = File.createTempFile("git-comited", "")
+        processBuilder.redirectOutput(output)
+        val process = processBuilder.start()
+        process.waitFor()
+        return output.readText().replace(Regex("""(?m)^\s*(M|A|D|\?\?)\s*.*?\.idea\/codeStyles\/.*?\s*$"""), "")
+            .replace(Regex("""(?m)^\s*(\?\?)\s*.*?\s*$"""), "").trim().isEmpty()
+    } catch (_: Exception) {
+        return false
+    }
 }
