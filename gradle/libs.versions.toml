@@ -1,5 +1,6 @@
 [versions]
-dagger = "2.46.1"              # 👈 【今回の追加分】エラーで怒られた「dagger」を追記！
+"kotlinx.serialization" = "1.5.1" # 👈 【今回の追加分】全体を "" で囲って正確に追記！
+dagger = "2.46.1"
 activityCompose = "1.7.2"
 gradlePlugin = "7.4.2"
 "kotlinx.coroutines" = "1.6.4"
