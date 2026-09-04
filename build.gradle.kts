@@ -6,7 +6,7 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-        gradlePluginPortal() // 👑 ココにこの1行をパチッと書き足すだけだぜぃ！😎
+        // gradlePluginPortal()  👑 ココにこの1行をパチッと書き足すだけだぜぃ！😎
     }
 
     dependencies {
