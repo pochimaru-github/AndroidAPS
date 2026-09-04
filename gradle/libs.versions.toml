@@ -25,9 +25,8 @@ kotlin = "1.8.20"
 klint = { id = "org.jlleitschuh.gradle.ktlint", version = "11.5.1" }
 moduleDependencyGraph = { id = "com.savvasdalkitsis.module-dependency-graph", version = "0.10" }
 ksp = { id = "com.google.devtools.ksp", version = "1.8.20-1.0.11" }
-# 👈 ここを以下の公式IDと正しいバージョンに書き換えます！
-# compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version = "1.8.20" }
-compose-compiler = { id = "androidx.compose.compiler", version = "1.4.7" }
+# 👈 ここを以下のように「Kotlin本体のバージョン（1.8.20）」を参照する形に上書きします！
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
