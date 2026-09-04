@@ -1,5 +1,5 @@
 [versions]
-lifecycleRuntimeKtx = "2.6.1"  # 👈 【今回の追加分】エラーで怒られた「lifecycleRuntimeKtx」を追記！
+lifecycleRuntimeKtx = "2.6.1"
 retrofit = "2.9.0"
 navigationCompose = "2.6.0"
 okhttp = "4.11.0"
@@ -19,6 +19,15 @@ googleServices = "4.3.15"
 room = "2.5.0"
 agp = "7.4.2"
 kotlin = "1.8.20"
+
+[plugins]
+# 👈 工場が「足りない！」と叫んだプラグインの定義をここに一斉登録します！
+klint = { id = "org.jlleitschuh.gradle.ktlint", version = "11.5.1" }
+moduleDependencyGraph = { id = "com.savvasdalkitsis.module-dependency-graph", version = "0.10" }
+ksp = { id = "com.google.devtools.ksp", version = "1.8.20-1.0.11" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version = "1.8.20" }
+android-test = { id = "com.android.test", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
 
 [libraries]
