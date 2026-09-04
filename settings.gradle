@@ -14,7 +14,19 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = 'AndroidAPS'
+rootProject.name = "AndroidAPS"
+include ':app'
+include ':pump:insight'
+include ':pump:medtrum'
+include ':pump:medtronic'
+include ':pump:omnipod:common'
+include ':pump:omnipod:eros'
+include ':pump:omnipod:dash'
+include ':pump:common'
+include ':pump:rileylink'
+include ':pump:virtual'
+include ':shared:impl'
+include ':shared:tests'
+include ':ui'
+include ':workflow'
 
-// 👑【宇宙最後の完全開通！】隠し部屋 api の本当の居場所（:plugins:api）を工場の絶対法律で完璧に開通し、すべての dependencies のすれ違いを永久に出禁にしました！
-include ':app', ':core'
