@@ -1,7 +1,8 @@
 [versions]
-room = "2.5.0"     # 👈 エラーで怒られた「room」の定義をここに1行だけ追加！
-agp = "7.4.2"      # 👈 手元に記録されているこの数字をそのまま1ミリも触らずキープ！
-kotlin = "1.8.20"  # 👈 手元に記録されているこの数字もそのまま1ミリも触らずキープ！
+googleServices = "4.3.15"  # 👈 【今回の追加分】エラーで怒られた「googleServices」を追記！
+room = "2.5.0"             # 👈 前回追加した大正解の数字。そのまま残します！
+agp = "7.4.2"              # 👈 手元の超重要パーツ。そのまま残します！
+kotlin = "1.8.20"          # 👈 手元の超重要パーツ。そのまま残します！
 
 [libraries]
 #com-android-tools-build = { module = "com.android.tools.build:gradle", version.ref = "agp" }
