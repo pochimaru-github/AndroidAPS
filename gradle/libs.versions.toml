@@ -1,5 +1,6 @@
 [versions]
-activityCompose = "1.7.2"      # 👈 【今回の追加分】エラーで怒られた「activityCompose」を追記！
+dagger = "2.46.1"              # 👈 【今回の追加分】エラーで怒られた「dagger」を追記！
+activityCompose = "1.7.2"
 gradlePlugin = "7.4.2"
 "kotlinx.coroutines" = "1.6.4"
 work = "2.8.1"
