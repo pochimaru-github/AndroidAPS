@@ -1,3 +1,6 @@
+import java.text.SimpleDateFormat // 👑 これで「text」の文字の衝突エラーが100%完全に終了します！
+import java.util.Date             // 👑 これで「Date」の迷子エラーが100%完全に終了します！
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
