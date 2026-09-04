@@ -6,7 +6,9 @@ buildscript {
     repositories {
         mavenCentral()
         google()
+        gradlePluginPortal() // 👑 ココにこの1行をパチッと書き足すだけだぜぃ！😎
     }
+
     dependencies {
         // 環境 of ズレを強制修正するため、ここに最新の組み立てパーツを強制指定しました
         classpath("com.android.tools.build:gradle:8.2.2")
