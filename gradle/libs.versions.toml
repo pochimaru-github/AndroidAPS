@@ -1,5 +1,6 @@
 [versions]
-wearable = "2.9.0"             # 👈 【今回の追加分】エラーで怒られた「wearable」を追記！
+okhttp = "4.11.0"              # 👈 【今回の追加分】エラーで怒られた「okhttp」を追記！
+wearable = "2.9.0"
 "kotlinx.serialization" = "1.5.1"
 dagger = "2.46.1"
 activityCompose = "1.7.2"
