@@ -1,6 +1,7 @@
 [versions]
-gradlePlugin = "7.4.2"         # 👈 【今回の追加分】エラーで怒られた「gradlePlugin」を追記！
-"kotlinx.coroutines" = "1.6.4" # 👈 前回ガッチリ固定した大正解。そのまま残します！
+activityCompose = "1.7.2"      # 👈 【今回の追加分】エラーで怒られた「activityCompose」を追記！
+gradlePlugin = "7.4.2"
+"kotlinx.coroutines" = "1.6.4"
 work = "2.8.1"
 composeBom = "2023.05.01"
 mockito = "5.3.1"
