@@ -65,7 +65,8 @@ project.afterEvaluate {
         val executions = mutableListOf<File>()
         subprojects.forEach { proj ->
             variants.forEach { variant ->
-                val path = proj.layout.buildDirectory.dir("outputs/unit_test_code_coverage/${variant}UnitTest/test${variant.replaceFirstChar(Char::titlecase)}UnitTest.exec").get()
+                val path = proj.layout.buildDirectory.dir("outputs/unit_test_code_coverage/${variant}UnitTest/test${variant.capitalize()}UnitTest.exec").get()
+                // val path = proj.layout.buildDirectory.dir("outputs/unit_test_code_coverage/${variant}UnitTest/test${variant.replaceFirstChar(Char::titlecase)}UnitTest.exec").get()
                 files(path).forEach { file ->
                     println("Collecting execution data from: ${file.absolutePath}")
                     executions.add(file)
