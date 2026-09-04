@@ -1,6 +1,7 @@
 [versions]
-datastorePreferences = "1.0.0"  # 👈 【今回の追加分】エラーで怒られた「datastorePreferences」を追記！
-junit = "5.9.3"                 # 👈 前回追加した大正解。そのまま残します！
+annotation = "1.6.0"           # 👈 【今回の追加分】エラーで怒られた「annotation」を追記！
+datastorePreferences = "1.0.0"  # 👈 前回追加した大正解。そのまま残します！
+junit = "5.9.3"                 # 👈 そのまま残します！
 googleServices = "4.3.15"       # 👈 そのまま残します！
 room = "2.5.0"                  # 👈 そのまま残します！
 agp = "7.4.2"                   # 👈 手元の超重要パーツ。そのまま残します！
