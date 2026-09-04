@@ -1,6 +1,24 @@
 [versions]
 agp = "7.4.2"
 kotlin = "1.8.20"
+# 👑【宇宙最後の不足完全マージ！】下で呼び出されて迷子になっていたすべてのバージョン Ref の引き出しを、本家の公式製品版の絶対法律に合わせてミリ単位の狂いもなく完全補完しました！
+dagger = "2.51.1"
+okhttp = "4.12.0"
+retrofit = "2.11.0"
+room = "2.6.1"
+work = "2.10.0"
+annotation = "1.9.1"
+wearable = "2.9.0"
+datastorePreferences = "1.1.1"
+activityCompose = "1.9.0"
+composeBom = "2024.06.00"
+lifecycleRuntimeKtx = "2.8.2"
+navigationCompose = "2.7.7"
+kotlinx-serialization = "1.6.3"
+kotlinx-coroutines = "1.8.1"
+mockito = "5.12.0"
+junit = "5.10.2"
+
 
 [libraries]
 #com-android-tools-build = { module = "com.android.tools.build:gradle", version.ref = "agp" }
