@@ -3,12 +3,12 @@ agp = "7.4.2"
 kotlin = "1.8.20"
 
 [libraries]
-com-android-tools-build = { module = "com.android.tools.build:gradle", version.ref = "agp" }
-com-google-gms = "com.google.gms:google-services:4.3.15"
-com-google-firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.4"
-notlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlin-allopen = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
-kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+#com-android-tools-build = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+#com-google-gms = "com.google.gms:google-services:4.3.15"
+#com-google-firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.4"
+#notlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+#kotlin-allopen = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
+#kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 com-android-tools-build = { group = "com.android.tools.build", name = "gradle", version.ref = "gradlePlugin" }
 com-google-gms = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
 
