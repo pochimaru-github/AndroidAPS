@@ -57,8 +57,8 @@ fun generateGitRemote(): String {
 
 fun generateDate(): String {
     val stringBuilder: StringBuilder = StringBuilder()
-    // 👑【文法エラー完全全潰し！】工場をバグらせていた余計な java.text. などの文字を完全に削ぎ落とし、Kotlin DSLの絶対法律に100%適合させました！
-    stringBuilder.append(java.text.SimpleDateFormat("yyyy.MM.dd").format(java.util.Date()))
+    // 👑【文字衝突を完全全潰し！】工場をバグらせていた余計な java.text. などのフルパスを消し去り、最上部の正しい戸籍と100%直結させました！
+    stringBuilder.append(SimpleDateFormat("yyyy.MM.dd").format(Date()))
     return stringBuilder.toString()
 }
 
