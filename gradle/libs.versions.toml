@@ -1,5 +1,6 @@
 [versions]
-navigationCompose = "2.6.0"    # 👈 【今回の追加分】エラーで怒られた「navigationCompose」を追記！
+retrofit = "2.9.0"             # 👈 【今回の追加分】エラーで怒られた「retrofit」を追記！
+navigationCompose = "2.6.0"
 okhttp = "4.11.0"
 wearable = "2.9.0"
 "kotlinx.serialization" = "1.5.1"
