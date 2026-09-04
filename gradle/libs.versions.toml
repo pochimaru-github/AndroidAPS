@@ -1,16 +1,16 @@
 [versions]
-"kotlinx.coroutines" = "1.6.4" # 👈 【今回の修正】名前全体を "" で囲って1つの地続きキーにします！
-#kotlinx.coroutines = "1.6.4"   # 👈 【今回の追加分】エラーで怒られた「kotlinx.coroutines」を追記！
-work = "2.8.1"                 # 👈 前回追加した大正解。そのまま残します！
-composeBom = "2023.05.01"      # 👈 そのまま残します！
-mockito = "5.3.1"              # 👈 そのまま残します！
-annotation = "1.6.0"           # 👈 そのまま残します！
-datastorePreferences = "1.0.0"  # 👈 そのまま残します！
-junit = "5.9.3"                 # 👈 そのまま残します！
-googleServices = "4.3.15"       # 👈 そのまま残します！
-room = "2.5.0"                  # 👈 そのまま残します！
-agp = "7.4.2"                   # 👈 手元の超重要パーツ。そのまま残します！
-kotlin = "1.8.20"               # 👈 手元の超重要パーツ。そのまま残します！
+gradlePlugin = "7.4.2"         # 👈 【今回の追加分】エラーで怒られた「gradlePlugin」を追記！
+"kotlinx.coroutines" = "1.6.4" # 👈 前回ガッチリ固定した大正解。そのまま残します！
+work = "2.8.1"
+composeBom = "2023.05.01"
+mockito = "5.3.1"
+annotation = "1.6.0"
+datastorePreferences = "1.0.0"
+junit = "5.9.3"
+googleServices = "4.3.15"
+room = "2.5.0"
+agp = "7.4.2"
+kotlin = "1.8.20"
 
 
 [libraries]
