@@ -1,5 +1,6 @@
 [versions]
-kotlinx.coroutines = "1.6.4"   # 👈 【今回の追加分】エラーで怒られた「kotlinx.coroutines」を追記！
+"kotlinx.coroutines" = "1.6.4" # 👈 【今回の修正】名前全体を "" で囲って1つの地続きキーにします！
+#kotlinx.coroutines = "1.6.4"   # 👈 【今回の追加分】エラーで怒られた「kotlinx.coroutines」を追記！
 work = "2.8.1"                 # 👈 前回追加した大正解。そのまま残します！
 composeBom = "2023.05.01"      # 👈 そのまま残します！
 mockito = "5.3.1"              # 👈 そのまま残します！
