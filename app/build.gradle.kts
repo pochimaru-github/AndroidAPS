@@ -5,46 +5,29 @@ plugins {
 }
 
 android {
-    compileSdk = 34
+    compileSdkVersion 34
 
     defaultConfig {
-        applicationId = "com.nightscout.androidaps"
-        minSdk = 21
-        targetSdk = 34
-        versionCode = 3040206
-        versionName = "3.4.2.6"
+        applicationId "com.nightscout.androidaps"
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode 3040206
+        versionName "3.4.2.6"
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = '11'
     }
 }
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
-
-fun generateGitBuild(): String {
-    try {
-        val processBuilder = ProcessBuilder("git", "describe", "--always", "--abbrev=7")
-        val output = File.createTempFile("git-build", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().trim()
-    } catch (_: Exception) {
-        return "NoGitSystemAvailable"
-    }
-}
-
-fun generateGitRemote(): String {
-    try {
-        val processBuilder = ProcessBuilder("git", "config", "--get", "remote.origin.url")
         val output = File.createTempFile("git-remote", "")
         processBuilder.redirectOutput(output)
         val process = processBuilder.start()
@@ -57,27 +40,56 @@ fun generateGitRemote(): String {
 
 fun generateDate(): String {
     val stringBuilder: StringBuilder = StringBuilder()
-    // 👑【文字衝突を完全全潰し！】工場をバグらせていた余計な java.text. などのフルパスを消し去り、最上部の正しい戸籍と100%直結させました！
+    // showing only date prevents app to rebuild everytime
     stringBuilder.append(SimpleDateFormat("yyyy.MM.dd").format(Date()))
     return stringBuilder.toString()
 }
 
-// 👑【カタログ迷子解決！】大元のボス設計図と連動し、rootProject側からVersionsのカタログを安全に引っ張ってくる本物純正の文法へアジャスト！
-fun isMaster(): Boolean = !rootProject.ext["Versions.appVersion"].toString().contains("-")
+fun isMaster(): Boolean = !Versions.appVersion.contains("-")
+
+fun gitAvailable(): Boolean {
+    try {
+        val processBuilder = ProcessBuilder("git", "--version")
+        val output = File.createTempFile("git-version", "")
+        processBuilder.redirectOutput(output)
+        val process = processBuilder.start()
+        process.waitFor()
+        return output.readText().isNotEmpty()
+    } catch (_: Exception) {
+        return false
+    }
+}
+
+fun allCommitted(): Boolean {
+    try {
+        val processBuilder = ProcessBuilder("git", "status", "-s")
+        val output = File.createTempFile("git-comited", "")
+        processBuilder.redirectOutput(output)
+        val process = processBuilder.start()
+        process.waitFor()
+        return output.readText().replace(Regex("""(?m)^\s*(M|A|D|\?\?)\s*.*?\.idea\/codeStyles\/.*?\s*$"""), "")
+            // ignore all files added to project dir but not staged/known to GIT
+            .replace(Regex("""(?m)^\s*(\?\?)\s*.*?\s*$"""), "").trim().isEmpty()
+    } catch (_: Exception) {
+        return false
+    }
+}
 
 android {
+
     namespace = "app.aaps"
 
     defaultConfig {
-        minSdk = 21
-        targetSdk = 34
+        minSdk = Versions.minSdk
+        targetSdk = Versions.targetSdk
 
-        buildConfigField("String", "VERSION", "\"3.4.2.6\"")
+        buildConfigField("String", "VERSION", "\"$version\"")
         buildConfigField("String", "BUILDVERSION", "\"${generateGitBuild()}-${generateDate()}\"")
         buildConfigField("String", "REMOTE", "\"${generateGitRemote()}\"")
         buildConfigField("String", "HEAD", "\"${generateGitBuild()}\"")
         buildConfigField("String", "COMMITTED", "\"${allCommitted()}\"")
 
+        // For Dagger injected instrumentation tests in app module
         testInstrumentationRunner = "app.aaps.runners.InjectedTestRunner"
     }
 
@@ -88,7 +100,7 @@ android {
             applicationId = "info.nightscout.androidaps"
             dimension = "standard"
             resValue("string", "app_name", "AAPS")
-            versionName = "3.4.2.6"
+            versionName = Versions.appVersion
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_launcher_round"
         }
@@ -96,7 +108,7 @@ android {
             applicationId = "info.nightscout.aapspumpcontrol"
             dimension = "standard"
             resValue("string", "app_name", "Pumpcontrol")
-            versionName = "3.4.2.6-pumpcontrol"
+            versionName = Versions.appVersion + "-pumpcontrol"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_pumpcontrol"
             manifestPlaceholders["appIconRound"] = "@null"
         }
@@ -104,7 +116,7 @@ android {
             applicationId = "info.nightscout.aapsclient"
             dimension = "standard"
             resValue("string", "app_name", "AAPSClient")
-            versionName = "3.4.2.6-aapsclient"
+            versionName = Versions.appVersion + "-aapsclient"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_yellowowl"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_yellowowl"
         }
@@ -112,7 +124,7 @@ android {
             applicationId = "info.nightscout.aapsclient2"
             dimension = "standard"
             resValue("string", "app_name", "AAPSClient2")
-            versionName = "3.4.2.6-aapsclient"
+            versionName = Versions.appVersion + "-aapsclient"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_blueowl"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_blueowl"
         }
@@ -120,6 +132,7 @@ android {
 
     useLibrary("org.apache.http.legacy")
 
+    //Deleting it causes a binding error
     buildFeatures {
         dataBinding = true
         buildConfig = true
@@ -132,6 +145,9 @@ allprojects {
 }
 
 dependencies {
+    // in order to use internet"s versions you"d need to enable Jetifier again
+    // https://github.com
+    // https://github.com
     implementation(project(":shared:impl"))
     implementation(project(":core:data"))
     implementation(project(":core:objects"))
@@ -183,11 +199,18 @@ dependencies {
 
     debugImplementation(libs.com.squareup.leakcanary.android)
 
+
     kspAndroidTest(libs.com.google.dagger.android.processor)
+
+    /* Dagger2 - We are going to use dagger.android which includes
+     * support for Activity and fragment injection so we need to include
+     * the following dependencies */
     ksp(libs.com.google.dagger.android.processor)
     ksp(libs.com.google.dagger.compiler)
 
+    // MainApp
     api(libs.com.uber.rxdogtag2.rxdogtag)
+    // Remote config
     api(libs.com.google.firebase.config)
 }
 
@@ -196,24 +219,9 @@ println("isMaster: ${isMaster()}")
 println("gitAvailable: ${gitAvailable()}")
 println("allCommitted: ${allCommitted()}")
 println("-------------------")
-
 if (!gitAvailable()) {
     throw GradleException("GIT system is not available. On Windows try to run Android Studio as an Administrator. Check if GIT is installed and Studio have permissions to use it")
 }
 if (isMaster() && !allCommitted()) {
     throw GradleException("There are uncommitted changes. Clone sources again as described in wiki and do not allow gradle update")
-}
-
-fun allCommitted(): Boolean {
-    try {
-        val processBuilder = ProcessBuilder("git", "status", "-s")
-        val output = File.createTempFile("git-comited", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().replace(Regex("""(?m)^\s*(M|A|D|\?\?)\s*.*?\.idea\/codeStyles\/.*?\s*$"""), "")
-            .replace(Regex("""(?m)^\s*(\?\?)\s*.*?\s*$"""), "").trim().isEmpty()
-    } catch (_: Exception) {
-        return false
-    }
 }
