@@ -7,8 +7,17 @@ plugins {
 }
 
 android {
+    namespace = "app.aaps.core.graph" // もし既存の namespace があればそれを優先
+    compileSdk = 34 // ← この1行を追加
 
-    namespace = "app.aaps.core.graph"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
