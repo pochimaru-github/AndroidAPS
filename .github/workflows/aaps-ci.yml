@@ -23,6 +23,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew assembleFullDebug
           
-     // - name: Build with Gradle
-      //  run: ./gradlew assembleFullRelease
+     # - name: Build with Gradle
+      #  run: ./gradlew assembleFullRelease
         
