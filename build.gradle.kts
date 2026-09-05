@@ -27,6 +27,18 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
 }
 
+subprojects {
+    plugins.withId("com.android.library") {
+        configure<com.android.build.gradle.LibraryExtension> {
+            compileSdk = 34
+
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_11
+                targetCompatibility = JavaVersion.VERSION_11
+            }
+        }
+    }
+}
 
 allprojects {
     repositories {
