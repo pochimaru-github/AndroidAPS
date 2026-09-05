@@ -45,19 +45,24 @@ include ':database:impl'
 include ':database:persistence'
 include ':pump:combov2'
 include ':pump:combov2:comboctl' // ← この行を追加
-include ':pump:dana'
-include ':pump:danars'
-include ':pump:danar'
+include ':pump:dana' // ← この行を追加
+include ':pump:danars' // ← この行を追加
+include ':pump:danar' // ← この行を追加
 include ':pump:diaconn'
 include ':pump:eopatch'
 include ':pump:eopatch:core' // ← この行を追加
 include ':pump:medtrum'
 include ':pump:equil'
 include ':pump:insight'
+include ':pump:insight:core' // ← この行を追加
 include ':pump:medtronic'
 include ':pump:common'
+include ':pump:omnipod' // ← この行を追加
+include ':pump:omnipod:core' // ← この行を追加
 include ':pump:omnipod:common'
 include ':pump:omnipod:eros'
+include ':pump:medtronic' // ← この行を追加
+include ':pump:solo' // ← この行を追加
 include ':pump:omnipod:dash'
 include ':pump:rileylink'
 include ':pump:virtual'
