@@ -1,5 +1,3 @@
-import kotlin.math.min
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
@@ -12,7 +10,7 @@ plugins {
 android {
     namespace = "app.aaps.shared.impl"
     defaultConfig {
-        minSdk = min(Versions.minSdk, Versions.wearMinSdk)
+        minSdk = 26 // ← 直値 26 へ書き換え
     }
 }
 
