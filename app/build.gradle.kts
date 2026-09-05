@@ -2,8 +2,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
-    id("com.android.application")
-    id("kotlin-android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
 }
 
