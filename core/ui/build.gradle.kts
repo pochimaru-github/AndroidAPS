@@ -1,15 +1,14 @@
-import kotlin.math.min
-
 plugins {
     alias(libs.plugins.android.library)
     id("kotlin-android")
-    id("android-module-dependencies")
+    // ... 他のプラグイン
 }
 
 android {
     namespace = "app.aaps.core.ui"
+
     defaultConfig {
-        minSdk = min(Versions.minSdk, Versions.wearMinSdk)
+        minSdk = 26 // ← min(Versions.minSdk, Versions.wearMinSdk) から変更
     }
 }
 
