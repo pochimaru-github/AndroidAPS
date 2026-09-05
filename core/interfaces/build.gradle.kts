@@ -22,9 +22,10 @@ dependencies {
     api(libs.androidx.appcompat)
     api(libs.androidx.preference)
 
-    api(platform(libs.kotlinx.serialization.bom))
-    api(libs.kotlinx.serialization.json)
-    api(libs.kotlinx.serialization.protobuf)
+    // バージョンを直接指定して参照エラーを解消
+    api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.5.1"))
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.5.1")
 
     api(libs.org.apache.commons.lang3)
     api(libs.net.danlew.android.joda)
