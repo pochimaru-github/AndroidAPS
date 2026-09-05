@@ -44,6 +44,7 @@ include ':implementation'
 include ':database:impl'
 include ':database:persistence'
 include ':pump:combov2'
+include ':pump:combov2:comboctl' // ← この行を追加
 include ':pump:dana'
 include ':pump:danars'
 include ':pump:danar'
