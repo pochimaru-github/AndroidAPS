@@ -38,6 +38,15 @@ subprojects {
             }
         }
     }
+
+    // 全サブプロジェクトで Play Services の新しすぎるバージョンを強制固定
+    configurations.all {
+        resolutionStrategy {
+            force("com.google.android.gms:play-services-measurement-api:21.5.0")
+            force("com.google.android.gms:play-services-measurement-impl:21.5.0")
+            force("com.google.android.gms:play-services-measurement-sdk-api:21.5.0")
+        }
+    }
 }
 
 allprojects {
@@ -52,7 +61,8 @@ allprojects {
             freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
             freeCompilerArgs.add("-Xannotation-default-target=param-property")
             freeCompilerArgs.add("-Xjvm-default=all") //Support @JvmDefault
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11) // ← JVM_17 から JVM_11 に修正
+            freeCompilerArgs.add("-Xskip-prerelease-check") // ← Pre-release クラスの読み込みエラー回避を追加
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
     gradle.projectsEvaluated {
