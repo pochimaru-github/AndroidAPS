@@ -22,6 +22,7 @@ plugins {
     alias(libs.plugins.moduleDependencyGraph)
     alias(libs.plugins.ksp)
     alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false // ← これを追加
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.kotlin.android) apply false
 }
