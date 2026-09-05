@@ -4,6 +4,7 @@ import java.util.Date
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
     id("kotlin-kapt")
 }
 
@@ -60,12 +61,11 @@ fun generateGitRemote(): String {
 
 fun generateDate(): String {
     val stringBuilder: StringBuilder = StringBuilder()
-    // 👑 最上部に不純物パッチ（import）を足さないルールを守るため、本家が持っている関数の中にフルパス（java.text. / java.util.）で安全にアジャストさせました！
-    stringBuilder.append(java.text.SimpleDateFormat("yyyy.MM.dd").format(java.util.Date()))
+    stringBuilder.append(SimpleDateFormat("yyyy.MM.dd").format(Date()))
     return stringBuilder.toString()
 }
 
-fun isMaster(): Boolean = !Versions.appVersion.contains("-")
+fun isMaster(): Boolean = !"3.4.2.6".contains("-")
 
 fun gitAvailable(): Boolean {
     try {
@@ -98,8 +98,8 @@ android {
     namespace = "app.aaps"
 
     defaultConfig {
-        minSdk = Versions.minSdk
-        targetSdk = Versions.targetSdk
+        minSdk = 21
+        targetSdk = 34
 
         buildConfigField("String", "VERSION", "\"$version\"")
         buildConfigField("String", "BUILDVERSION", "\"${generateGitBuild()}-${generateDate()}\"")
@@ -117,7 +117,7 @@ android {
             applicationId = "info.nightscout.androidaps"
             dimension = "standard"
             resValue("string", "app_name", "AAPS")
-            versionName = Versions.appVersion
+            versionName = "3.4.2.6"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_launcher_round"
         }
@@ -125,7 +125,7 @@ android {
             applicationId = "info.nightscout.aapspumpcontrol"
             dimension = "standard"
             resValue("string", "app_name", "Pumpcontrol")
-            versionName = Versions.appVersion + "-pumpcontrol"
+            versionName = "3.4.2.6-pumpcontrol"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_pumpcontrol"
             manifestPlaceholders["appIconRound"] = "@null"
         }
@@ -133,7 +133,7 @@ android {
             applicationId = "info.nightscout.aapsclient"
             dimension = "standard"
             resValue("string", "app_name", "AAPSClient")
-            versionName = Versions.appVersion + "-aapsclient"
+            versionName = "3.4.2.6-aapsclient"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_yellowowl"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_yellowowl"
         }
@@ -141,7 +141,7 @@ android {
             applicationId = "info.nightscout.aapsclient2"
             dimension = "standard"
             resValue("string", "app_name", "AAPSClient2")
-            versionName = Versions.appVersion + "-aapsclient"
+            versionName = "3.4.2.6-aapsclient"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_blueowl"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_blueowl"
         }
