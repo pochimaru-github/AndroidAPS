@@ -18,9 +18,9 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
-    // AAPT2 のリソース処理オプション
+    // AAPT2 のリソース処理オプション (Kotlin DSL 用の正確な記述)
     aaptOptions {
-        cruncherEnabled = false // PNG の自動圧縮による併発エラーを防止
+        isCruncherEnabled = false
     }
 }
 
