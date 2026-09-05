@@ -9,7 +9,18 @@ plugins {
 
 android {
     namespace = "app.aaps.ui"
+    compileSdk = 34 // ← この1行を追加
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
+
 
 dependencies {
     implementation(project(":core:data"))
