@@ -1,5 +1,3 @@
-import kotlin.math.min
-
 plugins {
     alias(libs.plugins.android.library)
     id("kotlin-android")
@@ -13,7 +11,7 @@ plugins {
 android {
     namespace = "app.aaps.core.utils"
     defaultConfig {
-        minSdk = min(Versions.minSdk, Versions.wearMinSdk)
+        minSdk = 26 // ← 直値 26 に書き換え
     }
 }
 
@@ -25,10 +23,6 @@ dependencies {
     api(platform(libs.com.google.firebase.bom))
     api(libs.com.google.firebase.analytics)
     api(libs.com.google.firebase.crashlytics)
-    // StatsActivity not in use now
-    // api(libs.com.google.firebase.messaging)
-    // api(libs.com.google.firebase.auth)
-    // api(libs.com.google.firebase.database)
 
     //CryptoUtil
     api(libs.com.madgag.spongycastle)
