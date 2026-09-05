@@ -1,5 +1,3 @@
-import kotlin.math.min
-
 plugins {
     alias(libs.plugins.android.library)
     id("kotlin-android")
@@ -11,17 +9,15 @@ plugins {
 }
 
 android {
-
     namespace = "app.aaps.core.interfaces"
     defaultConfig {
-        minSdk = min(Versions.minSdk, Versions.wearMinSdk)
+        minSdk = 26 // ← Versions 参照から直値 26 へ変更
     }
 }
 
 dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:keys"))
-
 
     api(libs.androidx.appcompat)
     api(libs.androidx.preference)
