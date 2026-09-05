@@ -6,18 +6,11 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-        // gradlePluginPortal()  👑 ココにこの1行をパチッと書き足すだけだぜぃ！😎
     }
 
     dependencies {
-        // 環境 of ズレを強制修正するため、ここに最新の組み立てパーツを強制指定しました
-        classpath("com.android.tools.build:gradle:8.2.2")
         classpath(libs.com.google.gms)
         classpath(libs.com.google.firebase.gradle)
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-
         classpath(libs.kotlin.gradlePlugin)
         classpath(libs.kotlin.allopen)
         classpath(libs.kotlin.serialization)
