@@ -50,6 +50,7 @@ include ':pump:danars'
 include ':pump:danar'
 include ':pump:diaconn'
 include ':pump:eopatch'
+include ':pump:eopatch:core' // ← この行を追加
 include ':pump:medtrum'
 include ':pump:equil'
 include ':pump:insight'
