@@ -59,9 +59,11 @@ allprojects {
         compilerOptions {
             freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
             freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
+            freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi") // ← 【追加】Opt-in エラーを解消
+            freeCompilerArgs.add("-language-version=1.9")              // ← 【追加】Enum.entries などの 1.9 機能を全モジュールで有効化
             freeCompilerArgs.add("-Xannotation-default-target=param-property")
             freeCompilerArgs.add("-Xjvm-default=all") //Support @JvmDefault
-            freeCompilerArgs.add("-Xskip-prerelease-check") // ← Pre-release クラスの読み込みエラー回避を追加
+            freeCompilerArgs.add("-Xskip-prerelease-check")
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
