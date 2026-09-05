@@ -10,7 +10,7 @@ plugins {
 android {
     namespace = "app.aaps.shared.tests"
     defaultConfig {
-        minSdk = Versions.minSdk
+        minSdk = 26 // ← 直値 26 へ書き換え
     }
 }
 
