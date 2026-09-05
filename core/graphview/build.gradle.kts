@@ -4,10 +4,18 @@ plugins {
     id("android-module-dependencies")
 }
 
-
 android {
+    namespace = "app.aaps.core.graphview" // 既存の namespace 定義があればそれを優先
+    compileSdk = 34 // ← 追加
 
-    namespace = "com.jjoe64.graphview"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
