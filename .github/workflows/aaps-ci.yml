@@ -21,5 +21,8 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
       - name: Build with Gradle
-        run: ./gradlew assembleFullRelease
+        run: ./gradlew assembleFullDebug
+          
+     // - name: Build with Gradle
+      //  run: ./gradlew assembleFullRelease
         
