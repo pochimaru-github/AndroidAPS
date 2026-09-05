@@ -5,18 +5,18 @@ plugins {
     id("android-module-dependencies")
     id("test-module-dependencies")
     id("jacoco-module-dependencies")
-    alias(libs.plugins.compose.compiler)
+    // alias(libs.plugins.compose.compiler) ← この1行を削除
 }
 
 android {
     namespace = "app.aaps.pump.virtual"
 
     buildFeatures {
-        compose=true
+        compose = true
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion="1.5.3"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
 }
 
@@ -44,5 +44,4 @@ dependencies {
     implementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-
 }
