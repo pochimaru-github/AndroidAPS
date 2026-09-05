@@ -4,6 +4,6 @@ plugins {
 }
 
 java {
-    sourceCompatibility = Versions.javaVersion
-    targetCompatibility = Versions.javaVersion
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
