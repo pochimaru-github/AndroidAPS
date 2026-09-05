@@ -21,8 +21,8 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
       - name: Build with Gradle
-        run: ./gradlew assembleFullDebug
-          
+        run: ./gradlew clean :core:objects:assembleDebug --stacktrace
+
      # - name: Build with Gradle
       #  run: ./gradlew assembleFullRelease
         
