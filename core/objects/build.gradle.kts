@@ -17,11 +17,6 @@ android {
         // ベクター画像の互換処理（リソースマージ時の Workers クラッシュを防止）
         vectorDrawables.useSupportLibrary = true
     }
-
-    // AAPT2 のリソース処理オプション (Kotlin DSL 用の正確な記述)
-    aaptOptions {
-        isCruncherEnabled = false
-    }
 }
 
 dependencies {
