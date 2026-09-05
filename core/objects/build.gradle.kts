@@ -11,6 +11,17 @@ plugins {
 
 android {
     namespace = "app.aaps.core.objects"
+
+    defaultConfig {
+        minSdk = 26
+        // ベクター画像の互換処理（リソースマージ時の Workers クラッシュを防止）
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    // AAPT2 のリソース処理オプション
+    aaptOptions {
+        cruncherEnabled = false // PNG の自動圧縮による併発エラーを防止
+    }
 }
 
 dependencies {
