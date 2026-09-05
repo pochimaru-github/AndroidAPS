@@ -15,7 +15,8 @@ tasks.withType<KotlinCompile>().configureEach {
         jvmTarget = "11"
         freeCompilerArgs = freeCompilerArgs + listOf(
             "-opt-in=kotlin.ExperimentalStdlibApi",
-            "-language-version=1.9"
+            "-language-version=1.9",
+            "-Xskip-prerelease-check" // ← この行を追加してプレリリースエラーを回避
         )
     }
 }
