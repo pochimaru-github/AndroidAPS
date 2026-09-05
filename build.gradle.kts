@@ -22,7 +22,7 @@ plugins {
     alias(libs.plugins.moduleDependencyGraph)
     alias(libs.plugins.ksp)
     alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.android.library) apply false // ← これを追加
+    alias(libs.plugins.android.library) apply false
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.kotlin.android) apply false
 }
@@ -52,7 +52,7 @@ allprojects {
             freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
             freeCompilerArgs.add("-Xannotation-default-target=param-property")
             freeCompilerArgs.add("-Xjvm-default=all") //Support @JvmDefault
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11) // ← JVM_17 から JVM_11 に修正
         }
     }
     gradle.projectsEvaluated {
