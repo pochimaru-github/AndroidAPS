@@ -55,22 +55,31 @@ allprojects {
         google()
         maven("https://jitpack.io")
     }
+    
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
             freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
-            freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi") // ← 【追加】Opt-in エラーを解消
-            freeCompilerArgs.add("-language-version=1.9")              // ← 【追加】Enum.entries などの 1.9 機能を全モジュールで有効化
+            freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi")
+            freeCompilerArgs.add("-language-version=1.9")
             freeCompilerArgs.add("-Xannotation-default-target=param-property")
-            freeCompilerArgs.add("-Xjvm-default=all") //Support @JvmDefault
+            freeCompilerArgs.add("-Xjvm-default=all")
             freeCompilerArgs.add("-Xskip-prerelease-check")
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
+
+    // 【追加】KSP プラグインが適用されている全モジュールへ Kotlin 1.9 / JVM 11 設定を伝播させる
+    plugins.withId("com.google.devtools.ksp") {
+        configure<com.google.devtools.ksp.gradle.KspExtension> {
+            arg("kotlin.language.version", "1.9")
+            arg("kotlin.api.version", "1.9")
+        }
+    }
+
     gradle.projectsEvaluated {
         tasks.withType<KotlinCompile> {
             val compilerArgs = compilerOptions.freeCompilerArgs.get()
-            // compilerArgs line is fully synced now
         }
     }
 
