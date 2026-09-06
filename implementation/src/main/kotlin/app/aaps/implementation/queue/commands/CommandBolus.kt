@@ -19,7 +19,7 @@ class CommandBolus(
     injector: HasAndroidInjector,
     private val detailedBolusInfo: DetailedBolusInfo,
     override val callback: Callback?,
-    type: Command.CommandType,
+    override val commandType: Command.CommandType,
     private val carbsRunnable: Runnable
 ) : Command {
 
@@ -29,11 +29,8 @@ class CommandBolus(
     @Inject lateinit var activePlugin: ActivePlugin
     @Inject lateinit var pumpEnactResultProvider: Provider<PumpEnactResult>
 
-    override var commandType: Command.CommandType
-
     init {
         injector.androidInjector().inject(this)
-        this.commandType = type
     }
 
     override fun execute() {
