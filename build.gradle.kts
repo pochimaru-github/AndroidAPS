@@ -96,11 +96,12 @@ allprojects {
         }
     }
 
-    // KSP プラグインが適用されている全モジュールへ Kotlin 1.9 / JVM 11 設定を伝播させる
+    // KSP プラグインのプロセッサ検索エラー（No providers found）回避設定
     plugins.withId("com.google.devtools.ksp") {
         configure<com.google.devtools.ksp.gradle.KspExtension> {
             arg("kotlin.language.version", "1.9")
             arg("kotlin.api.version", "1.9")
+            incremental = false
         }
     }
 
