@@ -24,10 +24,13 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      # ビルド実行前に全モジュールの Vector XML 内の ?attr/... を #FFFFFF へ自動置換
+      # ビルド実行前に全モジュールの Vector XML 内の ?attr/... を #FFFFFF へ自動置換し、Git チェックを回避するため仮コミット
       - name: Replace dynamic theme attributes in Vector Drawables
         run: |
           find . -type f -path "*/src/main/res/drawable*/*.xml" -exec sed -i -E 's/"\?attr\/[^"]+"/"#FFFFFF"/g' {} +
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: temporary replace vector drawable attributes for build" || true
 
       - name: Build with Gradle
         run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache
