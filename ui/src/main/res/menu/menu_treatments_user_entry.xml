@@ -4,7 +4,7 @@
     <item
         android:id="@+id/nav_show_loop"
         android:icon="@drawable/ic_loop_closed_white"
-        android:iconTint="?attr/colorControlNormal"
+        android:iconTint="#FFFFFF"
         android:title="@string/show_loop"
         app:showAsAction="ifRoom" />
 
