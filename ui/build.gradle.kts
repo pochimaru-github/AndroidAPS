@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    id("kotlin-kapt") // ← 【変更】alias(libs.plugins.ksp) から kapt へ変更
     id("kotlin-android")
     id("android-module-dependencies")
     id("test-module-dependencies")
@@ -9,7 +9,13 @@ plugins {
 
 android {
     namespace = "app.aaps.ui"
-    compileSdk = 34 // ← この1行を追加
+    compileSdk = 34
+
+    // 【追加】vectorDrawables 設定を入れるため defaultConfig を定義
+    defaultConfig {
+        minSdk = 26
+        vectorDrawables.useSupportLibrary = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -20,7 +26,6 @@ android {
         jvmTarget = "11"
     }
 }
-
 
 dependencies {
     implementation(project(":core:data"))
@@ -36,6 +41,8 @@ dependencies {
     testImplementation(project(":shared:tests"))
 
     api(libs.androidx.core)
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    
+    // 【変更】Dagger アノテーションプロセッサを ksp から kapt へ変更
+    kapt(libs.com.google.dagger.compiler)
+    kapt(libs.com.google.dagger.android.processor)
 }
