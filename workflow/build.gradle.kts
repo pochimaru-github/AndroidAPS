@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    id("kotlin-kapt")
     id("kotlin-android")
     id("android-module-dependencies")
     id("test-module-dependencies")
@@ -34,6 +34,6 @@ dependencies {
 
     testImplementation(project(":shared:tests"))
 
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    kapt(libs.com.google.dagger.compiler)
+    kapt(libs.com.google.dagger.android.processor)
 }
