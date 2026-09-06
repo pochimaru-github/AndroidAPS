@@ -101,7 +101,7 @@ allprojects {
         configure<com.google.devtools.ksp.gradle.KspExtension> {
             arg("kotlin.language.version", "1.9")
             arg("kotlin.api.version", "1.9")
-            incremental = false
+            arg("ksp.incremental", "false")
         }
     }
 
