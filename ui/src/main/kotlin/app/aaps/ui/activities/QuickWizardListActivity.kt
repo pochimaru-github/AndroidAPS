@@ -79,46 +79,48 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
         itemTouchHelper.startDrag(viewHolder)
     }
 
-    class QuickWizardEntryViewHolder(val binding: QuickwizardListItemBinding) : RecyclerView.ViewHolder(binding.root)
+    class QuickWizardEntryViewHolder(val itemView: View, val itemBinding: QuickwizardListItemBinding) : RecyclerView.ViewHolder(itemView)
 
     private inner class RecyclerViewAdapter(var fragmentManager: FragmentManager) : RecyclerView.Adapter<QuickWizardEntryViewHolder>(), ItemTouchHelperAdapter {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuickWizardEntryViewHolder {
-            val binding = QuickwizardListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            return QuickWizardEntryViewHolder(binding)
+            val itemBinding = QuickwizardListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val view: View = itemBinding.root
+            return QuickWizardEntryViewHolder(view, itemBinding)
         }
 
         @SuppressLint("ClickableViewAccessibility")
         override fun onBindViewHolder(holder: QuickWizardEntryViewHolder, position: Int) {
             val entry = quickWizard[position]
-            holder.binding.from.text = dateUtil.timeString(entry.validFromDate())
-            holder.binding.to.text = dateUtil.timeString(entry.validToDate())
-            holder.binding.buttonText.text = entry.buttonText()
+            val binding = holder.itemBinding
+            binding.from.text = dateUtil.timeString(entry.validFromDate())
+            binding.to.text = dateUtil.timeString(entry.validToDate())
+            binding.buttonText.text = entry.buttonText()
             var bindingCarbsTextFull = rh.gs(app.aaps.core.objects.R.string.format_carbs, entry.carbs())
             if (entry.useEcarbs() == QuickWizardEntry.YES) {
                 bindingCarbsTextFull += " +" + rh.gs(app.aaps.core.objects.R.string.format_carbs, entry.carbs2())
                 bindingCarbsTextFull += "/" + entry.duration() + "h->" + entry.time() + "min"
             }
-            holder.binding.carbs.text = bindingCarbsTextFull
+            binding.carbs.text = bindingCarbsTextFull
             if (entry.device() == QuickWizardEntry.DEVICE_ALL) {
-                holder.binding.device.visibility = View.GONE
+                binding.device.visibility = View.GONE
             } else {
-                holder.binding.device.visibility = View.VISIBLE
+                binding.device.visibility = View.VISIBLE
                 val resId = if (quickWizard[position].device() == QuickWizardEntry.DEVICE_WATCH) {
                     app.aaps.core.objects.R.drawable.ic_watch
                 } else {
                     app.aaps.core.objects.R.drawable.ic_smartphone
                 }
-                holder.binding.device.setImageResource(resId)
+                binding.device.setImageResource(resId)
                 
                 val desc = if (quickWizard[position].device() == QuickWizardEntry.DEVICE_WATCH) {
                     rh.gs(R.string.a11y_only_on_watch)
                 } else {
                     rh.gs(R.string.a11y_only_on_phone)
                 }
-                holder.binding.device.contentDescription = desc
+                binding.device.contentDescription = desc
             }
-            holder.binding.root.setOnClickListener {
+            binding.root.setOnClickListener {
                 if (actionHelper.isNoAction) {
                     val manager = fragmentManager
                     val editQuickWizardDialog = EditQuickWizardDialog()
@@ -127,11 +129,11 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
                     editQuickWizardDialog.arguments = bundle
                     editQuickWizardDialog.show(manager, "EditQuickWizardDialog")
                 } else if (actionHelper.isRemoving) {
-                    holder.binding.cbRemove.toggle()
-                    actionHelper.updateSelection(position, entry, holder.binding.cbRemove.isChecked)
+                    binding.cbRemove.toggle()
+                    actionHelper.updateSelection(position, entry, binding.cbRemove.isChecked)
                 }
             }
-            holder.binding.root.setOnLongClickListener { view ->
+            binding.root.setOnLongClickListener { view ->
                 if (actionHelper.isNoAction) {
                     val actualBg = iobCobCalculator.ads.actualBg()
                     val profile = profileFunction.getProfile()
@@ -163,19 +165,19 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
                 }
                 false
             }
-            holder.binding.sortHandle.setOnTouchListener { _, event ->
+            binding.sortHandle.setOnTouchListener { _, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                     onStartDrag(holder)
                     return@setOnTouchListener true
                 }
                 return@setOnTouchListener false
             }
-            holder.binding.cbRemove.isChecked = actionHelper.isSelected(position)
-            holder.binding.cbRemove.setOnCheckedChangeListener { _, value ->
+            binding.cbRemove.isChecked = actionHelper.isSelected(position)
+            binding.cbRemove.setOnCheckedChangeListener { _, value ->
                 actionHelper.updateSelection(position, entry, value)
             }
-            holder.binding.sortHandle.visibility = actionHelper.isSorting.toVisibility()
-            holder.binding.cbRemove.visibility = actionHelper.isRemoving.toVisibility()
+            binding.sortHandle.visibility = actionHelper.isSorting.toVisibility()
+            binding.cbRemove.visibility = actionHelper.isRemoving.toVisibility()
         }
 
         override fun getItemCount() = quickWizard.size()
