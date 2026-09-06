@@ -47,7 +47,7 @@ allprojects {
         maven("https://jitpack.io")
     }
 
-    // 全モジュール・全構成で AndroidX / Play Services / Kotlin のバージョンを強制固定
+    // 全モジュール・全構成で AndroidX / Play Services / Kotlin / Kotlinx のバージョンを強制固定
     configurations.all {
         resolutionStrategy {
             // AndroidX / Play Services の固定
@@ -63,6 +63,13 @@ allprojects {
             force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22")
             force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22")
             force("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
+
+            // kotlinx 関連のバージョン固定 (Kotlin 1.9 互換の 0.5.0 / 1.8.0 等に固定)
+            force("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+            force("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.5.0")
+            force("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+            force("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+            force("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
             // 自動引き込み依存関係の強制制御
             eachDependency {
