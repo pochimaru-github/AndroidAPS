@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    // 【修正箇所 1】 alias(libs.plugins.ksp) を削除し、id("kotlin-kapt") を追加
+    id("kotlin-kapt")
     id("kotlin-android")
     id("android-module-dependencies")
     id("all-open-dependencies")
@@ -43,6 +44,7 @@ dependencies {
     api(libs.org.slf4j.api)
     api(libs.com.github.tony19.logback.android)
 
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    // 【修正箇所 2】 ksp(...) を kapt(...) に変更
+    kapt(libs.com.google.dagger.compiler)
+    kapt(libs.com.google.dagger.android.processor)
 }
