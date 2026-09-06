@@ -1,4 +1,4 @@
-name: AAPS-CI
+Name: AAPS-CI
 on:
   workflow_dispatch:
     inputs:
@@ -21,8 +21,4 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
       - name: Build with Gradle
-        run: ./gradlew clean :core:objects:assembleDebug --stacktrace
-
-     # - name: Build with Gradle
-      #  run: ./gradlew assembleFullRelease
-        
+        run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace
