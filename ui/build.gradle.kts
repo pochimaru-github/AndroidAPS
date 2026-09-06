@@ -17,6 +17,12 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
+    // 【追加】DataBinding / ViewBinding を有効化
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
