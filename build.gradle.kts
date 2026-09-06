@@ -26,7 +26,6 @@ plugins {
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.kotlin.android) apply false
 }
-
 subprojects {
     plugins.withId("com.android.library") {
         configure<com.android.build.gradle.LibraryExtension> {
@@ -39,12 +38,18 @@ subprojects {
         }
     }
 
-    // 全サブプロジェクトで Play Services の新しすぎるバージョンを強制固定
+    // 全サブプロジェクトで Play Services および AndroidX のバージョンを強制固定
     configurations.all {
         resolutionStrategy {
             force("com.google.android.gms:play-services-measurement-api:21.5.0")
             force("com.google.android.gms:play-services-measurement-impl:21.5.0")
             force("com.google.android.gms:play-services-measurement-sdk-api:21.5.0")
+            
+            // 【追加】AGP 7.4.2 と互換性のある AndroidX バージョンへ強制的・一括固定
+            force("androidx.activity:activity:1.8.2")
+            force("androidx.activity:activity-ktx:1.8.2")
+            force("androidx.appcompat:appcompat:1.6.1")
+            force("androidx.navigationevent:navigationevent:1.0.0-alpha01")
         }
     }
 }
