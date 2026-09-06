@@ -23,10 +23,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
-
-      - name: Build with Gradle
-        run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache --info
-
-          
+               
      # - name: Build with Gradle
-     #   run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache
+     #   run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache --info
+          
+      - name: Build with Gradle
+        run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache
+        
