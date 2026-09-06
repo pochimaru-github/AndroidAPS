@@ -128,7 +128,7 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
                     actionHelper.updateSelection(position, entry, holder.binding.cbRemove.isChecked)
                 }
             }
-            holder.binding.root.setOnLongClickListener {
+            holder.binding.root.setOnLongClickListener { view ->
                 if (actionHelper.isNoAction) {
                     val actualBg = iobCobCalculator.ads.actualBg()
                     val profile = profileFunction.getProfile()
@@ -141,15 +141,19 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
 
                         if (wizard.calculatedTotalInsulin > 0.0 && quickWizardEntry.carbs() > 0.0) {
                             val carbsAfterConstraints = constraintChecker.applyCarbsConstraints(ConstraintObject(quickWizardEntry.carbs(), aapsLogger)).value()
-                            if (abs(wizard.insulinAfterConstraints - wizard.calculatedTotalInsulin) >= pump.pumpDescription.pumpType.determineCorrectBolusStepSize(wizard.insulinAfterConstraints) || carbsAfterConstraints != quickWizardEntry.carbs()) {
+                            val stepSize = pump.pumpDescription.pumpType.determineCorrectBolusStepSize(wizard.insulinAfterConstraints)
+                            val violatesInsulin = abs(wizard.insulinAfterConstraints - wizard.calculatedTotalInsulin) >= stepSize
+                            val violatesCarbs = carbsAfterConstraints != quickWizardEntry.carbs()
+
+                            if (violatesInsulin || violatesCarbs) {
+                                val errorMsg = "${rh.gs(R.string.constraints_violation)}\n${rh.gs(R.string.change_your_input)}"
                                 OKDialog.show(
-                                    it.context, rh.gs(app.aaps.core.ui.R.string.treatmentdeliveryerror), rh.gs(R.string.constraints_violation) + "\n" + rh.gs(
-                                        R.string
-                                            .change_your_input
-                                    )
+                                    view.context,
+                                    rh.gs(app.aaps.core.ui.R.string.treatmentdeliveryerror),
+                                    errorMsg
                                 )
                             }
-                            wizard.confirmAndExecute(it.context, quickWizardEntry)
+                            wizard.confirmAndExecute(view.context, quickWizardEntry)
                         }
                     }
                     return@setOnLongClickListener true
