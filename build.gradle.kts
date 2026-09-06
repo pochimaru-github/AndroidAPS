@@ -26,6 +26,7 @@ plugins {
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.kotlin.android) apply false
 }
+
 subprojects {
     plugins.withId("com.android.library") {
         configure<com.android.build.gradle.LibraryExtension> {
@@ -37,21 +38,6 @@ subprojects {
             }
         }
     }
-
-    // 全サブプロジェクトで Play Services および AndroidX のバージョンを強制固定
-    configurations.all {
-        resolutionStrategy {
-            force("com.google.android.gms:play-services-measurement-api:21.5.0")
-            force("com.google.android.gms:play-services-measurement-impl:21.5.0")
-            force("com.google.android.gms:play-services-measurement-sdk-api:21.5.0")
-            
-            // 【追加】AGP 7.4.2 と互換性のある AndroidX バージョンへ強制的・一括固定
-            force("androidx.activity:activity:1.8.2")
-            force("androidx.activity:activity-ktx:1.8.2")
-            force("androidx.appcompat:appcompat:1.6.1")
-            force("androidx.navigationevent:navigationevent:1.0.0-alpha01")
-        }
-    }
 }
 
 allprojects {
@@ -60,7 +46,36 @@ allprojects {
         google()
         maven("https://jitpack.io")
     }
-    
+
+    // 全モジュール・全構成で AndroidX / Play Services / Kotlin のバージョンを強制固定
+    configurations.all {
+        resolutionStrategy {
+            // AndroidX / Play Services の固定
+            force("androidx.activity:activity:1.8.2")
+            force("androidx.activity:activity-ktx:1.8.2")
+            force("androidx.appcompat:appcompat:1.6.1")
+            force("com.google.android.gms:play-services-measurement-api:21.5.0")
+            force("com.google.android.gms:play-services-measurement-impl:21.5.0")
+            force("com.google.android.gms:play-services-measurement-sdk-api:21.5.0")
+
+            // Kotlin 関連の固定 (2.1.20 等の混入による metadata エラーを回避)
+            force("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
+            force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22")
+            force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22")
+            force("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
+
+            // 自動引き込み依存関係の強制制御
+            eachDependency {
+                if (requested.group == "androidx.activity") {
+                    useVersion("1.8.2")
+                }
+                if (requested.group == "androidx.appcompat") {
+                    useVersion("1.6.1")
+                }
+            }
+        }
+    }
+
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
@@ -74,7 +89,7 @@ allprojects {
         }
     }
 
-    // 【追加】KSP プラグインが適用されている全モジュールへ Kotlin 1.9 / JVM 11 設定を伝播させる
+    // KSP プラグインが適用されている全モジュールへ Kotlin 1.9 / JVM 11 設定を伝播させる
     plugins.withId("com.google.devtools.ksp") {
         configure<com.google.devtools.ksp.gradle.KspExtension> {
             arg("kotlin.language.version", "1.9")
