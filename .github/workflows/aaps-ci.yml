@@ -23,10 +23,11 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
-               
-     # - name: Build with Gradle
-     #   run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache --info
-          
+
+      # ビルド実行前に全モジュールの Vector XML 内の ?attr/... を #FFFFFF へ自動置換
+      - name: Replace dynamic theme attributes in Vector Drawables
+        run: |
+          find . -type f -path "*/src/main/res/drawable*/*.xml" -exec sed -i -E 's/"\?attr\/[^"]+"/"#FFFFFF"/g' {} +
+
       - name: Build with Gradle
         run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache
-        
