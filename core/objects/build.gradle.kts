@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    id("kotlin-kapt") // ← 【変更】alias(libs.plugins.ksp) から kapt へ変更
     id("kotlin-android")
     id("kotlin-parcelize")
     id("android-module-dependencies")
@@ -41,6 +41,7 @@ dependencies {
     //WorkManager
     api(libs.androidx.work.runtime)  // DataWorkerStorage
 
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    // 【変更】Dagger アノテーションプロセッサを ksp から kapt へ変更
+    kapt(libs.com.google.dagger.compiler)
+    kapt(libs.com.google.dagger.android.processor)
 }
