@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    // 【修正箇所 1】 alias(libs.plugins.ksp) を削除（またはコメントアウト）し、id("kotlin-kapt") を追加
+    id("kotlin-kapt")
     id("kotlin-android")
     id("android-module-dependencies")
     id("test-module-dependencies")
@@ -21,6 +22,7 @@ dependencies {
     api(libs.com.google.dagger.android.support)
     api(libs.com.google.android.material)
 
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    // 【修正箇所 2】 ksp(...) を kapt(...) に変更
+    kapt(libs.com.google.dagger.compiler)
+    kapt(libs.com.google.dagger.android.processor)
 }
