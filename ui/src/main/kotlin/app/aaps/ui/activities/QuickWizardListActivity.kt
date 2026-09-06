@@ -79,9 +79,9 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
         itemTouchHelper.startDrag(viewHolder)
     }
 
-    private inner class RecyclerViewAdapter(var fragmentManager: FragmentManager) : RecyclerView.Adapter<RecyclerViewAdapter.QuickWizardEntryViewHolder>(), ItemTouchHelperAdapter {
+    class QuickWizardEntryViewHolder(val binding: QuickwizardListItemBinding) : RecyclerView.ViewHolder(binding.root)
 
-        private inner class QuickWizardEntryViewHolder(val binding: QuickwizardListItemBinding) : RecyclerView.ViewHolder(binding.root)
+    private inner class RecyclerViewAdapter(var fragmentManager: FragmentManager) : RecyclerView.Adapter<QuickWizardEntryViewHolder>(), ItemTouchHelperAdapter {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuickWizardEntryViewHolder {
             val binding = QuickwizardListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -104,16 +104,19 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
                 holder.binding.device.visibility = View.GONE
             } else {
                 holder.binding.device.visibility = View.VISIBLE
-                holder.binding.device.setImageResource(
-                    when (quickWizard[position].device()) {
-                        QuickWizardEntry.DEVICE_WATCH -> app.aaps.core.objects.R.drawable.ic_watch
-                        else                          -> app.aaps.core.objects.R.drawable.ic_smartphone
-                    }
-                )
-                holder.binding.device.contentDescription = when (quickWizard[position].device()) {
-                    QuickWizardEntry.DEVICE_WATCH -> rh.gs(R.string.a11y_only_on_watch)
-                    else                          -> rh.gs(R.string.a11y_only_on_phone)
+                val resId = if (quickWizard[position].device() == QuickWizardEntry.DEVICE_WATCH) {
+                    app.aaps.core.objects.R.drawable.ic_watch
+                } else {
+                    app.aaps.core.objects.R.drawable.ic_smartphone
                 }
+                holder.binding.device.setImageResource(resId)
+                
+                val desc = if (quickWizard[position].device() == QuickWizardEntry.DEVICE_WATCH) {
+                    rh.gs(R.string.a11y_only_on_watch)
+                } else {
+                    rh.gs(R.string.a11y_only_on_phone)
+                }
+                holder.binding.device.contentDescription = desc
             }
             holder.binding.root.setOnClickListener {
                 if (actionHelper.isNoAction) {
@@ -248,7 +251,6 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
 
     private fun removeSelected(selectedItems: SparseArray<QuickWizardEntry>) {
         OKDialog.showConfirmation(this, rh.gs(app.aaps.core.ui.R.string.removerecord), getConfirmationText(selectedItems), Runnable {
-            //fix for bug with removal of QuickWizardEntries. Everytime and item is deleted you have to shift the position of to-be-deleted QW to left
             var shiftPositionToLeftFor = 0
             selectedItems.forEach { _, item ->
                 quickWizard.remove(item.position - shiftPositionToLeftFor)
@@ -267,5 +269,4 @@ class QuickWizardListActivity : TranslatedDaggerAppCompatActivity(), OnStartDrag
         }
         return rh.gs(app.aaps.core.ui.R.string.confirm_remove_multiple_items, selectedItems.size())
     }
-
 }
