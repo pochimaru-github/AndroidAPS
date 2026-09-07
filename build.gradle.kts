@@ -96,13 +96,9 @@ allprojects {
         }
     }
 
-    // KSP プラグインのプロセッサ検索エラー（No providers found）回避設定
+    // 全サブプロジェクトの ksp 設定および依存関係を kapt に統一
     plugins.withId("com.google.devtools.ksp") {
-        configure<com.google.devtools.ksp.gradle.KspExtension> {
-            arg("kotlin.language.version", "1.9")
-            arg("kotlin.api.version", "1.9")
-            arg("ksp.incremental", "false")
-        }
+        plugins.apply("kotlin-kapt")
     }
 
     gradle.projectsEvaluated {
