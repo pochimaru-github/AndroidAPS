@@ -524,7 +524,7 @@ class IobCobCalculatorPlugin @Inject constructor(
         val total = IobTotal(toTime)
         val profile = profileFunction.getProfile() ?: return total
         val dia = profile.dia
-        val divisor = preferences.get(DoubleKey.ApsAmaBolusSnoozeDivisor)
+        val divisor = preferences.get(DoubleKey.ApsAmaBolusSnoozeDivisor) ?: 2.0
         assert(divisor > 0)
 
         val boluses = persistenceLayer.getBolusesFromTime(toTime - range(), true).blockingGet()
@@ -549,6 +549,7 @@ class IobCobCalculatorPlugin @Inject constructor(
         total.plus(calculateIobToTimeFromExtendedBoluses(toTime))
         return total
     }
+ 
 
     private fun calculateIobToTimeFromExtendedBoluses(toTime: Long): IobTotal {
         val total = IobTotal(toTime)
