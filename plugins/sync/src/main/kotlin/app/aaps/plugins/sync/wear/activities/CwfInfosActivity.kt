@@ -176,11 +176,13 @@ class PrefRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: CwfPrefViewHolder, position: Int) {
         val pref = prefList[position]
-        val key = pref.first
-        val value = pref.second.lowercase().toBooleanStrictOrNull()
-        with(holder.binding) {
-            prefLabel.text = rh.gs(key.label)
-            value?.let { prefValue.setImageResource(if (it) R.drawable.settings_on else R.drawable.settings_off) }
+        val key: CwfMetadataKey = pref.first
+        val valueStr: String = pref.second
+        val valueBool: Boolean? = valueStr.lowercase().toBooleanStrictOrNull()
+
+        holder.binding.prefLabel.text = rh.gs(key.label)
+        valueBool?.let {
+            holder.binding.prefValue.setImageResource(if (it) R.drawable.settings_on else R.drawable.settings_off)
         }
     }
 }
@@ -205,42 +207,14 @@ class ViewRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: CwfViewHolder, position: Int) {
         val cwfView = viewList[position]
-        val key = cwfView.first.key
-        val value = cwfView.first.comment
-        with(holder.binding) {
-            viewKey.text = "\"$key\":"
-            viewComment.text = rh.gs(value)
-        }
+        val viewKeyObj: ViewKeys = cwfView.first
+        val keyName: String = viewKeyObj.key
+        val commentResId: Int = viewKeyObj.comment
+
+        holder.binding.viewKey.text = "\"$keyName\":"
+        holder.binding.viewComment.text = rh.gs(commentResId)
     }
 }
-
-    class ViewRecyclerViewAdapter(
-        private var viewList: List<Pair<ViewKeys, Boolean>>,
-        private val rh: ResourceHelper
-    ) : RecyclerView.Adapter<ViewRecyclerViewAdapter.CwfViewHolder>() {
-
-        class CwfViewHolder(val binding: CwfInfosActivityViewItemBinding) : RecyclerView.ViewHolder(binding.root) {
-            init {
-                binding.root.isClickable = false
-            }
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CwfViewHolder {
-            val binding = CwfInfosActivityViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            return CwfViewHolder(binding)
-        }
-
-        override fun getItemCount(): Int = viewList.size
-
-        override fun onBindViewHolder(holder: CwfViewHolder, position: Int) {
-            val cwfView = viewList[position]
-            val key = cwfView.first.key
-            val value = cwfView.first.comment
-            with(holder.binding) {
-                viewKey.text = "\"$key\":"
-                viewComment.text = rh.gs(value)
-            }
-        }
     }
 
     private fun checkCustomVersion(metadata: CwfMetadataMap): Boolean {
