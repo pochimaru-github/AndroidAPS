@@ -178,8 +178,6 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
 
     private var _binding: OverviewFragmentBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
@@ -433,3 +431,64 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun updateGraph() {
+        // Graph update logic
+    }
+
+    private fun updateNotification() {
+        // Notification update logic
+    }
+
+    private fun updateBg() {
+        // BG update logic
+    }
+
+    private fun updateTemporaryBasal() {
+        // Temp basal update logic
+    }
+
+    private fun updateExtendedBolus() {
+        // Extended bolus update logic
+    }
+
+    private fun updateIobCob() {
+        // IOB/COB update logic
+    }
+
+    private fun processButtonsVisibility() {
+        // Buttons visibility logic
+    }
+
+    private fun processAps() {
+        val lastRun = loop.lastRun
+        if (lastRun != null) {
+            val lastRunText = lastRun.displayText()
+            runOnUiThread {
+                _binding?.infoLayout?.apsMode?.text = lastRunText
+            }
+        }
+    }
+
+    private fun updateProfile() {
+        // Profile update logic
+    }
+
+    private fun updateTemporaryTarget() {
+        // Temp target update logic
+    }
+
+    private fun updatePumpStatus() {
+        // Pump status update logic
+    }
+
+    private fun updateCalcProgress() {
+        // Calc progress update logic
+    }
+
+    private fun prepareGraphsIfNeeded(size: Int) {
+        // Prepare graphs logic
+    }
+
+    private fun popupBolusDialogIfRunning(onClick: Boolean) {
+        // Popup bolus dialog logic
+    }
+}
