@@ -85,7 +85,7 @@ class BGSourceFragment : DaggerFragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = BgListAdapter()
+        adapter = BgListAdapter(dateUtil, profileUtil, rh, actionHelper)
         binding.recyclerview.setHasFixedSize(true)
         binding.recyclerview.layoutManager = LinearLayoutManager(view.context)
         binding.recyclerview.adapter = adapter
@@ -144,7 +144,12 @@ class BGSourceFragment : DaggerFragment(), MenuProvider {
         if (actionHelper.onOptionsItemSelected(item)) true
         else super.onContextItemSelected(item)
 
-    inner class BgListAdapter : ListAdapter<GVWithLabel, BgListAdapter.GlucoseValuesViewHolder>(GlucoseValueDiffCallback()) {
+    class BgListAdapter(
+        private val dateUtil: DateUtil,
+        private val profileUtil: ProfileUtil,
+        private val rh: ResourceHelper,
+        private val actionHelper: ActionModeHelper<GV>
+    ) : ListAdapter<GVWithLabel, BgListAdapter.GlucoseValuesViewHolder>(GlucoseValueDiffCallback()) {
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): GlucoseValuesViewHolder {
             val v = LayoutInflater.from(viewGroup.context).inflate(R.layout.source_item, viewGroup, false)
@@ -167,7 +172,7 @@ class BGSourceFragment : DaggerFragment(), MenuProvider {
                 val previous = getItem(position - 1).gv
                 val diff = previous.timestamp - glucoseValue.timestamp
                 if (diff < T.secs(20).msecs())
-                    holder.binding.root.setBackgroundColor(rh.gac(context, app.aaps.core.ui.R.attr.bgsourceError))
+                    holder.binding.root.setBackgroundColor(rh.gac(holder.itemView.context, app.aaps.core.ui.R.attr.bgsourceError))
             }
 
             holder.binding.root.setOnLongClickListener {
@@ -191,8 +196,7 @@ class BGSourceFragment : DaggerFragment(), MenuProvider {
             holder.binding.cbRemove.visibility = actionHelper.isRemoving.toVisibility()
         }
 
-        inner class GlucoseValuesViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
+        class GlucoseValuesViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val binding = SourceItemBinding.bind(view)
         }
     }
