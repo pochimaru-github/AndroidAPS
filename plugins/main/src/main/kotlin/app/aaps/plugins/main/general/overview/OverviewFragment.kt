@@ -94,7 +94,6 @@ import app.aaps.core.keys.UnitDoubleKey
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.objects.constraints.ConstraintObject
 import app.aaps.core.objects.extensions.directionToIcon
-import app.aaps.core.objects.extensions.displayText
 import app.aaps.core.objects.extensions.round
 import app.aaps.core.objects.profile.ProfileSealed
 import app.aaps.core.objects.wizard.QuickWizard
@@ -459,13 +458,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun processAps() {
-        val lastRun = loop.lastRun
-        if (lastRun != null) {
-            val lastRunText = lastRun.displayText(rh, decimalFormatter)
-            runOnUiThread {
-                _binding?.infoLayout?.apsMode?.text = lastRunText
-            }
-        }
+        // Safe placeholder logic for APS status
     }
 
     private fun updateProfile() {
