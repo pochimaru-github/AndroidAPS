@@ -161,11 +161,13 @@ class PrefRecyclerViewAdapter(
     private val rh: ResourceHelper
 ) : RecyclerView.Adapter<PrefRecyclerViewAdapter.CwfPrefViewHolder>() {
 
-    class CwfPrefViewHolder(val binding: CwfInfosActivityPrefItemBinding) : RecyclerView.ViewHolder(binding.root)
+    class CwfPrefViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val binding = CwfInfosActivityPrefItemBinding.bind(view)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CwfPrefViewHolder {
-        val binding = CwfInfosActivityPrefItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return CwfPrefViewHolder(binding)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.cwf_infos_activity_pref_item, parent, false)
+        return CwfPrefViewHolder(view)
     }
 
     override fun getItemCount(): Int = prefList.size
@@ -190,11 +192,13 @@ class ViewRecyclerViewAdapter(
     private val rh: ResourceHelper
 ) : RecyclerView.Adapter<ViewRecyclerViewAdapter.CwfViewHolder>() {
 
-    class CwfViewHolder(val binding: CwfInfosActivityViewItemBinding) : RecyclerView.ViewHolder(binding.root)
+    class CwfViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val binding = CwfInfosActivityViewItemBinding.bind(view)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CwfViewHolder {
-        val binding = CwfInfosActivityViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return CwfViewHolder(binding)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.cwf_infos_activity_view_item, parent, false)
+        return CwfViewHolder(view)
     }
 
     override fun getItemCount(): Int = viewList.size
