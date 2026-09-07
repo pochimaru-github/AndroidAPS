@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
     id("kotlin-android")
-    id("kotlin-kapt")
     id("kotlin-parcelize")
     id("android-module-dependencies")
     id("test-module-dependencies")
@@ -27,7 +26,7 @@ dependencies {
     testImplementation(project(":shared:tests"))
     testImplementation(project(":implementation"))
 
-    //WorkManager
+    // WorkManager
     api(libs.androidx.work.runtime)
     // Maintenance
     api(libs.androidx.gridlayout)
@@ -37,6 +36,4 @@ dependencies {
 
     // Chrome Custom Tabs for OAuth flow
     api(libs.androidx.browser)
-
-    kapt(libs.com.google.dagger.compiler)
 }
