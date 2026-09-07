@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
     id("kotlin-android")
+    id("kotlin-kapt")
     id("android-module-dependencies")
     id("test-module-dependencies")
     id("jacoco-module-dependencies")
@@ -10,7 +11,7 @@ plugins {
 android {
     namespace = "app.aaps.shared.impl"
     defaultConfig {
-        minSdk = 26 // ← 直値 26 へ書き換え
+        minSdk = 26
     }
 }
 
@@ -20,7 +21,7 @@ dependencies {
     implementation(project(":core:keys"))
     implementation(project(":core:utils"))
 
-    //Logger
+    // Logger
     api(libs.org.slf4j.api)
     api(libs.com.github.tony19.logback.android)
 
@@ -31,7 +32,8 @@ dependencies {
     api(libs.io.reactivex.rxjava3.rxandroid)
     api(libs.net.danlew.android.joda)
 
+    // Dagger Dependencies
     api(libs.com.google.dagger.android.support)
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    kapt(libs.com.google.dagger.compiler)
+    kapt(libs.com.google.dagger.android.processor)
 }
