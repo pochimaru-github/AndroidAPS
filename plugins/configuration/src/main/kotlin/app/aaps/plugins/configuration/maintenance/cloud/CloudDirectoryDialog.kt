@@ -344,10 +344,9 @@ class CloudDirectoryDialog @Inject constructor(
         cloudPathText: TextView
     ) {
         val provider = cloudStorageManager.getProvider(StorageTypes.GOOGLE_DRIVE)
-        val hasCredentials = provider?.hasValidCredentials() == true
-        val hasConnectionError = cloudStorageManager.hasConnectionError()
-        
-        if (hasCredentials) {
+        if (provider != null && provider.hasValidCredentials()) {
+            val hasConnectionError = cloudStorageManager.hasConnectionError()
+            
             // Show authorization status section
             authStatusSection.visibility = View.VISIBLE
             
