@@ -113,7 +113,7 @@ class OverviewDataImpl @Inject constructor(
         val tz = TimeZone.currentSystemDefault()
         val now = Instant.fromEpochMilliseconds(System.currentTimeMillis())
         val local = now.toLocalDateTime(tz)
-        val truncatedHour = LocalDateTime(local.year, local.month, local.day, local.hour, 0)
+        val truncatedHour = LocalDateTime(local.year, local.month, local.dayOfMonth, local.hour, 0)
         val nextFullHour = truncatedHour.toInstant(tz).plus(1, DateTimeUnit.HOUR, tz)
 
         toTime = nextFullHour.toEpochMilliseconds() + 100000 // a little bit more to avoid wrong rounding - GraphView specific
