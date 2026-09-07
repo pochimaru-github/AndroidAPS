@@ -22,8 +22,14 @@ import app.aaps.core.ui.extensions.scanForActivity
 import app.aaps.core.ui.extensions.toVisibility
 import javax.inject.Inject
 
-class SWEditEncryptedPassword @Inject constructor(aapsLogger: AAPSLogger, rh: ResourceHelper, rxBus: RxBus, preferences: Preferences, passwordCheck: PasswordCheck, private val cryptoUtil: CryptoUtil) :
-    SWItem(aapsLogger, rh, rxBus, preferences, passwordCheck) {
+class SWEditEncryptedPassword @Inject constructor(
+    aapsLogger: AAPSLogger,
+    rh: ResourceHelper,
+    rxBus: RxBus,
+    preferences: Preferences,
+    passwordCheck: PasswordCheck,
+    private val cryptoUtil: CryptoUtil
+) : SWItem(aapsLogger, rh, rxBus, preferences, passwordCheck) {
 
     private var validator: (String) -> Boolean = String::isNotEmpty
     private var updateDelay = 0L
@@ -31,11 +37,43 @@ class SWEditEncryptedPassword @Inject constructor(aapsLogger: AAPSLogger, rh: Re
     override fun generateDialog(layout: LinearLayout) {
         val context = layout.context
         val isPasswordSet = preferences.getIfExists(StringKey.ProtectionMasterPassword).isNullOrEmpty().not()
-        var editText: EditText? = null
-        var editText2: EditText? = null
-        var l: TextView? = null
-        var c: TextView? = null
-        var c2: TextView? = null
+
+        val createdEditText = EditText(context).apply {
+            id = View.generateViewId()
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            maxLines = 1
+            visibility = isPasswordSet.not().toVisibility()
+        }
+
+        val createdEditText2 = EditText(context).apply {
+            id = View.generateViewId()
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            maxLines = 1
+            visibility = isPasswordSet.not().toVisibility()
+        }
+
+        val createdL: TextView? = label?.let {
+            TextView(context).apply {
+                id = View.generateViewId()
+                setText(it)
+                setTypeface(typeface, Typeface.BOLD)
+            }
+        }
+
+        val createdC: TextView? = comment?.let {
+            TextView(context).apply {
+                id = View.generateViewId()
+                setText(it)
+                setTypeface(typeface, Typeface.ITALIC)
+                visibility = isPasswordSet.not().toVisibility()
+            }
+        }
+
+        val createdC2 = TextView(context).apply {
+            id = View.generateViewId()
+            setText(R.string.confirm)
+            visibility = isPasswordSet.not().toVisibility()
+        }
 
         val button = Button(context)
         button.setText(R.string.unlock_settings)
@@ -43,55 +81,22 @@ class SWEditEncryptedPassword @Inject constructor(aapsLogger: AAPSLogger, rh: Re
             context.scanForActivity()?.let { activity ->
                 passwordCheck.queryPassword(activity, R.string.master_password, StringKey.ProtectionMasterPassword, {
                     button.visibility = View.GONE
-                    editText?.visibility = View.VISIBLE
-                    editText2?.visibility = View.VISIBLE
-                    l?.visibility = View.VISIBLE
-                    c?.visibility = View.VISIBLE
-                    c2?.visibility = View.VISIBLE
+                    createdEditText.visibility = View.VISIBLE
+                    createdEditText2.visibility = View.VISIBLE
+                    createdL?.visibility = View.VISIBLE
+                    createdC?.visibility = View.VISIBLE
+                    createdC2.visibility = View.VISIBLE
                 })
             }
         }
         button.visibility = isPasswordSet.toVisibility()
         layout.addView(button)
 
-        label?.let {
-            l = TextView(context)
-            l.id = View.generateViewId()
-            l.setText(it)
-            l.setTypeface(l.typeface, Typeface.BOLD)
-            layout.addView(l)
-        }
-
-        comment?.let {
-            c = TextView(context)
-            c.id = View.generateViewId()
-            c.setText(it)
-            c.setTypeface(c.typeface, Typeface.ITALIC)
-            c.visibility = isPasswordSet.not().toVisibility()
-            layout.addView(c)
-        }
-
-        editText = EditText(context)
-        editText.id = View.generateViewId()
-        editText.inputType = InputType.TYPE_CLASS_TEXT
-        editText.maxLines = 1
-        editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-        editText.visibility = isPasswordSet.not().toVisibility()
-        layout.addView(editText)
-
-        c2 = TextView(context)
-        c2.id = View.generateViewId()
-        c2.setText(R.string.confirm)
-        c2.visibility = isPasswordSet.not().toVisibility()
-        layout.addView(c2)
-
-        editText2 = EditText(context)
-        editText2.id = View.generateViewId()
-        editText2.inputType = InputType.TYPE_CLASS_TEXT
-        editText2.maxLines = 1
-        editText2.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-        editText2.visibility = isPasswordSet.not().toVisibility()
-        layout.addView(editText2)
+        createdL?.let { layout.addView(it) }
+        createdC?.let { layout.addView(it) }
+        layout.addView(createdEditText)
+        layout.addView(createdC2)
+        layout.addView(createdEditText2)
 
         super.generateDialog(layout)
         val watcher = object : TextWatcher {
@@ -99,14 +104,14 @@ class SWEditEncryptedPassword @Inject constructor(aapsLogger: AAPSLogger, rh: Re
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 preferences.remove(preference as StringPreferenceKey)
                 scheduleChange(updateDelay)
-                if (validator.invoke(editText.text.toString()) && validator.invoke(editText2.text.toString()) && editText.text.toString() == editText2.text.toString())
+                if (validator.invoke(createdEditText.text.toString()) && validator.invoke(createdEditText2.text.toString()) && createdEditText.text.toString() == createdEditText2.text.toString())
                     save(s.toString(), updateDelay)
             }
 
             override fun afterTextChanged(s: Editable) {}
         }
-        editText.addTextChangedListener(watcher)
-        editText2.addTextChangedListener(watcher)
+        createdEditText.addTextChangedListener(watcher)
+        createdEditText2.addTextChangedListener(watcher)
     }
 
     fun preference(preference: StringKey): SWEditEncryptedPassword {
