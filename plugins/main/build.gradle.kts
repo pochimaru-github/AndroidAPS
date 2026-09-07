@@ -54,5 +54,4 @@ dependencies {
     api(libs.androidx.work.runtime)
 
     kapt(libs.com.google.dagger.compiler)
-    kapt(libs.com.google.dagger.android.processor)
 }
