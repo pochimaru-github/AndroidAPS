@@ -114,23 +114,25 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
                 binding.prefTitle.text = rh.gs(if (cwfAuthorization) R.string.cwf_infos_pref_locked else R.string.cwf_infos_pref_required)
                 binding.prefRecyclerview.layoutManager = LinearLayoutManager(this)
                 binding.prefRecyclerview.adapter = PrefRecyclerViewAdapter(
-                    metadata.filter { it.key.isPref && (it.value.lowercase() == "true" || it.value.lowercase() == "false") }.toList()
+                    metadata.filter { it.key.isPref && (it.value.lowercase() == "true" || it.value.lowercase() == "false") }.toList(),
+                    rh
                 )
             } else
                 binding.prefLayout.visibility = View.GONE
             binding.viewRecyclerview.layoutManager = LinearLayoutManager(this)
-            binding.viewRecyclerview.adapter = ViewRecyclerViewAdapter(listVisibleView(it.json))
+            binding.viewRecyclerview.adapter = ViewRecyclerViewAdapter(listVisibleView(it.json), rh)
         }
 
     }
 
-    inner class PrefRecyclerViewAdapter internal constructor(private var prefList: List<Pair<CwfMetadataKey, String>>) : RecyclerView.Adapter<PrefRecyclerViewAdapter.CwfPrefViewHolder>() {
+class PrefRecyclerViewAdapter(
+        private var prefList: List<Pair<CwfMetadataKey, String>>,
+        private val rh: ResourceHelper
+    ) : RecyclerView.Adapter<PrefRecyclerViewAdapter.CwfPrefViewHolder>() {
 
-        inner class CwfPrefViewHolder(val cwfInfosActivityPrefItemBinding: CwfInfosActivityPrefItemBinding) : RecyclerView.ViewHolder(cwfInfosActivityPrefItemBinding.root) {
+        class CwfPrefViewHolder(val binding: CwfInfosActivityPrefItemBinding) : RecyclerView.ViewHolder(binding.root) {
             init {
-                with(cwfInfosActivityPrefItemBinding) {
-                    root.isClickable = false
-                }
+                binding.root.isClickable = false
             }
         }
 
@@ -139,28 +141,27 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
             return CwfPrefViewHolder(binding)
         }
 
-        override fun getItemCount(): Int {
-            return prefList.size
-        }
+        override fun getItemCount(): Int = prefList.size
 
         override fun onBindViewHolder(holder: CwfPrefViewHolder, position: Int) {
             val pref = prefList[position]
             val key = pref.first
-            val value = pref.second.lowercase().toBooleanStrictOrNull()                                                     // should never be null here, just safety to avoid exception
-            with(holder.cwfInfosActivityPrefItemBinding) {
+            val value = pref.second.lowercase().toBooleanStrictOrNull()
+            with(holder.binding) {
                 prefLabel.text = rh.gs(key.label)
-                value?.let { prefValue.setImageResource(if (it) R.drawable.settings_on else R.drawable.settings_off) }// should never be null here, just safety to avoid exception
+                value?.let { prefValue.setImageResource(if (it) R.drawable.settings_on else R.drawable.settings_off) }
             }
         }
     }
 
-    inner class ViewRecyclerViewAdapter internal constructor(private var viewList: List<Pair<ViewKeys, Boolean>>) : RecyclerView.Adapter<ViewRecyclerViewAdapter.CwfViewHolder>() {
+    class ViewRecyclerViewAdapter(
+        private var viewList: List<Pair<ViewKeys, Boolean>>,
+        private val rh: ResourceHelper
+    ) : RecyclerView.Adapter<ViewRecyclerViewAdapter.CwfViewHolder>() {
 
-        inner class CwfViewHolder(val cwfInfosActivityViewItemBinding: CwfInfosActivityViewItemBinding) : RecyclerView.ViewHolder(cwfInfosActivityViewItemBinding.root) {
+        class CwfViewHolder(val binding: CwfInfosActivityViewItemBinding) : RecyclerView.ViewHolder(binding.root) {
             init {
-                with(cwfInfosActivityViewItemBinding) {
-                    root.isClickable = false
-                }
+                binding.root.isClickable = false
             }
         }
 
@@ -169,16 +170,13 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
             return CwfViewHolder(binding)
         }
 
-        override fun getItemCount(): Int {
-            return viewList.size
-        }
+        override fun getItemCount(): Int = viewList.size
 
         override fun onBindViewHolder(holder: CwfViewHolder, position: Int) {
             val cwfView = viewList[position]
             val key = cwfView.first.key
             val value = cwfView.first.comment
-            //val visible = cwfView.second        // will be used if all keys included into RecyclerView
-            with(holder.cwfInfosActivityViewItemBinding) {
+            with(holder.binding) {
                 viewKey.text = "\"$key\":"
                 viewComment.text = rh.gs(value)
             }
