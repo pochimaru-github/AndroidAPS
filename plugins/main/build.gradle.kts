@@ -10,6 +10,11 @@ plugins {
 
 android {
     namespace = "app.aaps.plugins.main"
+
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -36,7 +41,7 @@ dependencies {
     // Actions
     api(libs.androidx.gridlayout)
 
-    //SmsCommunicator
+    // SmsCommunicator
     api(libs.com.eatthepath.java.otp)
     api(libs.com.github.kenglxn.qrgen.android)
 
