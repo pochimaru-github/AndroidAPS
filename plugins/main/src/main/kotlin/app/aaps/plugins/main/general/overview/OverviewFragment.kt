@@ -461,7 +461,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     private fun processAps() {
         val lastRun = loop.lastRun
         if (lastRun != null) {
-            val lastRunText = lastRun.displayText()
+            val lastRunText = lastRun.displayText(rh, decimalFormatter)
             runOnUiThread {
                 _binding?.infoLayout?.apsMode?.text = lastRunText
             }
