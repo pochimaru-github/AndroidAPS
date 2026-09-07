@@ -1,4 +1,4 @@
-package app.aaps.plugins.source
+    package app.aaps.plugins.source
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -224,7 +224,7 @@ class BGSourceFragment : DaggerFragment(), MenuProvider {
     @SuppressLint("CheckResult")
     private fun removeSelected(selectedItems: SparseArray<GV>) {
         activity?.let { activity ->
-            OKDialog.showConfirmation(activity, rh.gs(app.aaps.core.ui.R.string.removerecord), getConfirmationText(selectedItems), {
+            OKDialog.showConfirmation(activity, rh.gs(app.aaps.core.ui.R.string.removerecord), getConfirmationText(selectedItems), Runnable {
                 selectedItems.forEach { _, glucoseValue ->
                     disposable += persistenceLayer.invalidateGlucoseValue(
                         glucoseValue.id, action = Action.BG_REMOVED,
