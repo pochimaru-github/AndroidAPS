@@ -212,7 +212,7 @@ class BGSourceFragment : DaggerFragment(), MenuProvider {
     private fun getConfirmationText(selectedItems: SparseArray<GV>): String {
         if (selectedItems.size == 1) {
             val glucoseValue = selectedItems.valueAt(0)
-            return dateUtil.dateAndTimeString(glucoseValue.timestamp) + "\n" + profileUtil.fromMgdlToUnits(glucoseValue.value.toDouble())
+            return dateUtil.dateAndTimeString(glucoseValue.timestamp) + "\n" + profileUtil.fromMgdlToStringInUnits(glucoseValue.value)
         }
         return rh.gs(app.aaps.core.ui.R.string.confirm_remove_multiple_items, selectedItems.size)
     }
