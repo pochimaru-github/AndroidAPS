@@ -329,7 +329,7 @@ class IobCobCalculatorPlugin @Inject constructor(
         }
         return ads.getLastAutosensData(reason, aapsLogger, dateUtil)
     }
-
+    
     override fun getCobInfo(reason: String): CobInfo {
         val autosensData = ads.getLastAutosensData(reason, aapsLogger, dateUtil)
         var displayCob: Double? = null
@@ -339,12 +339,16 @@ class IobCobCalculatorPlugin @Inject constructor(
         val carbs = persistenceLayer.getCarbsFromTimeExpanded(autosensData?.time ?: now, true)
         if (autosensData != null) {
             displayCob = autosensData.cob
+            var currentCob = displayCob
             carbs.forEach { carb ->
                 if (carb.timestamp > autosensData.time && carb.timestamp <= now) {
-                    displayCob = displayCob!! + carb.amount
-                    displayCob = max(displayCob, 0.0)
+                    if (currentCob != null) {
+                        currentCob += carb.amount
+                        currentCob = max(currentCob, 0.0)
+                    }
                 }
             }
+            displayCob = currentCob
             timestamp = autosensData.time
         }
         // Future carbs
