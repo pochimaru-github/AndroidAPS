@@ -122,37 +122,97 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
             binding.viewRecyclerview.layoutManager = LinearLayoutManager(this)
             binding.viewRecyclerview.adapter = ViewRecyclerViewAdapter(listVisibleView(it.json), rh)
         }
-
     }
 
+    private fun checkCustomVersion(metadata: CwfMetadataMap): Boolean {
+        metadata[CwfMetadataKey.CWF_VERSION]?.let { version ->
+            val currentAppVer = versionCheckerUtils.versionDigits(CUSTOM_VERSION)
+            val metadataVer = versionCheckerUtils.versionDigits(version)
+            //Only check that Loaded Watchface version is lower or equal to Wear CustomWatchface version
+            return ((currentAppVer.size >= 2) && (metadataVer.size >= 2) && (currentAppVer[0] >= metadataVer[0]))
+        }
+        return false
+    }
+
+    private fun listVisibleView(jsonString: String, allViews: Boolean = false): List<Pair<ViewKeys, Boolean>> {
+        val json = JSONObject(jsonString)
+
+        val visibleKeyPairs = mutableListOf<Pair<ViewKeys, Boolean>>()
+
+        for (viewKey in ViewKeys.entries) {
+            try {
+                val jsonValue = json.optJSONObject(viewKey.key)
+                if (jsonValue != null) {
+                    val visibility = jsonValue.optString(JsonKeys.VISIBILITY.key) == JsonKeyValues.VISIBLE.key
+                    if (visibility || allViews)
+                        visibleKeyPairs.add(Pair(viewKey, visibility))
+                }
+            } catch (_: Exception) {
+                aapsLogger.debug(LTag.WEAR, "Wrong key in json file: ${viewKey.key}")
+            }
+        }
+        return visibleKeyPairs
+    }
+} // ← CwfInfosActivity の閉じカッコ
+
+// ↓ ここから下（ファイルの最下部）に Adapter クラスを配置
 class PrefRecyclerViewAdapter(
-        private var prefList: List<Pair<CwfMetadataKey, String>>,
-        private val rh: ResourceHelper
-    ) : RecyclerView.Adapter<PrefRecyclerViewAdapter.CwfPrefViewHolder>() {
+    private var prefList: List<Pair<CwfMetadataKey, String>>,
+    private val rh: ResourceHelper
+) : RecyclerView.Adapter<PrefRecyclerViewAdapter.CwfPrefViewHolder>() {
 
-        class CwfPrefViewHolder(val binding: CwfInfosActivityPrefItemBinding) : RecyclerView.ViewHolder(binding.root) {
-            init {
-                binding.root.isClickable = false
-            }
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CwfPrefViewHolder {
-            val binding = CwfInfosActivityPrefItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            return CwfPrefViewHolder(binding)
-        }
-
-        override fun getItemCount(): Int = prefList.size
-
-        override fun onBindViewHolder(holder: CwfPrefViewHolder, position: Int) {
-            val pref = prefList[position]
-            val key = pref.first
-            val value = pref.second.lowercase().toBooleanStrictOrNull()
-            with(holder.binding) {
-                prefLabel.text = rh.gs(key.label)
-                value?.let { prefValue.setImageResource(if (it) R.drawable.settings_on else R.drawable.settings_off) }
-            }
+    class CwfPrefViewHolder(val binding: CwfInfosActivityPrefItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.root.isClickable = false
         }
     }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CwfPrefViewHolder {
+        val binding = CwfInfosActivityPrefItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return CwfPrefViewHolder(binding)
+    }
+
+    override fun getItemCount(): Int = prefList.size
+
+    override fun onBindViewHolder(holder: CwfPrefViewHolder, position: Int) {
+        val pref = prefList[position]
+        val key = pref.first
+        val value = pref.second.lowercase().toBooleanStrictOrNull()
+        with(holder.binding) {
+            prefLabel.text = rh.gs(key.label)
+            value?.let { prefValue.setImageResource(if (it) R.drawable.settings_on else R.drawable.settings_off) }
+        }
+    }
+}
+
+class ViewRecyclerViewAdapter(
+    private var viewList: List<Pair<ViewKeys, Boolean>>,
+    private val rh: ResourceHelper
+) : RecyclerView.Adapter<ViewRecyclerViewAdapter.CwfViewHolder>() {
+
+    class CwfViewHolder(val binding: CwfInfosActivityViewItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.root.isClickable = false
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CwfViewHolder {
+        val binding = CwfInfosActivityViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return CwfViewHolder(binding)
+    }
+
+    override fun getItemCount(): Int = viewList.size
+
+    override fun onBindViewHolder(holder: CwfViewHolder, position: Int) {
+        val cwfView = viewList[position]
+        val key = cwfView.first.key
+        val value = cwfView.first.comment
+        with(holder.binding) {
+            viewKey.text = "\"$key\":"
+            viewComment.text = rh.gs(value)
+        }
+    }
+}
 
     class ViewRecyclerViewAdapter(
         private var viewList: List<Pair<ViewKeys, Boolean>>,
