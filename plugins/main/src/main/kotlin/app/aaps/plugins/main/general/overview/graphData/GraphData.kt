@@ -103,7 +103,7 @@ class GraphData @Inject constructor(
     }
 
     fun addRunningModes() {
-        addSeries(overviewData.runningModesSeries as PointsWithLabelGraphSeries<DataPoint>)
+        addSeries(overviewData.runningModesSeries as PointsWithLabelGraphSeries<DataPointWithLabelInterface>)
     }
 
     fun addTreatments(context: Context?) {
