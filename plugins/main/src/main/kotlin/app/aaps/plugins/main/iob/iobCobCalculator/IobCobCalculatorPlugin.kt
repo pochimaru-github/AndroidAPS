@@ -339,16 +339,16 @@ class IobCobCalculatorPlugin @Inject constructor(
         val carbs = persistenceLayer.getCarbsFromTimeExpanded(autosensData?.time ?: now, true)
         if (autosensData != null) {
             displayCob = autosensData.cob
-            var currentCob = displayCob
-            if (currentCob != null) {
-                var safeCob = currentCob
-                carbs.forEach { carb ->
+            val initialCob = displayCob
+            if (initialCob != null) {
+                var calculatedCob = initialCob
+                for (carb in carbs) {
                     if (carb.timestamp > autosensData.time && carb.timestamp <= now) {
-                        safeCob += carb.amount
-                        safeCob = max(safeCob, 0.0)
+                        calculatedCob += carb.amount
+                        calculatedCob = max(calculatedCob, 0.0)
                     }
                 }
-                displayCob = safeCob
+                displayCob = calculatedCob
             }
             timestamp = autosensData.time
         }
