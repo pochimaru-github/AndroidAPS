@@ -213,9 +213,8 @@ class ViewRecyclerViewAdapter(
 
         holder.binding.viewKey.text = "\"$keyName\":"
         holder.binding.viewComment.text = rh.gs(commentResId)
-    }
+    } 
 }
-    }
 
     private fun checkCustomVersion(metadata: CwfMetadataMap): Boolean {
         metadata[CwfMetadataKey.CWF_VERSION]?.let { version ->
