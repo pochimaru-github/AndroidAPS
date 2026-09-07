@@ -13,7 +13,7 @@ import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.plugins.main.R
 import app.aaps.plugins.main.general.smsCommunicator.otp.OneTimePassword
 import app.aaps.plugins.main.general.smsCommunicator.otp.OneTimePasswordValidationResult
-import jakarta.inject.Inject
+import javax.inject.Inject
 
 class AuthRequest @Inject constructor(
     private val aapsLogger: AAPSLogger,
