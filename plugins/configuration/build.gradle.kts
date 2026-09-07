@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
     id("kotlin-android")
+    id("kotlin-kapt")
     id("kotlin-parcelize")
     id("android-module-dependencies")
     id("test-module-dependencies")
@@ -11,7 +12,6 @@ plugins {
 android {
     namespace = "app.aaps.plugins.configuration"
 }
-
 
 dependencies {
     implementation(project(":core:data"))
@@ -38,6 +38,6 @@ dependencies {
     // Chrome Custom Tabs for OAuth flow
     api(libs.androidx.browser)
 
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    kapt(libs.com.google.dagger.compiler)
+    kapt(libs.com.google.dagger.android.processor)
 }
