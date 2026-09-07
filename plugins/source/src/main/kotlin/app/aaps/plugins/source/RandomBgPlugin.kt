@@ -66,7 +66,7 @@ class RandomBgPlugin @Inject constructor(
 
     @VisibleForTesting
     var handler: Handler? = null
-    private var refreshLoop: Runnable
+    private lateinit var refreshLoop: Runnable
     private var wakeLock: PowerManager.WakeLock? = null
     private var interval = 5L // minutes
 
