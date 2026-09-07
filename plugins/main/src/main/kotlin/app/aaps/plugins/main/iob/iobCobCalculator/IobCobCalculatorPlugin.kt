@@ -341,7 +341,7 @@ class IobCobCalculatorPlugin @Inject constructor(
             displayCob = autosensData.cob
             val initialCob = displayCob
             if (initialCob != null) {
-                var calculatedCob = initialCob
+                var calculatedCob: Double = initialCob
                 for (carb in carbs) {
                     if (carb.timestamp > autosensData.time && carb.timestamp <= now) {
                         calculatedCob += carb.amount
