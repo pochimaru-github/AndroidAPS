@@ -56,7 +56,7 @@ class GlunovoPlugin @Inject constructor(
     var handler: Handler? = null
 
     @VisibleForTesting
-    var refreshLoop: Runnable
+    lateinit var refreshLoop: Runnable
 
     private val contentUri: Uri = "content://$AUTHORITY/$TABLE_NAME".toUri()
 
