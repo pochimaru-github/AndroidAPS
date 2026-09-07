@@ -9,6 +9,12 @@ plugins {
 
 android {
     namespace = "app.aaps.plugins.source"
+
+    // DataBinding と ViewBinding を有効化
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
+    }
 }
 
 dependencies {
