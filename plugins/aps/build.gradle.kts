@@ -9,6 +9,11 @@ plugins {
 
 android {
     namespace = "app.aaps.plugins.aps"
+
+    buildFeatures {
+        viewBinding = true
+        dataBinding = true
+    }
 }
 
 dependencies {
@@ -35,7 +40,7 @@ dependencies {
     //Logger
     api(libs.org.slf4j.api)
 
-    // Dagger (kapt 構成へ統一)
+    // Dagger (kapt 構成)
     implementation("com.google.dagger:dagger:2.50")
     implementation("com.google.dagger:dagger-android:2.50")
     implementation("com.google.dagger:dagger-android-support:2.50")
