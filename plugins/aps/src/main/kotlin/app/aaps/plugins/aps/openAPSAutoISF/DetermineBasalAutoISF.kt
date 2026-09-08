@@ -1,12 +1,12 @@
 package app.aaps.plugins.aps.openAPSAutoISF
 
-import app.aaps.plugins.aps.openaps.determinebasal.data.AutosensData
-import app.aaps.plugins.aps.openaps.determinebasal.data.DetermineBasalResult
-import app.aaps.plugins.aps.openaps.determinebasal.data.GlucoseStatus
-import app.aaps.plugins.aps.openaps.determinebasal.data.IobStatus
-import app.aaps.plugins.aps.openaps.determinebasal.data.MealData
-import app.aaps.plugins.aps.openaps.determinebasal.data.Profile
-import app.aaps.plugins.aps.openaps.determinebasal.data.TempBasal
+import app.aaps.plugins.aps.openAPS.determinebasal.data.AutosensData
+import app.aaps.plugins.aps.openAPS.determinebasal.data.DetermineBasalResult
+import app.aaps.plugins.aps.openAPS.determinebasal.data.GlucoseStatus
+import app.aaps.plugins.aps.openAPS.determinebasal.data.IobStatus
+import app.aaps.plugins.aps.openAPS.determinebasal.data.MealData
+import app.aaps.plugins.aps.openAPS.determinebasal.data.Profile
+import app.aaps.plugins.aps.openAPS.determinebasal.data.TempBasal
 import org.slf.LoggerFactory
 import kotlin.math.max
 import kotlin.math.min
