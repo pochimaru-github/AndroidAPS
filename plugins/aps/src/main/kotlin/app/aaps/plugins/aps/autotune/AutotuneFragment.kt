@@ -34,12 +34,12 @@ class AutotuneFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.autotuneRunButton.setOnClickListener {
+        binding.autotuneRun.setOnClickListener {
             context?.let { ctx ->
                 OKDialog.showConfirmation(
                     ctx,
-                    rh.gs(R.string.autotune_confirm_title),
-                    rh.gs(R.string.autotune_confirm_message),
+                    rh.gs(app.aaps.core.ui.R.string.autotune),
+                    rh.gs(app.aaps.core.ui.R.string.ok),
                     DialogInterface.OnClickListener { _, _ -> runAutotune() }
                 )
             }
@@ -49,7 +49,7 @@ class AutotuneFragment : Fragment() {
     private fun runAutotune() {
         val daysText = binding.autotuneDays.text.toString()
         val days = daysText.toIntOrNull() ?: 7
-        binding.autotuneRunButton.isEnabled = false
+        binding.autotuneRun.isEnabled = false
         binding.autotuneResults.text = rh.gs(R.string.autotune_running)
 
         autotunePlugin.aapsAutotune(daysBack = days, autoSwitch = false, profileToTune = "", weekDays = null)
