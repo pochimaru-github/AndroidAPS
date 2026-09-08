@@ -244,20 +244,30 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
         _binding?.recyclerview?.swapAdapter(RecyclerViewAdapter(nsClientPlugin?.listLog ?: arrayListOf()), true)
     }
 
-    private inner class RecyclerViewAdapter(private var logList: List<EventNSClientNewLog>) : RecyclerView.Adapter<RecyclerViewAdapter.NsClientLogViewHolder>() {
-
-        override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): NsClientLogViewHolder =
-            NsClientLogViewHolder(LayoutInflater.from(viewGroup.context).inflate(R.layout.ns_client_log_item, viewGroup, false))
-
-        override fun onBindViewHolder(holder: NsClientLogViewHolder, position: Int) {
-            holder.binding.logText.text = HtmlHelper.fromHtml(logList[position].toPreparedHtml().toString())
-        }
-
-        override fun getItemCount() = logList.size
-
-        inner class NsClientLogViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-            val binding = NsClientLogItemBinding.bind(view)
-        }
+    private fun updateLog() {
+        _binding?.recyclerview?.recycledViewPool?.clear()
+        _binding?.recyclerview?.swapAdapter(RecyclerViewAdapter(nsClientPlugin?.listLog ?: arrayListOf()), true)
     }
+} // ← NSClientFragment の閉じカッコ
+
+// ↓ クラスの外側（トップレベル）に配置
+class RecyclerViewAdapter(
+    private var logList: List<EventNSClientNewLog>
+) : RecyclerView.Adapter<RecyclerViewAdapter.NsClientLogViewHolder>() {
+
+    class NsClientLogViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val binding: NsClientLogItemBinding = NsClientLogItemBinding.bind(view)
+    }
+
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): NsClientLogViewHolder {
+        val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.ns_client_log_item, viewGroup, false)
+        return NsClientLogViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: NsClientLogViewHolder, position: Int) {
+        val logItem = logList[position]
+        holder.binding.logText.text = HtmlHelper.fromHtml(logItem.toPreparedHtml().toString())
+    }
+
+    override fun getItemCount(): Int = logList.size
 }
