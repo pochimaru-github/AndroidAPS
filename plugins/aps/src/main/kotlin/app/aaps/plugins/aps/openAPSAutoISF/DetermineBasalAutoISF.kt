@@ -36,7 +36,7 @@ class DetermineBasalAutoISF {
         val UAMpredBG: Double? = profile.UAMpredBG
 
         var dynamicRatio = 1.0
-        val targetBg = profile.targetBg
+        val targetBg = profile.targetBg.toDouble()
 
         val acob = aCOBpredBG
         val uam = UAMpredBG
@@ -50,7 +50,7 @@ class DetermineBasalAutoISF {
             val adjustmentFactor: Double = 0.004
             dynamicRatio += (bgDiff * adjustmentFactor)
         } else if (glucoseStatus.glucose > targetBg) {
-            val bgDiff: Double = glucoseStatus.glucose.toDouble() - targetBg.toDouble()
+            val bgDiff: Double = glucoseStatus.glucose.toDouble() - targetBg
             val adjustmentFactor: Double = 0.003
             dynamicRatio += (bgDiff * adjustmentFactor)
         }
@@ -60,7 +60,7 @@ class DetermineBasalAutoISF {
         val adjustedIsf = profile.isf / dynamicRatio
         log.debug("AutoISF adjusted ISF: original={}, adjusted={}, ratio={}", profile.isf, adjustedIsf, dynamicRatio)
 
-        val targetDifference = glucoseStatus.glucose.toDouble() - profile.targetBg.toDouble()
+        val targetDifference = glucoseStatus.glucose.toDouble() - targetBg
         val requiredBasalRate = profile.currentBasal + (targetDifference / adjustedIsf)
 
         val calculatedRate = max(0.0, min(requiredBasalRate, profile.maxBasal))
