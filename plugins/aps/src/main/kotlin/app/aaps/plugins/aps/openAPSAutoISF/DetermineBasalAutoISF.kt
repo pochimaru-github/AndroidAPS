@@ -1,4 +1,4 @@
-package info.nightscout.androidaps.plugins.openaps.determinebasal
+package app.aaps.plugins.aps.openAPSAutoISF
 
 import info.nightscout.androidaps.plugins.openaps.determinebasal.data.DetermineBasalResult
 import info.nightscout.androidaps.plugins.openaps.determinebasal.data.Profile
