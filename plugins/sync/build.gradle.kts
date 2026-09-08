@@ -1,66 +1,58 @@
 plugins {
     alias(libs.plugins.android.library)
-    id("kotlin-android")
+    alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
-    id("android-module-dependencies")
-    id("test-module-dependencies")
-    id("jacoco-module-dependencies")
 }
 
 android {
-    namespace = "app.aaps.plugins.sync"
+    namespace = "app.nightscout.android.plugins.sync"
+    compileSdk = 34
+
+    defaultConfig {
+        minSdk = 21
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
-    implementation(project(":core:data"))
-    implementation(project(":core:interfaces"))
-    implementation(project(":core:keys"))
-    implementation(project(":core:objects"))
-    implementation(project(":core:nssdk"))
     implementation(project(":core:ui"))
-    implementation(project(":core:utils"))
-    implementation(project(":core:validators"))
-    implementation(project(":shared:impl"))
+    implementation(project(":core:interfaces"))
 
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.androidx.work.testing)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
 
-    testImplementation(project(":shared:tests"))
-    testImplementation(project(":implementation"))
-    testImplementation(project(":plugins:aps"))
-    androidTestImplementation(project(":shared:tests"))
-
-    // OpenHuman
-    api(libs.com.squareup.okhttp3.okhttp)
-    api(libs.com.squareup.retrofit2.retrofit)
-    api(libs.androidx.browser)
-    api(libs.androidx.work.runtime)
-    api(libs.androidx.gridlayout)
-    api(libs.com.google.android.material)
-
-    // NSClient, Tidepool
-    api(libs.io.socket.client)
-    api(libs.com.squareup.okhttp3.logging.interceptor)
-    api(libs.com.squareup.retrofit2.adapter.rxjava3)
-    api(libs.com.squareup.retrofit2.converter.gson)
-    api(libs.com.google.code.gson)
-    api(libs.net.openid.appauth)
-
-    // DataLayerListenerService
-    api(libs.com.google.android.gms.playservices.wearable)
-
-    // Garmin
-    api(libs.com.garmin.connectiq) { artifact { type = "aar" } }
-    androidTestImplementation(libs.com.garmin.connectiq) { artifact { type = "aar" } }
-
+    // Dagger
+    implementation(libs.com.google.dagger)
     kapt(libs.com.google.dagger.compiler)
-    kapt(libs.com.google.dagger.android.processor)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
 
 kapt {
     correctErrorTypes = true
     keepJavacAnnotationProcessors = true
-    
+
     javacOptions {
         option("--add-opens=java.base/java.lang=ALL-UNNAMED")
         option("--add-opens=java.base/java.util=ALL-UNNAMED")
