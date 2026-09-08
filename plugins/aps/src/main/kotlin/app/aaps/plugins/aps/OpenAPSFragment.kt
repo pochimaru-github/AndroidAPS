@@ -165,11 +165,22 @@ class OpenAPSFragment : DaggerFragment(), MenuProvider {
 
     private fun Any.dataClassToHtml(): Spanned =
         HtmlHelper.fromHtml(
-            StringBuilder().also { sb ->
-                this::class.declaredMemberProperties.forEach { property ->
-                    property.call(this)?.let { value ->
-                        if (ClassUtils.isPrimitiveOrWrapper(value::class.java)) sb.append(property.name.bold(), ": ", value, br)
-                        if (value is StringBuilder) sb.append(property.name.bold(), ": ", value.toString(), br)
+            StringBuilder().apply {
+                this@dataClassToHtml::class.declaredMemberProperties.forEach { property ->
+                    val value = property.call(this@dataClassToHtml)
+                    if (value != null) {
+                        if (ClassUtils.isPrimitiveOrWrapper(value::class.java)) {
+                            append(property.name.bold())
+                            append(": ")
+                            append(value)
+                            append(br)
+                        }
+                        if (value is StringBuilder) {
+                            append(property.name.bold())
+                            append(": ")
+                            append(value.toString())
+                            append(br)
+                        }
                     }
                 }
             }.toString()
@@ -177,14 +188,25 @@ class OpenAPSFragment : DaggerFragment(), MenuProvider {
 
     private fun Any.dataClassToHtml(properties: List<String>): Spanned =
         HtmlHelper.fromHtml(
-            StringBuilder().also { sb ->
-                properties.forEach { property ->
-                    this::class.declaredMemberProperties
-                        .firstOrNull { it.name == property }?.call(this)
-                        ?.let { value ->
-                            if (ClassUtils.isPrimitiveOrWrapper(value::class.java)) sb.append(property.bold(), ": ", value, br)
-                            if (value is StringBuilder) sb.append(property.bold(), ": ", value.toString(), br)
+            StringBuilder().apply {
+                properties.forEach { propertyName ->
+                    val property = this@dataClassToHtml::class.declaredMemberProperties
+                        .firstOrNull { it.name == propertyName }
+                    val value = property?.call(this@dataClassToHtml)
+                    if (value != null) {
+                        if (ClassUtils.isPrimitiveOrWrapper(value::class.java)) {
+                            append(propertyName.bold())
+                            append(": ")
+                            append(value)
+                            append(br)
                         }
+                        if (value is StringBuilder) {
+                            append(propertyName.bold())
+                            append(": ")
+                            append(value.toString())
+                            append(br)
+                        }
+                    }
                 }
             }.toString()
         )
