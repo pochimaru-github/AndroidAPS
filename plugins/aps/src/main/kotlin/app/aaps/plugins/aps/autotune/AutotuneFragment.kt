@@ -36,7 +36,6 @@ class AutotuneFragment : PluginBaseFragment() {
 
         binding.autotuneRunButton.setOnClickListener {
             context?.let { ctx ->
-                // Kotlin 1.9 Overload resolution ambiguity 回避のために DialogInterface.OnClickListener を明示
                 OKDialog.showConfirmation(
                     ctx,
                     rh.gs(R.string.autotune_confirm_title),
@@ -53,7 +52,6 @@ class AutotuneFragment : PluginBaseFragment() {
         binding.autotuneRunButton.isEnabled = false
         binding.autotuneResults.text = rh.gs(R.string.autotune_running)
 
-        // Autotune実行処理の呼び出し
         autotunePlugin.aapsAutotune(daysBack = days, autoSwitch = false, profileToTune = "", weekDays = null)
     }
 
