@@ -1,13 +1,12 @@
 package app.aaps.plugins.aps.openAPSAutoISF
 
-import app.aaps.plugins.aps.openAPS.data.AutosensData
-import app.aaps.plugins.aps.openAPS.data.DetermineBasalResult
-import app.aaps.plugins.aps.openAPS.data.GlucoseStatus
-import app.aaps.plugins.aps.openAPS.data.IobStatus
-import app.aaps.plugins.aps.openAPS.data.MealData
-import app.aaps.plugins.aps.openAPS.data.Profile
-import app.aaps.plugins.aps.openAPS.data.TempBasal
-import app.aaps.core.logger.AAPSLogger
+import app.aaps.plugins.aps.openAPS.DetermineBasalResult
+import app.aaps.plugins.aps.openAPS.GlucoseStatus
+import app.aaps.plugins.aps.openAPS.IobStatus
+import app.aaps.plugins.aps.openAPS.MealData
+import app.aaps.plugins.aps.openAPS.Profile
+import app.aaps.plugins.aps.openAPS.TempBasal
+import app.aaps.plugins.aps.openAPS.AutosensData
 import kotlin.math.max
 import kotlin.math.min
 
@@ -25,9 +24,9 @@ class DetermineBasalAutoISF {
     ): DetermineBasalResult {
 
         if (glucoseStatus.glucose <= 0) {
-            return DetermineBasalResult().apply {
-                reason = "Invalid glucose reading"
-            }
+            val result = DetermineBasalResult()
+            result.reason = "Invalid glucose reading"
+            return result
         }
 
         val aCOBpredBG: Double? = profile.aCOBpredBG
@@ -64,10 +63,10 @@ class DetermineBasalAutoISF {
         val calculatedDuration: Int = 30
         val calculatedReason: String = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
 
-        return DetermineBasalResult().apply {
-            rate = calculatedRate
-            duration = calculatedDuration
-            reason = calculatedReason
-        }
+        val result = DetermineBasalResult()
+        result.rate = calculatedRate
+        result.duration = calculatedDuration
+        result.reason = calculatedReason
+        return result
     }
 }
