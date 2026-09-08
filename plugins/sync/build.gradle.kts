@@ -36,17 +36,9 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:interfaces"))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-
     // Dagger
     implementation(libs.com.google.dagger)
     kapt(libs.com.google.dagger.compiler)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }
 
 kapt {
