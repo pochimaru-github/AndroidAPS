@@ -5,15 +5,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.ui.dialogs.OKDialog
-import app.aaps.core.ui.fragment.PluginBaseFragment
 import app.aaps.plugins.aps.R
 import app.aaps.plugins.aps.databinding.AutotuneFragmentBinding
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-class AutotuneFragment : PluginBaseFragment() {
+@AndroidEntryPoint
+class AutotuneFragment : Fragment() {
 
     @Inject lateinit var aapsLogger: AAPSLogger
     @Inject lateinit var rh: ResourceHelper
