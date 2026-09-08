@@ -1,12 +1,12 @@
 package app.aaps.plugins.aps.openAPSAutoISF
 
-import app.aaps.plugins.aps.openAPS.determinebasal.data.AutosensData
-import app.aaps.plugins.aps.openAPS.determinebasal.data.DetermineBasalResult
-import app.aaps.plugins.aps.openAPS.determinebasal.data.GlucoseStatus
-import app.aaps.plugins.aps.openAPS.determinebasal.data.IobStatus
-import app.aaps.plugins.aps.openAPS.determinebasal.data.MealData
-import app.aaps.plugins.aps.openAPS.determinebasal.data.Profile
-import app.aaps.plugins.aps.openAPS.determinebasal.data.TempBasal
+import app.aaps.plugins.aps.openAPS.AutosensData
+import app.aaps.plugins.aps.openAPS.DetermineBasalResult
+import app.aaps.plugins.aps.openAPS.GlucoseStatus
+import app.aaps.plugins.aps.openAPS.IobStatus
+import app.aaps.plugins.aps.openAPS.MealData
+import app.aaps.plugins.aps.openAPS.Profile
+import app.aaps.plugins.aps.openAPS.TempBasal
 import org.slf.LoggerFactory
 import kotlin.math.max
 import kotlin.math.min
@@ -26,10 +26,11 @@ class DetermineBasalAutoISF {
         reservoirData: Double?
     ): DetermineBasalResult {
 
+        val result = DetermineBasalResult()
+
         if (glucoseStatus.glucose <= 0) {
-            return DetermineBasalResult(
-                reason = "Invalid glucose reading"
-            )
+            result.reason = "Invalid glucose reading"
+            return result
         }
 
         val aCOBpredBG: Double? = profile.aCOBpredBG?.toDouble()
@@ -66,14 +67,10 @@ class DetermineBasalAutoISF {
         val targetDifference: Double = currentGlucose - targetBg
         val requiredBasalRate: Double = profile.currentBasal.toDouble() + (targetDifference / adjustedIsf)
 
-        val calculatedRate: Double = max(0.0, min(requiredBasalRate, profile.maxBasal.toDouble()))
-        val calculatedDuration: Int = 30
-        val calculatedReason: String = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
+        result.rate = max(0.0, min(requiredBasalRate, profile.maxBasal.toDouble()))
+        result.duration = 30
+        result.reason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
 
-        return DetermineBasalResult(
-            rate = calculatedRate,
-            duration = calculatedDuration,
-            reason = calculatedReason
-        )
+        return result
     }
 }
