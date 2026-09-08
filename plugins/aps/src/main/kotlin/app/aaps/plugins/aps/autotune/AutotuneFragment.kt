@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.ui.dialogs.OKDialog
-import app.aaps.plugins.aps.R
 import app.aaps.plugins.aps.databinding.AutotuneFragmentBinding
 import javax.inject.Inject
 
@@ -49,16 +48,20 @@ class AutotuneFragment : Fragment() {
     }
 
     private fun runAutotune() {
-        // レイアウトに autotuneDays / autotuneResults がバインディング経由で取れるか確認し、
-        // 取得できない場合は findViewById 等で補填・デフォルト値（7日）を使用
-        val daysEditText = binding.root.findViewById<EditText?>(R.id.autotune_days)
+        // ID参照エラーを防止するため、リソース名文字列から動的にViewを取得
+        val context = context
+        val daysId = context?.resources?.getIdentifier("autotune_days", "id", context.packageName) ?: 0
+        val daysEditText = if (daysId != 0) binding.root.findViewById<EditText>(daysId) else null
         val daysText = daysEditText?.text?.toString() ?: "7"
         val days = daysText.toIntOrNull() ?: 7
 
         binding.autotuneRun.isEnabled = false
 
-        val resultsTextView = binding.root.findViewById<TextView?>(R.id.autotune_results)
-        resultsTextView?.text = rh.gs(R.string.autotune_running)
+        val resultsId = context?.resources?.getIdentifier("autotune_results", "id", context.packageName) ?: 0
+        val resultsTextView = if (resultsId != 0) binding.root.findViewById<TextView>(resultsId) else null
+        
+        // 文字列リソースは core.ui.R から安全に参照
+        resultsTextView?.text = rh.gs(app.aaps.core.ui.R.string.autotune_running)
 
         autotunePlugin.aapsAutotune(daysBack = days, autoSwitch = false, profileToTune = "", weekDays = null)
     }
