@@ -112,15 +112,17 @@ allprojects {
     apply(plugin = "jacoco")
 }
 
-// 全モジュールの kapt タスクに JVM オプションを強制適用
+// 全モジュールの kapt タスクに JavaForkOptions 経由で JVM 引数を安全性高く追加
 subprojects {
     tasks.matching { it.name.startsWith("kapt") }.configureEach {
-        if (this is org.jetbrains.kotlin.gradle.tasks.Kapt) {
-            kaptProcessJvmArgs.add("--add-opens=java.base/java.lang=ALL-UNNAMED")
-            kaptProcessJvmArgs.add("--add-opens=java.base/java.util=ALL-UNNAMED")
-            kaptProcessJvmArgs.add("--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED")
-            kaptProcessJvmArgs.add("--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
-            kaptProcessJvmArgs.add("--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+        if (this is JavaForkOptions) {
+            jvmArgs(
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-opens=java.base/java.util=ALL-UNNAMED",
+                "--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
+                "--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+                "--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+            )
         }
     }
 }
