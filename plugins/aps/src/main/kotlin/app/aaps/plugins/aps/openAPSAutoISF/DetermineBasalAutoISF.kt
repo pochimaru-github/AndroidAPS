@@ -1,12 +1,12 @@
 package app.aaps.plugins.aps.openAPSAutoISF
 
-import app.aaps.plugins.aps.openAPS.AutosensData
-import app.aaps.plugins.aps.openAPS.DetermineBasalResult
-import app.aaps.plugins.aps.openAPS.GlucoseStatus
-import app.aaps.plugins.aps.openAPS.IobStatus
-import app.aaps.plugins.aps.openAPS.MealData
-import app.aaps.plugins.aps.openAPS.Profile
-import app.aaps.plugins.aps.openAPS.TempBasal
+import app.aaps.core.aps.AutosensData
+import app.aaps.core.aps.DetermineBasalResult
+import app.aaps.core.aps.GlucoseStatus
+import app.aaps.core.aps.IobStatus
+import app.aaps.core.aps.MealData
+import app.aaps.core.aps.Profile
+import app.aaps.core.aps.TempBasal
 import org.slf.LoggerFactory
 import kotlin.math.max
 import kotlin.math.min
@@ -26,11 +26,10 @@ class DetermineBasalAutoISF {
         reservoirData: Double?
     ): DetermineBasalResult {
 
-        val result = DetermineBasalResult()
-
         if (glucoseStatus.glucose <= 0) {
-            result.reason = "Invalid glucose reading"
-            return result
+            return DetermineBasalResult(
+                reason = "Invalid glucose reading"
+            )
         }
 
         val aCOBpredBG: Double? = profile.aCOBpredBG?.toDouble()
@@ -67,10 +66,14 @@ class DetermineBasalAutoISF {
         val targetDifference: Double = currentGlucose - targetBg
         val requiredBasalRate: Double = profile.currentBasal.toDouble() + (targetDifference / adjustedIsf)
 
-        result.rate = max(0.0, min(requiredBasalRate, profile.maxBasal.toDouble()))
-        result.duration = 30
-        result.reason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
+        val calculatedRate: Double = max(0.0, min(requiredBasalRate, profile.maxBasal.toDouble()))
+        val calculatedDuration: Int = 30
+        val calculatedReason: String = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
 
-        return result
+        return DetermineBasalResult(
+            rate = calculatedRate,
+            duration = calculatedDuration,
+            reason = calculatedReason
+        )
     }
 }
