@@ -36,9 +36,9 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:interfaces"))
 
-    // Dagger
-    implementation(libs.com.google.dagger)
-    kapt(libs.com.google.dagger.compiler)
+    // Dagger (正しいエイリアス名)
+    implementation(libs.dagger)
+    kapt(libs.dagger.compiler)
 }
 
 kapt {
