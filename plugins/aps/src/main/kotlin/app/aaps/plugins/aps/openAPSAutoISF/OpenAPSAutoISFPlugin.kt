@@ -432,24 +432,15 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
         aapsLogger.debug(LTag.APS, "AutoIsfMode:        $autoIsfMode")
         //aapsLogger.debug(LTag.APS, "AutoISF extras:     ${Json.encodeToString(OapsProfile.serializer(), oapsProfile)}")
 
-        determineBasalAutoISF.determine_basal(
-            glucose_status = glucoseStatus,
-            currenttemp = currentTemp,
-            iob_data_array = iobArray,
-            profile = oapsProfile,
-            autosens_data = autosensResult,
-            meal_data = mealData,
+        determineBasalAutoISF.determineBasal(
+            glucoseStatus = glucoseStatus,
+            currentTemp = currentTemp,
+            iobData = iobData,
+            profile = profile,
+            autosensData = autosensResult,
+            mealData = mealData,
             microBolusAllowed = microBolusAllowed,
-            currentTime = now,
-            flatBGsDetected = flatBGsDetected,
-            autoIsfMode = autoIsfMode,
-            loop_wanted_smb = loopWantedSmb,
-            profile_percentage = profile_percentage,
-            smb_ratio = smbRatio,
-            smb_max_range_extension = smbMaxRangeExtension,
-            iob_threshold_percent = iobThresholdPercent,
-            auto_isf_consoleError = consoleError,
-            auto_isf_consoleLog = consoleLog
+            reservoirData = null
         ).also {
             val determineBasalResult = apsResultProvider.get().with(it)
             // Preserve input data
