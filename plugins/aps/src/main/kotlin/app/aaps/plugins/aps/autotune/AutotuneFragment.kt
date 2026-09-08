@@ -1,29 +1,23 @@
-package info.nightscout.androidaps.plugins.openaps.autotune
+package app.aaps.plugins.aps.autotune
 
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import info.nightscout.androidaps.R
-import info.nightscout.androidaps.databinding.AutotuneFragmentBinding
-import info.nightscout.androidaps.interfaces.FragmentWithMenu
-import info.nightscout.androidaps.plugins.openaps.autotune.data.Autotune
-import info.nightscout.androidaps.plugins.openaps.autotune.data.AutotuneResult
-import info.nightscout.androidaps.utils.OKDialog
-import info.nightscout.androidaps.utils.SP
-import info.nightscout.androidaps.utils.SafeParse
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.slf me.LoggerFactory
+import app.aaps.core.interfaces.logging.AAPSLogger
+import app.aaps.core.interfaces.resources.ResourceHelper
+import app.aaps.core.ui.dialogs.OKDialog
+import app.aaps.core.ui.fragments.PluginBaseFragment
+import app.aaps.plugins.aps.R
+import app.aaps.plugins.aps.databinding.AutotuneFragmentBinding
+import javax.inject.Inject
 
-class AutotuneFragment : FragmentWithMenu() {
+class AutotuneFragment : PluginBaseFragment() {
 
-    private val log = LoggerFactory.getLogger(AutotuneFragment::class.java)
-    private val scope = CoroutineScope(Dispatchers.Main + Job())
+    @Inject lateinit var aapsLogger: AAPSLogger
+    @Inject lateinit var rh: ResourceHelper
+    @Inject lateinit var autotunePlugin: AutotunePlugin
 
     private var _binding: AutotuneFragmentBinding? = null
     private val binding get() = _binding!!
@@ -34,50 +28,37 @@ class AutotuneFragment : FragmentWithMenu() {
         savedInstanceState: Bundle?
     ): View {
         _binding = AutotuneFragmentBinding.inflate(inflater, container, false)
-        val view = binding.root
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         binding.autotuneRunButton.setOnClickListener {
             context?.let { ctx ->
+                // Kotlin 1.9 Overload resolution ambiguity 回避のために DialogInterface.OnClickListener を明示
                 OKDialog.showConfirmation(
                     ctx,
-                    getString(R.string.autotune_confirm_title),
-                    getString(R.string.autotune_confirm_message),
+                    rh.gs(R.string.autotune_confirm_title),
+                    rh.gs(R.string.autotune_confirm_message),
                     DialogInterface.OnClickListener { _, _ -> runAutotune() }
                 )
             }
         }
-
-        return view
     }
 
     private fun runAutotune() {
-        val days = SafeParse.parseInt(binding.autotuneDays.text.toString(), 7)
+        val daysText = binding.autotuneDays.text.toString()
+        val days = daysText.toIntOrNull() ?: 7
         binding.autotuneRunButton.isEnabled = false
-        binding.autotuneResults.text = getString(R.string.autotune_running)
+        binding.autotuneResults.text = rh.gs(R.string.autotune_running)
 
-        scope.launch(Dispatchers.IO) {
-            try {
-                val autotune = Autotune()
-                val result: AutotuneResult = autotune.calculate(days)
-
-                withContext(Dispatchers.Main) {
-                    binding.autotuneResults.text = result.toFormattedString()
-                    binding.autotuneRunButton.isEnabled = true
-                }
-            } catch (e: Exception) {
-                log.error("Error executing Autotune: ", e)
-                withContext(Dispatchers.Main) {
-                    binding.autotuneResults.text = getString(R.string.autotune_error, e.localizedMessage)
-                    binding.autotuneRunButton.isEnabled = true
-                }
-            }
-        }
+        // Autotune実行処理の呼び出し
+        autotunePlugin.aapsAutotune(daysBack = days, autoSwitch = false, profileToTune = "", weekDays = null)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
-    override fun getPluginName(): String = "Autotune"
 }
