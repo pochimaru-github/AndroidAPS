@@ -1,12 +1,12 @@
 package app.aaps.plugins.aps.openAPSAutoISF
 
-import info.nightscout.androidaps.plugins.openaps.determinebasal.data.DetermineBasalResult
-import info.nightscout.androidaps.plugins.openaps.determinebasal.data.Profile
-import info.nightscout.androidaps.plugins.openaps.determinebasal.data.GlucoseStatus
-import info.nightscout.androidaps.plugins.openaps.determinebasal.data.IobStatus
-import info.nightscout.androidaps.plugins.openaps.determinebasal.data.MealData
-import info.nightscout.androidaps.plugins.openaps.determinebasal.data.TempBasal
-import info.nightscout.androidaps.plugins.openaps.determinebasal.data.AutosensData
+import app.aaps.plugins.aps.openaps.determinebasal.data.AutosensData
+import app.aaps.plugins.aps.openaps.determinebasal.data.DetermineBasalResult
+import app.aaps.plugins.aps.openaps.determinebasal.data.GlucoseStatus
+import app.aaps.plugins.aps.openaps.determinebasal.data.IobStatus
+import app.aaps.plugins.aps.openaps.determinebasal.data.MealData
+import app.aaps.plugins.aps.openaps.determinebasal.data.Profile
+import app.aaps.plugins.aps.openaps.determinebasal.data.TempBasal
 import org.slf.LoggerFactory
 import kotlin.math.max
 import kotlin.math.min
@@ -33,13 +33,12 @@ class DetermineBasalAutoISF {
             return result
         }
 
-        var aCOBpredBG: Double? = profile.aCOBpredBG
-        var UAMpredBG: Double? = profile.UAMpredBG
+        val aCOBpredBG: Double? = profile.aCOBpredBG
+        val UAMpredBG: Double? = profile.UAMpredBG
 
         var dynamicRatio = 1.0
         val targetBg = profile.targetBg
 
-        // Kotlin 1.9 Smart Cast Fix: Local val assignment for captured variables
         val acob = aCOBpredBG
         val uam = UAMpredBG
 
