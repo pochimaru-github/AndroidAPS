@@ -80,13 +80,13 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
             .toObservable(EventWearUpdateGui::class.java)
             .observeOn(aapsSchedulers.main)
             .subscribe({
-                           it.customWatchfaceData?.let { cwf ->
-                               if (!it.exportFile) {
-                                   wearPlugin.savedCustomWatchface = cwf
-                                   updateGui()
-                               }
-                           }
-                       }, fabricPrivacy::logException)
+                it.customWatchfaceData?.let { cwf ->
+                    if (!it.exportFile) {
+                        wearPlugin.savedCustomWatchface = cwf
+                        updateGui()
+                    }
+                }
+            }, fabricPrivacy::logException)
 
         updateGui()
     }
@@ -128,7 +128,6 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
         metadata[CwfMetadataKey.CWF_VERSION]?.let { version ->
             val currentAppVer = versionCheckerUtils.versionDigits(CUSTOM_VERSION)
             val metadataVer = versionCheckerUtils.versionDigits(version)
-            //Only check that Loaded Watchface version is lower or equal to Wear CustomWatchface version
             return ((currentAppVer.size >= 2) && (metadataVer.size >= 2) && (currentAppVer[0] >= metadataVer[0]))
         }
         return false
@@ -136,7 +135,6 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
 
     private fun listVisibleView(jsonString: String, allViews: Boolean = false): List<Pair<ViewKeys, Boolean>> {
         val json = JSONObject(jsonString)
-
         val visibleKeyPairs = mutableListOf<Pair<ViewKeys, Boolean>>()
 
         for (viewKey in ViewKeys.entries) {
@@ -153,9 +151,8 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
         }
         return visibleKeyPairs
     }
-} // ← CwfInfosActivity の閉じカッコ
+}
 
-// ↓ ここから下（ファイルの最下部）に Adapter クラスを配置
 class PrefRecyclerViewAdapter(
     private var prefList: List<Pair<CwfMetadataKey, String>>,
     private val rh: ResourceHelper
@@ -213,36 +210,4 @@ class ViewRecyclerViewAdapter(
         holder.binding.viewKey.text = "\"$keyName\":"
         holder.binding.viewComment.text = rh.gs(commentResId)
     }
-}
-
-    private fun checkCustomVersion(metadata: CwfMetadataMap): Boolean {
-        metadata[CwfMetadataKey.CWF_VERSION]?.let { version ->
-            val currentAppVer = versionCheckerUtils.versionDigits(CUSTOM_VERSION)
-            val metadataVer = versionCheckerUtils.versionDigits(version)
-            //Only check that Loaded Watchface version is lower or equal to Wear CustomWatchface version
-            return ((currentAppVer.size >= 2) && (metadataVer.size >= 2) && (currentAppVer[0] >= metadataVer[0]))
-        }
-        return false
-    }
-
-    private fun listVisibleView(jsonString: String, allViews: Boolean = false): List<Pair<ViewKeys, Boolean>> {
-        val json = JSONObject(jsonString)
-
-        val visibleKeyPairs = mutableListOf<Pair<ViewKeys, Boolean>>()
-
-        for (viewKey in ViewKeys.entries) {
-            try {
-                val jsonValue = json.optJSONObject(viewKey.key)
-                if (jsonValue != null) {
-                    val visibility = jsonValue.optString(JsonKeys.VISIBILITY.key) == JsonKeyValues.VISIBLE.key
-                    if (visibility || allViews)
-                        visibleKeyPairs.add(Pair(viewKey, visibility))
-                }
-            } catch (_: Exception) {
-                aapsLogger.debug(LTag.WEAR, "Wrong key in json file: ${viewKey.key}")
-            }
-        }
-        return visibleKeyPairs
-    }
-
 }
