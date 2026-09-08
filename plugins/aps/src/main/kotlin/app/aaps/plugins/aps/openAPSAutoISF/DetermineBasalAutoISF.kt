@@ -35,11 +35,11 @@ class DetermineBasalAutoISF {
         val aCOBpredBG: Double? = profile.aCOBpredBG
         val UAMpredBG: Double? = profile.UAMpredBG
 
-        var dynamicRatio = 1.0
-        val targetBg = profile.targetBg.toDouble()
+        var dynamicRatio: Double = 1.0
+        val targetBg: Double = profile.targetBg.toDouble()
 
-        val acob = aCOBpredBG
-        val uam = UAMpredBG
+        val acob: Double? = aCOBpredBG
+        val uam: Double? = UAMpredBG
 
         if (acob != null && acob > targetBg) {
             val bgDiff: Double = acob - targetBg
@@ -49,28 +49,28 @@ class DetermineBasalAutoISF {
             val bgDiff: Double = uam - targetBg
             val adjustmentFactor: Double = 0.004
             dynamicRatio += (bgDiff * adjustmentFactor)
-        } else if (glucoseStatus.glucose > targetBg) {
+        } else if (glucoseStatus.glucose.toDouble() > targetBg) {
             val bgDiff: Double = glucoseStatus.glucose.toDouble() - targetBg
             val adjustmentFactor: Double = 0.003
             dynamicRatio += (bgDiff * adjustmentFactor)
         }
 
-        dynamicRatio = min(max(dynamicRatio, profile.minAutoSensRatio), profile.maxAutoSensRatio)
+        dynamicRatio = min(max(dynamicRatio, profile.minAutoSensRatio.toDouble()), profile.maxAutoSensRatio.toDouble())
 
-        val adjustedIsf = profile.isf / dynamicRatio
+        val adjustedIsf: Double = profile.isf.toDouble() / dynamicRatio
         log.debug("AutoISF adjusted ISF: original={}, adjusted={}, ratio={}", profile.isf, adjustedIsf, dynamicRatio)
 
-        val targetDifference = glucoseStatus.glucose.toDouble() - targetBg
-        val requiredBasalRate = profile.currentBasal + (targetDifference / adjustedIsf)
+        val targetDifference: Double = glucoseStatus.glucose.toDouble() - targetBg
+        val requiredBasalRate: Double = profile.currentBasal.toDouble() + (targetDifference / adjustedIsf)
 
-        val calculatedRate = max(0.0, min(requiredBasalRate, profile.maxBasal))
-        val calculatedDuration = 30
-        val calculatedReason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
+        val calculatedRate: Double = max(0.0, min(requiredBasalRate, profile.maxBasal.toDouble()))
+        val calculatedDuration: Int = 30
+        val calculatedReason: String = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
 
-        return DetermineBasalResult().apply {
-            rate = calculatedRate
-            duration = calculatedDuration
+        return DetermineBasalResult(
+            rate = calculatedRate,
+            duration = calculatedDuration,
             reason = calculatedReason
-        }
+        )
     }
 }
