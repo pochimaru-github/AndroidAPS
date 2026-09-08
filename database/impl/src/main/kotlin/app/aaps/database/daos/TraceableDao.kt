@@ -5,6 +5,7 @@ import androidx.room.Update
 import app.aaps.database.daos.workaround.TraceableDaoWorkaround
 import app.aaps.database.entities.interfaces.TraceableDBEntry
 
+@JvmDefaultWithCompatibility
 internal interface TraceableDao<T : TraceableDBEntry> : TraceableDaoWorkaround<T> {
 
     fun findById(id: Long): T?
