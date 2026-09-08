@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.resources.ResourceHelper
@@ -47,10 +49,16 @@ class AutotuneFragment : Fragment() {
     }
 
     private fun runAutotune() {
-        val daysText = binding.autotuneDays.text.toString()
+        // レイアウトに autotuneDays / autotuneResults がバインディング経由で取れるか確認し、
+        // 取得できない場合は findViewById 等で補填・デフォルト値（7日）を使用
+        val daysEditText = binding.root.findViewById<EditText?>(R.id.autotune_days)
+        val daysText = daysEditText?.text?.toString() ?: "7"
         val days = daysText.toIntOrNull() ?: 7
+
         binding.autotuneRun.isEnabled = false
-        binding.autotuneResults.text = rh.gs(R.string.autotune_running)
+
+        val resultsTextView = binding.root.findViewById<TextView?>(R.id.autotune_results)
+        resultsTextView?.text = rh.gs(R.string.autotune_running)
 
         autotunePlugin.aapsAutotune(daysBack = days, autoSwitch = false, profileToTune = "", weekDays = null)
     }
