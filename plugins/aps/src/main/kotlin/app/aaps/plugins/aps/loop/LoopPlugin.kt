@@ -1012,11 +1012,12 @@ class LoopPlugin @Inject constructor(
                     enacted?.put("smb", lastRun.tbrSetByPump?.bolusDelivered)
                 }
             }
-        } ?: {
+        } ?: run {
             val calcIob = iobCobCalculator.calculateIobArrayInDia(profile)
             if (calcIob.isNotEmpty()) {
-                iob = calcIob[0].json(dateUtil)
-                iob.put("time", dateUtil.toISOString(dateUtil.now()))
+                iob = calcIob[0].json(dateUtil).apply {
+                    put("time", dateUtil.toISOString(dateUtil.now()))
+                }
             }
         }
         persistenceLayer.insertDeviceStatus(
