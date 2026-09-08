@@ -89,7 +89,6 @@ allprojects {
             freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
             freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi")
             freeCompilerArgs.add("-language-version=1.9")
-            freeCompilerArgs.add("-Xannotation-default-target=param-property")
             freeCompilerArgs.add("-Xjvm-default=all")
             freeCompilerArgs.add("-Xskip-prerelease-check")
             freeCompilerArgs.add("-Xsuppress-version-warnings")
@@ -102,29 +101,8 @@ allprojects {
         plugins.apply("kotlin-kapt")
     }
 
-    gradle.projectsEvaluated {
-        tasks.withType<KotlinCompile> {
-            val compilerArgs = compilerOptions.freeCompilerArgs.get()
-        }
-    }
-
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "jacoco")
-}
-
-// 全モジュールの kapt タスクに JavaForkOptions 経由で JVM 引数を安全性高く追加
-subprojects {
-    tasks.matching { it.name.startsWith("kapt") }.configureEach {
-        if (this is JavaForkOptions) {
-            jvmArgs(
-                "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                "--add-opens=java.base/java.util=ALL-UNNAMED",
-                "--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
-                "--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
-                "--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
-            )
-        }
-    }
 }
 
 // Setup all reports aggregation
