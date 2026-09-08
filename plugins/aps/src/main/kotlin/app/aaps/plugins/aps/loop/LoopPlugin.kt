@@ -51,7 +51,7 @@ import app.aaps.core.interfaces.pump.DetailedBolusInfo
 import app.aaps.core.interfaces.pump.PumpEnactResult
 import app.aaps.core.interfaces.pump.PumpStatusProvider
 import app.aaps.core.interfaces.pump.PumpSync
-import app.aaps.core.interfaces.pump.VirtualPump
+import app.aaps.core.interfaces.virtual.VirtualPump
 import app.aaps.core.interfaces.queue.Callback
 import app.aaps.core.interfaces.queue.CommandQueue
 import app.aaps.core.interfaces.receivers.ReceiverStatusStore
@@ -442,7 +442,7 @@ class LoopPlugin @Inject constructor(
         return false
     }
 
-@Suppress("CheckResult")
+    @Suppress("CheckResult")
     @Synchronized
     override fun invoke(initiator: String, allowNotification: Boolean, tempBasalFallback: Boolean) {
         try {
