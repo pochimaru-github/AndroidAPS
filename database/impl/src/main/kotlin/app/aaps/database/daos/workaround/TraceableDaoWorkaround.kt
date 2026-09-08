@@ -6,6 +6,7 @@ import app.aaps.database.daos.insertNewEntryImpl
 import app.aaps.database.daos.updateExistingEntryImpl
 import app.aaps.database.entities.interfaces.TraceableDBEntry
 
+@JvmDefaultWithCompatibility
 interface TraceableDaoWorkaround<T : TraceableDBEntry> {
 
     /**
