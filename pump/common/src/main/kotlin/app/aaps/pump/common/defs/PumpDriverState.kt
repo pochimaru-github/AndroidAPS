@@ -4,9 +4,6 @@ import app.aaps.pump.common.R
 import app.aaps.core.ui.R as CoreUiR
 import app.aaps.core.interfaces.R as CoreIfR
 
-// TODO there are 3 classes now, that do similar things, sort of, need to define exact rules: PumpDeviceState, PumpDriverState, PumpStatusState
-
-// TODO split this enum into 2
 enum class PumpDriverState {
 
     NotInitialized,
