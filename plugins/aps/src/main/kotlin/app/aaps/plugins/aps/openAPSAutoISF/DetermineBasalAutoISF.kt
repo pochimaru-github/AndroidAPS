@@ -1,13 +1,13 @@
 package app.aaps.plugins.aps.openAPSAutoISF
 
-import app.aaps.core.aps.AutosensData
-import app.aaps.core.aps.DetermineBasalResult
-import app.aaps.core.aps.GlucoseStatus
-import app.aaps.core.aps.IobStatus
-import app.aaps.core.aps.MealData
-import app.aaps.core.aps.Profile
-import app.aaps.core.aps.TempBasal
-import org.slf.LoggerFactory
+import app.aaps.core.interfaces.aps.AutosensData
+import app.aaps.core.interfaces.aps.DetermineBasalResult
+import app.aaps.core.interfaces.aps.GlucoseStatus
+import app.aaps.core.interfaces.aps.IobStatus
+import app.aaps.core.interfaces.aps.MealData
+import app.aaps.core.interfaces.aps.TempBasal
+import app.aaps.core.interfaces.profile.Profile
+import org.slf4j.LoggerFactory
 import kotlin.math.max
 import kotlin.math.min
 
