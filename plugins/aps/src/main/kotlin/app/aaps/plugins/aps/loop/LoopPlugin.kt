@@ -110,7 +110,7 @@ class LoopPlugin @Inject constructor(
     private val context: Context,
     private val commandQueue: CommandQueue,
     private val activePlugin: ActivePlugin,
-    private val virtualPump: VirtualPump,
+    private val virtualPump: app.aaps.core.interfaces.virtual.VirtualPump,
     private val iobCobCalculator: IobCobCalculator,
     private val processedTbrEbData: ProcessedTbrEbData,
     private val receiverStatusStore: ReceiverStatusStore,
