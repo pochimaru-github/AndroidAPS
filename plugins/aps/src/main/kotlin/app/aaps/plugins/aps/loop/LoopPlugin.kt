@@ -442,6 +442,7 @@ class LoopPlugin @Inject constructor(
         return false
     }
 
+@Suppress("CheckResult")
     @Synchronized
     override fun invoke(initiator: String, allowNotification: Boolean, tempBasalFallback: Boolean) {
         try {
