@@ -1,19 +1,17 @@
 package app.aaps.plugins.aps.openAPSAutoISF
 
-import app.aaps.plugins.aps.openAPS.determinebasal.data.AutosensData
-import app.aaps.plugins.aps.openAPS.determinebasal.data.DetermineBasalResult
-import app.aaps.plugins.aps.openAPS.determinebasal.data.GlucoseStatus
-import app.aaps.plugins.aps.openAPS.determinebasal.data.IobStatus
-import app.aaps.plugins.aps.openAPS.determinebasal.data.MealData
-import app.aaps.plugins.aps.openAPS.determinebasal.data.Profile
-import app.aaps.plugins.aps.openAPS.determinebasal.data.TempBasal
-import org.slf.LoggerFactory
+import app.aaps.plugins.aps.openAPS.data.AutosensData
+import app.aaps.plugins.aps.openAPS.data.DetermineBasalResult
+import app.aaps.plugins.aps.openAPS.data.GlucoseStatus
+import app.aaps.plugins.aps.openAPS.data.IobStatus
+import app.aaps.plugins.aps.openAPS.data.MealData
+import app.aaps.plugins.aps.openAPS.data.Profile
+import app.aaps.plugins.aps.openAPS.data.TempBasal
+import app.aaps.core.logger.AAPSLogger
 import kotlin.math.max
 import kotlin.math.min
 
 class DetermineBasalAutoISF {
-
-    private val log = LoggerFactory.getLogger(DetermineBasalAutoISF::class.java)
 
     fun determineBasal(
         glucoseStatus: GlucoseStatus,
@@ -58,7 +56,6 @@ class DetermineBasalAutoISF {
         dynamicRatio = min(max(dynamicRatio, profile.minAutoSensRatio.toDouble()), profile.maxAutoSensRatio.toDouble())
 
         val adjustedIsf: Double = profile.isf.toDouble() / dynamicRatio
-        log.debug("AutoISF adjusted ISF: original={}, adjusted={}, ratio={}", profile.isf, adjustedIsf, dynamicRatio)
 
         val targetDifference: Double = glucoseStatus.glucose.toDouble() - targetBg
         val requiredBasalRate: Double = profile.currentBasal.toDouble() + (targetDifference / adjustedIsf)
@@ -67,10 +64,10 @@ class DetermineBasalAutoISF {
         val calculatedDuration: Int = 30
         val calculatedReason: String = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
 
-        return DetermineBasalResult(
-            rate = calculatedRate,
-            duration = calculatedDuration,
+        return DetermineBasalResult().apply {
+            rate = calculatedRate
+            duration = calculatedDuration
             reason = calculatedReason
-        )
+        }
     }
 }
