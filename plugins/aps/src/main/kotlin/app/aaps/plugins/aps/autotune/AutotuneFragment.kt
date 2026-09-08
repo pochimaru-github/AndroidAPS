@@ -48,7 +48,6 @@ class AutotuneFragment : Fragment() {
     }
 
     private fun runAutotune() {
-        // ID参照エラーを防止するため、リソース名文字列から動的にViewを取得
         val context = context
         val daysId = context?.resources?.getIdentifier("autotune_days", "id", context.packageName) ?: 0
         val daysEditText = if (daysId != 0) binding.root.findViewById<EditText>(daysId) else null
@@ -60,8 +59,8 @@ class AutotuneFragment : Fragment() {
         val resultsId = context?.resources?.getIdentifier("autotune_results", "id", context.packageName) ?: 0
         val resultsTextView = if (resultsId != 0) binding.root.findViewById<TextView>(resultsId) else null
         
-        // 文字列リソースは core.ui.R から安全に参照
-        resultsTextView?.text = rh.gs(app.aaps.core.ui.R.string.autotune_running)
+        // リソースIDの欠落を防ぐため直接テキストをセット
+        resultsTextView?.text = "Autotune running..."
 
         autotunePlugin.aapsAutotune(daysBack = days, autoSwitch = false, profileToTune = "", weekDays = null)
     }
