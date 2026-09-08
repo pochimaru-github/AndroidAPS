@@ -317,6 +317,7 @@ class LoopPlugin @Inject constructor(
      * Check if running mode is corresponding to pump state and constraints
      * and force change mode if needed
      */
+    @Suppress("CheckResult")
     @VisibleForTesting
     fun runningModePreCheck() {
         val runningMode = persistenceLayer.getRunningModeActiveAt(dateUtil.now())
@@ -340,7 +341,6 @@ class LoopPlugin @Inject constructor(
         // Pump not suspended anymore but running mode is suspended by pump -> end running mode
         if (!activePlugin.activePump.isSuspended() && runningMode.mode == RM.Mode.SUSPENDED_BY_PUMP) {
             runningMode.duration = dateUtil.now() - runningMode.timestamp
-            @SuppressLint("CheckResult")
             persistenceLayer.insertOrUpdateRunningMode(
                 runningMode = runningMode,
                 action = Action.PUMP_RUNNING,
@@ -377,7 +377,6 @@ class LoopPlugin @Inject constructor(
 
         // Perform change if needed
         if (reasons != null) {
-            @SuppressLint("CheckResult")
             persistenceLayer.insertOrUpdateRunningMode(
                 runningMode = RM(
                     timestamp = dateUtil.now(),
@@ -403,7 +402,6 @@ class LoopPlugin @Inject constructor(
         ) {
             // End now
             runningMode.duration = dateUtil.now() - runningMode.timestamp
-            @SuppressLint("CheckResult")
             persistenceLayer.insertOrUpdateRunningMode(
                 runningMode = runningMode,
                 action = Action.LOOP_CHANGE,
@@ -424,7 +422,6 @@ class LoopPlugin @Inject constructor(
         return maxIob
     }
 
-    @Suppress("SameParameterValue")
     private fun treatmentTimeThreshold(durationMinutes: Int): Boolean {
         val threshold = System.currentTimeMillis() + durationMinutes * 60 * 1000
         var bool = false
@@ -901,9 +898,9 @@ class LoopPlugin @Inject constructor(
     /**
      * Simulate pump disconnection
      */
+    @Suppress("CheckResult")
     private fun goToZeroTemp(durationInMinutes: Int, profile: Profile, mode: RM.Mode, action: Action, source: Sources, listValues: List<ValueWithUnit>) {
         val pump = activePlugin.activePump
-        @SuppressLint("CheckResult")
         persistenceLayer.insertOrUpdateRunningMode(
             runningMode = RM(
                 timestamp = dateUtil.now(),
@@ -948,9 +945,9 @@ class LoopPlugin @Inject constructor(
     /**
      * Suspend loop
      */
+    @Suppress("CheckResult")
     fun suspendLoop(mode: RM.Mode, autoForced: Boolean, reasons: String?, durationInMinutes: Int, action: Action, source: Sources, note: String? = null, listValues: List<ValueWithUnit> = emptyList()) {
         assert(mode == RM.Mode.SUSPENDED_BY_PUMP || mode == RM.Mode.SUSPENDED_BY_USER)
-        @SuppressLint("CheckResult")
         persistenceLayer.insertOrUpdateRunningMode(
             runningMode = RM(timestamp = dateUtil.now(), duration = T.mins(durationInMinutes.toLong()).msecs(), mode = mode, autoForced = autoForced, reasons = reasons),
             action = action,
