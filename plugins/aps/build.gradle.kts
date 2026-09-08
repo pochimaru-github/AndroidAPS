@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
     id("kotlin-android")
+    id("kotlin-kapt")
     id("android-module-dependencies")
     id("test-module-dependencies")
     id("jacoco-module-dependencies")
@@ -35,5 +35,23 @@ dependencies {
     //Logger
     api(libs.org.slf4j.api)
 
-    ksp(libs.com.google.dagger.android.processor)
+    // Dagger (kapt 構成へ統一)
+    implementation("com.google.dagger:dagger:2.50")
+    implementation("com.google.dagger:dagger-android:2.50")
+    implementation("com.google.dagger:dagger-android-support:2.50")
+    kapt("com.google.dagger:dagger-compiler:2.50")
+    kapt("com.google.dagger:dagger-android-processor:2.50")
+}
+
+kapt {
+    correctErrorTypes = true
+    keepJavacAnnotationProcessors = true
+
+    javacOptions {
+        option("--add-opens=java.base/java.lang=ALL-UNNAMED")
+        option("--add-opens=java.base/java.util=ALL-UNNAMED")
+        option("--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED")
+        option("--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
+        option("--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+    }
 }
