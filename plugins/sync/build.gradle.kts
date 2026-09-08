@@ -56,3 +56,16 @@ dependencies {
     kapt(libs.com.google.dagger.compiler)
     kapt(libs.com.google.dagger.android.processor)
 }
+
+kapt {
+    correctErrorTypes = true
+    keepJavacAnnotationProcessors = true
+    
+    javacOptions {
+        option("--add-opens=java.base/java.lang=ALL-UNNAMED")
+        option("--add-opens=java.base/java.util=ALL-UNNAMED")
+        option("--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED")
+        option("--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
+        option("--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+    }
+}
