@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.ui.dialogs.OKDialog
-import app.aaps.core.ui.fragments.PluginBaseFragment
+import app.aaps.core.ui.fragment.PluginBaseFragment
 import app.aaps.plugins.aps.R
 import app.aaps.plugins.aps.databinding.AutotuneFragmentBinding
 import javax.inject.Inject
