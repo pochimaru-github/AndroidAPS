@@ -36,9 +36,9 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:interfaces"))
 
-    // Dagger (正しいエイリアス名)
-    implementation(libs.dagger)
-    kapt(libs.dagger.compiler)
+    // Dagger (バージョンカタログの命名に左右されない直接指定)
+    implementation("com.google.dagger:dagger:2.50")
+    kapt("com.google.dagger:dagger-compiler:2.50")
 }
 
 kapt {
