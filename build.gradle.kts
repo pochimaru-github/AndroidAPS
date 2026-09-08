@@ -96,11 +96,6 @@ allprojects {
         }
     }
 
-    // 全サブプロジェクトの ksp 設定および依存関係を kapt に統一
-    plugins.withId("com.google.devtools.ksp") {
-        plugins.apply("kotlin-kapt")
-    }
-
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "jacoco")
 }
