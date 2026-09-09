@@ -18,7 +18,7 @@ class DetermineBasalAutoISF {
     fun <RT : APSResult> determineBasal(
         glucoseStatus: GlucoseStatus,
         currentTemp: CurrentTemp,
-        iobData: Any?, // IobStatusの型ミスマッチを回避するためAny?で受け取り
+        iobData: Any?,
         profile: Profile,
         autosensData: AutosensResult,
         mealData: MealData,
@@ -50,14 +50,12 @@ class DetermineBasalAutoISF {
 
         val maxBasal = profile.getMaxDailyBasal()
         val calculatedRate = max(0.0, min(requiredBasalRate, maxBasal))
-        val calculatedDuration = 30
-        val calculatedReason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
 
-        // APSResult の匿名実装オブジェクトを作成してキャスト
         val result = object : APSResult {
-            override fun rate(): Double = calculatedRate
-            override fun duration(): Int = calculatedDuration
-            override fun reason(): String = calculatedReason
+            override var algorithm: APSResult.Algorithm = APSResult.Algorithm.OpenAPS
+            override var rate: Double = calculatedRate
+            override var duration: Int = 30
+            override var reason: String = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
         }
 
         return result as RT
