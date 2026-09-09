@@ -6,29 +6,19 @@ plugins {
 
 android {
     namespace = "app.nightscout.android.plugins.sync"
-    compileSdk = 34
 
-    defaultConfig {
-        minSdk = 21
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
+    buildFeatures {
+        viewBinding = true
+        dataBinding = true
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
@@ -36,20 +26,14 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:interfaces"))
 
-    // Dagger (バージョンカタログの命名に左右されない直接指定)
+    // Dagger (Kapt 構成)
     implementation("com.google.dagger:dagger:2.50")
+    implementation("com.google.dagger:dagger-android:2.50")
+    implementation("com.google.dagger:dagger-android-support:2.50")
     kapt("com.google.dagger:dagger-compiler:2.50")
+    kapt("com.google.dagger:dagger-android-processor:2.50")
 }
 
 kapt {
     correctErrorTypes = true
-    keepJavacAnnotationProcessors = true
-
-    javacOptions {
-        option("--add-opens=java.base/java.lang=ALL-UNNAMED")
-        option("--add-opens=java.base/java.util=ALL-UNNAMED")
-        option("--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED")
-        option("--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
-        option("--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
-    }
 }
