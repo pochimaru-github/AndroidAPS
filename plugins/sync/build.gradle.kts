@@ -36,4 +36,5 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+    mapDiagnosticLocations = true
 }
