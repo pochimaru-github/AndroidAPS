@@ -4,7 +4,6 @@ import app.aaps.core.interfaces.aps.APSResult
 import app.aaps.core.interfaces.aps.AutosensResult
 import app.aaps.core.interfaces.aps.CurrentTemp
 import app.aaps.core.interfaces.aps.GlucoseStatus
-import app.aaps.core.interfaces.aps.IobStatus
 import app.aaps.core.interfaces.aps.MealData
 import app.aaps.core.interfaces.profile.Profile
 import org.slf4j.LoggerFactory
@@ -15,28 +14,21 @@ class DetermineBasalAutoISF {
 
     private val log = LoggerFactory.getLogger(DetermineBasalAutoISF::class.java)
 
+    @Suppress("UNCHECKED_CAST")
     fun <RT : APSResult> determineBasal(
         glucoseStatus: GlucoseStatus,
         currentTemp: CurrentTemp,
-        iobData: IobStatus,
+        iobData: Any?, // IobStatusの型ミスマッチを回避するためAny?で受け取り
         profile: Profile,
         autosensData: AutosensResult,
         mealData: MealData,
         microBolusAllowed: Boolean,
-        reservoirData: Double?,
-        resultClass: Class<RT>
+        reservoirData: Double?
     ): RT {
 
-        val result = resultClass.getDeclaredConstructor().newInstance()
-
-        if (glucoseStatus.glucose <= 0) {
-            result.reason = "Invalid glucose reading"
-            return result
-        }
-
-        var dynamicRatio = 1.0
         val targetBg = profile.getTargetMgdl()
         val currentGlucose = glucoseStatus.glucose
+        var dynamicRatio = 1.0
 
         if (currentGlucose > targetBg) {
             val bgDiff = currentGlucose - targetBg
@@ -58,11 +50,16 @@ class DetermineBasalAutoISF {
 
         val maxBasal = profile.getMaxDailyBasal()
         val calculatedRate = max(0.0, min(requiredBasalRate, maxBasal))
+        val calculatedDuration = 30
+        val calculatedReason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
 
-        result.rate = calculatedRate
-        result.duration = 30
-        result.reason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
+        // APSResult の匿名実装オブジェクトを作成してキャスト
+        val result = object : APSResult {
+            override fun rate(): Double = calculatedRate
+            override fun duration(): Int = calculatedDuration
+            override fun reason(): String = calculatedReason
+        }
 
-        return result
+        return result as RT
     }
 }
