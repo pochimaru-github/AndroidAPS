@@ -35,5 +35,5 @@ dependencies {
 }
 
 kapt {
-    correctErrorTypes = true
+    keepJavacAnnotationProcessors = true
 }
