@@ -10,6 +10,16 @@ plugins {
 
 android {
     namespace = "app.aaps.plugins.constraints"
+
+    buildFeatures {
+        viewBinding = true
+        dataBinding = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }
 
 dependencies {
