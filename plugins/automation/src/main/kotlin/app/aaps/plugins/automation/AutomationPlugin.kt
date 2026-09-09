@@ -133,7 +133,7 @@ class AutomationPlugin @Inject constructor(
     var btConnects: MutableList<EventBTChange> = ArrayList()
 
     private var handler: Handler? = null
-    private var refreshLoop: Runnable
+    private lateinit var refreshLoop: Runnable
 
     companion object {
 
