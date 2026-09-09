@@ -29,10 +29,11 @@ kotlin {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += listOf(
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        freeCompilerArgs.addAll(
             "-opt-in=kotlinx.datetime.ExperimentalKotlinxDateTimeApi",
+            "-opt-in=kotlin.RequiresOptIn",
             "-Xjvm-default=all"
         )
     }
