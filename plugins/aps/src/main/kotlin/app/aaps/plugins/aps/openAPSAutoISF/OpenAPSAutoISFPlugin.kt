@@ -444,9 +444,9 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
         )
 
         val determineBasalResult = apsResultProvider.get()
-        determineBasalResult.setRate(result.rate)
-        determineBasalResult.setDuration(result.duration)
-        determineBasalResult.setReason(result.reason)
+        determineBasalResult.rate = result.rate
+        determineBasalResult.duration = result.duration
+        determineBasalResult.reason = result.reason
 
         // Preserve input data
         determineBasalResult.inputConstraints = inputConstraints
