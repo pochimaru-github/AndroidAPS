@@ -4,7 +4,7 @@ import app.aaps.core.interfaces.aps.APSResult
 import app.aaps.core.interfaces.aps.AutosensResult
 import app.aaps.core.interfaces.aps.CurrentTemp
 import app.aaps.core.interfaces.aps.GlucoseStatus
-import app.aaps.core.interfaces.aps.Iob
+import app.aaps.core.interfaces.aps.IobStatus
 import app.aaps.core.interfaces.aps.MealData
 import app.aaps.core.interfaces.profile.Profile
 import org.slf4j.LoggerFactory
@@ -15,18 +15,19 @@ class DetermineBasalAutoISF {
 
     private val log = LoggerFactory.getLogger(DetermineBasalAutoISF::class.java)
 
-    fun determineBasal(
+    fun <RT : APSResult> determineBasal(
         glucoseStatus: GlucoseStatus,
         currentTemp: CurrentTemp,
-        iobData: Iob,
+        iobData: IobStatus,
         profile: Profile,
         autosensData: AutosensResult,
         mealData: MealData,
         microBolusAllowed: Boolean,
-        reservoirData: Double?
-    ): APSResult {
+        reservoirData: Double?,
+        resultClass: Class<RT>
+    ): RT {
 
-        val result = APSResult()
+        val result = resultClass.getDeclaredConstructor().newInstance()
 
         if (glucoseStatus.glucose <= 0) {
             result.reason = "Invalid glucose reading"
@@ -57,12 +58,10 @@ class DetermineBasalAutoISF {
 
         val maxBasal = profile.getMaxDailyBasal()
         val calculatedRate = max(0.0, min(requiredBasalRate, maxBasal))
-        val calculatedDuration = 30
-        val calculatedReason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
 
         result.rate = calculatedRate
-        result.duration = calculatedDuration
-        result.reason = calculatedReason
+        result.duration = 30
+        result.reason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
 
         return result
     }
