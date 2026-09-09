@@ -32,4 +32,4 @@ jobs:
           git commit -am "chore: temporary replace vector drawable attributes for build" || true
 
       - name: Build with Gradle
-        run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache --no-daemon
+        run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache --no-daemon --no-parallel -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
