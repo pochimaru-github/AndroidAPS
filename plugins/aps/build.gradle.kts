@@ -52,6 +52,10 @@ kapt {
     correctErrorTypes = true
     keepJavacAnnotationProcessors = true
 
+    arguments {
+        arg("android.databinding.enableV2", "true")
+    }
+
     javacOptions {
         option("--add-opens=java.base/java.lang=ALL-UNNAMED")
         option("--add-opens=java.base/java.util=ALL-UNNAMED")
