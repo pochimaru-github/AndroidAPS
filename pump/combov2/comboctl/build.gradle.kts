@@ -27,7 +27,8 @@ android {
     kotlinOptions {
         jvmTarget = "17"
         freeCompilerArgs += listOf(
-            "-opt-in=kotlinx.datetime.ExperimentalKotlinxDateTimeApi"
+            "-opt-in=kotlinx.datetime.ExperimentalKotlinxDateTimeApi",
+            "-Xfriend-paths="
         )
     }
 }
