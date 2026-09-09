@@ -39,7 +39,7 @@ dependencies {
     api(libs.com.github.rtchagas.pingplacepicker)
     api(libs.com.google.firebase.config)
 
-    // Dagger (kapt 構成に統一)
+    // Dagger (Kapt 構成)
     implementation("com.google.dagger:dagger:2.50")
     implementation("com.google.dagger:dagger-android:2.50")
     implementation("com.google.dagger:dagger-android-support:2.50")
