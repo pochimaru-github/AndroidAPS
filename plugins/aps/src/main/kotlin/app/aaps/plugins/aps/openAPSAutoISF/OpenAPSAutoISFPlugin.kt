@@ -443,7 +443,11 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
             reservoirData = null
         )
 
-        val determineBasalResult = apsResultProvider.get().with(result)
+        val determineBasalResult = apsResultProvider.get()
+        determineBasalResult.rate = result.rate
+        determineBasalResult.duration = result.duration
+        determineBasalResult.reason = result.reason
+
         // Preserve input data
         determineBasalResult.inputConstraints = inputConstraints
         determineBasalResult.autosensResult = autosensResult
