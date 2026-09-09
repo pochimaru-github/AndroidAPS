@@ -8,18 +8,31 @@ plugins {
 
 android {
     namespace = "info.nightscout.comboctl"
+
     sourceSets.getByName("main") {
         kotlin.srcDir("src/commonMain/kotlin")
         kotlin.srcDir("src/androidMain/kotlin")
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
     }
+
     sourceSets.getByName("test") {
         kotlin.srcDir("src/jvmTest/kotlin")
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+        freeCompilerArgs += listOf(
+            "-opt-in=kotlinx.datetime.ExperimentalKotlinxDateTimeApi"
+        )
     }
 }
 
 dependencies {
-
     api(platform(libs.kotlinx.coroutines.bom))
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.datetime)
