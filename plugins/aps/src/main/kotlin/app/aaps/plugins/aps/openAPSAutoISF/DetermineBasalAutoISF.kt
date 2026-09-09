@@ -14,9 +14,9 @@ class DetermineBasalAutoISF {
     private val log = LoggerFactory.getLogger(DetermineBasalAutoISF::class.java)
 
     data class AutoISFResult(
-        var rate: Double = 0.0,
-        var duration: Int = 0,
-        var reason: String = ""
+        val rate: Double = 0.0,
+        val duration: Int = 0,
+        val reason: String = ""
     )
 
     fun determineBasal(
