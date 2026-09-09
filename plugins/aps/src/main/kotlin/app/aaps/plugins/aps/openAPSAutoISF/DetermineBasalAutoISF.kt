@@ -2,7 +2,6 @@ package app.aaps.plugins.aps.openAPSAutoISF
 
 import app.aaps.core.interfaces.aps.AutosensResult
 import app.aaps.core.interfaces.aps.CurrentTemp
-import app.aaps.core.interfaces.aps.DetermineBasalResult
 import app.aaps.core.interfaces.aps.GlucoseStatus
 import app.aaps.core.interfaces.aps.MealData
 import app.aaps.core.interfaces.profile.Profile
@@ -14,6 +13,12 @@ class DetermineBasalAutoISF {
 
     private val log = LoggerFactory.getLogger(DetermineBasalAutoISF::class.java)
 
+    data class AutoISFResult(
+        var rate: Double = 0.0,
+        var duration: Int = 0,
+        var reason: String = ""
+    )
+
     fun determineBasal(
         glucoseStatus: GlucoseStatus,
         currentTemp: CurrentTemp,
@@ -23,7 +28,7 @@ class DetermineBasalAutoISF {
         mealData: MealData,
         microBolusAllowed: Boolean,
         reservoirData: Double?
-    ): DetermineBasalResult {
+    ): AutoISFResult {
 
         val targetBg = profile.getTargetMgdl()
         val currentGlucose = glucoseStatus.glucose
@@ -49,11 +54,10 @@ class DetermineBasalAutoISF {
         val maxBasal = profile.getMaxDailyBasal()
         val calculatedRate = max(0.0, min(requiredBasalRate, maxBasal))
 
-        val result = DetermineBasalResult()
-        result.rate = calculatedRate
-        result.duration = 30
-        result.reason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
-
-        return result
+        return AutoISFResult(
+            rate = calculatedRate,
+            duration = 30,
+            reason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
+        )
     }
 }
