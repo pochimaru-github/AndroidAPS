@@ -10,13 +10,13 @@ android {
     namespace = "info.nightscout.comboctl"
 
     sourceSets.getByName("main") {
-        kotlin.srcDir("src/commonMain/kotlin")
-        kotlin.srcDir("src/androidMain/kotlin")
+        // commonMain と androidMain を単一の JVM/Android ソースセットに統合
+        java.srcDirs("src/commonMain/kotlin", "src/androidMain/kotlin")
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
     }
 
     sourceSets.getByName("test") {
-        kotlin.srcDir("src/jvmTest/kotlin")
+        java.srcDirs("src/jvmTest/kotlin")
     }
 
     compileOptions {
@@ -27,8 +27,7 @@ android {
     kotlinOptions {
         jvmTarget = "17"
         freeCompilerArgs += listOf(
-            "-opt-in=kotlinx.datetime.ExperimentalKotlinxDateTimeApi",
-            "-Xfriend-paths="
+            "-opt-in=kotlinx.datetime.ExperimentalKotlinxDateTimeApi"
         )
     }
 }
