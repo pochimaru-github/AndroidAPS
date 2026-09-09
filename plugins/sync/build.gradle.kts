@@ -36,5 +36,4 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
-    useBuildStubs = true
 }
