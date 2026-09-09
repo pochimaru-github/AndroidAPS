@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
     id("kotlin-android")
+    id("kotlin-kapt")
     id("android-module-dependencies")
     id("all-open-dependencies")
     id("test-module-dependencies")
@@ -37,6 +37,14 @@ dependencies {
     // Phone checker
     api(libs.com.scottyab.rootbeer.lib)
 
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
+    // Dagger (Kapt 構成)
+    implementation("com.google.dagger:dagger:2.50")
+    implementation("com.google.dagger:dagger-android:2.50")
+    implementation("com.google.dagger:dagger-android-support:2.50")
+    kapt("com.google.dagger:dagger-compiler:2.50")
+    kapt("com.google.dagger:dagger-android-processor:2.50")
+}
+
+kapt {
+    correctErrorTypes = true
 }
