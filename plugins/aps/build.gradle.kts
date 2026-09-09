@@ -12,7 +12,7 @@ android {
 
     buildFeatures {
         viewBinding = true
-        dataBinding = true
+        dataBinding = false
     }
 }
 
@@ -51,16 +51,4 @@ dependencies {
 kapt {
     correctErrorTypes = true
     keepJavacAnnotationProcessors = true
-
-    arguments {
-        arg("android.databinding.enableV2", "true")
-    }
-
-    javacOptions {
-        option("--add-opens=java.base/java.lang=ALL-UNNAMED")
-        option("--add-opens=java.base/java.util=ALL-UNNAMED")
-        option("--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED")
-        option("--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
-        option("--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
-    }
 }
