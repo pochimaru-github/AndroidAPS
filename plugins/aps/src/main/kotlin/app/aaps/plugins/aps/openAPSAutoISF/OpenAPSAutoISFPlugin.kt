@@ -432,7 +432,7 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
         aapsLogger.debug(LTag.APS, "AutoIsfMode:        $autoIsfMode")
         //aapsLogger.debug(LTag.APS, "AutoISF extras:     ${Json.encodeToString(OapsProfile.serializer(), oapsProfile)}")
 
-        val result = determineBasalAutoISF.determineBasal(
+        determineBasalAutoISF.determineBasal(
             glucoseStatus = glucoseStatus,
             currentTemp = currentTemp,
             iobData = iobData,
@@ -441,21 +441,21 @@ open class OpenAPSAutoISFPlugin @Inject constructor(
             mealData = mealData,
             microBolusAllowed = microBolusAllowed,
             reservoirData = null
-        )
-
-        val determineBasalResult = apsResultProvider.get().with(result)
-        // Preserve input data
-        determineBasalResult.inputConstraints = inputConstraints
-        determineBasalResult.autosensResult = autosensResult
-        determineBasalResult.iobData = iobArray
-        determineBasalResult.glucoseStatus = glucoseStatus
-        determineBasalResult.currentTemp = currentTemp
-        determineBasalResult.oapsProfileAutoIsf = oapsProfile
-        determineBasalResult.mealData = mealData
-        lastAPSResult = determineBasalResult
-        lastAPSRun = now
-        aapsLogger.debug(LTag.APS, "Result: $result")
-        rxBus.send(EventAPSCalculationFinished())
+        ).also { result ->
+            val determineBasalResult = apsResultProvider.get().with(result)
+            // Preserve input data
+            determineBasalResult.inputConstraints = inputConstraints
+            determineBasalResult.autosensResult = autosensResult
+            determineBasalResult.iobData = iobArray
+            determineBasalResult.glucoseStatus = glucoseStatus
+            determineBasalResult.currentTemp = currentTemp
+            determineBasalResult.oapsProfileAutoIsf = oapsProfile
+            determineBasalResult.mealData = mealData
+            lastAPSResult = determineBasalResult
+            lastAPSRun = now
+            aapsLogger.debug(LTag.APS, "Result: $result")
+            rxBus.send(EventAPSCalculationFinished())
+        }
 
         rxBus.send(EventOpenAPSUpdateGui())
     }
