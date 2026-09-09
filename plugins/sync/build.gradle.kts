@@ -26,6 +26,10 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:interfaces"))
 
+    // Jackson / Json Annotations (NonExistentClass 解消用)
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+
     // Dagger (Kapt 構成)
     implementation("com.google.dagger:dagger:2.50")
     implementation("com.google.dagger:dagger-android:2.50")
@@ -35,6 +39,5 @@ dependencies {
 }
 
 kapt {
-    correctErrorTypes = false
-    keepJavacAnnotationProcessors = true
+    correctErrorTypes = true
 }
