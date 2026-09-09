@@ -4,7 +4,6 @@ retrofit = "2.9.0"
 navigationCompose = "2.6.0"
 okhttp = "4.11.0"
 wearable = "2.9.0"
-# --- 修正後 (クォートを外し、ハイフン表記に変更) ---
 kotlinx-serialization = "1.5.1"
 dagger = "2.46.1"
 activityCompose = "1.7.2"
@@ -19,14 +18,14 @@ junit = "5.9.3"
 googleServices = "4.3.15"
 room = "2.5.0"
 agp = "7.4.2"
-kotlin = "1.8.20"
+kotlin = "1.9.22"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-android-library = { id = "com.android.library", version.ref = "agp" } # ← これを追加
+android-library = { id = "com.android.library", version.ref = "agp" }
 klint = { id = "org.jlleitschuh.gradle.ktlint", version = "11.5.1" }
 moduleDependencyGraph = { id = "com.savvasdalkitsis.module-dependency-graph", version = "0.10" }
-ksp = { id = "com.google.devtools.ksp", version = "1.8.20-1.0.11" }
+ksp = { id = "com.google.devtools.ksp", version = "1.9.22-1.0.17" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
@@ -69,7 +68,6 @@ kotlin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-serializ
 kotlin-stdlib-jdk8 = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
 
-# 【修正箇所】各ライブラリに version.ref = "kotlinx-serialization" を追加
 kotlinx-serialization-bom = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-bom", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-protobuf = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-protobuf", version.ref = "kotlinx-serialization" }
