@@ -22,7 +22,7 @@ class DetermineBasalAutoISF {
         mealData: MealData,
         microBolusAllowed: Boolean,
         reservoirData: Double?
-    ): AutoISFResult {
+    ): Result {
 
         val targetBg = profile.getTargetMgdl()
         val currentGlucose = glucoseStatus.glucose
@@ -40,7 +40,6 @@ class DetermineBasalAutoISF {
 
         val originalIsf = profile.getIsfMgdl("DetermineBasalAutoISF") ?: 100.0
         val adjustedIsf = originalIsf / dynamicRatio
-        log.debug("AutoISF adjusted ISF: original={}, adjusted={}, ratio={}", originalIsf, adjustedIsf, dynamicRatio)
 
         val targetDifference = currentGlucose - targetBg
         val currentBasal = profile.getBasal()
@@ -49,14 +48,14 @@ class DetermineBasalAutoISF {
         val maxBasal = profile.getMaxDailyBasal()
         val calculatedRate = max(0.0, min(requiredBasalRate, maxBasal))
 
-        return AutoISFResult(
+        return Result(
             rate = calculatedRate,
             duration = 30,
             reason = "AutoISF Active (Ratio: %.2f, Adj ISF: %.1f)".format(dynamicRatio, adjustedIsf)
         )
     }
 
-    data class AutoISFResult(
+    class Result(
         val rate: Double = 0.0,
         val duration: Int = 0,
         val reason: String = ""
