@@ -41,7 +41,7 @@ class TriggerPumpBatteryLevel(injector: HasAndroidInjector) : Trigger(injector) 
         val erosBatteryLinkAvailable = pump.model() == PumpType.OMNIPOD_EROS && pump.isUseRileyLinkBatteryLevel()
         val currentLevel = pump.batteryLevel?.toDouble()
         val available = currentLevel != null && (pump.model().supportBatteryLevel || erosBatteryLinkAvailable)
-        if (!available) {
+        if (!available || currentLevel == null) {
             aapsLogger.debug(LTag.AUTOMATION, "NOT ready for execution: " + friendlyDescription())
             return false
         }
