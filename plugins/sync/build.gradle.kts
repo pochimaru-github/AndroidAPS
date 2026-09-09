@@ -35,9 +35,6 @@ dependencies {
 }
 
 kapt {
-    correctErrorTypes = true
-    arguments {
-        arg("dagger.fastInit", "enabled")
-        arg("dagger.formatGeneratedSource", "disabled")
-    }
+    correctErrorTypes = false
+    keepJavacAnnotationProcessors = true
 }
