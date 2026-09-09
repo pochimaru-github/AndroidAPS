@@ -51,7 +51,7 @@ class DetermineBasalAutoISF {
         val maxBasal = profile.getMaxDailyBasal()
         val calculatedRate = max(0.0, min(requiredBasalRate, maxBasal))
 
-        val result = object : APSResult {
+        val result: APSResult = object : APSResult {
             override var algorithm: APSResult.Algorithm = APSResult.Algorithm.AUTO_ISF
             override var rate: Double = calculatedRate
             override var duration: Int = 30
@@ -59,6 +59,7 @@ class DetermineBasalAutoISF {
             override var autosensResult: AutosensResult? = autosensData
             override var carbsReq: Int = 0
             override var carbsReqWithin: Int = 0
+            override val carbsRequiredText: String = ""
         }
 
         return result as RT
