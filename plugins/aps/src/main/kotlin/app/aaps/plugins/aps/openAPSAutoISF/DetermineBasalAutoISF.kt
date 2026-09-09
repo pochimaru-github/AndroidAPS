@@ -76,7 +76,7 @@ class DetermineBasalAutoISF {
     }
 
     private class AutoISFAPSResult : APSResult {
-        override fun with(result: RT): APSResult = this
+        override fun with(result: APSResult): APSResult = this
         override var date: Long = System.currentTimeMillis()
         override var reason: String = ""
         override var rate: Double = 0.0
