@@ -22,8 +22,7 @@ class DetermineBasalAutoISF {
 
     private val log = LoggerFactory.getLogger(DetermineBasalAutoISF::class.java)
 
-    @Suppress("UNCHECKED_CAST")
-    fun <RT : APSResult> determineBasal(
+    fun determineBasal(
         glucoseStatus: GlucoseStatus,
         currentTemp: CurrentTemp,
         iobData: Any?,
@@ -32,7 +31,7 @@ class DetermineBasalAutoISF {
         mealData: MealData,
         microBolusAllowed: Boolean,
         reservoirData: Double?
-    ): RT {
+    ): APSResult {
 
         val targetBg = profile.getTargetMgdl()
         val currentGlucose = glucoseStatus.glucose
@@ -59,7 +58,7 @@ class DetermineBasalAutoISF {
         val maxBasal = profile.getMaxDailyBasal()
         val calculatedRate = max(0.0, min(requiredBasalRate, maxBasal))
 
-        val resultInstance = AutoISFAPSResult().apply {
+        return AutoISFAPSResult().apply {
             algorithm = APSResult.Algorithm.AUTO_ISF
             rate = calculatedRate
             duration = 30
@@ -71,12 +70,10 @@ class DetermineBasalAutoISF {
             carbsReq = 0
             carbsReqWithin = 0
         }
-
-        return resultInstance as RT
     }
 
     private class AutoISFAPSResult : APSResult {
-        override fun with(result: APSResult): APSResult = this
+        override fun <RT : APSResult> with(result: RT): APSResult = this
         override var date: Long = System.currentTimeMillis()
         override var reason: String = ""
         override var rate: Double = 0.0
