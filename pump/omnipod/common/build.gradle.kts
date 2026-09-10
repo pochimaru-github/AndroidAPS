@@ -28,6 +28,13 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:utils"))
 
+    // Lifecycleのバージョン競合(2.9.0)を回避し、AGP 7.4.2と互換のある2.6.2に固定
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx") {
+        version {
+            strictly("2.6.2")
+        }
+    }
+
     api(libs.androidx.constraintlayout)
     api(libs.androidx.fragment)
     api(libs.androidx.navigation.fragment)
