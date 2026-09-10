@@ -37,7 +37,4 @@ dependencies {
     api(libs.com.google.dagger.android.support)
     kapt(libs.com.google.dagger.compiler)
     kapt(libs.com.google.dagger.android.processor)
-    
-    // DataBinding Compiler
-    kapt("com.android.databinding:compiler:8.2.2")
 }
