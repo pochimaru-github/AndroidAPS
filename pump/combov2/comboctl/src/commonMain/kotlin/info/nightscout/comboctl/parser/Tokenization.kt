@@ -6,18 +6,6 @@ import info.nightscout.comboctl.base.DisplayFrame
 import kotlin.math.sign
 
 /**
- * Extension function on DisplayFrame to safely retrieve a pixel value at specified coordinates.
- */
-fun DisplayFrame.getPixelAt(x: Int, y: Int): Boolean {
-    // If pixels list exists inside DisplayFrame, get value safely; otherwise return default
-    if (x < 0 || x >= DISPLAY_FRAME_WIDTH || y < 0 || y >= DISPLAY_FRAME_HEIGHT) {
-        return false
-    }
-    val index = y * DISPLAY_FRAME_WIDTH + x
-    return if (index < this.pixels.size) this.pixels[index] else false
-}
-
-/**
  * Structure containing details about a match discovered in a [DisplayFrame].
  *
  * The match is referred to as a "token", similar to lexical tokens
