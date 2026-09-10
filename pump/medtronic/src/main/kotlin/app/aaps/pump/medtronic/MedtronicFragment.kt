@@ -68,14 +68,7 @@ class MedtronicFragment : DaggerFragment() {
     private var disposable: CompositeDisposable = CompositeDisposable()
 
     private val handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
-    private var refreshLoop: Runnable
-
-    init {
-        refreshLoop = Runnable {
-            activity?.runOnUiThread { updateGUI() }
-            handler.postDelayed(refreshLoop, T.mins(1).msecs())
-        }
-    }
+    private lateinit var refreshLoop: Runnable
 
     private var _binding: MedtronicFragmentBinding? = null
 
@@ -88,6 +81,11 @@ class MedtronicFragment : DaggerFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        refreshLoop = Runnable {
+            activity?.runOnUiThread { updateGUI() }
+            handler.postDelayed(refreshLoop, T.mins(1).msecs())
+        }
 
         binding.rlStatus.text = rh.gs(RileyLinkServiceState.NotStarted.resourceId)
 
@@ -129,7 +127,9 @@ class MedtronicFragment : DaggerFragment() {
     @Synchronized
     override fun onResume() {
         super.onResume()
-        handler.postDelayed(refreshLoop, T.mins(1).msecs())
+        if (::refreshLoop.isInitialized) {
+            handler.postDelayed(refreshLoop, T.mins(1).msecs())
+        }
         disposable += rxBus
             .toObservable(EventRefreshButtonState::class.java)
             .observeOn(aapsSchedulers.main)
