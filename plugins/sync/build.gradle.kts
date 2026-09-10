@@ -1,8 +1,8 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.hilt.android)
+    id("com.android.library")
+    kotlin("multiplatform")
+    kotlin("kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 kotlin {
