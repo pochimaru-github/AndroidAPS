@@ -111,7 +111,7 @@ class RileyLinkBLEConfigActivity : TranslatedDaggerAppCompatActivity() {
                 this@RileyLinkBLEConfigActivity,
                 rh.gs(R.string.riley_link_ble_config_remove_riley_link_confirmation_title),
                 rh.gs(R.string.riley_link_ble_config_remove_riley_link_confirmation),
-                {
+                Runnable {
                     rileyLinkUtil.sendBroadcastMessage(RileyLinkConst.Intents.RileyLinkDisconnect)
                     preferences.remove(RileyLinkStringPreferenceKey.MacAddress)
                     preferences.remove(RileyLinkStringKey.Name)
