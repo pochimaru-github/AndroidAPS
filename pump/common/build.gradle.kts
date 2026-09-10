@@ -10,21 +10,28 @@ plugins {
 
 android {
     namespace = "app.aaps.pump.common"
+
+    buildFeatures {
+        dataBinding = true
+    }
 }
 
 dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:interfaces"))
     implementation(project(":core:keys"))
-    implementation(project(":core:ui")) // ← 追加
+    implementation(project(":core:ui"))
     implementation(project(":core:utils"))
     implementation(project(":shared:impl"))
 
-    //Logger
+    // Logger
     api(libs.org.slf4j.api)
     api(libs.com.github.tony19.logback.android)
 
     api(libs.io.reactivex.rxjava3.rxandroid)
+
+    // XStream
+    implementation(libs.com.thoughtworks.xstream)
 
     api(libs.com.google.dagger.android.support)
     kapt(libs.com.google.dagger.compiler)
