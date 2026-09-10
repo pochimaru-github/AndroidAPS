@@ -1,12 +1,12 @@
-package info.nightscout.androidaps.plugins.pump.omnipod.dash.ui
+package app.aaps.pump.omnipod.dash.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import info.nightscout.androidaps.plugins.pump.omnipod.dash.OmnipodDashPumpPlugin
-import info.nightscout.androidaps.plugins.pump.omnipod.dash.databinding.OmnipodDashOverviewFragmentBinding
+import app.aaps.pump.omnipod.dash.OmnipodDashPumpPlugin
+import app.aaps.pump.omnipod.dash.databinding.OmnipodDashOverviewFragmentBinding
 import javax.inject.Inject
 
 class OmnipodDashOverviewFragment : Fragment() {
