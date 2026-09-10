@@ -4,25 +4,39 @@ plugins {
     kotlin("kapt")
 }
 
+android {
+    namespace = "info.nightscout.androidaps.plugins.sync"
+    compileSdk = 34
+
+    defaultConfig {
+        minSdk = 28
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
 kotlin {
-    // 1. 【警告への対応】Android ターゲットの明示的な登録
+    // 警告回避のため androidTarget を宣言
     androidTarget()
 
     sourceSets {
         val commonMain by getting {
             dependencies {
-                // common の依存関係
+                // Room 等の共通依存関係
             }
         }
         val androidMain by getting {
             dependencies {
-                // android の依存関係
+                // kapt の依存関係は dependencies ブロックではなく sourceSets 内で管理
             }
         }
     }
 }
 
-// 2. 【エラーへの対応】 dependencies ブロック内に kapt を記述する
+// kapt の設定は dependencies ブロックではなく dependencies { ... } 構成を正しく定義
 dependencies {
-    kapt("androidx.room:room-compiler:2.5.2")
+    add("kapt", "androidx.room:room-compiler:2.5.2")
 }
