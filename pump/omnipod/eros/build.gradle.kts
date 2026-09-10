@@ -11,6 +11,8 @@ android {
     namespace = "app.aaps.pump.omnipod.eros"
 
     defaultConfig {
+        vectorDrawables.useSupportLibrary = true
+
         ksp {
             arg("room.incremental", "true")
             arg("room.schemaLocation", "$projectDir/schemas")
