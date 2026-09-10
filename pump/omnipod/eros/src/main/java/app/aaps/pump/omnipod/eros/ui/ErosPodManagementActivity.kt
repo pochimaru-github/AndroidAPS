@@ -87,8 +87,8 @@ class ErosPodManagementActivity : TranslatedDaggerAppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val type: PodActivationWizardActivity.Type = if (podStateManager.isPodInitialized
-                and podStateManager.activationProgress.isAtLeast(ActivationProgress.PRIMING_COMPLETED)
+            val type: PodActivationWizardActivity.Type = if (podStateManager.isPodInitialized &&
+                podStateManager.activationProgress.isAtLeast(ActivationProgress.PRIMING_COMPLETED)
             ) {
                 PodActivationWizardActivity.Type.SHORT
             } else {
