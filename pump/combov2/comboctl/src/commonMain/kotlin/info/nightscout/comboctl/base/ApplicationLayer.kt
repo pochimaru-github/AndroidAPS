@@ -19,17 +19,16 @@ interface TransportLayer {
 }
 
 /**
- * Enum for screen glyphs used across parser and tokenization.
+ * Sealed class representing screen glyphs and character variants used in parser.
  */
-enum class Glyph(val isLarge: Boolean = false) {
-    DIGIT_0, DIGIT_1, DIGIT_2, DIGIT_3, DIGIT_4,
-    DIGIT_5, DIGIT_6, DIGIT_7, DIGIT_8, DIGIT_9,
-    CHAR_A, CHAR_B, CHAR_C, CHAR_D, CHAR_E, CHAR_F,
-    CHAR_G, CHAR_H, CHAR_I, CHAR_J, CHAR_K, CHAR_L,
-    CHAR_M, CHAR_N, CHAR_O, CHAR_P, CHAR_Q, CHAR_R,
-    CHAR_S, CHAR_T, CHAR_U, CHAR_V, CHAR_W, CHAR_X,
-    CHAR_Y, CHAR_Z,
-    SPACE, MINUS, PLUS, SLASH, COLON, DOT, COMMA
+sealed class Glyph {
+    open val isLarge: Boolean = false
+
+    data class SmallCharacter(val char: Char) : Glyph()
+    data class LargeCharacter(val char: Char) : Glyph() {
+        override val isLarge: Boolean = true
+    }
+    object Unknown : Glyph()
 }
 
 /**
@@ -69,8 +68,6 @@ class ApplicationLayer(
 
     /**
      * Constructs and sends a packet to deliver a bolus.
-     *
-     * @param milliUnits Bolus amount in milli-units (e.g., 1000 = 1.0 U)
      */
     fun createCMDDeliverBolusPacket(milliUnits: Int): ByteArray {
         val commandByte = 0x01.toByte()
@@ -82,9 +79,6 @@ class ApplicationLayer(
 
     /**
      * Constructs and sends a packet to set a Temporary Basal Rate (TBR).
-     *
-     * @param percentage TBR percentage (e.g., 150 = 150%)
-     * @param durationMinutes Duration in minutes
      */
     fun createCMDSetTBRPercentPacket(percentage: Int, durationMinutes: Int): ByteArray {
         val commandByte = 0x02.toByte()
