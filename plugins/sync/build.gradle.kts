@@ -1,7 +1,31 @@
 plugins {
     id("com.android.library")
-    kotlin("android")
+    kotlin("multiplatform")
     kotlin("kapt")
+}
+
+kotlin {
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "17"
+            }
+        }
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(":core"))
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                implementation("androidx.appcompat:appcompat:1.6.1")
+                implementation("com.google.android.material:material:1.9.0")
+            }
+        }
+    }
 }
 
 android {
@@ -12,33 +36,12 @@ android {
         minSdk = 26
     }
 
-    flavorDimensions.add("standard")
-    productFlavors {
-        create("full") {
-            dimension = "standard"
-            matchingFallbacks.add("full")
-        }
-        create("pump") {
-            dimension = "standard"
-            matchingFallbacks.add("pump")
-        }
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
 
 dependencies {
-    implementation(project(":core"))
-    
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
-    
     kapt("androidx.room:room-compiler:2.5.2")
 }
