@@ -11,6 +11,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":core:interfaces"))
+                implementation(project(":core:data"))
+                implementation(project(":core:objects"))
             }
         }
 
@@ -20,6 +22,9 @@ kotlin {
                 implementation(libs.androidx.room.runtime)
                 implementation(libs.androidx.room)
                 implementation(libs.androidx.work.runtime)
+                
+                // Gson
+                implementation(libs.com.google.code.gson)
                 
                 // Dagger2
                 implementation(libs.com.google.dagger.android)
