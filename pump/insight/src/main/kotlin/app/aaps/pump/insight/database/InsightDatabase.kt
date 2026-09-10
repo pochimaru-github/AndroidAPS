@@ -30,7 +30,6 @@ abstract class InsightDatabase : RoomDatabase() {
                 InsightDatabase::class.java,
                 "insight_database.db"
             )
-                .fallbackToDestructiveMigration(false)
                 .build()
     }
 }
