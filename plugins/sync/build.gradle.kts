@@ -5,13 +5,7 @@ plugins {
 }
 
 kotlin {
-    androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
-        }
-    }
+    androidTarget()
 
     sourceSets {
         val commonMain by getting {
@@ -28,15 +22,19 @@ kotlin {
                 implementation(libs.androidx.room)
                 implementation(libs.androidx.work.runtime)
                 
-                // Dagger2 (Hilt ではなく Dagger を使用)
+                // Dagger2
                 implementation(libs.com.google.dagger.android)
                 implementation(libs.com.google.dagger.android.support)
-                kapt(libs.com.google.dagger.compiler)
-                kapt(libs.com.google.dagger.android.processor)
-                kapt(libs.androidx.room.compiler)
             }
         }
     }
+}
+
+dependencies {
+    // KMPブロック外からkaptアノテーションプロセッサを注入
+    add("kapt", libs.com.google.dagger.compiler)
+    add("kapt", libs.com.google.dagger.android.processor)
+    add("kapt", libs.androidx.room.compiler)
 }
 
 android {
