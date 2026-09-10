@@ -1,53 +1,42 @@
 plugins {
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
-    id("kotlin-android")
-    id("android-module-dependencies")
-    id("test-module-dependencies")
-    id("jacoco-module-dependencies")
+}
+
+kotlin {
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "17"
+            }
+        }
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.kotlinx.datetime)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+    }
 }
 
 android {
     namespace = "info.nightscout.comboctl"
+    compileSdk = 33
 
-    sourceSets.getByName("main") {
-        java.srcDirs("src/commonMain/kotlin", "src/androidMain/kotlin")
-        manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    }
-
-    sourceSets.getByName("test") {
-        java.srcDirs("src/jvmTest/kotlin")
+    defaultConfig {
+        minSdk = 26
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-}
-
-kotlin {
-    jvmToolchain(17)
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        freeCompilerArgs.addAll(
-            "-opt-in=kotlinx.datetime.ExperimentalKotlinxDateTimeApi",
-            "-opt-in=kotlin.RequiresOptIn",
-            "-Xjvm-default=all"
-        )
-    }
-}
-
-dependencies {
-    api(platform(libs.kotlinx.coroutines.bom))
-    api(libs.kotlinx.coroutines.core)
-    api(libs.kotlinx.datetime)
-    api(libs.androidx.core)
-
-    testImplementation(kotlin("test"))
-    testImplementation(project(":shared:tests"))
-
-    testImplementation(libs.io.kotlintest.runner.junit5)
-    testRuntimeOnly(libs.org.junit.jupiter.engine)
 }
