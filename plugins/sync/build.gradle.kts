@@ -26,8 +26,8 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":db"))
     
-    implementation(libs.androidx.appcompat)
-    implementation(libs.google.material)
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.9.0")
     
-    kapt(libs.room.compiler)
+    kapt("androidx.room:room-compiler:2.5.2")
 }
