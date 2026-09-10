@@ -10,6 +10,12 @@ plugins {
 android {
 
     namespace = "app.aaps.pump.diaconn"
+
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
+    }
+
     defaultConfig {
         ksp {
             arg("room.incremental", "true")
