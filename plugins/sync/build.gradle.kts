@@ -10,6 +10,9 @@ android {
 
     defaultConfig {
         minSdk = 26
+
+        // :core モジュールの ProductFlavor (standard -> full) を明示的に解決する設定
+        missingDimensionStrategy("standard", "full")
     }
 
     compileOptions {
