@@ -3,20 +3,11 @@ package info.nightscout.comboctl.parser
 import info.nightscout.comboctl.base.DISPLAY_FRAME_HEIGHT
 import info.nightscout.comboctl.base.DISPLAY_FRAME_WIDTH
 import info.nightscout.comboctl.base.DisplayFrame
+import info.nightscout.comboctl.base.Glyph
 import kotlin.math.sign
 
 /**
  * Structure containing details about a match discovered in a [DisplayFrame].
- *
- * The match is referred to as a "token", similar to lexical tokens
- * in lexical analyzers.
- *
- * This is the result of a pattern search in a display frame.
- *
- * @property pattern The pattern for which a match was found.
- * @property glyph [Glyph] associated with the pattern.
- * @property x X-coordinate of the location of the token in the display frame.
- * @property y Y-coordinate of the location of the token in the display frame.
  */
 data class Token(
     val pattern: Pattern,
@@ -32,16 +23,6 @@ typealias Tokens = List<Token>
 
 /**
  * Checks if the region at the given coordinates matches the given pattern.
- *
- * This is used for finding tokens in a frame.
- *
- * @param displayFrame [DisplayFrame] that contains the region to match the pattern against.
- * @param pattern Pattern to match with the region in the display frame.
- * @param x X-coordinate of the region in the display frame.
- * @param y Y-coordinate of the region in the display frame.
- * @return true if the region matches the pattern. false in case of mismatch
- *         or if the coordinates would place the pattern (partially) outside
- *         of the bounds of the display frame.
  */
 fun checkIfPatternMatchesAt(displayFrame: DisplayFrame, pattern: Pattern, x: Int, y: Int): Boolean {
     if ((x < 0) || (y < 0) ||
@@ -67,9 +48,6 @@ fun checkIfPatternMatchesAt(displayFrame: DisplayFrame, pattern: Pattern, x: Int
 
 /**
  * Look for regions in the display frame that can be turned into tokens.
- *
- * @param displayFrame [DisplayFrame] to search for tokens.
- * @return Tokens found in this frame.
  */
 fun findTokens(displayFrame: DisplayFrame): Tokens {
     val tokens = mutableListOf<Token>()
