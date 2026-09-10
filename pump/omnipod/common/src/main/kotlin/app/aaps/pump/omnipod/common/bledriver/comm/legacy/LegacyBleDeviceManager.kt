@@ -33,7 +33,7 @@ class LegacyBleDeviceManager @Inject constructor(
         val adapter = bluetoothAdapter ?: return false
         val device = adapter.getRemoteDevice(podAddress)
         if (device.bondState != android.bluetooth.BluetoothDevice.BOND_NONE) return true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM &&
+        if (Build.VERSION.SDK_INT >= 35 &&
             ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
         ) {
             val result = device.createBond()
@@ -46,7 +46,7 @@ class LegacyBleDeviceManager @Inject constructor(
     override fun removeBond(podAddress: String) {
         try {
             if (!preferences.get(DashBooleanPreferenceKey.UseBonding) ||
-                Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM ||
+                Build.VERSION.SDK_INT < 35 ||
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
             ) {
                 return
