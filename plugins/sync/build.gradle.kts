@@ -2,7 +2,6 @@ plugins {
     id("com.android.library")
     kotlin("multiplatform")
     kotlin("kapt")
-    id("com.google.dagger.hilt.android")
 }
 
 kotlin {
