@@ -5,17 +5,16 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import app.aaps.pump.omnipod.common.database.DateTypeConverter
 
 @Database(
-    entities = [DashHistoryEntry::class],
+    entities = [HistoryRecordEntity::class],
     version = 1,
     exportSchema = false
 )
-@TypeConverters(DateTypeConverter::class)
+@TypeConverters(Converters::class)
 abstract class DashHistoryDatabase : RoomDatabase() {
 
-    abstract fun dashHistoryDao(): DashHistoryDao
+    abstract fun historyRecordDao(): HistoryRecordDao
 
     companion object {
         @Volatile
