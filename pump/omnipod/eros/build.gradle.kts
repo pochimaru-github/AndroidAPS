@@ -36,8 +36,18 @@ dependencies {
     implementation(project(":pump:common"))
     implementation(project(":pump:rileylink"))
 
-    // Lifecycleのバージョン競合(2.9.0/2.4.0)を回避し、AGP 7.4.2と互換のある2.6.2に固定
+    // Lifecycleのバージョン競合を回避し、AGP 7.4.2と互換のある2.6.2に固定
     implementation("androidx.lifecycle:lifecycle-runtime-ktx") {
+        version {
+            strictly("2.6.2")
+        }
+    }
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx") {
+        version {
+            strictly("2.6.2")
+        }
+    }
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx") {
         version {
             strictly("2.6.2")
         }
@@ -53,7 +63,6 @@ dependencies {
     testImplementation(project(":implementation"))
     testImplementation(project(":shared:impl"))
     testImplementation(project(":shared:tests"))
-
 
     ksp(libs.com.google.dagger.compiler)
     ksp(libs.com.google.dagger.android.processor)
