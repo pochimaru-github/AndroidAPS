@@ -11,6 +11,31 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
+ * Large symbols used in display parser.
+ */
+enum class LargeSymbol {
+    CLOCK,
+    WARNING,
+    CHECKMARK,
+    CROSS,
+    BATTERY
+}
+
+/**
+ * Sealed class representing screen glyphs used in parser.
+ */
+sealed class Glyph {
+    data class SmallCharacter(val char: Char) : Glyph()
+    data class LargeCharacter(val char: Char) : Glyph()
+    data class LargeSymbolGlyph(val symbol: LargeSymbol) : Glyph()
+    object Unknown : Glyph()
+
+    companion object {
+        val LargeSymbol = info.nightscout.comboctl.base.LargeSymbol
+    }
+}
+
+/**
  * Interface representing transport layer abstraction.
  */
 interface TransportLayer {
@@ -53,57 +78,37 @@ class ApplicationLayer(
         _isPumpConnected.value = false
     }
 
-    /**
-     * Constructs and sends a packet to deliver a bolus.
-     */
     fun createCMDDeliverBolusPacket(milliUnits: Int): ByteArray {
         val commandByte = 0x01.toByte()
         val arg1 = (milliUnits and 0xFF).toByte()
         val arg2 = ((milliUnits shr 8) and 0xFF).toByte()
-
         return byteArrayOf(commandByte, arg1, arg2)
     }
 
-    /**
-     * Constructs and sends a packet to set a Temporary Basal Rate (TBR).
-     */
     fun createCMDSetTBRPercentPacket(percentage: Int, durationMinutes: Int): ByteArray {
         val commandByte = 0x02.toByte()
         val percByte = (percentage and 0xFF).toByte()
         val durLow = (durationMinutes and 0xFF).toByte()
         val durHigh = ((durationMinutes shr 8) and 0xFF).toByte()
-
         return byteArrayOf(commandByte, percByte, durLow, durHigh)
     }
 
-    /**
-     * Constructs and sends a packet to cancel any active TBR.
-     */
     fun createCMDCancelTBRPacket(): ByteArray {
         return byteArrayOf(0x03.toByte())
     }
 
-    /**
-     * Deliver bolus to pump.
-     */
     suspend fun deliverBolus(milliUnits: Int): Boolean {
         if (!_isPumpConnected.value) return false
         val packet = createCMDDeliverBolusPacket(milliUnits)
         return transportLayer.sendPacket(packet)
     }
 
-    /**
-     * Set temporary basal rate.
-     */
     suspend fun setTBR(percentage: Int, durationMinutes: Int): Boolean {
         if (!_isPumpConnected.value) return false
         val packet = createCMDSetTBRPercentPacket(percentage, durationMinutes)
         return transportLayer.sendPacket(packet)
     }
 
-    /**
-     * Cancel active temporary basal rate.
-     */
     suspend fun cancelTBR(): Boolean {
         if (!_isPumpConnected.value) return false
         val packet = createCMDCancelTBRPacket()
