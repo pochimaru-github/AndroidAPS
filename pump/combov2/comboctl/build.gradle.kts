@@ -19,6 +19,11 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
             }
         }
+        val androidMain by getting {
+            dependencies {
+                // Android固有の依存関係
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
