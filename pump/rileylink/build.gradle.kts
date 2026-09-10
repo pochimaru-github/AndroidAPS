@@ -9,6 +9,11 @@ plugins {
 
 android {
     namespace = "app.aaps.pump.common.hw.rileylink"
+
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
+    }
 }
 
 dependencies {
