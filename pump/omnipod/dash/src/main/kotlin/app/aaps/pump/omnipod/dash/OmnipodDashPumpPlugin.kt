@@ -1,9 +1,9 @@
-package info.nightscout.androidaps.plugins.pump.omnipod.dash
+package app.aaps.pump.omnipod.dash
 
 import android.content.Context
-import info.nightscout.androidaps.plugins.pump.common.hw.PumpDevice
-import info.nightscout.androidaps.plugins.pump.omnipod.common.OmnipodPlugin
-import info.nightscout.androidaps.plugins.pump.omnipod.dash.database.DashHistoryDatabase
+import app.aaps.pump.common.hw.PumpDevice
+import app.aaps.pump.omnipod.common.OmnipodPlugin
+import app.aaps.pump.omnipod.dash.history.database.DashHistoryDatabase
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,9 +22,8 @@ class OmnipodDashPumpPlugin @Inject constructor(
         return true
     }
 
-    // StatusChecker 等のプロパティ初期化ロジック
     fun initializeStatusChecker() {
-        // 必要に応じたステータスチェックの初期化処理
+        // 初期化処理
     }
 
     companion object {
