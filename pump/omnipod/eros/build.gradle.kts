@@ -18,6 +18,10 @@ android {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
+
+    buildFeatures {
+        dataBinding = true
+    }
 }
 
 dependencies {
