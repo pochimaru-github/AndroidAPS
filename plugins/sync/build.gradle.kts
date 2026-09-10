@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
     kotlin("multiplatform")
     kotlin("kapt")
 }
@@ -23,20 +23,20 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
+                implementation(libs.androidx.core)
                 implementation(libs.androidx.room.runtime)
-                implementation(libs.androidx.room.ktx)
-                implementation(libs.androidx.work.runtime.ktx)
-                implementation(libs.hilt.android)
-                implementation(libs.androidx.hilt.work)
+                implementation(libs.androidx.room)
+                implementation(libs.androidx.work.runtime)
+                
+                // Dagger2 (Hilt ではなく Dagger を使用)
+                implementation(libs.com.google.dagger.android)
+                implementation(libs.com.google.dagger.android.support)
+                kapt(libs.com.google.dagger.compiler)
+                kapt(libs.com.google.dagger.android.processor)
+                kapt(libs.androidx.room.compiler)
             }
         }
     }
-}
-
-dependencies {
-    add("kapt", libs.hilt.compiler)
-    add("kapt", libs.androidx.hilt.compiler)
-    add("kapt", libs.androidx.room.compiler)
 }
 
 android {
