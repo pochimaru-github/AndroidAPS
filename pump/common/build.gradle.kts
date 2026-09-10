@@ -24,14 +24,14 @@ dependencies {
     implementation(project(":core:utils"))
     implementation(project(":shared:impl"))
 
+    // XStream (AnyTypePermission 用)
+    implementation(libs.com.thoughtworks.xstream)
+
     // Logger
     api(libs.org.slf4j.api)
     api(libs.com.github.tony19.logback.android)
 
     api(libs.io.reactivex.rxjava3.rxandroid)
-
-    // XStream
-    implementation(libs.com.thoughtworks.xstream)
 
     api(libs.com.google.dagger.android.support)
     kapt(libs.com.google.dagger.compiler)
