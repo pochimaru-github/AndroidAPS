@@ -1,35 +1,22 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    kotlin("kapt")
+    alias(libs.plugins.ksp)
+    id("kotlin-android")
+    id("android-module-dependencies")
+    id("test-module-dependencies")
+    id("jacoco-module-dependencies")
 }
 
 android {
     namespace = "app.aaps.pump.omnipod.dash"
-    compileSdk = 35
 
     defaultConfig {
-        minSdk = 28
+        vectorDrawables.useSupportLibrary = true
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+        ksp {
+            arg("room.incremental", "true")
+            arg("room.schemaLocation", "$projectDir/schemas")
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -38,32 +25,45 @@ android {
 }
 
 dependencies {
-    implementation(project(":app:commons"))
-    implementation(project(":pump:common"))
+    implementation(project(":core:data"))
+    implementation(project(":core:interfaces"))
+    implementation(project(":core:keys"))
+    implementation(project(":core:libraries"))
+    implementation(project(":core:utils"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:validators"))
     implementation(project(":pump:omnipod:common"))
+    implementation(project(":pump:common"))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-
-    // Lifecycle バージョン衝突回避のための strictly 指定
-    implementation(libs.androidx.lifecycle.livedata.ktx) {
-        version { strictly("2.6.2") }
+    // Lifecycleのバージョン競合を回避し、AGP 7.4.2と互換のある2.6.2に固定
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx") {
+        version {
+            strictly("2.6.2")
+        }
     }
-    implementation(libs.androidx.lifecycle.viewmodel.ktx) {
-        version { strictly("2.6.2") }
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx") {
+        version {
+            strictly("2.6.2")
+        }
+    }
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx") {
+        version {
+            strictly("2.6.2")
+        }
     }
 
-    // Dagger 2
-    implementation(libs.dagger)
-    kapt(libs.dagger.compiler)
+    api(libs.androidx.room)
+    api(libs.androidx.room.runtime)
+    api(libs.androidx.room.rxjava3)
 
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
+    androidTestImplementation(project(":shared:tests"))
+    // optional - Test helpers
+    testImplementation(libs.androidx.room.testing)
+    testImplementation(project(":implementation"))
+    testImplementation(project(":shared:impl"))
+    testImplementation(project(":shared:tests"))
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    ksp(libs.com.google.dagger.compiler)
+    ksp(libs.com.google.dagger.android.processor)
+    ksp(libs.androidx.room.compiler)
 }
