@@ -1,27 +1,15 @@
 plugins {
     id("com.android.library")
-    id("kotlin-android")
-    id("kotlin-kapt")
+    kotlin("android")
+    kotlin("kapt")
 }
 
 android {
-    namespace = "info.nightscout.androidaps.plugins.sync"
+    namespace = "app.nightscout.aaps.plugins.sync"
     compileSdk = 33
 
     defaultConfig {
         minSdk = 26
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
     }
 
     compileOptions {
@@ -34,17 +22,12 @@ android {
     }
 }
 
-kapt {
-    correctErrorTypes = true
-}
-
 dependencies {
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.8.0")
-
-    // Room
-    kapt("androidx.room:room-compiler:2.5.0")
-    implementation("androidx.room:room-runtime:2.5.0")
-    implementation("androidx.room:room-ktx:2.5.0")
+    implementation(project(":core"))
+    implementation(project(":db"))
+    
+    implementation(libs.androidx.appcompat)
+    implementation(libs.google.material)
+    
+    kapt(libs.room.compiler)
 }
