@@ -19,16 +19,12 @@ interface TransportLayer {
 }
 
 /**
- * Sealed class representing screen glyphs and character variants used in parser.
+ * Sealed class representing screen glyphs used in parser.
  */
-sealed class Glyph {
-    open val isLarge: Boolean = false
-
-    data class SmallCharacter(val char: Char) : Glyph()
-    data class LargeCharacter(val char: Char) : Glyph() {
-        override val isLarge: Boolean = true
-    }
-    object Unknown : Glyph()
+sealed class Glyph(open val isLarge: Boolean = false) {
+    data class SmallCharacter(val char: Char) : Glyph(isLarge = false)
+    data class LargeCharacter(val char: Char) : Glyph(isLarge = true)
+    object Unknown : Glyph(isLarge = false)
 }
 
 /**
