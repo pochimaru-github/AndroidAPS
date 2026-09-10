@@ -10,7 +10,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":core:model"))
                 implementation(project(":core:interfaces"))
             }
         }
@@ -31,7 +30,6 @@ kotlin {
 }
 
 dependencies {
-    // KMPブロック外からkaptアノテーションプロセッサを注入
     add("kapt", libs.com.google.dagger.compiler)
     add("kapt", libs.com.google.dagger.android.processor)
     add("kapt", libs.androidx.room.compiler)
