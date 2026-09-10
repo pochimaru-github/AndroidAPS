@@ -5,28 +5,34 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import app.aaps.pump.omnipod.common.database.DateTypeConverter
 
 @Database(
-    entities = [HistoryRecordEntity::class],
-    exportSchema = false,
-    version = DashHistoryDatabase.VERSION
+    entities = [DashHistoryEntry::class],
+    version = 1,
+    exportSchema = false
 )
-@TypeConverters(Converters::class)
+@TypeConverters(DateTypeConverter::class)
 abstract class DashHistoryDatabase : RoomDatabase() {
 
-    abstract fun historyRecordDao(): HistoryRecordDao
+    abstract fun dashHistoryDao(): DashHistoryDao
 
     companion object {
+        @Volatile
+        private var INSTANCE: DashHistoryDatabase? = null
 
-        const val VERSION = 4
-
-        fun build(context: Context) =
-            Room.databaseBuilder(
-                context.applicationContext,
-                DashHistoryDatabase::class.java,
-                "omnipod_dash_history_database.db",
-            )
-                .fallbackToDestructiveMigration(false)
-                .build()
+        fun getInstance(context: Context): DashHistoryDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    DashHistoryDatabase::class.java,
+                    "dash_history_database"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
     }
 }
