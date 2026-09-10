@@ -4,10 +4,33 @@ import info.nightscout.comboctl.parser.ParsedScreen
 import info.nightscout.comboctl.parser.parseDisplayFrame
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+/**
+ * Interface representing transport layer abstraction.
+ */
+interface TransportLayer {
+    val incomingFrames: Flow<DisplayFrame>
+    suspend fun sendPacket(packet: ByteArray): Boolean
+}
+
+/**
+ * Enum for screen glyphs used across parser and tokenization.
+ */
+enum class Glyph(val isLarge: Boolean = false) {
+    DIGIT_0, DIGIT_1, DIGIT_2, DIGIT_3, DIGIT_4,
+    DIGIT_5, DIGIT_6, DIGIT_7, DIGIT_8, DIGIT_9,
+    CHAR_A, CHAR_B, CHAR_C, CHAR_D, CHAR_E, CHAR_F,
+    CHAR_G, CHAR_H, CHAR_I, CHAR_J, CHAR_K, CHAR_L,
+    CHAR_M, CHAR_N, CHAR_O, CHAR_P, CHAR_Q, CHAR_R,
+    CHAR_S, CHAR_T, CHAR_U, CHAR_V, CHAR_W, CHAR_X,
+    CHAR_Y, CHAR_Z,
+    SPACE, MINUS, PLUS, SLASH, COLON, DOT, COMMA
+}
 
 /**
  * Application layer handling low-level packet construction, command processing,
