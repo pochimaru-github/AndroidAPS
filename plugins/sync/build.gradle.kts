@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -35,11 +36,7 @@ android {
 }
 
 kapt {
-    javacOptions {
-        option("--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
-        option("--add-exports", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
-        option("--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
-    }
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -47,6 +44,11 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.8.0")
 
+    // Dagger / Hilt
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-compiler:2.44")
+
+    // Room
     kapt("androidx.room:room-compiler:2.5.0")
     implementation("androidx.room:room-runtime:2.5.0")
     implementation("androidx.room:room-ktx:2.5.0")
