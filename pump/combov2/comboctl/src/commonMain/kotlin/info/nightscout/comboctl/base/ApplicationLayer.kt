@@ -106,32 +106,3 @@ class ApplicationLayer(
         return transportLayer.sendPacket(packet)
     }
 }
-
-/**
- * Interface representing transport layer abstraction.
- */
-interface TransportLayer {
-    val incomingFrames: kotlinx.coroutines.flow.Flow<DisplayFrame>
-    suspend fun sendPacket(packet: ByteArray): Boolean
-}
-
-/**
- * DisplayFrame stub used for rendering and parsing screens.
- */
-data class DisplayFrame(
-    val glyphs: List<Glyph>
-)
-
-/**
- * Enum for screen glyphs.
- */
-enum class Glyph {
-    DIGIT_0, DIGIT_1, DIGIT_2, DIGIT_3, DIGIT_4,
-    DIGIT_5, DIGIT_6, DIGIT_7, DIGIT_8, DIGIT_9,
-    CHAR_A, CHAR_B, CHAR_C, CHAR_D, CHAR_E, CHAR_F,
-    CHAR_G, CHAR_H, CHAR_I, CHAR_J, CHAR_K, CHAR_L,
-    CHAR_M, CHAR_N, CHAR_O, CHAR_P, CHAR_Q, CHAR_R,
-    CHAR_S, CHAR_T, CHAR_U, CHAR_V, CHAR_W, CHAR_X,
-    CHAR_Y, CHAR_Z,
-    SPACE, MINUS, PLUS, SLASH, COLON, DOT, COMMA
-}
