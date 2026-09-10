@@ -36,6 +36,13 @@ dependencies {
     implementation(project(":pump:common"))
     implementation(project(":pump:rileylink"))
 
+    // Lifecycleのバージョン競合(2.9.0/2.4.0)を回避し、AGP 7.4.2と互換のある2.6.2に固定
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx") {
+        version {
+            strictly("2.6.2")
+        }
+    }
+
     api(libs.androidx.room)
     api(libs.androidx.room.runtime)
     api(libs.androidx.room.rxjava3)
