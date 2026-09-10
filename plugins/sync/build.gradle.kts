@@ -5,7 +5,6 @@ plugins {
 }
 
 kotlin {
-    // 警告回避のための明示的登録
     androidTarget {
         compilations.all {
             kotlinOptions {
@@ -24,19 +23,20 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
-                // Version Catalogアクセサのミスを防止するため直接指定
-                implementation("androidx.room:room-runtime:2.5.2")
-                implementation("androidx.room:room-ktx:2.5.2")
-                implementation("androidx.work:work-runtime-ktx:2.8.1")
-                
-                // Hilt
-                implementation("com.google.dagger:hilt-android:2.48")
-                kapt("com.google.dagger:hilt-compiler:2.48")
-                implementation("androidx.hilt:hilt-work:1.0.0")
-                kapt("androidx.hilt:hilt-compiler:1.0.0")
+                implementation(libs.androidx.room.runtime)
+                implementation(libs.androidx.room.ktx)
+                implementation(libs.androidx.work.runtime.ktx)
+                implementation(libs.hilt.android)
+                implementation(libs.androidx.hilt.work)
             }
         }
     }
+}
+
+dependencies {
+    add("kapt", libs.hilt.compiler)
+    add("kapt", libs.androidx.hilt.compiler)
+    add("kapt", libs.androidx.room.compiler)
 }
 
 android {
