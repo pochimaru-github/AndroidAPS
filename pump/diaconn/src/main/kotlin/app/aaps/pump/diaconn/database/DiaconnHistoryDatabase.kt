@@ -26,7 +26,6 @@ abstract class DiaconnHistoryDatabase : RoomDatabase() {
                 DiaconnHistoryDatabase::class.java,
                 "diaconn_database.db"
             )
-                .fallbackToDestructiveMigration(false)
                 .build()
     }
 }
