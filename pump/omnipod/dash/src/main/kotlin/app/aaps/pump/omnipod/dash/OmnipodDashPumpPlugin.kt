@@ -1,7 +1,7 @@
 package app.aaps.pump.omnipod.dash
 
 import android.content.Context
-import app.aaps.pump.omnipod.common.OmnipodPlugin
+import app.aaps.core.interfaces.plugin.Plugin
 import app.aaps.pump.omnipod.dash.history.database.DashHistoryDatabase
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -9,7 +9,7 @@ import javax.inject.Singleton
 @Singleton
 class OmnipodDashPumpPlugin @Inject constructor(
     private val context: Context
-) : OmnipodPlugin() {
+) : Plugin {
 
     private val database: DashHistoryDatabase by lazy {
         DashHistoryDatabase.getInstance(context)
@@ -17,7 +17,7 @@ class OmnipodDashPumpPlugin @Inject constructor(
 
     override fun getName(): String = "Omnipod DASH"
 
-    override fun isConnected(): Boolean {
+    fun isConnected(): Boolean {
         return true
     }
 
