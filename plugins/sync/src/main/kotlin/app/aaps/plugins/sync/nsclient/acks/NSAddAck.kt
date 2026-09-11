@@ -25,34 +25,42 @@ class NSAddAck(
 
     var id: String? = null
     var json: JSONObject? = null
+
     override fun call(vararg args: Any) {
+        if (args.isEmpty()) return
+
+        val firstArg = args[0]
+
         // Regular response
-        try {
-            val responseArray = args[0] as JSONArray
-            val response: JSONObject
-            if (responseArray.length() > 0) {
-                response = responseArray.getJSONObject(0)
-                id = response.getString("_id")
-                json = response
-            }
-            processAddAck()
-            return
-        } catch (e: Exception) {
-            aapsLogger.error("Unhandled exception", e)
-        }
-        // Check for not authorized
-        try {
-            val response = args[0] as JSONObject
-            if (response.has("result")) {
-                id = null
-                if (response.getString("result").contains("Not")) {
-                    rxBus.send(EventNSClientRestart())
-                    return
+        if (firstArg is JSONArray) {
+            try {
+                if (firstArg.length() > 0) {
+                    val response = firstArg.getJSONObject(0)
+                    id = response.optString("_id", null)
+                    json = response
                 }
-                aapsLogger.debug(LTag.NSCLIENT, "DBACCESS " + response.getString("result"))
+                processAddAck()
+                return
+            } catch (e: Exception) {
+                aapsLogger.error("Unhandled exception", e)
             }
-        } catch (e: Exception) {
-            aapsLogger.error("Unhandled exception", e)
+        }
+
+        // Check for not authorized
+        if (firstArg is JSONObject) {
+            try {
+                if (firstArg.has("result")) {
+                    id = null
+                    val resultStr = firstArg.optString("result", "")
+                    if (resultStr.contains("Not")) {
+                        rxBus.send(EventNSClientRestart())
+                        return
+                    }
+                    aapsLogger.debug(LTag.NSCLIENT, "DBACCESS $resultStr")
+                }
+            } catch (e: Exception) {
+                aapsLogger.error("Unhandled exception", e)
+            }
         }
     }
 
