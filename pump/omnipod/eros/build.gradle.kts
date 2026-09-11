@@ -1,8 +1,3 @@
-repositories {
-    google()
-    mavenCentral()
-}
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -44,10 +39,6 @@ android {
 dependencies {
     implementation(project(":pump:common"))
     implementation(project(":pump:omnipod:common"))
-
-    implementation(libs.io.reactivex.rxjava3.rxjava)
-    implementation(libs.io.reactivex.rxjava3.rxkotlin)
-    implementation(libs.io.reactivex.rxjava3.rxandroid)
 
     testImplementation(libs.org.junit.jupiter)
 }
