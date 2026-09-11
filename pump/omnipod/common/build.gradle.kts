@@ -20,6 +20,13 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+        force("androidx.lifecycle:lifecycle-common:2.8.7")
+    }
+}
+
 dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:interfaces"))
@@ -27,8 +34,6 @@ dependencies {
     implementation(project(":core:libraries"))
     implementation(project(":core:ui"))
     implementation(project(":core:utils"))
-
-    implementation(libs.androidx.lifecycle.viewmodel)
 
     api(libs.androidx.constraintlayout)
     api(libs.androidx.fragment)
