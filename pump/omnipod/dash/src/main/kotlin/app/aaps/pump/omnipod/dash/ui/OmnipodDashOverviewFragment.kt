@@ -34,9 +34,7 @@ class OmnipodDashOverviewFragment : Fragment() {
     fun updateUi() {
         if (isAdded) {
             _binding?.let { safeBinding ->
-                safeBinding.plugin = plugin
-                safeBinding.lifecycleOwner = viewLifecycleOwner
-                safeBinding.executePendingBindings()
+                // UI更新処理が必要な場合はここに記述
             }
         }
     }
