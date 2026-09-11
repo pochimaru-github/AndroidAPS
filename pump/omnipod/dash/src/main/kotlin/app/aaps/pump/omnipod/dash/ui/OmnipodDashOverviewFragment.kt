@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import app.aaps.pump.omnipod.dash.OmnipodDashPumpPlugin
-import app.aaps.pump.omnipod.dash.databinding.OmnipodDashOverviewFragmentBinding
+import app.aaps.pump.omnipod.dash.R
 import javax.inject.Inject
 
 class OmnipodDashOverviewFragment : Fragment() {
@@ -14,16 +14,12 @@ class OmnipodDashOverviewFragment : Fragment() {
     @Inject
     lateinit var plugin: OmnipodDashPumpPlugin
 
-    private var _binding: OmnipodDashOverviewFragmentBinding? = null
-    private val binding get() = _binding!!
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = OmnipodDashOverviewFragmentBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        return inflater.inflate(R.layout.omnipod_dash_overview_fragment, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -33,14 +29,7 @@ class OmnipodDashOverviewFragment : Fragment() {
 
     fun updateUi() {
         if (isAdded) {
-            _binding?.let { safeBinding ->
-                // UI更新処理が必要な場合はここに記述
-            }
+            // UI更新処理が必要な場合はここに記述
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
