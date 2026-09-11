@@ -3,6 +3,8 @@ package app.aaps.pump.omnipod.dash.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.Button
 import app.aaps.core.interfaces.profile.ProfileFunction
 import app.aaps.core.interfaces.queue.Callback
 import app.aaps.core.interfaces.queue.CommandQueue
@@ -14,12 +16,11 @@ import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.ui.activities.TranslatedDaggerAppCompatActivity
 import app.aaps.core.ui.dialogs.OKDialog
-import app.aaps.core.ui.extensions.toVisibility
 import app.aaps.pump.omnipod.common.bledriver.pod.definition.ActivationProgress
 import app.aaps.pump.omnipod.common.bledriver.pod.state.OmnipodDashPodStateManager
 import app.aaps.pump.omnipod.common.queue.command.CommandPlayTestBeep
 import app.aaps.pump.omnipod.common.ui.wizard.activation.PodActivationWizardActivity
-import app.aaps.pump.omnipod.dash.databinding.OmnipodDashPodManagementBinding
+import app.aaps.pump.omnipod.dash.R
 import app.aaps.pump.omnipod.dash.ui.wizard.activation.DashPodActivationWizardActivity
 import app.aaps.pump.omnipod.dash.ui.wizard.deactivation.DashPodDeactivationWizardActivity
 import app.aaps.pump.omnipod.dash.util.mapProfileToBasalProgram
@@ -41,19 +42,27 @@ class DashPodManagementActivity : TranslatedDaggerAppCompatActivity() {
 
     private var disposables: CompositeDisposable = CompositeDisposable()
 
-    private lateinit var binding: OmnipodDashPodManagementBinding
+    private lateinit var buttonActivatePod: Button
+    private lateinit var buttonDeactivatePod: Button
+    private lateinit var buttonDiscardPod: Button
+    private lateinit var buttonPlayTestBeep: Button
+    private lateinit var buttonPodHistory: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        binding = OmnipodDashPodManagementBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.omnipod_dash_pod_management)
 
         title = rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        binding.buttonActivatePod.setOnClickListener {
+        buttonActivatePod = findViewById(R.id.buttonActivatePod)
+        buttonDeactivatePod = findViewById(R.id.buttonDeactivatePod)
+        buttonDiscardPod = findViewById(R.id.buttonDiscardPod)
+        buttonPlayTestBeep = findViewById(R.id.buttonPlayTestBeep)
+        buttonPodHistory = findViewById(R.id.buttonPodHistory)
+
+        buttonActivatePod.setOnClickListener {
             val profile = profileFunction.getProfile()
             if (profile == null) {
                 OKDialog.show(
@@ -87,11 +96,11 @@ class DashPodManagementActivity : TranslatedDaggerAppCompatActivity() {
             startActivity(intent)
         }
 
-        binding.buttonDeactivatePod.setOnClickListener {
+        buttonDeactivatePod.setOnClickListener {
             startActivity(Intent(this, DashPodDeactivationWizardActivity::class.java))
         }
 
-        binding.buttonDiscardPod.setOnClickListener {
+        buttonDiscardPod.setOnClickListener {
             OKDialog.showConfirmation(
                 this,
                 rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_discard_pod_confirmation),
@@ -101,9 +110,9 @@ class DashPodManagementActivity : TranslatedDaggerAppCompatActivity() {
             )
         }
 
-        binding.buttonPlayTestBeep.setOnClickListener {
-            binding.buttonPlayTestBeep.isEnabled = false
-            binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_playing_test_beep)
+        buttonPlayTestBeep.setOnClickListener {
+            buttonPlayTestBeep.isEnabled = false
+            buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_playing_test_beep)
 
             commandQueue.customCommand(
                 CommandPlayTestBeep(),
@@ -125,7 +134,7 @@ class DashPodManagementActivity : TranslatedDaggerAppCompatActivity() {
             )
         }
 
-        binding.buttonPodHistory.setOnClickListener {
+        buttonPodHistory.setOnClickListener {
             startActivity(Intent(this, DashPodHistoryActivity::class.java))
         }
     }
@@ -146,32 +155,29 @@ class DashPodManagementActivity : TranslatedDaggerAppCompatActivity() {
     }
 
     private fun refreshButtons() {
-        // Only show the discard button to reset a cached unique ID before the unique ID has actually been set
-        // Otherwise, users should use the Deactivate Pod Wizard. In case proper deactivation fails,
-        // they will get an option to discard the Pod there
         val discardButtonEnabled =
             podStateManager.uniqueId != null &&
                 podStateManager.activationProgress.isBefore(ActivationProgress.SET_UNIQUE_ID)
-        binding.buttonDiscardPod.visibility = discardButtonEnabled.toVisibility()
+        buttonDiscardPod.visibility = if (discardButtonEnabled) View.VISIBLE else View.GONE
 
-        binding.buttonActivatePod.isEnabled = podStateManager.activationProgress.isBefore(ActivationProgress.COMPLETED)
-        binding.buttonDeactivatePod.isEnabled = podStateManager.bluetoothAddress != null || podStateManager.ltk != null
+        buttonActivatePod.isEnabled = podStateManager.activationProgress.isBefore(ActivationProgress.COMPLETED)
+        buttonDeactivatePod.isEnabled = podStateManager.bluetoothAddress != null || podStateManager.ltk != null
 
         if (podStateManager.activationProgress.isAtLeast(ActivationProgress.PHASE_1_COMPLETED)) {
             if (commandQueue.isCustomCommandInQueue(CommandPlayTestBeep::class.java)) {
-                binding.buttonPlayTestBeep.isEnabled = false
-                binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_playing_test_beep)
+                buttonPlayTestBeep.isEnabled = false
+                buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_playing_test_beep)
             } else {
-                binding.buttonPlayTestBeep.isEnabled = true
-                binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_play_test_beep)
+                buttonPlayTestBeep.isEnabled = true
+                buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_play_test_beep)
             }
         } else {
-            binding.buttonPlayTestBeep.isEnabled = false
-            binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_play_test_beep)
+            buttonPlayTestBeep.isEnabled = false
+            buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_play_test_beep)
         }
 
         if (discardButtonEnabled) {
-            binding.buttonDiscardPod.isEnabled = true
+            buttonDiscardPod.isEnabled = true
         }
     }
 
