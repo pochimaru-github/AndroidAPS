@@ -502,7 +502,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
 
                 val minutesRunning = Duration(startTime, now).standardMinutes
                 val textColor: Int
-                var text: String = rh.gs(
+                var text = rh.gs(
                     app.aaps.pump.omnipod.common.R.string.omnipod_common_overview_temp_basal_value,
                     amount,
                     dateUtil.timeString(startTime.millis),
