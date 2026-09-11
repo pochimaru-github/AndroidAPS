@@ -67,6 +67,7 @@ allprojects {
             force("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
             force("androidx.lifecycle:lifecycle-livedata:2.8.7")
             force("androidx.lifecycle:lifecycle-livedata-core:2.8.7")
+            force("androidx.lifecycle:lifecycle-extensions:2.2.0")
 
             // Kotlin 関連の固定 (2.1.20 等の混入による metadata エラーを回避)
             force("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
@@ -90,7 +91,11 @@ allprojects {
                     useVersion("1.6.1")
                 }
                 if (requested.group == "androidx.lifecycle") {
-                    useVersion("2.8.7")
+                    if (requested.name == "lifecycle-extensions") {
+                        useVersion("2.2.0")
+                    } else {
+                        useVersion("2.8.7")
+                    }
                 }
             }
         }
