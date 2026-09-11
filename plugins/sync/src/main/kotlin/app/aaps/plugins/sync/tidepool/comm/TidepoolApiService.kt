@@ -19,35 +19,48 @@ const val SESSION_TOKEN_HEADER: String = "x-tidepool-session-token"
 interface TidepoolApiService {
 
     @Headers(
-        "User-Agent: AAPS- " + "1.0",
+        "User-Agent: AAPS-1.0",
         "X-Tidepool-Client-Name: aaps",
         "X-Tidepool-Client-Version: 0.2.0"
     )
-
-    @Suppress("unused")
     @DELETE("/v1/datasets/{dataSetId}")
-    fun deleteDataSet(@Header(SESSION_TOKEN_HEADER) token: String, @Path("dataSetId") id: String): Call<DatasetReplyMessage>
+    fun deleteDataSet(
+        @Header("x-tidepool-session-token") token: String,
+        @Path("dataSetId") id: String
+    ): Call<DatasetReplyMessage>
 
     @GET("/v1/users/{userId}/data_sets")
     fun getOpenDataSets(
-        @Header(SESSION_TOKEN_HEADER) token: String,
+        @Header("x-tidepool-session-token") token: String,
         @Path("userId") id: String,
         @Query("client.name") clientName: String,
         @Query("size") size: Int
     ): Call<List<DatasetReplyMessage>>
 
-    @Suppress("unused")
     @GET("/v1/datasets/{dataSetId}")
-    fun getDataSet(@Header(SESSION_TOKEN_HEADER) token: String, @Path("dataSetId") id: String): Call<DatasetReplyMessage>
+    fun getDataSet(
+        @Header("x-tidepool-session-token") token: String,
+        @Path("dataSetId") id: String
+    ): Call<DatasetReplyMessage>
 
     @POST("/v1/users/{userId}/data_sets")
-    fun openDataSet(@Header(SESSION_TOKEN_HEADER) token: String, @Path("userId") id: String, @Body body: RequestBody): Call<DatasetReplyMessage>
+    fun openDataSet(
+        @Header("x-tidepool-session-token") token: String,
+        @Path("userId") id: String,
+        @Body body: RequestBody
+    ): Call<DatasetReplyMessage>
 
     @POST("/v1/datasets/{sessionId}/data")
-    fun doUpload(@Header(SESSION_TOKEN_HEADER) token: String, @Path("sessionId") id: String, @Body body: RequestBody): Call<UploadReplyMessage>
+    fun doUpload(
+        @Header("x-tidepool-session-token") token: String,
+        @Path("sessionId") id: String,
+        @Body body: RequestBody
+    ): Call<UploadReplyMessage>
 
-    @Suppress("unused")
     @PUT("/v1/datasets/{sessionId}")
-    fun closeDataSet(@Header(SESSION_TOKEN_HEADER) token: String, @Path("sessionId") id: String, @Body body: RequestBody): Call<DatasetReplyMessage>
-
+    fun closeDataSet(
+        @Header("x-tidepool-session-token") token: String,
+        @Path("sessionId") id: String,
+        @Body body: RequestBody
+    ): Call<DatasetReplyMessage>
 }
