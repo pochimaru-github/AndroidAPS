@@ -1,7 +1,6 @@
 package app.aaps.pump.omnipod.eros.ui
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import app.aaps.core.interfaces.notifications.Notification
 import app.aaps.core.interfaces.queue.Callback
@@ -13,13 +12,12 @@ import app.aaps.core.interfaces.rx.events.EventDismissNotification
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.pump.omnipod.common.queue.command.CommandDeactivatePod
+import app.aaps.pump.omnipod.common.queue.command.CommandPlayTestBeeps
 import app.aaps.pump.omnipod.eros.OmnipodErosPumpPlugin
-import app.aaps.pump.omnipod.eros.R
 import app.aaps.pump.omnipod.eros.databinding.OmnipodErosPodManagementBinding
 import app.aaps.pump.omnipod.eros.driver.definition.OmnipodConstants
 import app.aaps.pump.omnipod.eros.driver.manager.ErosPodStateManager
 import app.aaps.pump.omnipod.eros.event.EventOmnipodErosPumpValuesChanged
-import app.aaps.pump.omnipod.eros.queue.command.CommandPlayTestBeeps
 import app.aaps.pump.omnipod.eros.util.OmnipodAlertUtil
 import dagger.android.AndroidInjection
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -46,15 +44,6 @@ class ErosPodManagementActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         _binding = OmnipodErosPodManagementBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        binding.buttonPlayTestBeeps.setOnClickListener {
-            disableActionButtons()
-            commandQueue.customCommand(
-                CommandPlayTestBeeps(),
-                DisplayResultDialogCallback(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_error_failed_to_play_test_beeps), false)
-                    .messageOnSuccess(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation_played_test_beeps))
-            )
-        }
 
         binding.buttonDeactivatePod.setOnClickListener {
             disableActionButtons()
@@ -117,7 +106,6 @@ class ErosPodManagementActivity : AppCompatActivity() {
 
     private fun updateActionButtons() {
         val isReady = podStateManager.hasPodState()
-        binding.buttonPlayTestBeeps.isEnabled = isReady
         binding.buttonDeactivatePod.isEnabled = isReady
     }
 
@@ -140,7 +128,6 @@ class ErosPodManagementActivity : AppCompatActivity() {
     }
 
     private fun disableActionButtons() {
-        binding.buttonPlayTestBeeps.isEnabled = false
         binding.buttonDeactivatePod.isEnabled = false
     }
 
