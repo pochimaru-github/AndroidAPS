@@ -41,7 +41,7 @@ subprojects {
 
     plugins.withId("com.android.application") {
         configure<com.android.build.gradle.AppExtension> {
-            compileSdk = 34
+            compileSdkVersion(34)
 
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_17
