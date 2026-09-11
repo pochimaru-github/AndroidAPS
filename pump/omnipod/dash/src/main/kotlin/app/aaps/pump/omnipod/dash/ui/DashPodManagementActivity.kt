@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import app.aaps.core.interfaces.profile.ProfileFunction
 import app.aaps.core.interfaces.queue.Callback
 import app.aaps.core.interfaces.queue.CommandQueue
@@ -16,6 +15,7 @@ import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.ui.activities.TranslatedDaggerAppCompatActivity
 import app.aaps.core.ui.dialogs.OKDialog
+import app.aaps.core.ui.elements.SingleClickButton
 import app.aaps.pump.omnipod.common.bledriver.pod.definition.ActivationProgress
 import app.aaps.pump.omnipod.common.bledriver.pod.state.OmnipodDashPodStateManager
 import app.aaps.pump.omnipod.common.queue.command.CommandPlayTestBeep
@@ -42,11 +42,11 @@ class DashPodManagementActivity : TranslatedDaggerAppCompatActivity() {
 
     private var disposables: CompositeDisposable = CompositeDisposable()
 
-    private lateinit var buttonActivatePod: Button
-    private lateinit var buttonDeactivatePod: Button
-    private lateinit var buttonDiscardPod: Button
-    private lateinit var buttonPlayTestBeep: Button
-    private lateinit var buttonPodHistory: Button
+    private lateinit var buttonActivatePod: SingleClickButton
+    private lateinit var buttonDeactivatePod: SingleClickButton
+    private lateinit var buttonDiscardPod: SingleClickButton
+    private lateinit var buttonPlayTestBeep: SingleClickButton
+    private lateinit var buttonPodHistory: SingleClickButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,11 +56,11 @@ class DashPodManagementActivity : TranslatedDaggerAppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        buttonActivatePod = findViewById(R.id.buttonActivatePod)
-        buttonDeactivatePod = findViewById(R.id.buttonDeactivatePod)
-        buttonDiscardPod = findViewById(R.id.buttonDiscardPod)
-        buttonPlayTestBeep = findViewById(R.id.buttonPlayTestBeep)
-        buttonPodHistory = findViewById(R.id.buttonPodHistory)
+        buttonActivatePod = findViewById(R.id.button_activate_pod)
+        buttonDeactivatePod = findViewById(R.id.button_deactivate_pod)
+        buttonDiscardPod = findViewById(R.id.button_discard_pod)
+        buttonPlayTestBeep = findViewById(R.id.button_play_test_beep)
+        buttonPodHistory = findViewById(R.id.button_pod_history)
 
         buttonActivatePod.setOnClickListener {
             val profile = profileFunction.getProfile()
