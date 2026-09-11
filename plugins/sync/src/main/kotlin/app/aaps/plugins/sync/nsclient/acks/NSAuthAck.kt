@@ -10,11 +10,16 @@ class NSAuthAck(private val rxBus: RxBus) : Event(), Ack {
     var read = false
     var write = false
     var writeTreatment = false
-    override fun call(vararg args: Any) {
-        val response = args[0] as JSONObject
-        read = response.optBoolean("read")
-        write = response.optBoolean("write")
-        writeTreatment = response.optBoolean("write_treatment")
+
+    override fun call(args: Array<out Any>) {
+        if (args.isNotEmpty()) {
+            val response = args[0] as? JSONObject
+            if (response != null) {
+                read = response.optBoolean("read")
+                write = response.optBoolean("write")
+                writeTreatment = response.optBoolean("write_treatment")
+            }
+        }
         rxBus.send(this)
     }
 }
