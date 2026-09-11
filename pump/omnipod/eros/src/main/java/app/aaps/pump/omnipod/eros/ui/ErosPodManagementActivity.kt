@@ -1,283 +1,186 @@
 package app.aaps.pump.omnipod.eros.ui
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
-import app.aaps.core.interfaces.configuration.Config
-import app.aaps.core.interfaces.profile.ProfileFunction
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import app.aaps.core.interfaces.notifications.Notification
 import app.aaps.core.interfaces.queue.Callback
 import app.aaps.core.interfaces.queue.CommandQueue
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.AapsSchedulers
 import app.aaps.core.interfaces.rx.bus.RxBus
-import app.aaps.core.interfaces.rx.events.EventQueueChanged
+import app.aaps.core.interfaces.rx.events.EventDismissNotification
 import app.aaps.core.interfaces.ui.UiInteraction
-import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
-import app.aaps.core.ui.activities.TranslatedDaggerAppCompatActivity
 import app.aaps.core.ui.dialogs.OKDialog
-import app.aaps.core.ui.extensions.toVisibility
-import app.aaps.pump.common.events.EventRileyLinkDeviceStatusChange
-import app.aaps.pump.common.hw.rileylink.dialog.RileyLinkStatusActivity
-import app.aaps.pump.common.hw.rileylink.service.RileyLinkServiceData
-import app.aaps.pump.common.hw.rileylink.service.tasks.ResetRileyLinkConfigurationTask
-import app.aaps.pump.common.hw.rileylink.service.tasks.ServiceTaskExecutor
-import app.aaps.pump.omnipod.common.queue.command.CommandPlayTestBeep
-import app.aaps.pump.omnipod.common.ui.wizard.activation.PodActivationWizardActivity
+import app.aaps.pump.omnipod.common.queue.command.CommandDeactivatePod
+import app.aaps.pump.omnipod.common.queue.command.CommandPlayTestBeeps
 import app.aaps.pump.omnipod.eros.OmnipodErosPumpPlugin
 import app.aaps.pump.omnipod.eros.R
 import app.aaps.pump.omnipod.eros.databinding.OmnipodErosPodManagementBinding
-import app.aaps.pump.omnipod.eros.driver.definition.ActivationProgress
+import app.aaps.pump.omnipod.eros.driver.definition.OmnipodConstants
 import app.aaps.pump.omnipod.eros.driver.manager.ErosPodStateManager
 import app.aaps.pump.omnipod.eros.event.EventOmnipodErosPumpValuesChanged
-import app.aaps.pump.omnipod.eros.manager.AapsOmnipodErosManager
-import app.aaps.pump.omnipod.eros.queue.command.CommandReadPulseLog
-import app.aaps.pump.omnipod.eros.ui.wizard.activation.ErosPodActivationWizardActivity
-import app.aaps.pump.omnipod.eros.ui.wizard.deactivation.ErosPodDeactivationWizardActivity
+import app.aaps.pump.omnipod.eros.util.OmnipodAlertUtil
+import dagger.android.AndroidInjection
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
-import javax.inject.Provider
 
-/**
- * Created by andy on 30/08/2019
- */
-class ErosPodManagementActivity : TranslatedDaggerAppCompatActivity() {
+class ErosPodManagementActivity : AppCompatActivity() {
 
-    @Inject lateinit var fabricPrivacy: FabricPrivacy
-    @Inject lateinit var commandQueue: CommandQueue
-    @Inject lateinit var podStateManager: ErosPodStateManager
-    @Inject lateinit var rileyLinkServiceData: RileyLinkServiceData
-    @Inject lateinit var aapsOmnipodManager: AapsOmnipodErosManager
-    @Inject lateinit var context: Context
-    @Inject lateinit var omnipodErosPumpPlugin: OmnipodErosPumpPlugin
-    @Inject lateinit var serviceTaskExecutor: ServiceTaskExecutor
-    @Inject lateinit var aapsSchedulers: AapsSchedulers
-    @Inject lateinit var config: Config
-    @Inject lateinit var uiInteraction: UiInteraction
     @Inject lateinit var rh: ResourceHelper
     @Inject lateinit var rxBus: RxBus
-    @Inject lateinit var profileFunction: ProfileFunction
-    @Inject lateinit var resetRileyLinkConfigurationTaskProvider: Provider<ResetRileyLinkConfigurationTask>
+    @Inject lateinit var commandQueue: CommandQueue
+    @Inject lateinit var podStateManager: ErosPodStateManager
+    @Inject lateinit var omnipodAlertUtil: OmnipodAlertUtil
+    @Inject lateinit var omnipodErosPumpPlugin: OmnipodErosPumpPlugin
+    @Inject lateinit var aapsSchedulers: AapsSchedulers
+    @Inject lateinit var uiInteraction: UiInteraction
 
     private var disposables: CompositeDisposable = CompositeDisposable()
-    private val handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
-
-    private lateinit var binding: OmnipodErosPodManagementBinding
+    private var _binding: OmnipodErosPodManagementBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-
-        binding = OmnipodErosPodManagementBinding.inflate(layoutInflater)
+        _binding = OmnipodErosPodManagementBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        title = rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_title)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-
-        binding.buttonActivatePod.setOnClickListener {
-            val profile = profileFunction.getProfile()
-            if (profile == null) {
-                OKDialog.show(
-                    this,
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_error_failed_to_set_profile_empty_profile)
-                )
-                return@setOnClickListener
-            }
-
-            val type: PodActivationWizardActivity.Type = if (podStateManager.isPodInitialized &&
-                podStateManager.activationProgress.isAtLeast(ActivationProgress.PRIMING_COMPLETED)
-            ) {
-                PodActivationWizardActivity.Type.SHORT
-            } else {
-                PodActivationWizardActivity.Type.LONG
-            }
-
-            val intent = Intent(this, ErosPodActivationWizardActivity::class.java)
-            intent.putExtra(PodActivationWizardActivity.KEY_TYPE, type)
-            startActivity(intent)
+        binding.buttonPlayTestBeeps.setOnClickListener {
+            disableActionButtons()
+            commandQueue.customCommand(
+                CommandPlayTestBeeps(),
+                DisplayResultDialogCallback(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_error_failed_to_play_test_beeps), false)
+                    .messageOnSuccess(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation_played_test_beeps))
+            )
         }
 
         binding.buttonDeactivatePod.setOnClickListener {
-            startActivity(Intent(this, ErosPodDeactivationWizardActivity::class.java))
+            disableActionButtons()
+            commandQueue.customCommand(
+                CommandDeactivatePod(),
+                DisplayResultDialogCallback(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_error_failed_to_deactivate_pod), true)
+                    .messageOnSuccess(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation_pod_deactivated))
+                    .actionOnSuccess { rxBus.send(EventDismissNotification(Notification.OMNIPOD_POD_ALERTS)) }
+            )
         }
 
-        binding.buttonDiscardPod.setOnClickListener {
-            OKDialog.showConfirmation(
-                this,
-                rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_discard_pod_confirmation), Thread {
-                    aapsOmnipodManager.discardPodState()
-                })
-        }
-
-        binding.buttonRileylinkStats.setOnClickListener {
-            if (omnipodErosPumpPlugin.rileyLinkService?.verifyConfiguration() == true) {
-                startActivity(Intent(context, RileyLinkStatusActivity::class.java))
-            } else {
-                displayNotConfiguredDialog()
+        binding.buttonSaveLowReservoirAlert.setOnClickListener {
+            val input = binding.lowReservoirAlertUnits.text?.toString()
+            val units = input?.toDoubleOrNull()
+            if (units != null) {
+                omnipodAlertUtil.lowReservoirAlertUnits = units.toInt()
+                displayOkDialog(
+                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation),
+                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation_saved_low_reservoir_alert)
+                )
             }
         }
 
-        binding.buttonResetRileylinkConfig.setOnClickListener {
-            // TODO improvement: properly disable button until task is finished
-            handler.post { serviceTaskExecutor.startTask(resetRileyLinkConfigurationTaskProvider.get()) }
-        }
-
-        binding.buttonPlayTestBeep.setOnClickListener {
-            binding.buttonPlayTestBeep.isEnabled = false
-            binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_playing_test_beep)
-
-            commandQueue.customCommand(CommandPlayTestBeep(), object : Callback() {
-                override fun run() {
-                    if (result.success.not()) {
-                        displayErrorDialog(
-                            rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
-                            rh.gs(
-                                app.aaps.pump.omnipod.common.R.string.omnipod_common_two_strings_concatenated_by_colon,
-                                rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_error_failed_to_play_test_beep),
-                                result.comment
-                            ),
-                            false
-                        )
-                    }
-                }
-            })
-        }
-
-        binding.buttonPulseLog.setOnClickListener {
-            binding.buttonPulseLog.isEnabled = false
-            binding.buttonPulseLog.setText(R.string.omnipod_eros_pod_management_button_reading_pulse_log)
-
-            commandQueue.customCommand(CommandReadPulseLog(), object : Callback() {
-                override fun run() {
-                    if (result.success.not()) {
-                        displayErrorDialog(
-                            rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
-                            rh.gs(
-                                app.aaps.pump.omnipod.common.R.string.omnipod_common_two_strings_concatenated_by_colon,
-                                rh.gs(R.string.omnipod_eros_error_failed_to_read_pulse_log),
-                                result.comment
-                            ),
-                            false
-                        )
-                    }
-                }
-            })
-        }
-
-        binding.buttonPodHistory.setOnClickListener {
-            startActivity(Intent(this, ErosPodHistoryActivity::class.java))
+        binding.buttonSavePodExpirationAlert.setOnClickListener {
+            val input = binding.podExpirationAlertHours.text?.toString()
+            val hours = input?.toDoubleOrNull()
+            if (hours != null) {
+                omnipodAlertUtil.podExpirationAlertHours = hours.toInt()
+                displayOkDialog(
+                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation),
+                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation_saved_pod_expiration_alert)
+                )
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
         disposables += rxBus
-            .toObservable(EventRileyLinkDeviceStatusChange::class.java)
-            .observeOn(aapsSchedulers.main)
-            .subscribe({ refreshButtons() }, fabricPrivacy::logException)
-        disposables += rxBus
             .toObservable(EventOmnipodErosPumpValuesChanged::class.java)
             .observeOn(aapsSchedulers.main)
-            .subscribe({ refreshButtons() }, fabricPrivacy::logException)
-        disposables += rxBus
-            .toObservable(EventQueueChanged::class.java)
-            .observeOn(aapsSchedulers.main)
-            .subscribe({ refreshButtons() }, fabricPrivacy::logException)
-
-        refreshButtons()
+            .subscribe({ updateUi() }, { })
+        updateUi()
     }
 
     override fun onPause() {
         super.onPause()
         disposables.clear()
-        handler.removeCallbacksAndMessages(null)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
+        _binding = null
     }
 
-    private fun refreshButtons() {
-        // Only show the discard button to reset a cached Pod address before the Pod has actually been initialized
-        // Otherwise, users should use the Deactivate Pod Wizard. In case proper deactivation fails,
-        // they will get an option to discard the Pod state there
-        // Milos Kozak: allow to show button by activating engineering mode
-        val discardButtonEnabled = podStateManager.hasPodState() && (podStateManager.isPodInitialized.not() || config.isEngineeringMode())
-        binding.buttonDiscardPod.visibility = discardButtonEnabled.toVisibility()
+    private fun updateUi() {
+        updateActionButtons()
+        updateAlertSettings()
+    }
 
-        val pulseLogButtonEnabled = aapsOmnipodManager.isPulseLogButtonEnabled
-        binding.buttonPulseLog.visibility = pulseLogButtonEnabled.toVisibility()
+    private fun updateActionButtons() {
+        val isReady = podStateManager.hasPodState()
+        binding.buttonPlayTestBeeps.isEnabled = isReady
+        binding.buttonDeactivatePod.isEnabled = isReady
+    }
 
-        binding.buttonRileylinkStats.visibility = aapsOmnipodManager.isRileylinkStatsButtonEnabled.toVisibility()
-        binding.waitingForRlLayout.visibility = (rileyLinkServiceData.rileyLinkServiceState.isReady().not()).toVisibility()
-
-        if (rileyLinkServiceData.rileyLinkServiceState.isReady()) {
-            binding.buttonActivatePod.isEnabled = podStateManager.isPodActivationCompleted.not()
-            binding.buttonDeactivatePod.isEnabled = podStateManager.activationProgress.isAtLeast(ActivationProgress.PAIRING_COMPLETED)
-
-            if (podStateManager.isPodInitialized && podStateManager.activationProgress.isAtLeast(ActivationProgress.PAIRING_COMPLETED)) {
-                if (commandQueue.isCustomCommandInQueue(CommandPlayTestBeep::class.java)) {
-                    binding.buttonPlayTestBeep.isEnabled = false
-                    binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_playing_test_beep)
-                } else {
-                    binding.buttonPlayTestBeep.isEnabled = true
-                    binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_play_test_beep)
-                }
-            } else {
-                binding.buttonPlayTestBeep.isEnabled = false
-                binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_play_test_beep)
-            }
-
-            if (discardButtonEnabled) {
-                binding.buttonDiscardPod.isEnabled = true
-            }
-            if (pulseLogButtonEnabled) {
-                if (podStateManager.isPodActivationCompleted) {
-                    if (commandQueue.isCustomCommandInQueue(CommandReadPulseLog::class.java)) {
-                        binding.buttonPulseLog.isEnabled = false
-                        binding.buttonPulseLog.setText(R.string.omnipod_eros_pod_management_button_reading_pulse_log)
-                    } else {
-                        binding.buttonPulseLog.isEnabled = true
-                        binding.buttonPulseLog.setText(R.string.omnipod_eros_pod_management_button_read_pulse_log)
-                    }
-                } else {
-                    binding.buttonPulseLog.isEnabled = false
-                    binding.buttonPulseLog.setText(R.string.omnipod_eros_pod_management_button_read_pulse_log)
-                }
-            }
+    private fun updateAlertSettings() {
+        val lowAlertUnits = omnipodAlertUtil.lowReservoirAlertUnits
+        val currentLowAlert = if (lowAlertUnits != null) {
+            lowAlertUnits.toString()
         } else {
-            binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_play_test_beep)
-            binding.buttonActivatePod.isEnabled = false
-            binding.buttonDeactivatePod.isEnabled = false
-            binding.buttonPlayTestBeep.isEnabled = false
-
-            if (discardButtonEnabled) {
-                binding.buttonDiscardPod.isEnabled = false
-            }
-            if (pulseLogButtonEnabled) {
-                binding.buttonPulseLog.isEnabled = false
-                binding.buttonPulseLog.setText(R.string.omnipod_eros_pod_management_button_read_pulse_log)
-            }
+            OmnipodConstants.DEFAULT_MAX_RESERVOIR_ALERT_THRESHOLD.toString()
         }
+        binding.lowReservoirAlertUnits.setText(currentLowAlert)
+
+        val expAlertHours = omnipodAlertUtil.podExpirationAlertHours
+        val currentExpAlert = if (expAlertHours != null) {
+            expAlertHours.toString()
+        } else {
+            OmnipodConstants.DEFAULT_EXPIRATION_ALERT_HOURS.toString()
+        }
+        binding.podExpirationAlertHours.setText(currentExpAlert)
     }
 
-    private fun displayErrorDialog(title: String, message: String, @Suppress("SameParameterValue") withSound: Boolean) {
+    private fun disableActionButtons() {
+        binding.buttonPlayTestBeeps.isEnabled = false
+        binding.buttonDeactivatePod.isEnabled = false
+    }
+
+    private fun displayErrorDialog(title: String, message: String, withSound: Boolean) {
         uiInteraction.runAlarm(message, title, if (withSound) app.aaps.core.ui.R.raw.boluserror else 0)
     }
 
-    private fun displayNotConfiguredDialog() {
-        context.let {
-            app.aaps.core.ui.UIRunnable {
-                OKDialog.show(
-                    it, rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
-                    rh.gs(R.string.omnipod_eros_error_operation_not_possible_no_configuration)
+    private fun displayOkDialog(title: String, message: String) {
+        OKDialog.show(this, title, message)
+    }
+
+    inner class DisplayResultDialogCallback(
+        private val errorMessagePrefix: String,
+        private val withSoundOnError: Boolean
+    ) : Callback() {
+
+        private var messageOnSuccess: String? = null
+        private var actionOnSuccess: Runnable? = null
+
+        override fun run() {
+            if (result.success) {
+                messageOnSuccess?.let { displayOkDialog(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation), it) }
+                actionOnSuccess?.run()
+            } else {
+                displayErrorDialog(
+                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
+                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_two_strings_concatenated_by_colon, errorMessagePrefix, result.comment),
+                    withSoundOnError
                 )
-            }.run()
+            }
+        }
+
+        fun messageOnSuccess(message: String): DisplayResultDialogCallback {
+            messageOnSuccess = message
+            return this
+        }
+
+        fun actionOnSuccess(action: Runnable): DisplayResultDialogCallback {
+            actionOnSuccess = action
+            return this
         }
     }
 }
