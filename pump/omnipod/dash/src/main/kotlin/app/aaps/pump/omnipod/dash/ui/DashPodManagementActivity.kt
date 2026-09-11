@@ -15,11 +15,11 @@ import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.ui.activities.TranslatedDaggerAppCompatActivity
 import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.core.ui.extensions.toVisibility
+import app.aaps.pump.omnipod.common.bledriver.pod.definition.ActivationProgress
+import app.aaps.pump.omnipod.common.bledriver.pod.state.OmnipodDashPodStateManager
 import app.aaps.pump.omnipod.common.queue.command.CommandPlayTestBeep
 import app.aaps.pump.omnipod.common.ui.wizard.activation.PodActivationWizardActivity
 import app.aaps.pump.omnipod.dash.databinding.OmnipodDashPodManagementBinding
-import app.aaps.pump.omnipod.common.bledriver.pod.definition.ActivationProgress
-import app.aaps.pump.omnipod.common.bledriver.pod.state.OmnipodDashPodStateManager
 import app.aaps.pump.omnipod.dash.ui.wizard.activation.DashPodActivationWizardActivity
 import app.aaps.pump.omnipod.dash.ui.wizard.deactivation.DashPodDeactivationWizardActivity
 import app.aaps.pump.omnipod.dash.util.mapProfileToBasalProgram
@@ -95,7 +95,7 @@ class DashPodManagementActivity : TranslatedDaggerAppCompatActivity() {
             OKDialog.showConfirmation(
                 this,
                 rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_discard_pod_confirmation),
-                Thread {
+                Runnable {
                     podStateManager.reset()
                 }
             )
@@ -109,7 +109,7 @@ class DashPodManagementActivity : TranslatedDaggerAppCompatActivity() {
                 CommandPlayTestBeep(),
                 object : Callback() {
                     override fun run() {
-                        if (!result.success) {
+                        if (result.success.not()) {
                             displayErrorDialog(
                                 rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
                                 rh.gs(
