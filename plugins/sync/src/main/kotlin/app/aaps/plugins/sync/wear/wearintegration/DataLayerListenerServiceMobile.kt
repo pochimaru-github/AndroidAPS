@@ -16,7 +16,7 @@ import app.aaps.core.interfaces.rx.events.EventWearUpdateGui
 import app.aaps.core.interfaces.rx.weardata.EventData
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.plugins.sync.R
-import app.aaps.plugins.sync.wear.WearPlugin
+import app.aaps.plugins.sync.WearPlugin
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.CapabilityClient
 import com.google.android.gms.wearable.CapabilityInfo
@@ -58,7 +58,6 @@ class DataLayerListenerServiceMobile : WearableListenerService() {
     private val dataClient by lazy { Wearable.getDataClient(this) }
     private val messageClient by lazy { Wearable.getMessageClient(this) }
     private val capabilityClient by lazy { Wearable.getCapabilityClient(this) }
-    //private val nodeClient by lazy { Wearable.getNodeClient(this) }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
@@ -138,12 +137,11 @@ class DataLayerListenerServiceMobile : WearableListenerService() {
         }
     }
 
-    // Find a nearby node or pick one arbitrarily
     private fun pickBestNodeId(nodes: Set<Node>): Node? =
         nodes.firstOrNull { it.isNearby } ?: nodes.firstOrNull()
 
     @Suppress("unused")
-    private fun sendData(path: String, vararg params: DataMap) {
+    private fun sendData(path: String, params: List<DataMap>) {
         if (wearPlugin.isEnabled()) {
             scope.launch {
                 try {
