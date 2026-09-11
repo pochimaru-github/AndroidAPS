@@ -37,11 +37,20 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:data"))
+    implementation(project(":core:interfaces"))
+    implementation(project(":core:keys"))
+    implementation(project(":core:libraries"))
     implementation(project(":core:ui"))
     implementation(project(":core:utils"))
+
     implementation(project(":pump:common"))
     implementation(project(":pump:rileylink"))
     implementation(project(":pump:omnipod:common"))
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
 
     testImplementation(libs.org.junit.jupiter)
 }
