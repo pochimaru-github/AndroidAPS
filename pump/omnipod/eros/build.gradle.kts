@@ -37,7 +37,10 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:ui"))
+    implementation(project(":core:utils"))
     implementation(project(":pump:common"))
+    implementation(project(":pump:rileylink"))
     implementation(project(":pump:omnipod:common"))
 
     testImplementation(libs.org.junit.jupiter)
