@@ -3,12 +3,11 @@ package app.aaps.pump.omnipod.eros.ui
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
 import app.aaps.core.interfaces.rx.AapsSchedulers
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.core.ui.ActivityBase
+import app.aaps.core.ui.PumpActivity
 import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.pump.omnipod.common.R
 import app.aaps.pump.omnipod.common.queue.command.CommandDeactivatePod
@@ -19,17 +18,15 @@ import app.aaps.pump.omnipod.eros.OmnipodErosPumpPlugin
 import app.aaps.pump.omnipod.eros.databinding.OmnipodErosPodManagementBinding
 import app.aaps.pump.omnipod.eros.driver.definition.ActivationProgress
 import app.aaps.pump.omnipod.eros.driver.manager.ErosPodStateManager
-import app.aaps.pump.omnipod.eros.driver.util.TimeUtil
 import app.aaps.pump.omnipod.eros.event.EventOmnipodErosPumpValuesChanged
 import app.aaps.pump.omnipod.eros.manager.AapsOmnipodErosManager
 import app.aaps.pump.omnipod.eros.queue.command.CommandReadPodInfo
 import app.aaps.pump.omnipod.eros.util.AapsOmnipodUtil
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
-import org.joda.time.DateTime
 import javax.inject.Inject
 
-class ErosPodManagementActivity : ActivityBase() {
+class ErosPodManagementActivity : PumpActivity() {
 
     @Inject lateinit var rxBus: RxBus
     @Inject lateinit var podStateManager: ErosPodStateManager
@@ -96,7 +93,7 @@ class ErosPodManagementActivity : ActivityBase() {
                 {
                     disableButtons()
                     commandQueue.customCommand(
-                        CommandDeactivatePod(true),
+                        CommandDeactivatePod(),
                         DisplayResultDialogCallback(rh.gs(R.string.omnipod_common_error_failed_to_deactivate_pod), false)
                             .actionOnSuccess {
                                 podStateManager.discardPodState()
