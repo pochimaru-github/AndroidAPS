@@ -86,7 +86,11 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
 
     private var disposables: CompositeDisposable = CompositeDisposable()
 
-    private val handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
+    private val handler: Handler by lazy {
+        val thread = HandlerThread(this::class.simpleName + "Handler")
+        thread.start()
+        Handler(thread.looper)
+    }
     private var refreshLoop: Runnable
 
     init {
