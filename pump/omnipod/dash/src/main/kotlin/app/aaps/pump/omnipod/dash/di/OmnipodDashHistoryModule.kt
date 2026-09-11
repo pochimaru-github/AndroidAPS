@@ -16,7 +16,7 @@ class OmnipodDashHistoryModule {
 
     @Provides
     @Singleton
-    internal fun provideDatabase(context: Context): DashHistoryDatabase = DashHistoryDatabase.build(context)
+    internal fun provideDatabase(context: Context): DashHistoryDatabase = DashHistoryDatabase.getInstance(context)
 
     @Provides
     @Singleton
