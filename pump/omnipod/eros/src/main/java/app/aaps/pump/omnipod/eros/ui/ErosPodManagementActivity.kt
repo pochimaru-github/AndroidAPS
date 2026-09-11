@@ -12,12 +12,13 @@ import app.aaps.core.interfaces.rx.events.EventDismissNotification
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.pump.omnipod.common.queue.command.CommandDeactivatePod
-import app.aaps.pump.omnipod.common.queue.command.CommandPlayTestBeeps
 import app.aaps.pump.omnipod.eros.OmnipodErosPumpPlugin
+import app.aaps.pump.omnipod.eros.R
 import app.aaps.pump.omnipod.eros.databinding.OmnipodErosPodManagementBinding
 import app.aaps.pump.omnipod.eros.driver.definition.OmnipodConstants
 import app.aaps.pump.omnipod.eros.driver.manager.ErosPodStateManager
 import app.aaps.pump.omnipod.eros.event.EventOmnipodErosPumpValuesChanged
+import app.aaps.pump.omnipod.eros.queue.command.CommandPlayTestBeeps
 import app.aaps.pump.omnipod.eros.util.OmnipodAlertUtil
 import dagger.android.AndroidInjection
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -45,12 +46,21 @@ class ErosPodManagementActivity : AppCompatActivity() {
         _binding = OmnipodErosPodManagementBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.buttonPlayTestBeeps.setOnClickListener {
+            disableActionButtons()
+            commandQueue.customCommand(
+                CommandPlayTestBeeps(),
+                DisplayResultDialogCallback(rh.gs(R.string.omnipod_error_failed_to_play_test_beeps), false)
+                    .messageOnSuccess(rh.gs(R.string.omnipod_confirmation_played_test_beeps))
+            )
+        }
+
         binding.buttonDeactivatePod.setOnClickListener {
             disableActionButtons()
             commandQueue.customCommand(
                 CommandDeactivatePod(),
-                DisplayResultDialogCallback(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_error_failed_to_deactivate_pod), true)
-                    .messageOnSuccess(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation_pod_deactivated))
+                DisplayResultDialogCallback(rh.gs(R.string.omnipod_error_failed_to_deactivate_pod), true)
+                    .messageOnSuccess(rh.gs(R.string.omnipod_confirmation_pod_deactivated))
                     .actionOnSuccess { rxBus.send(EventDismissNotification(Notification.OMNIPOD_POD_ALERTS)) }
             )
         }
@@ -61,8 +71,8 @@ class ErosPodManagementActivity : AppCompatActivity() {
             if (units != null) {
                 omnipodAlertUtil.lowReservoirAlertUnits = units.toInt()
                 displayOkDialog(
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation),
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation_saved_low_reservoir_alert)
+                    rh.gs(R.string.omnipod_confirmation),
+                    rh.gs(R.string.omnipod_confirmation_saved_low_reservoir_alert)
                 )
             }
         }
@@ -73,8 +83,8 @@ class ErosPodManagementActivity : AppCompatActivity() {
             if (hours != null) {
                 omnipodAlertUtil.podExpirationAlertHours = hours.toInt()
                 displayOkDialog(
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation),
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation_saved_pod_expiration_alert)
+                    rh.gs(R.string.omnipod_confirmation),
+                    rh.gs(R.string.omnipod_confirmation_saved_pod_expiration_alert)
                 )
             }
         }
@@ -106,6 +116,7 @@ class ErosPodManagementActivity : AppCompatActivity() {
 
     private fun updateActionButtons() {
         val isReady = podStateManager.hasPodState()
+        binding.buttonPlayTestBeeps.isEnabled = isReady
         binding.buttonDeactivatePod.isEnabled = isReady
     }
 
@@ -128,6 +139,7 @@ class ErosPodManagementActivity : AppCompatActivity() {
     }
 
     private fun disableActionButtons() {
+        binding.buttonPlayTestBeeps.isEnabled = false
         binding.buttonDeactivatePod.isEnabled = false
     }
 
@@ -149,12 +161,12 @@ class ErosPodManagementActivity : AppCompatActivity() {
 
         override fun run() {
             if (result.success) {
-                messageOnSuccess?.let { displayOkDialog(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation), it) }
+                messageOnSuccess?.let { displayOkDialog(rh.gs(R.string.omnipod_confirmation), it) }
                 actionOnSuccess?.run()
             } else {
                 displayErrorDialog(
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_two_strings_concatenated_by_colon, errorMessagePrefix, result.comment),
+                    rh.gs(R.string.omnipod_warning),
+                    rh.gs(app.aaps.core.R.string.two_strings_concatenated_by_colon, errorMessagePrefix, result.comment),
                     withSoundOnError
                 )
             }
