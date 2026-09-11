@@ -87,12 +87,10 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
     private var disposables: CompositeDisposable = CompositeDisposable()
 
     private val handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
-    private var refreshLoop: Runnable
-
-    init {
-        refreshLoop = Runnable {
+    private val refreshLoop: Runnable = object : Runnable {
+        override fun run() {
             activity?.runOnUiThread { updateUi() }
-            handler.postDelayed(refreshLoop, REFRESH_INTERVAL_MILLIS)
+            handler.postDelayed(this, REFRESH_INTERVAL_MILLIS)
         }
     }
 
@@ -692,18 +690,18 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
         private var actionOnSuccess: Runnable? = null
 
         override fun run() {
-            if (result.success) {
-                val messageOnSuccess = this.messageOnSuccess
-                if (messageOnSuccess != null) {
-                    displayOkDialog(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation), messageOnSuccess)
-                }
-                actionOnSuccess?.run()
-            } else {
+            if (result.success.not()) {
                 displayErrorDialog(
                     rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
                     rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_two_strings_concatenated_by_colon, errorMessagePrefix, result.comment),
                     withSoundOnError
                 )
+            } else {
+                val messageOnSuccess = this.messageOnSuccess
+                if (messageOnSuccess != null) {
+                    displayOkDialog(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation), messageOnSuccess)
+                }
+                actionOnSuccess?.run()
             }
         }
 
