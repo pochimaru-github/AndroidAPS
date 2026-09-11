@@ -32,10 +32,12 @@ class OmnipodDashOverviewFragment : Fragment() {
     }
 
     fun updateUi() {
-        if (_binding != null && isAdded) {
-            binding.plugin = plugin
-            binding.lifecycleOwner = viewLifecycleOwner
-            binding.executePendingBindings()
+        if (isAdded) {
+            _binding?.let { safeBinding ->
+                safeBinding.plugin = plugin
+                safeBinding.lifecycleOwner = viewLifecycleOwner
+                safeBinding.executePendingBindings()
+            }
         }
     }
 
