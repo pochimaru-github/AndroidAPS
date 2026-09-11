@@ -215,11 +215,14 @@ class ErosPodManagementActivity : TranslatedDaggerAppCompatActivity() {
         val isRlReady = rileyLinkServiceData.rileyLinkServiceState.isReady()
         binding.waitingForRlLayout.visibility = isRlReady.not().toVisibility()
 
-        if (isRlReady) {
-            binding.buttonActivatePod.isEnabled = podStateManager.isPodActivationCompleted.not()
-            binding.buttonDeactivatePod.isEnabled = podStateManager.activationProgress.isAtLeast(ActivationProgress.PAIRING_COMPLETED)
+        val isActivationCompleted = podStateManager.isPodActivationCompleted
+        val isPairingAtLeast = podStateManager.activationProgress.isAtLeast(ActivationProgress.PAIRING_COMPLETED)
 
-            if (podStateManager.isPodInitialized && podStateManager.activationProgress.isAtLeast(ActivationProgress.PAIRING_COMPLETED)) {
+        if (isRlReady) {
+            binding.buttonActivatePod.isEnabled = isActivationCompleted.not()
+            binding.buttonDeactivatePod.isEnabled = isPairingAtLeast
+
+            if (isPodInit && isPairingAtLeast) {
                 if (commandQueue.isCustomCommandInQueue(CommandPlayTestBeep::class.java)) {
                     binding.buttonPlayTestBeep.isEnabled = false
                     binding.buttonPlayTestBeep.setText(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_button_playing_test_beep)
@@ -236,7 +239,7 @@ class ErosPodManagementActivity : TranslatedDaggerAppCompatActivity() {
                 binding.buttonDiscardPod.isEnabled = true
             }
             if (pulseLogButtonEnabled) {
-                if (podStateManager.isPodActivationCompleted) {
+                if (isActivationCompleted) {
                     if (commandQueue.isCustomCommandInQueue(CommandReadPulseLog::class.java)) {
                         binding.buttonPulseLog.isEnabled = false
                         binding.buttonPulseLog.setText(R.string.omnipod_eros_pod_management_button_reading_pulse_log)
