@@ -18,6 +18,10 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
+                implementation(project(":core:interfaces"))
+                implementation(project(":core:data"))
+                implementation(project(":core:objects"))
+
                 implementation(libs.androidx.core)
                 implementation(libs.androidx.room.runtime)
                 implementation(libs.androidx.room)
@@ -35,6 +39,10 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":core:interfaces"))
+    implementation(project(":core:data"))
+    implementation(project(":core:objects"))
+
     add("kapt", libs.com.google.dagger.compiler)
     add("kapt", libs.com.google.dagger.android.processor)
     add("kapt", libs.androidx.room.compiler)
