@@ -1,70 +1,48 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    id("com.android.library")
     id("kotlin-android")
-    id("android-module-dependencies")
-    id("test-module-dependencies")
-    id("jacoco-module-dependencies")
+    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
     namespace = "app.aaps.pump.omnipod.eros"
+    compileSdk = 34
 
     defaultConfig {
-        vectorDrawables.useSupportLibrary = true
-
-        ksp {
-            arg("room.incremental", "true")
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
+        minSdk = 26
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
         dataBinding = true
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
 
 dependencies {
-    implementation(project(":core:data"))
-    implementation(project(":core:interfaces"))
-    implementation(project(":core:keys"))
-    implementation(project(":core:libraries"))
-    implementation(project(":core:utils"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:validators"))
-    implementation(project(":pump:omnipod:common"))
+    implementation(project(":core"))
     implementation(project(":pump:common"))
-    implementation(project(":pump:rileylink"))
+    implementation(project(":pump:omnipod:common"))
 
-    // Lifecycleのバージョン競合を回避し、AGP 7.4.2と互換のある2.6.2に固定
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx") {
-        version {
-            strictly("2.6.2")
-        }
-    }
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx") {
-        version {
-            strictly("2.6.2")
-        }
-    }
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx") {
-        version {
-            strictly("2.6.2")
-        }
-    }
+    val roomVersion = "2.6.2"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 
-    api(libs.androidx.room)
-    api(libs.androidx.room.runtime)
-    api(libs.androidx.room.rxjava3)
+    implementation(libs.rxjava)
+    implementation(libs.rxkotlin)
+    implementation(libs.rxandroid)
 
-    androidTestImplementation(project(":shared:tests"))
-    // optional - Test helpers
-    testImplementation(libs.androidx.room.testing)
-    testImplementation(project(":implementation"))
-    testImplementation(project(":shared:impl"))
-    testImplementation(project(":shared:tests"))
-
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
-    ksp(libs.androidx.room.compiler)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
