@@ -91,12 +91,13 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
         thread.start()
         Handler(thread.looper)
     }
-    private var refreshLoop: Runnable
 
-    init {
-        refreshLoop = Runnable {
-            activity?.runOnUiThread { updateUi() }
-            handler.postDelayed(refreshLoop, REFRESH_INTERVAL_MILLIS)
+    private val refreshLoop: Runnable by lazy {
+        object : Runnable {
+            override fun run() {
+                activity?.runOnUiThread { updateUi() }
+                handler.postDelayed(this, REFRESH_INTERVAL_MILLIS)
+            }
         }
     }
 
