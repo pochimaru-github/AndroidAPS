@@ -47,7 +47,7 @@ allprojects {
         maven("https://jitpack.io")
     }
 
-    // 全モジュール・全構成で AndroidX / Play Services / Kotlin / Kotlinx のバージョンを強制固定
+    // 全モジュール・全構成で AndroidX / Play Services / Kotlin / Kotlinx / Lifecycle のバージョンを強制固定
     configurations.all {
         resolutionStrategy {
             // AndroidX / Play Services の固定
@@ -57,6 +57,16 @@ allprojects {
             force("com.google.android.gms:play-services-measurement-api:21.5.0")
             force("com.google.android.gms:play-services-measurement-impl:21.5.0")
             force("com.google.android.gms:play-services-measurement-sdk-api:21.5.0")
+
+            // Lifecycle 関連のバージョンを 2.8.7 へ強制固定 (2.9.0 の KMP Variant 競合をブロック)
+            force("androidx.lifecycle:lifecycle-runtime:2.8.7")
+            force("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+            force("androidx.lifecycle:lifecycle-common:2.8.7")
+            force("androidx.lifecycle:lifecycle-common-jvm:2.8.7")
+            force("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
+            force("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+            force("androidx.lifecycle:lifecycle-livedata:2.8.7")
+            force("androidx.lifecycle:lifecycle-livedata-core:2.8.7")
 
             // Kotlin 関連の固定 (2.1.20 等の混入による metadata エラーを回避)
             force("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
@@ -78,6 +88,9 @@ allprojects {
                 }
                 if (requested.group == "androidx.appcompat") {
                     useVersion("1.6.1")
+                }
+                if (requested.group == "androidx.lifecycle") {
+                    useVersion("2.8.7")
                 }
             }
         }
