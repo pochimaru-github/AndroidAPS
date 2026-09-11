@@ -5,7 +5,7 @@ import app.aaps.core.interfaces.rx.events.Event
 import io.socket.client.Ack
 import org.json.JSONObject
 
-class NSUpdateAck(private val rxBus: RxBus) : Event(), Ack {
+class NSAddAck(private val rxBus: RxBus) : Event(), Ack {
 
     var success = false
 
