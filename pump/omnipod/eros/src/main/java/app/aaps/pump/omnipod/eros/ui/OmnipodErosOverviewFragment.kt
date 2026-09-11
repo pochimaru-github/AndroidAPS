@@ -87,10 +87,12 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
     private var disposables: CompositeDisposable = CompositeDisposable()
 
     private val handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
-    private val refreshLoop: Runnable = object : Runnable {
-        override fun run() {
+    private var refreshLoop: Runnable
+
+    init {
+        refreshLoop = Runnable {
             activity?.runOnUiThread { updateUi() }
-            handler.postDelayed(this, REFRESH_INTERVAL_MILLIS)
+            handler.postDelayed(refreshLoop, REFRESH_INTERVAL_MILLIS)
         }
     }
 
@@ -271,7 +273,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
             }
         }
 
-        if (!podStateManager.hasPodState() || !podStateManager.isPodInitialized) {
+        if (podStateManager.hasPodState().not() || podStateManager.isPodInitialized.not()) {
             podInfoBinding.uniqueId.text = if (podStateManager.hasPodState()) {
                 podStateManager.address.toString()
             } else {
@@ -410,10 +412,10 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
     }
 
     private fun updatePodStatus() {
-        podInfoBinding.podStatus.text = if (!podStateManager.hasPodState()) {
+        podInfoBinding.podStatus.text = if (podStateManager.hasPodState().not()) {
             rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_status_no_active_pod)
-        } else if (!podStateManager.isPodActivationCompleted) {
-            if (!podStateManager.isPodInitialized) {
+        } else if (podStateManager.isPodActivationCompleted.not()) {
+            if (podStateManager.isPodInitialized.not()) {
                 rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_status_waiting_for_activation)
             } else {
                 if (podStateManager.activationProgress.isBefore(ActivationProgress.PRIMING_COMPLETED)) {
@@ -430,7 +432,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
                     rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_status_running)
                 }
 
-                if (!podStateManager.isBasalCertain) {
+                if (podStateManager.isBasalCertain.not()) {
                     status += " (" + rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_uncertain) + ")"
                 }
 
@@ -447,7 +449,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
         val podStatusColor =
             rh.gac(
                 context,
-                if (!podStateManager.isPodActivationCompleted || podStateManager.isPodDead || podStateManager.isSuspended || (podStateManager.isPodRunning && !podStateManager.isBasalCertain)) {
+                if (podStateManager.isPodActivationCompleted.not() || podStateManager.isPodDead || podStateManager.isSuspended || (podStateManager.isPodRunning && podStateManager.isBasalCertain.not())) {
                     app.aaps.core.ui.R.attr.warningColor
                 } else {
                     app.aaps.core.ui.R.attr.defaultTextColor
@@ -484,7 +486,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
 
     private fun updateTempBasal() {
         if (podStateManager.isPodActivationCompleted && podStateManager.isTempBasalRunning) {
-            if (!podStateManager.hasTempBasal()) {
+            if (podStateManager.hasTempBasal().not()) {
                 podInfoBinding.tempBasal.text = "???"
                 podInfoBinding.tempBasal.setTextColor(rh.gac(context, app.aaps.core.ui.R.attr.warningColor))
             } else {
@@ -517,7 +519,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
             var text = PLACEHOLDER
             val textColor: Int
 
-            if (!podStateManager.isPodActivationCompleted || podStateManager.isTempBasalCertain) {
+            if (podStateManager.isPodActivationCompleted.not() || podStateManager.isTempBasalCertain) {
                 textColor = rh.gac(context, app.aaps.core.ui.R.attr.defaultTextColor)
             } else {
                 textColor = rh.gac(context, app.aaps.core.ui.R.attr.warningColor)
@@ -569,7 +571,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
     }
 
     private fun updateSilenceAlertsButton() {
-        if (!omnipodManager.isAutomaticallyAcknowledgeAlertsEnabled && podStateManager.isPodRunning && (podStateManager.hasActiveAlerts() || commandQueue.isCustomCommandInQueue(
+        if (omnipodManager.isAutomaticallyAcknowledgeAlertsEnabled.not() && podStateManager.isPodRunning && (podStateManager.hasActiveAlerts() || commandQueue.isCustomCommandInQueue(
                 CommandSilenceAlerts::class.java
             ))
         ) {
@@ -582,9 +584,9 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
 
     private fun updateSuspendDeliveryButton() {
         // If the Pod is currently suspended, we show the Resume delivery button instead.
-        if (omnipodManager.isSuspendDeliveryButtonEnabled && podStateManager.isPodRunning && (!podStateManager.isSuspended || commandQueue.isCustomCommandInQueue(CommandSuspendDelivery::class.java))) {
+        if (omnipodManager.isSuspendDeliveryButtonEnabled && podStateManager.isPodRunning && (podStateManager.isSuspended.not() || commandQueue.isCustomCommandInQueue(CommandSuspendDelivery::class.java))) {
             buttonBinding.buttonSuspendDelivery.visibility = View.VISIBLE
-            buttonBinding.buttonSuspendDelivery.isEnabled = podStateManager.isPodRunning && !podStateManager.isSuspended && rileyLinkServiceData.rileyLinkServiceState.isReady() && isQueueEmpty()
+            buttonBinding.buttonSuspendDelivery.isEnabled = podStateManager.isPodRunning && podStateManager.isSuspended.not() && rileyLinkServiceData.rileyLinkServiceState.isReady() && isQueueEmpty()
         } else {
             buttonBinding.buttonSuspendDelivery.visibility = View.GONE
         }
@@ -593,7 +595,7 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
     private fun updateSetTimeButton() {
         if (podStateManager.isPodRunning && (podStateManager.timeDeviatesMoreThan(Duration.standardMinutes(5)) || commandQueue.isCustomCommandInQueue(CommandHandleTimeChange::class.java))) {
             buttonBinding.buttonSetTime.visibility = View.VISIBLE
-            buttonBinding.buttonSetTime.isEnabled = !podStateManager.isSuspended && rileyLinkServiceData.rileyLinkServiceState.isReady() && isQueueEmpty()
+            buttonBinding.buttonSetTime.isEnabled = podStateManager.isSuspended.not() && rileyLinkServiceData.rileyLinkServiceState.isReady() && isQueueEmpty()
         } else {
             buttonBinding.buttonSetTime.visibility = View.GONE
         }
@@ -690,18 +692,18 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
         private var actionOnSuccess: Runnable? = null
 
         override fun run() {
-            if (result.success.not()) {
-                displayErrorDialog(
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
-                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_two_strings_concatenated_by_colon, errorMessagePrefix, result.comment),
-                    withSoundOnError
-                )
-            } else {
+            if (result.success) {
                 val messageOnSuccess = this.messageOnSuccess
                 if (messageOnSuccess != null) {
                     displayOkDialog(rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_confirmation), messageOnSuccess)
                 }
                 actionOnSuccess?.run()
+            } else {
+                displayErrorDialog(
+                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
+                    rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_two_strings_concatenated_by_colon, errorMessagePrefix, result.comment),
+                    withSoundOnError
+                )
             }
         }
 
