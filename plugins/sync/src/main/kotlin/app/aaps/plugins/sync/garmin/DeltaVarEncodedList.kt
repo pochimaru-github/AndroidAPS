@@ -100,7 +100,7 @@ class DeltaVarEncodedList {
     /** Adds an entry to the buffer.
      *
      * [values] length must be the same as entrySize provided in the constructor.  */
-    fun add(vararg values: Int) {
+    fun add(values: IntArray) {
         if (values.size != lastValues.size) {
             throw IllegalArgumentException()
         }
