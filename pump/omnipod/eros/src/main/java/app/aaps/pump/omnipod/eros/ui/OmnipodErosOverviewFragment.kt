@@ -356,8 +356,12 @@ class OmnipodErosOverviewFragment : DaggerFragment() {
                 podInfoBinding.reservoir.text = rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_overview_reservoir_value_over50)
                 podInfoBinding.reservoir.setTextColor(rh.gac(context, app.aaps.core.ui.R.attr.defaultTextColor))
             } else {
-                val lowReservoirThreshold = (omnipodAlertUtil.lowReservoirAlertUnits
-                    ?: OmnipodConstants.DEFAULT_MAX_RESERVOIR_ALERT_THRESHOLD).toDouble()
+                val lowAlertUnits = omnipodAlertUtil.lowReservoirAlertUnits
+                val lowReservoirThreshold = if (lowAlertUnits != null) {
+                    lowAlertUnits.toDouble()
+                } else {
+                    OmnipodConstants.DEFAULT_MAX_RESERVOIR_ALERT_THRESHOLD.toDouble()
+                }
 
                 podInfoBinding.reservoir.text = rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_overview_reservoir_value, podStateManager.reservoirLevel)
                 podInfoBinding.reservoir.setTextColor(
