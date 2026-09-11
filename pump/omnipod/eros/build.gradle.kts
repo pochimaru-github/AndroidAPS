@@ -50,6 +50,7 @@ dependencies {
 
     implementation(libs.androidx.room.runtime)
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.room:room-rxjava3:2.6.1")
     kapt(libs.androidx.room.compiler)
 
     testImplementation(libs.org.junit.jupiter)
