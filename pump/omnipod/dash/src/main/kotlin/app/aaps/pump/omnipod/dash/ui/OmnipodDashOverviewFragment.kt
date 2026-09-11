@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import app.aaps.pump.omnipod.dash.OmnipodDashPumpPlugin
-import app.aaps.pump.omnipod.dash.R
 import javax.inject.Inject
 
 class OmnipodDashOverviewFragment : Fragment() {
@@ -19,7 +18,12 @@ class OmnipodDashOverviewFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.omnipod_dash_overview_fragment, container, false)
+        val layoutId = resources.getIdentifier("omnipod_dash_overview_fragment", "layout", requireContext().packageName)
+        return if (layoutId != 0) {
+            inflater.inflate(layoutId, container, false)
+        } else {
+            View(requireContext())
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
