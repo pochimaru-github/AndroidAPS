@@ -43,6 +43,7 @@ dependencies {
     implementation(project(":core:libraries"))
     implementation(project(":core:ui"))
     implementation(project(":core:utils"))
+    implementation(project(":core:validators"))
 
     implementation(project(":pump:common"))
     implementation(project(":pump:rileylink"))
