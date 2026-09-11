@@ -37,6 +37,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:validators"))
     implementation(project(":pump:omnipod:common"))
+    implementation(project(":pump:rileylink"))
     implementation(project(":pump:common"))
 
     implementation(libs.androidx.room.runtime)
