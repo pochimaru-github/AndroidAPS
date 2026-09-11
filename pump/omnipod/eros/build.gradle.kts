@@ -49,7 +49,7 @@ dependencies {
     implementation(project(":pump:omnipod:common"))
 
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
+    implementation("androidx.room:room-ktx:2.6.1")
     kapt(libs.androidx.room.compiler)
 
     testImplementation(libs.org.junit.jupiter)
