@@ -7,13 +7,14 @@ import app.aaps.core.interfaces.rx.AapsSchedulers
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.keys.interfaces.Preferences
+import app.aaps.core.ui.ActivityBase
 import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.pump.omnipod.common.R
+import app.aaps.pump.omnipod.common.queue.CommandQueue
 import app.aaps.pump.omnipod.common.queue.command.CommandDeactivatePod
 import app.aaps.pump.omnipod.common.queue.command.CommandPlayTestBeeps
 import app.aaps.pump.omnipod.common.queue.command.CommandReadPodStatus
 import app.aaps.pump.omnipod.common.queue.command.CommandReadPulseLog
-import app.aaps.pump.omnipod.common.ui.OmnipodManagementActivity
 import app.aaps.pump.omnipod.eros.OmnipodErosPumpPlugin
 import app.aaps.pump.omnipod.eros.databinding.OmnipodErosPodManagementBinding
 import app.aaps.pump.omnipod.eros.driver.definition.ActivationProgress
@@ -26,7 +27,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
 
-class ErosPodManagementActivity : OmnipodManagementActivity() {
+class ErosPodManagementActivity : ActivityBase() {
 
     @Inject lateinit var rxBus: RxBus
     @Inject lateinit var podStateManager: ErosPodStateManager
@@ -36,6 +37,7 @@ class ErosPodManagementActivity : OmnipodManagementActivity() {
     @Inject lateinit var omnipodUtil: AapsOmnipodUtil
     @Inject lateinit var aapsSchedulers: AapsSchedulers
     @Inject lateinit var uiInteraction: UiInteraction
+    @Inject lateinit var commandQueue: CommandQueue
 
     private var disposables: CompositeDisposable = CompositeDisposable()
     private lateinit var binding: OmnipodErosPodManagementBinding
