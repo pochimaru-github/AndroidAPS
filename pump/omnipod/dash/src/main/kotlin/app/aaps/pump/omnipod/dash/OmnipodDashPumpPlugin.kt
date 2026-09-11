@@ -1,7 +1,6 @@
 package app.aaps.pump.omnipod.dash
 
 import android.content.Context
-import app.aaps.pump.common.hw.PumpDevice
 import app.aaps.pump.omnipod.common.OmnipodPlugin
 import app.aaps.pump.omnipod.dash.history.database.DashHistoryDatabase
 import javax.inject.Inject
