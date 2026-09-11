@@ -33,8 +33,19 @@ subprojects {
             compileSdk = 34
 
             compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_11
-                targetCompatibility = JavaVersion.VERSION_11
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
+            }
+        }
+    }
+
+    plugins.withId("com.android.application") {
+        configure<com.android.build.gradle.AppExtension> {
+            compileSdk = 34
+
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
             }
         }
     }
@@ -58,7 +69,7 @@ allprojects {
         maven("https://jitpack.io")
     }
 
-    // 各サブモジュールのビルド構成に対してのみ依存関係を固定 (buildSrc 等の Gradle 内部構成への過剰介入をブロック)
+    // 各サブモジュールのビルド構成に対してのみ依存関係を固定
     configurations.matching { it.name.contains("Compile") || it.name.contains("Runtime") || it.name.contains("kapt") }.configureEach {
         resolutionStrategy {
             // AndroidX / Play Services の固定
@@ -121,7 +132,7 @@ allprojects {
             freeCompilerArgs.add("-Xjvm-default=all")
             freeCompilerArgs.add("-Xskip-prerelease-check")
             freeCompilerArgs.add("-Xsuppress-version-warnings")
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 
