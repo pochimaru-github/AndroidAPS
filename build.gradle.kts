@@ -58,8 +58,8 @@ allprojects {
         maven("https://jitpack.io")
     }
 
-    // 全モジュール・全構成で AndroidX / Play Services / Kotlin / Kotlinx / Lifecycle のバージョンを強制固定
-    configurations.all {
+    // 各サブモジュールのビルド構成に対してのみ依存関係を固定 (buildSrc 等の Gradle 内部構成への過剰介入をブロック)
+    configurations.matching { it.name.contains("Compile") || it.name.contains("Runtime") || it.name.contains("kapt") }.configureEach {
         resolutionStrategy {
             // AndroidX / Play Services の固定
             force("androidx.activity:activity:1.8.2")
@@ -69,7 +69,7 @@ allprojects {
             force("com.google.android.gms:play-services-measurement-impl:21.5.0")
             force("com.google.android.gms:play-services-measurement-sdk-api:21.5.0")
 
-            // Lifecycle 関連のバージョンを 2.8.7 へ強制固定 (2.9.0 の KMP Variant 競合をブロック)
+            // Lifecycle 関連のバージョンを 2.8.7 へ強制固定
             force("androidx.lifecycle:lifecycle-runtime:2.8.7")
             force("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
             force("androidx.lifecycle:lifecycle-common:2.8.7")
@@ -80,13 +80,13 @@ allprojects {
             force("androidx.lifecycle:lifecycle-livedata-core:2.8.7")
             force("androidx.lifecycle:lifecycle-extensions:2.2.0")
 
-            // Kotlin 関連の固定 (2.1.20 等の混入による metadata エラーを回避)
+            // Kotlin 関連の固定
             force("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
             force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22")
             force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22")
             force("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
 
-            // kotlinx 関連のバージョン固定 (Kotlin 1.9 互換の 0.5.0 / 1.8.0 等に固定)
+            // kotlinx 関連のバージョン固定
             force("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
             force("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.5.0")
             force("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
