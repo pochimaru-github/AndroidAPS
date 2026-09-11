@@ -107,7 +107,7 @@ class ErosPodManagementActivity : TranslatedDaggerAppCompatActivity() {
         binding.buttonDiscardPod.setOnClickListener {
             OKDialog.showConfirmation(
                 this,
-                rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_discard_pod_confirmation), Thread {
+                rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_pod_management_discard_pod_confirmation), Runnable {
                     aapsOmnipodManager.discardPodState()
                 })
         }
@@ -131,7 +131,7 @@ class ErosPodManagementActivity : TranslatedDaggerAppCompatActivity() {
 
             commandQueue.customCommand(CommandPlayTestBeep(), object : Callback() {
                 override fun run() {
-                    if (!result.success) {
+                    if (result.success.not()) {
                         displayErrorDialog(
                             rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
                             rh.gs(
@@ -152,7 +152,7 @@ class ErosPodManagementActivity : TranslatedDaggerAppCompatActivity() {
 
             commandQueue.customCommand(CommandReadPulseLog(), object : Callback() {
                 override fun run() {
-                    if (!result.success) {
+                    if (result.success.not()) {
                         displayErrorDialog(
                             rh.gs(app.aaps.pump.omnipod.common.R.string.omnipod_common_warning),
                             rh.gs(
@@ -203,21 +203,20 @@ class ErosPodManagementActivity : TranslatedDaggerAppCompatActivity() {
     }
 
     private fun refreshButtons() {
-        // Only show the discard button to reset a cached Pod address before the Pod has actually been initialized
-        // Otherwise, users should use the Deactivate Pod Wizard. In case proper deactivation fails,
-        // they will get an option to discard the Pod state there
-        // Milos Kozak: allow to show button by activating engineering mode
-        val discardButtonEnabled = podStateManager.hasPodState() && (!podStateManager.isPodInitialized || config.isEngineeringMode())
+        val isPodInit = podStateManager.isPodInitialized
+        val isEngMode = config.isEngineeringMode()
+        val discardButtonEnabled = podStateManager.hasPodState() && (isPodInit.not() || isEngMode)
         binding.buttonDiscardPod.visibility = discardButtonEnabled.toVisibility()
 
         val pulseLogButtonEnabled = aapsOmnipodManager.isPulseLogButtonEnabled
         binding.buttonPulseLog.visibility = pulseLogButtonEnabled.toVisibility()
 
         binding.buttonRileylinkStats.visibility = aapsOmnipodManager.isRileylinkStatsButtonEnabled.toVisibility()
-        binding.waitingForRlLayout.visibility = (!rileyLinkServiceData.rileyLinkServiceState.isReady()).toVisibility()
+        val isRlReady = rileyLinkServiceData.rileyLinkServiceState.isReady()
+        binding.waitingForRlLayout.visibility = isRlReady.not().toVisibility()
 
-        if (rileyLinkServiceData.rileyLinkServiceState.isReady()) {
-            binding.buttonActivatePod.isEnabled = !podStateManager.isPodActivationCompleted
+        if (isRlReady) {
+            binding.buttonActivatePod.isEnabled = podStateManager.isPodActivationCompleted.not()
             binding.buttonDeactivatePod.isEnabled = podStateManager.activationProgress.isAtLeast(ActivationProgress.PAIRING_COMPLETED)
 
             if (podStateManager.isPodInitialized && podStateManager.activationProgress.isAtLeast(ActivationProgress.PAIRING_COMPLETED)) {
