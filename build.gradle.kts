@@ -38,6 +38,17 @@ subprojects {
             }
         }
     }
+
+    plugins.withId("kotlin-kapt") {
+        configure<org.jetbrains.kotlin.gradle.plugin.KaptExtension> {
+            correctErrorTypes = true
+            useBuildCache = false
+            arguments {
+                arg("dagger.fastInit", "enabled")
+                arg("dagger.formatGeneratedSource", "disabled")
+            }
+        }
+    }
 }
 
 allprojects {
