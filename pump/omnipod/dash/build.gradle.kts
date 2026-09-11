@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
-    id("kotlin-android")
+    alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt")
     id("android-module-dependencies")
     id("test-module-dependencies")
     id("jacoco-module-dependencies")
@@ -12,11 +12,6 @@ android {
 
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
-
-        ksp {
-            arg("room.incremental", "true")
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
     }
 
     buildFeatures {
@@ -35,35 +30,18 @@ dependencies {
     implementation(project(":pump:omnipod:common"))
     implementation(project(":pump:common"))
 
-    // Lifecycleのバージョン競合を回避し、AGP 7.4.2と互換のある2.6.2に固定
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx") {
-        version {
-            strictly("2.6.2")
-        }
-    }
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx") {
-        version {
-            strictly("2.6.2")
-        }
-    }
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx") {
-        version {
-            strictly("2.6.2")
-        }
-    }
+    implementation(libs.androidx.room.runtime)
+    implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.room:room-rxjava3:2.6.1")
+    kapt(libs.androidx.room.compiler)
 
-    api(libs.androidx.room)
-    api(libs.androidx.room.runtime)
-    api(libs.androidx.room.rxjava3)
+    api(libs.com.google.dagger.android.support)
+    kapt(libs.com.google.dagger.compiler)
+    kapt(libs.com.google.dagger.android.processor)
 
     androidTestImplementation(project(":shared:tests"))
-    // optional - Test helpers
     testImplementation(libs.androidx.room.testing)
     testImplementation(project(":implementation"))
     testImplementation(project(":shared:impl"))
     testImplementation(project(":shared:tests"))
-
-    ksp(libs.com.google.dagger.compiler)
-    ksp(libs.com.google.dagger.android.processor)
-    ksp(libs.androidx.room.compiler)
 }
