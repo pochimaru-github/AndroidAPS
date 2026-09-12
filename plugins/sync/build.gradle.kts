@@ -31,7 +31,7 @@ kotlin {
                 implementation(libs.androidx.room)
                 implementation(libs.androidx.work.runtime)
                 
-                // Wear OS & Network & Socket.io
+                // Gson & Network & Socket.io (明確なGAV指定)
                 implementation(libs.com.google.code.gson)
                 implementation("com.google.android.gms:play-services-wearable:18.1.0")
                 implementation("com.squareup.okhttp3:okhttp:4.12.0")
