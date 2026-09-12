@@ -16,9 +16,6 @@ android {
     }
 }
 
-configurations.create("default")
-artifacts.add("default", file("libs/eopatch_core.aar"))
-
 dependencies {
     implementation(files("libs/eopatch_core.aar"))
 }
