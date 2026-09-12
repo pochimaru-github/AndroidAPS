@@ -25,6 +25,12 @@ android {
 kapt {
     correctErrorTypes = true
     keepJavacAnnotationProcessors = true
+    javacOptions {
+        option("-Xlint:-processing")
+    }
+    arguments {
+        arg("kotlin.suppress.metadata.version.check", "true")
+    }
 }
 
 dependencies {
