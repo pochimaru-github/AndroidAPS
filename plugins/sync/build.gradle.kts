@@ -25,12 +25,6 @@ android {
 kapt {
     correctErrorTypes = true
     keepJavacAnnotationProcessors = true
-    javacOptions {
-        option("-Xlint:-processing")
-    }
-    arguments {
-        arg("kotlin.suppress.metadata.version.check", "true")
-    }
 }
 
 dependencies {
@@ -59,5 +53,5 @@ dependencies {
     // Annotation Processors (KAPT)
     kapt(libs.com.google.dagger.compiler)
     kapt(libs.com.google.dagger.android.processor)
-    kapt(libs.androidx.room.compiler)
+    // kapt(libs.androidx.room.compiler) // ← 切り分けのため一時無効化
 }
