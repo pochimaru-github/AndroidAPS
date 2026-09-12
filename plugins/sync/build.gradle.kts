@@ -33,8 +33,8 @@ kotlin {
                 
                 // Gson & Network
                 implementation(libs.com.google.code.gson)
-                implementation(libs.squareup.okhttp3.okhttp)
-                implementation(libs.squareup.retrofit2.retrofit)
+                implementation("com.squareup.okhttp3:okhttp:4.12.0")
+                implementation("com.squareup.retrofit2:retrofit:2.9.0")
                 
                 // Dagger2
                 implementation(libs.com.google.dagger.android)
@@ -51,8 +51,8 @@ dependencies {
     implementation(project(":core:keys"))
     implementation(project(":core:ui"))
 
-    implementation(libs.squareup.okhttp3.okhttp)
-    implementation(libs.squareup.retrofit2.retrofit)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
 
     add("kapt", libs.com.google.dagger.compiler)
     add("kapt", libs.com.google.dagger.android.processor)
