@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.android.library)
     kotlin("android")
@@ -22,9 +24,24 @@ android {
     }
 }
 
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    sourceCompatibility = JavaVersion.VERSION_17.toString()
+    targetCompatibility = JavaVersion.VERSION_17.toString()
+}
+
 kapt {
     correctErrorTypes = true
     keepJavacAnnotationProcessors = true
+    arguments {
+        arg("dagger.fastInit", "enabled")
+        arg("dagger.formatGeneratedSource", "disabled")
+    }
 }
 
 dependencies {
@@ -53,5 +70,5 @@ dependencies {
     // Annotation Processors (KAPT)
     kapt(libs.com.google.dagger.compiler)
     kapt(libs.com.google.dagger.android.processor)
-    // kapt(libs.androidx.room.compiler) // ← 切り分けのため一時無効化
+    kapt(libs.androidx.room.compiler)
 }
