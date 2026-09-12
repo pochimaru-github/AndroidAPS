@@ -14,6 +14,7 @@ kotlin {
                 implementation(project(":core:data"))
                 implementation(project(":core:objects"))
                 implementation(project(":core:keys"))
+                implementation(project(":core:ui"))
             }
         }
 
@@ -23,14 +24,17 @@ kotlin {
                 implementation(project(":core:data"))
                 implementation(project(":core:objects"))
                 implementation(project(":core:keys"))
+                implementation(project(":core:ui"))
 
                 implementation(libs.androidx.core)
                 implementation(libs.androidx.room.runtime)
                 implementation(libs.androidx.room)
                 implementation(libs.androidx.work.runtime)
                 
-                // Gson
+                // Gson & Network
                 implementation(libs.com.google.code.gson)
+                implementation(libs.squareup.okhttp3.okhttp)
+                implementation(libs.squareup.retrofit2.retrofit)
                 
                 // Dagger2
                 implementation(libs.com.google.dagger.android)
@@ -45,6 +49,10 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:objects"))
     implementation(project(":core:keys"))
+    implementation(project(":core:ui"))
+
+    implementation(libs.squareup.okhttp3.okhttp)
+    implementation(libs.squareup.retrofit2.retrofit)
 
     add("kapt", libs.com.google.dagger.compiler)
     add("kapt", libs.com.google.dagger.android.processor)
