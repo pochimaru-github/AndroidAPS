@@ -6,17 +6,17 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
         freeCompilerArgs = freeCompilerArgs + listOf(
             "-opt-in=kotlin.ExperimentalStdlibApi",
             "-language-version=1.9",
-            "-Xskip-prerelease-check" // ← この行を追加してプレリリースエラーを回避
+            "-Xskip-prerelease-check"
         )
     }
 }
