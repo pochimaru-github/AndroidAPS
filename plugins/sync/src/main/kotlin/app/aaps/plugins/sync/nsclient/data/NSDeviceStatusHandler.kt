@@ -36,7 +36,7 @@ class NSDeviceStatusHandler @Inject constructor(
 
     private val disposable = CompositeDisposable()
 
-    fun handleNewData(@JvmSuppressWildcards deviceStatuses: Array<NSDeviceStatus>) {
+    fun handleNewData(deviceStatuses: List<NSDeviceStatus>) {
         var configurationDetected = false
         for (i in deviceStatuses.size - 1 downTo 0) {
             val nsDeviceStatus = deviceStatuses[i]
