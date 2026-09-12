@@ -20,10 +20,10 @@ import app.aaps.core.interfaces.Wear
 import app.aaps.core.interfaces.WearUtils
 import app.aaps.core.interfaces.logging.L
 import app.aaps.core.interfaces.objectMapper
+import app.aaps.core.interfaces.plugin.PluginBase
+import app.aaps.core.interfaces.plugin.PluginType
 import app.aaps.core.interfaces.rx.bus.RxBusWearData
 import app.aaps.core.interfaces.wear.WearPath
-import app.aaps.core.plugins.PluginBase
-import app.aaps.core.plugins.PluginType
 import app.aaps.core.units.GlucoseUnit
 import app.aaps.core.utils.DateUtil
 import app.aaps.core.utils.FabricUtils
