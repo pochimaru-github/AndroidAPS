@@ -14,7 +14,6 @@ kotlin {
                 implementation(project(":core:data"))
                 implementation(project(":core:objects"))
                 implementation(project(":core:keys"))
-                implementation(project(":core:plugins"))
                 implementation(project(":core:ui"))
             }
         }
@@ -25,7 +24,6 @@ kotlin {
                 implementation(project(":core:data"))
                 implementation(project(":core:objects"))
                 implementation(project(":core:keys"))
-                implementation(project(":core:plugins"))
                 implementation(project(":core:ui"))
 
                 implementation(libs.androidx.core)
@@ -53,7 +51,6 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:objects"))
     implementation(project(":core:keys"))
-    implementation(project(":core:plugins"))
     implementation(project(":core:ui"))
 
     implementation("com.google.android.gms:play-services-wearable:18.1.0")
