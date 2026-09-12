@@ -22,6 +22,11 @@ android {
     }
 }
 
+kapt {
+    correctErrorTypes = true
+    keepJavacAnnotationProcessors = true
+}
+
 dependencies {
     implementation(project(":core:interfaces"))
     implementation(project(":core:data"))
