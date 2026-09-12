@@ -14,6 +14,7 @@ kotlin {
                 implementation(project(":core:data"))
                 implementation(project(":core:objects"))
                 implementation(project(":core:keys"))
+                implementation(project(":core:plugins"))
                 implementation(project(":core:ui"))
             }
         }
@@ -24,6 +25,7 @@ kotlin {
                 implementation(project(":core:data"))
                 implementation(project(":core:objects"))
                 implementation(project(":core:keys"))
+                implementation(project(":core:plugins"))
                 implementation(project(":core:ui"))
 
                 implementation(libs.androidx.core)
@@ -31,10 +33,12 @@ kotlin {
                 implementation(libs.androidx.room)
                 implementation(libs.androidx.work.runtime)
                 
-                // Gson & Network
+                // Wear OS & Network & Socket.io
                 implementation(libs.com.google.code.gson)
+                implementation("com.google.android.gms:play-services-wearable:18.1.0")
                 implementation("com.squareup.okhttp3:okhttp:4.12.0")
                 implementation("com.squareup.retrofit2:retrofit:2.9.0")
+                implementation("io.socket:socket.io-client:2.0.1")
                 
                 // Dagger2
                 implementation(libs.com.google.dagger.android)
@@ -49,10 +53,13 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:objects"))
     implementation(project(":core:keys"))
+    implementation(project(":core:plugins"))
     implementation(project(":core:ui"))
 
+    implementation("com.google.android.gms:play-services-wearable:18.1.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("io.socket:socket.io-client:2.0.1")
 
     add("kapt", libs.com.google.dagger.compiler)
     add("kapt", libs.com.google.dagger.android.processor)
