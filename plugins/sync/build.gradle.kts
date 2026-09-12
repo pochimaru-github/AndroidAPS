@@ -13,6 +13,7 @@ kotlin {
                 implementation(project(":core:interfaces"))
                 implementation(project(":core:data"))
                 implementation(project(":core:objects"))
+                implementation(project(":core:keys"))
             }
         }
 
@@ -21,6 +22,7 @@ kotlin {
                 implementation(project(":core:interfaces"))
                 implementation(project(":core:data"))
                 implementation(project(":core:objects"))
+                implementation(project(":core:keys"))
 
                 implementation(libs.androidx.core)
                 implementation(libs.androidx.room.runtime)
@@ -42,6 +44,7 @@ dependencies {
     implementation(project(":core:interfaces"))
     implementation(project(":core:data"))
     implementation(project(":core:objects"))
+    implementation(project(":core:keys"))
 
     add("kapt", libs.com.google.dagger.compiler)
     add("kapt", libs.com.google.dagger.android.processor)
