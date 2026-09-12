@@ -21,7 +21,7 @@ class DeltaVarEncodedList {
     private val start: Int = 0
     private var end: Int = 0
 
-    val byteSize: Int get() =  end - start
+    val byteSize: Int get() = end - start
     var size: Int = 0
         private set
 
@@ -49,7 +49,8 @@ class DeltaVarEncodedList {
         byteBuffer.get(data)
         end = data.size
         val it = DeltaIterator()
-        while (it.next()) {
+        while (it.hasNext()) {
+            it.next()
             size++
         }
     }
@@ -113,7 +114,8 @@ class DeltaVarEncodedList {
     fun toArray(): IntArray {
         val values: IntBuffer = IntBuffer.allocate(lastValues.size * size)
         val it = DeltaIterator()
-        while (it.next()) {
+        while (it.hasNext()) {
+            it.next()
             values.put(it.current())
         }
         val next: IntArray = lastValues.copyOf(lastValues.size)
@@ -132,6 +134,13 @@ class DeltaVarEncodedList {
         private val buffer: ByteBuffer = ByteBuffer.wrap(data)
         private val currentValues: IntArray = IntArray(lastValues.size)
         private var more: Boolean = false
+
+        init {
+            buffer.position(start)
+            buffer.limit(end)
+            buffer.order(ByteOrder.LITTLE_ENDIAN)
+        }
+
         fun current(): IntArray {
             return currentValues
         }
@@ -152,7 +161,11 @@ class DeltaVarEncodedList {
             return zigzagDecode(v)
         }
 
-        operator fun next(): Boolean {
+        fun hasNext(): Boolean {
+            return buffer.hasRemaining()
+        }
+
+        fun next(): Boolean {
             if (!buffer.hasRemaining()) return false
             more = true
             var i = 0
@@ -161,12 +174,6 @@ class DeltaVarEncodedList {
                 i++
             }
             return more
-        }
-
-        init {
-            buffer.position(start)
-            buffer.limit(end)
-            buffer.order(ByteOrder.LITTLE_ENDIAN)
         }
     }
 
