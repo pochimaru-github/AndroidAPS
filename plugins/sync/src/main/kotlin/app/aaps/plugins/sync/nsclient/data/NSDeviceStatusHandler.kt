@@ -20,58 +20,6 @@ import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/*
-{
-    "_id": "594fdcec327b83c81b6b8c0f",
-    "device": "openaps://Sony D5803",
-    "pump": {
-        "battery": {
-            "percent": 100
-        },
-        "status": {
-            "status": "normal",
-            "timestamp": "2017-06-25T15:50:14Z"
-        },
-        "extended": {
-            "Version": "1.5-ac98852-2017.06.25",
-            "PumpIOB": 1.13,
-            "LastBolus": "25. 6. 2017 17:25:00",
-            "LastBolusAmount": 0.3,
-            "BaseBasalRate": 0.4,
-            "ActiveProfile": "2016 +30%"
-        },
-        "reservoir": 109,
-        "clock": "2017-06-25T15:55:10Z"
-    },
-    "openaps": {
-        "suggested": {
-            "temp": "absolute",
-            "bg": 115.9,
-            "tick": "+5",
-            "eventualBG": 105,
-            "snoozeBG": 105,
-            "predBGs": {
-                "IOB": [116, 114, 112, 110, 109, 107, 106, 105, 105, 104, 104, 104, 104, 104, 104, 104, 104, 105, 105, 105, 105, 105, 106, 106, 106, 106, 106, 107]
-            },
-            "sensitivityRatio": 0.81,
-            "variable_sens": 137.3,
-            "COB": 0,
-            "IOB": -0.035,
-            "reason": "COB: 0, Dev: -18, BGI: 0.43, ISF: 216, Target: 99; Eventual BG 105 > 99 but Min. Delta -2.60 < Exp. Delta 0.1; setting current basal of 0.4 as temp. Suggested rate is same as profile rate, no temp basal is active, doing nothing",
-            "timestamp": "2017-06-25T15:55:10Z"
-        },
-        "iob": {
-            "iob": -0.035,
-            "basaliob": -0.035,
-            "activity": -0.0004,
-            "time": "2017-06-25T15:55:10Z"
-        }
-    },
-    "uploaderBattery": 93,
-    "created_at": "2017-06-25T15:55:10Z",
-    "NSCLIENT_ID": 1498406118857
-}
- */
 @Suppress("SpellCheckingInspection")
 @Singleton
 class NSDeviceStatusHandler @Inject constructor(
@@ -87,7 +35,8 @@ class NSDeviceStatusHandler @Inject constructor(
 ) {
 
     private val disposable = CompositeDisposable()
-    fun handleNewData(deviceStatuses: Array<NSDeviceStatus>) {
+
+    fun handleNewData(@JvmSuppressWildcards deviceStatuses: Array<NSDeviceStatus>) {
         var configurationDetected = false
         for (i in deviceStatuses.size - 1 downTo 0) {
             val nsDeviceStatus = deviceStatuses[i]
