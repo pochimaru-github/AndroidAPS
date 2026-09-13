@@ -1,8 +1,5 @@
 package info.nightscout.comboctl.base
 
-//import info.nightscout.comboctl.base.ApplicationLayer.createCMDDeliverBolusPacket
-//import info.nightscout.comboctl.base.ApplicationLayer.createCMDReadHistoryBlockPacket
-//import info.nightscout.comboctl.base.ApplicationLayer.parseCMDReadHistoryBlockResponsePacket
 import kotlinx.datetime.LocalDateTime
 
 private val logger = Logger.get("ApplicationLayer")
@@ -490,7 +487,7 @@ object ApplicationLayer {
             return result
         }
     }
-}
+
     /**
      * A block of command mode history events.
      *
@@ -514,27 +511,5 @@ object ApplicationLayer {
      * sending CMD_CONFIRM_HISTORY_BLOCK. This will inform the Combo that the
      * user is done with that block. Afterwards, a CMD_READ_HISTORY_BLOCK
      * command sent to the Combo will result in the next block being returned.
-     *
-     * In pseudo code:
-     *
-     * ```
-     * while (true) {
-     *     sendPacketToCombo(createCMDReadHistoryBlockPacket())
-     *     packet = waitForPacketFromCombo(CMD_READ_HISTORY_BLOCK_RESPONSE)
-     *
-     *     try {
-     *         historyBlock = parseCMDReadHistoryBlockResponsePacket(packet)
-     *     } catch (exception) {
-     *         continue
-     *     }
-     *
-     *     processHistoryBlock(historyBlock)
-     *
-     *     sendPacketToCombo(createCMDConfirmHistoryBlockPacket())
-     *     waitForPacketFromCombo(CMD_CONFIRM_HISTORY_BLOCK_RESPONSE) // actual packet data is not needed here
-     *
-     *     if (!historyBlock.moreEventsAvailable)
-     *         break
-     * }
-     *
-    */
+     */
+}
