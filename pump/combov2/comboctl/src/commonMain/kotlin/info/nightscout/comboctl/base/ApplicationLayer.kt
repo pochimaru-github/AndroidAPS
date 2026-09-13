@@ -490,7 +490,7 @@ object ApplicationLayer {
             return result
         }
     }
-
+}
     /**
      * A block of command mode history events.
      *
