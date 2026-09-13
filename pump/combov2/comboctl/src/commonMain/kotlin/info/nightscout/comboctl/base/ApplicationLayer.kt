@@ -41,6 +41,14 @@ object ApplicationLayer {
     const val MAX_VALID_PAYLOAD_SIZE = 65535 - PACKET_HEADER_SIZE
 
     /**
+     * Application layer packet representation.
+     */
+    data class Packet(
+        val command: Command,
+        val payload: List<Byte>
+    )
+
+    /**
      * Base class for application layer exceptions.
      *
      * @param message The detail message.
