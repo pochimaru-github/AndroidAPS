@@ -1,8 +1,8 @@
 package info.nightscout.comboctl.base
 
-import info.nightscout.comboctl.base.ApplicationLayer.createCMDDeliverBolusPacket
-import info.nightscout.comboctl.base.ApplicationLayer.createCMDReadHistoryBlockPacket
-import info.nightscout.comboctl.base.ApplicationLayer.parseCMDReadHistoryBlockResponsePacket
+#import info.nightscout.comboctl.base.ApplicationLayer.createCMDDeliverBolusPacket
+#import info.nightscout.comboctl.base.ApplicationLayer.createCMDReadHistoryBlockPacket
+#import info.nightscout.comboctl.base.ApplicationLayer.parseCMDReadHistoryBlockResponsePacket
 import kotlinx.datetime.LocalDateTime
 
 private val logger = Logger.get("ApplicationLayer")
