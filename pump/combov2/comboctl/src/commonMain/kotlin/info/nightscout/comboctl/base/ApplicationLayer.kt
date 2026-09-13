@@ -48,7 +48,7 @@ object ApplicationLayer {
         val payload: List<Byte>
     ) {
         fun toTransportLayerPacketInfo(): TransportLayer.OutgoingPacketInfo {
-            val fullPayload = mutableListOf<Byte>()
+            val fullPayload = ArrayList<Byte>()
             fullPayload.add(0x10.toByte()) // Version 1.0
             fullPayload.add(command.serviceID.id.toByte())
             fullPayload.add((command.commandID and 0xFF).toByte())
@@ -386,4 +386,18 @@ object ApplicationLayer {
             return result
         }
     }
+}
+
+/**
+ * Extension function to convert TransportLayer.Packet to ApplicationLayer.Packet.
+ */
+fun TransportLayer.Packet.toAppLayerPacket(): ApplicationLayer.Packet {
+    val cmd = ApplicationLayer.extractAppLayerPacketCommand(this)
+        ?: ApplicationLayer.Command.CTRL_CONNECT
+    val payloadBytes = if (payload.size >= ApplicationLayer.PAYLOAD_BYTES_OFFSET) {
+        payload.subList(ApplicationLayer.PAYLOAD_BYTES_OFFSET, payload.size)
+    } else {
+        emptyList()
+    }
+    return ApplicationLayer.Packet(cmd, payloadBytes)
 }
