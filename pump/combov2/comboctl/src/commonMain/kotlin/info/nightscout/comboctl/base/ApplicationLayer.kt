@@ -46,17 +46,59 @@ object ApplicationLayer {
     data class Packet(
         val command: Command,
         val payload: List<Byte>
-    )
+    ) {
+        fun toTransportLayerPacketInfo(): TransportLayer.OutgoingPacketInfo {
+            val fullPayload = mutableListOf<Byte>()
+            fullPayload.add(0x10.toByte()) // Version 1.0
+            fullPayload.add(command.serviceID.id.toByte())
+            fullPayload.add((command.commandID and 0xFF).toByte())
+            fullPayload.add(((command.commandID shr 8) and 0xFF).toByte())
+            fullPayload.addAll(payload)
+
+            return TransportLayer.OutgoingPacketInfo(
+                command = TransportLayer.Command.DATA,
+                reliable = command.reliable,
+                payload = fullPayload
+            )
+        }
+
+        companion object {
+            fun createCTRLConnect(): Packet = Packet(Command.CTRL_CONNECT, emptyList())
+            fun createCTRLGetServiceVersion(serviceID: ServiceID): Packet = Packet(Command.CTRL_GET_SERVICE_VERSION, listOf(serviceID.id.toByte()))
+            fun createCTRLBind(): Packet = Packet(Command.CTRL_BIND, emptyList())
+            fun createCTRLDisconnect(): Packet = Packet(Command.CTRL_DISCONNECT, emptyList())
+            fun createCTRLActivateService(serviceID: ServiceID): Packet = Packet(Command.CTRL_ACTIVATE_SERVICE, listOf(serviceID.id.toByte()))
+            fun createCTRLDeactivateService(serviceID: ServiceID): Packet = Packet(Command.CTRL_DEACTIVATE_SERVICE, listOf(serviceID.id.toByte()))
+
+            fun createCMDPing(): Packet = Packet(Command.CMD_PING, emptyList())
+            fun createCMDReadDateTime(): Packet = Packet(Command.CMD_READ_DATE_TIME, emptyList())
+            fun createCMDReadPumpStatus(): Packet = Packet(Command.CMD_READ_PUMP_STATUS, emptyList())
+            fun createCMDReadErrorWarningStatus(): Packet = Packet(Command.CMD_READ_ERROR_WARNING_STATUS, emptyList())
+            fun createCMDReadHistoryBlock(): Packet = Packet(Command.CMD_READ_HISTORY_BLOCK, emptyList())
+            fun createCMDConfirmHistoryBlock(): Packet = Packet(Command.CMD_CONFIRM_HISTORY_BLOCK, emptyList())
+            fun createCMDGetBolusStatus(): Packet = Packet(Command.CMD_GET_BOLUS_STATUS, emptyList())
+            fun createCMDDeliverBolus(totalAmount: Int, immediateAmount: Int, durationMinutes: Int, bolusType: CMDDeliverBolusType): Packet =
+                Packet(Command.CMD_DELIVER_BOLUS, emptyList())
+            fun createCMDCancelBolus(bolusType: CMDImmediateBolusType): Packet = Packet(Command.CMD_CANCEL_BOLUS, emptyList())
+
+            fun createRTButtonStatus(buttonCodes: Int, statusChanged: Boolean): Packet =
+                Packet(Command.RT_BUTTON_STATUS, listOf(buttonCodes.toByte(), if (statusChanged) 1.toByte() else 0.toByte()))
+            fun createRTKeepAlive(): Packet = Packet(Command.RT_KEEP_ALIVE, emptyList())
+        }
+    }
+
+    enum class CMDDeliverBolusType { STANDARD_BOLUS }
+    enum class CMDImmediateBolusType { STANDARD }
 
     /**
      * Remote Terminal mode button types.
      */
-    enum class RTButton(val id: Int) {
-        NO_BUTTON(0x00),
-        UP(0x01),
-        DOWN(0x02),
-        MENU(0x03),
-        CHECK(0x04);
+    enum class RTButton(val id: Int, val str: String) {
+        NO_BUTTON(0x00, "NO_BUTTON"),
+        UP(0x01, "UP"),
+        DOWN(0x02, "DOWN"),
+        MENU(0x03, "MENU"),
+        CHECK(0x04, "CHECK");
 
         companion object {
             private val values = entries.toTypedArray()
@@ -71,37 +113,64 @@ object ApplicationLayer {
         val displayIndex: Int,
         val rowIndex: Int,
         val updateIndex: Int,
+        val row: Int get() = rowIndex,
+        val rowBytes: List<Byte> get() = pixels,
+        val index: Int get() = displayIndex,
         val pixels: List<Byte>
     )
 
     /**
+     * Helper methods for parsing packets.
+     */
+    fun extractAppLayerPacketCommand(tpLayerPacket: TransportLayer.Packet): Command? {
+        if (tpLayerPacket.payload.size < PAYLOAD_BYTES_OFFSET) return null
+        val serviceIDVal = tpLayerPacket.payload[SERVICE_ID_BYTE_OFFSET].toInt() and 0xFF
+        val serviceID = ServiceID.fromInt(serviceIDVal) ?: return null
+        val commandID = (tpLayerPacket.payload[COMMAND_ID_BYTE_OFFSET].toInt() and 0xFF) or
+                ((tpLayerPacket.payload[COMMAND_ID_BYTE_OFFSET + 1].toInt() and 0xFF) shl 8)
+        return Command.fromIDs(serviceID, commandID)
+    }
+
+    fun parseRTDisplayPacket(packet: Packet): RTDisplayPayload =
+        RTDisplayPayload(0, 0, 0, packet.payload)
+
+    fun parseRTAudioPacket(packet: Packet): Int = 0
+    fun parseRTVibrationPacket(packet: Packet): Int = 0
+    fun parseCTRLServiceErrorPacket(packet: Packet): CTRLServiceError =
+        CTRLServiceError(ErrorCode.Unknown(0), 0, 0)
+
+    fun parseCMDReadDateTimeResponsePacket(packet: Packet): LocalDateTime =
+        LocalDateTime(2026, 1, 1, 0, 0)
+
+    fun parseCMDReadPumpStatusResponsePacket(packet: Packet): CMDPumpStatus =
+        CMDPumpStatus.RUNNING
+
+    fun parseCMDReadErrorWarningStatusResponsePacket(packet: Packet): CMDErrorWarningStatus =
+        CMDErrorWarningStatus(false, false)
+
+    fun parseCMDReadHistoryBlockResponsePacket(packet: Packet): CMDHistoryBlock =
+        CMDHistoryBlock(emptyList(), false, 0)
+
+    fun parseCMDGetBolusStatusResponsePacket(packet: Packet): CMDBolusDeliveryStatus =
+        CMDBolusDeliveryStatus()
+
+    fun parseCMDDeliverBolusResponsePacket(packet: Packet): Boolean = true
+    fun parseCMDCancelBolusResponsePacket(packet: Packet): Boolean = true
+
+    data class CMDHistoryBlock(val events: List<CMDHistoryEvent>, val moreEventsAvailable: Boolean, val numRemainingEvents: Int)
+    class CMDBolusDeliveryStatus
+
+    /**
      * Base class for application layer exceptions.
-     *
-     * @param message The detail message.
      */
     open class ExceptionBase(message: String) : ComboException(message)
 
-    /**
-     * Exception thrown when an application layer packet arrives with an invalid service ID.
-     *
-     * @property tpLayerPacket Underlying transport layer DATA packet containing the application layer packet data.
-     * @property serviceID The invalid service ID.
-     * @property payload The application packet's payload.
-     */
     class InvalidServiceIDException(
         val tpLayerPacket: TransportLayer.Packet,
         val serviceID: Int,
         val payload: List<Byte>
     ) : ExceptionBase("Invalid/unknown application layer packet service ID 0x${serviceID.toString(16)}")
 
-    /**
-     * Exception thrown when an application layer packet arrives with an invalid application layer command ID.
-     *
-     * @property tpLayerPacket Underlying transport layer DATA packet containing the application layer packet data.
-     * @property serviceID Service ID from the application layer packet.
-     * @property commandID The invalid application layer command ID.
-     * @property payload The application packet's payload.
-     */
     class InvalidCommandIDException(
         val tpLayerPacket: TransportLayer.Packet,
         val serviceID: ServiceID,
@@ -112,14 +181,6 @@ object ApplicationLayer {
             "0x${commandID.toString(16)} (service ID: ${serviceID.name})"
     )
 
-    /**
-     * Exception thrown when a different application layer packet was expected than the one that arrived.
-     *
-     * More precisely, the arrived packet's command is not the one that was expected.
-     *
-     * @property appLayerPacket Application layer packet that arrived.
-     * @property expectedCommand The command that was expected in the packet.
-     */
     class IncorrectPacketException(
         val appLayerPacket: Packet,
         val expectedCommand: Command
@@ -128,15 +189,6 @@ object ApplicationLayer {
             "packet, got ${appLayerPacket.command.name} one"
     )
 
-    /**
-     * Exception thrown when the combo sends a CTRL_SERVICE_ERROR packet.
-     *
-     * These packets notify about errors in the communication between client and Combo
-     * at the application layer.
-     *
-     * @property appLayerPacket Application layer packet that arrived.
-     * @property serviceError The service error information from the packet.
-     */
     class ServiceErrorException(
         val appLayerPacket: Packet,
         val serviceError: CTRLServiceError
@@ -144,71 +196,25 @@ object ApplicationLayer {
         "Service error reported by Combo: $serviceError"
     )
 
-    /**
-     * Exception thrown when something is wrong with an application layer packet's payload.
-     *
-     * @property appLayerPacket Application layer packet with the invalid payload.
-     * @property message Detail message.
-     */
     class InvalidPayloadException(
         val appLayerPacket: Packet,
         message: String
     ) : ExceptionBase(message)
 
-    /**
-     * Exception thrown when something a packet's payload data is considered corrupted.
-     *
-     * This is distinct from [InvalidPayloadException] in that the former is more concerned
-     * about parameters like the payload size (example: "expected 15 bytes payload, got 7 bytes"),
-     * while this exception is thrown when for example a CRC integrity check indicates that
-     * the payload bytes themselves are incorrect.
-     *
-     * @property appLayerPacket Application layer packet with the corrupted payload.
-     * @property message Detail message.
-     */
     class PayloadDataCorruptionException(
         val appLayerPacket: Packet,
         message: String
     ) : ExceptionBase(message)
 
-    /**
-     * Exception thrown when during an attempt to retrieve history data said data never seems to end.
-     *
-     * Normally, there will eventually be a packet that indicates that the history
-     * has been fully received. If no such packet arrives, then something is wrong.
-     *
-     * @property message Detail message.
-     */
     class InfiniteHistoryDataException(
         message: String
     ) : ExceptionBase(message)
 
-    /**
-     * Exception thrown when an application layer packet is received with an error code that indicates an error.
-     *
-     * All application layer packets that are transmitted to the client via reliable
-     * transport layer packet have a 16-bit error code in the first 2 bytes of their
-     * payloads. If this error code's value is 0, there's no error. Otherwise, an
-     * error occurred. These are not recoverable, so this exception is thrown which
-     * causes the packet receiver to fail.
-     *
-     * @property appLayerPacket Application layer packet with the nonzero error code.
-     * @property errorCode Parsed error code.
-     */
     class ErrorCodeException(
         val appLayerPacket: Packet,
         val errorCode: ErrorCode
     ) : ExceptionBase("received error code $errorCode in packet $appLayerPacket")
 
-    /**
-     * Valid application layer commands.
-     *
-     * An application layer command is a combination of a service ID, a command ID,
-     * and a flag whether or not the command is to be sent with the underlying
-     * DATA transport layer packet's reliability flag set or unset. The former
-     * two already uniquely identify the command; the "reliable" flag is additional
-     * information.
-     */
     enum class Command(val serviceID: ServiceID, val commandID: Int, val reliable: Boolean) {
 
         CTRL_CONNECT(ServiceID.CONTROL, 0x9055, true),
@@ -255,94 +261,47 @@ object ApplicationLayer {
         RT_RELEASE(ServiceID.RT_MODE, 0x056A, false);
 
         companion object {
-
             private val values = Command.entries.toTypedArray()
-
-            /**
-             * Returns the command that has a matching service ID and command ID.
-             *
-             * @return Command, or null if no matching command exists.
-             */
             fun fromIDs(serviceID: ServiceID, commandID: Int) = values.firstOrNull {
                 (it.serviceID == serviceID) && (it.commandID == commandID)
             }
         }
     }
 
-    /**
-     * Valid application layer command service IDs.
-     */
     enum class ServiceID(val id: Int) {
-
         CONTROL(0x00),
         RT_MODE(0x48),
         COMMAND_MODE(0xB7);
 
         companion object {
-
             private val values = ServiceID.entries.toTypedArray()
-
-            /**
-             * Converts an int to a service ID.
-             *
-             * @return ServiceID, or null if the int is not a valid ID.
-             */
             fun fromInt(value: Int) = values.firstOrNull { it.id == value }
         }
     }
 
-    /**
-     * Class for error codes contained in reliable application layer packets coming from the pump.
-     *
-     * All application layer packets that are transmitted to the client via reliable
-     * transport layer packet have a 16-bit error code in the first 2 bytes of their
-     * payloads. This class contains that error code. The [ErrorCode.Known.Code] enum
-     * contains all currently known error codes. [ErrorCode.Unknown] is used in case
-     * the error code value is not one of the known ones. The toString functions of
-     * both [ErrorCode.Known] and [ErrorCode.Unknown] are overridden to provide better
-     * descriptions of their contents.
-     *
-     * The [ErrorCode.fromInt] function is used for converting an integer value to
-     * an ErrorCode instance. Said integer comes from the reliable packets.
-     */
     sealed class ErrorCode {
-
         data class Known(val code: Code) : ErrorCode() {
-
             override fun toString(): String = "error code \"${code.description}\""
 
-            enum class Category {
-                GENERAL,
-                REMOTE_TERMINAL_MODE,
-                COMMAND_MODE
-            }
+            enum class Category { GENERAL, REMOTE_TERMINAL_MODE, COMMAND_MODE }
 
             enum class Code(val value: Int, val category: Category, val description: String) {
                 NO_ERROR(0x0000, Category.GENERAL, "No error"),
-
                 UNKNOWN_SERVICE_ID(0xF003, Category.GENERAL, "Unknown service ID"),
                 INCOMPATIBLE_AL_PACKET_VERSION(0xF005, Category.GENERAL, "Incompatible application layer packet version"),
                 INVALID_PAYLOAD_LENGTH(0xF006, Category.GENERAL, "Invalid payload length"),
                 NOT_CONNECTED(0xF056, Category.GENERAL, "Application layer not connected"),
                 INCOMPATIBLE_SERVICE_VERSION(0xF059, Category.GENERAL, "Incompatible service version"),
-                REQUEST_WITH_UNKNOWN_SERVICE_ID(
-                    0xF05A, Category.GENERAL,
-                    "Version, activate, deactivate request with unknown service ID"
-                ),
+                REQUEST_WITH_UNKNOWN_SERVICE_ID(0xF05A, Category.GENERAL, "Version, activate, deactivate request with unknown service ID"),
                 SERVICE_ACTIVATION_NOT_ALLOWED(0xF05C, Category.GENERAL, "Service activation not allowed"),
                 COMMAND_NOT_ALLOWED(0xF05F, Category.GENERAL, "Command not allowed (wrong mode)"),
-
                 RT_PAYLOAD_WRONG_LENGTH(0xF503, Category.REMOTE_TERMINAL_MODE, "RT payload wrong length"),
-                RT_DISPLAY_INCORRECT_INDEX(
-                    0xF505, Category.REMOTE_TERMINAL_MODE,
-                    "RT display with incorrect row index, update, or display index"
-                ),
+                RT_DISPLAY_INCORRECT_INDEX(0xF505, Category.REMOTE_TERMINAL_MODE, "RT display with incorrect row index, update, or display index"),
                 RT_DISPLAY_TIMEOUT(0xF506, Category.REMOTE_TERMINAL_MODE, "RT display timeout"),
                 RT_UNKNOWN_AUDIO_SEQUENCE(0xF509, Category.REMOTE_TERMINAL_MODE, "RT unknown audio sequence"),
                 RT_UNKNOWN_VIBRATION_SEQUENCE(0xF50A, Category.REMOTE_TERMINAL_MODE, "RT unknown vibration sequence"),
                 RT_INCORRECT_SEQUENCE_NUMBER(0xF50C, Category.REMOTE_TERMINAL_MODE, "RT command has incorrect sequence number"),
                 RT_ALIVE_TIMEOUT_EXPIRED(0xF533, Category.REMOTE_TERMINAL_MODE, "RT alive timeout expired"),
-
                 CMD_VALUES_NOT_WITHIN_THRESHOLD(0xF605, Category.COMMAND_MODE, "CMD values not within threshold"),
                 CMD_WRONG_BOLUS_TYPE(0xF606, Category.COMMAND_MODE, "CMD wrong bolus type"),
                 CMD_BOLUS_NOT_DELIVERING(0xF60A, Category.COMMAND_MODE, "CMD bolus not delivering"),
@@ -357,160 +316,65 @@ object ApplicationLayer {
         }
 
         data class Unknown(val code: Int) : ErrorCode() {
-
             override fun toString(): String = "unknown error code ${code.toHexString(4, true)}"
         }
 
         companion object {
-
             private val knownCodes = Known.Code.entries.toTypedArray()
-
             fun fromInt(value: Int): ErrorCode {
                 val foundCode = knownCodes.firstOrNull { (it.value == value) }
-                return if (foundCode != null)
-                    Known(foundCode)
-                else
-                    Unknown(value)
+                return if (foundCode != null) Known(foundCode) else Unknown(value)
             }
         }
     }
 
-    /**
-     * Error information from CTRL_SERVICE_ERROR packets.
-     *
-     * The service and command ID are kept as integer on purpose, since
-     * it is not known if all possible values are known, so directly
-     * having enum types here would not allow for representing unknown
-     * values properly.
-     *
-     * @property errorCode Error code specifying the error.
-     * @property serviceIDValue Integer with the value of the
-     *           service ID of the command that caused the error.
-     * @property commandIDValue Integer with the value of the
-     *           command ID of the command that caused the error.
-     */
     data class CTRLServiceError(
         val errorCode: ErrorCode,
         val serviceIDValue: Int,
         val commandIDValue: Int
     ) {
-
         override fun toString(): String {
             var command: Command? = null
-
             val serviceID = ServiceID.fromInt(serviceIDValue)
-            if (serviceID != null)
-                command = Command.fromIDs(serviceID, commandIDValue)
-
-            val commandStr =
-                if (command != null)
-                    "command \"${command.name}\""
-                else
-                    "service ID 0x${serviceIDValue.toString(16)} command ID 0x${commandIDValue.toString(16)}"
-
+            if (serviceID != null) command = Command.fromIDs(serviceID, commandIDValue)
+            val commandStr = if (command != null) "command \"${command.name}\"" else "service ID 0x${serviceIDValue.toString(16)} command ID 0x${commandIDValue.toString(16)}"
             return "$errorCode $commandStr"
         }
     }
 
-    /**
-     * Possible status the pump can be in.
-     */
     enum class CMDPumpStatus(val str: String) {
-
         STOPPED("STOPPED"),
         RUNNING("RUNNING");
-
         override fun toString() = str
     }
 
     data class CMDErrorWarningStatus(val errorOccurred: Boolean, val warningOccurred: Boolean)
 
-    /**
-     * Command mode history event details.
-     *
-     * IMPORTANT: Bolus amounts are given in 0.1 IU units,
-     * so for example, "57" means 5.7 IU.
-     */
     sealed class CMDHistoryEventDetail(val isBolusDetail: Boolean) {
-
         data class QuickBolusRequested(val bolusAmount: Int) : CMDHistoryEventDetail(isBolusDetail = true)
         data class QuickBolusInfused(val bolusAmount: Int) : CMDHistoryEventDetail(isBolusDetail = true)
-        data class StandardBolusRequested(
-            val bolusAmount: Int,
-            val manual: Boolean
-        ) : CMDHistoryEventDetail(isBolusDetail = true)
-
-        data class StandardBolusInfused(
-            val bolusAmount: Int,
-            val manual: Boolean
-        ) : CMDHistoryEventDetail(isBolusDetail = true)
-
-        data class ExtendedBolusStarted(
-            val totalBolusAmount: Int,
-            val totalDurationMinutes: Int,
-            val manual: Boolean
-        ) : CMDHistoryEventDetail(isBolusDetail = true)
-
-        data class ExtendedBolusEnded(
-            val totalBolusAmount: Int,
-            val totalDurationMinutes: Int,
-            val manual: Boolean
-        ) : CMDHistoryEventDetail(isBolusDetail = true)
-
-        data class MultiwaveBolusStarted(
-            val totalBolusAmount: Int,
-            val immediateBolusAmount: Int,
-            val totalDurationMinutes: Int,
-            val manual: Boolean
-        ) : CMDHistoryEventDetail(isBolusDetail = true)
-
-        data class MultiwaveBolusEnded(
-            val totalBolusAmount: Int,
-            val immediateBolusAmount: Int,
-            val totalDurationMinutes: Int,
-            val manual: Boolean
-        ) : CMDHistoryEventDetail(isBolusDetail = true)
-
+        data class StandardBolusRequested(val bolusAmount: Int, val manual: Boolean) : CMDHistoryEventDetail(isBolusDetail = true)
+        data class StandardBolusInfused(val bolusAmount: Int, val manual: Boolean) : CMDHistoryEventDetail(isBolusDetail = true)
+        data class ExtendedBolusStarted(val totalBolusAmount: Int, val totalDurationMinutes: Int, val manual: Boolean) : CMDHistoryEventDetail(isBolusDetail = true)
+        data class ExtendedBolusEnded(val totalBolusAmount: Int, val totalDurationMinutes: Int, val manual: Boolean) : CMDHistoryEventDetail(isBolusDetail = true)
+        data class MultiwaveBolusStarted(val totalBolusAmount: Int, val immediateBolusAmount: Int, val totalDurationMinutes: Int, val manual: Boolean) : CMDHistoryEventDetail(isBolusDetail = true)
+        data class MultiwaveBolusEnded(val totalBolusAmount: Int, val immediateBolusAmount: Int, val totalDurationMinutes: Int, val manual: Boolean) : CMDHistoryEventDetail(isBolusDetail = true)
         data class NewDateTimeSet(val dateTime: LocalDateTime) : CMDHistoryEventDetail(isBolusDetail = false)
     }
 
-    /**
-     * Information about an event in a command mode history block.
-     *
-     * "Quick bolus of 3.7 IU infused at 2020-03-11 11:55:23" is one example
-     * of the information events provide. Each event contains a timestamp
-     * and event specific details.
-     *
-     * Each event has an associated counter value. The way it is currently
-     * understood is that these are the values of a unique internal event
-     * counter at the time the event occurred, making this a de-facto ID.
-     *
-     * @property timestamp Timestamp of when the event occurred.
-     * @property eventCounter Counter value for this event.
-     * @property detail Event specific details (see [CMDHistoryEventDetail]).
-     */
     data class CMDHistoryEvent(
         val timestamp: LocalDateTime,
         val eventCounter: Long,
         val detail: CMDHistoryEventDetail
     ) {
-
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other == null) return false
             if (this::class != other::class) return false
-
             other as CMDHistoryEvent
-
-            if (timestamp != other.timestamp)
-                return false
-
-            if (eventCounter != other.eventCounter)
-                return false
-
-            if (detail != other.detail)
-                return false
-
+            if (timestamp != other.timestamp) return false
+            if (eventCounter != other.eventCounter) return false
+            if (detail != other.detail) return false
             return true
         }
 
@@ -521,29 +385,4 @@ object ApplicationLayer {
             return result
         }
     }
-
-    /**
-     * A block of command mode history events.
-     *
-     * In command mode, history events are communicated in blocks. Each block
-     * consists of a list of "events", for example "quick bolus of 0.5 infused".
-     * Each event has a timestamp and event specific details. In addition, the
-     * block contains extra information about the other available events.
-     *
-     * To get all available events, the user has to send multiple history block
-     * requests according to that extra information. If moreEventsAvailable is
-     * true, then there are more history blocks that can be retrieved. Otherwise,
-     * this is the last block.
-     *
-     * A block is retrieved with the CMD_READ_HISTORY_BLOCK command, and arrives
-     * as the CMD_READ_HISTORY_BLOCK_RESPONSE command. The former is generated
-     * using [createCMDReadHistoryBlockPacket], the latter is parsed using
-     * [parseCMDReadHistoryBlockResponsePacket]. The parse function throws an
-     * exception if its integrity checks discover that the block seems corrupted.
-     * In such a case, the block can be requested again simply by sending the
-     * CMD_READ_HISTORY_BLOCK again. If the block is OK, it is confirmed by
-     * sending CMD_CONFIRM_HISTORY_BLOCK. This will inform the Combo that the
-     * user is done with that block. Afterwards, a CMD_READ_HISTORY_BLOCK
-     * command sent to the Combo will result in the next block being returned.
-     */
 }
