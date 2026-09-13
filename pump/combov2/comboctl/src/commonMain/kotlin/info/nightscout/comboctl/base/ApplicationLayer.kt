@@ -113,11 +113,12 @@ object ApplicationLayer {
         val displayIndex: Int,
         val rowIndex: Int,
         val updateIndex: Int,
-        val row: Int get() = rowIndex,
-        val rowBytes: List<Byte> get() = pixels,
-        val index: Int get() = displayIndex,
         val pixels: List<Byte>
-    )
+    ) {
+        val row: Int get() = rowIndex
+        val rowBytes: List<Byte> get() = pixels
+        val index: Int get() = displayIndex
+    }
 
     /**
      * Helper methods for parsing packets.
