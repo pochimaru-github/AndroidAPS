@@ -268,55 +268,6 @@ class PumpIO(
 
     /**
      * Performs a pairing procedure with a Combo.
-     *
-     * This performs the Combo-specific pairing. When this is called,
-     * the pump must have been paired at the Bluetooth level already.
-     * From Bluetooth's point of view, the pump is already paired with
-     * the client at this point. But the Combo itself needs an additional
-     * custom pairing. As part of this extra pairing, this function sets
-     * up a special temporary pairing connection to the Combo, and terminates
-     * that connection before finishing. Manually setting up such a connection
-     * is not necessary and not supported by the public API.
-     *
-     * However, the Bluetooth connection setup and teardown _is_ handled
-     * by this function. If the Combo-specific pairing fails, this also
-     * automatically unpairs the pump at the Bluetooth level.
-     *
-     * Cancelling the coroutine this function runs in will abort the pairing
-     * process in an orderly fashion.
-     *
-     * Pairing will initialize a new state for this pump [PumpStateStore] that
-     * was passed to the constructor of this class. This state will contain
-     * new pairing data, a new pump ID string, and a new initial nonce.
-     *
-     * The [onPairingPIN] block has two arguments. previousAttemptFailed
-     * is set to false initially, and true if this is a repeated call due
-     * to a previous failure to apply the PIN. Such a failure typically
-     * happens because the user mistyped the PIN, but in rare cases can also
-     * happen due to corrupted packets.
-     *
-     * Note that [onPairingPIN] is called by a coroutine that is run on
-     * a different thread than the one that called this function . With
-     * some UI frameworks like JavaFX, it is invalid to operate UI controls
-     * in coroutines that are not associated with a particular UI coroutine
-     * context. Consider using [kotlinx.coroutines.withContext] in
-     * [onPairingPIN] for this reason.
-     *
-     * WARNING: Do not run multiple performPairing functions simultaneously
-     * on the same pump. Otherwise, undefined behavior occurs.
-     *
-     * @param bluetoothFriendlyName The Bluetooth friendly name to use in
-     *   REQUEST_ID packets. Use [BluetoothInterface.getAdapterFriendlyName]
-     *   to get the friendly name.
-     * @param progressReporter [ProgressReporter] for tracking pairing progress.
-     * @param onPairingPIN Suspending block that asks the user for
-     *   the 10-digit pairing PIN during the pairing process.
-     * @throws IllegalStateException if this is ran while a connection
-     *   is running.
-     * @throws PumpStateAlreadyExistsException if the pump was already
-     *   fully paired before.
-     * @throws TransportLayer.PacketReceiverException if an exception
-     *   is thrown while this function is waiting for a packet.
      */
     @OptIn(ExperimentalTime::class)
     suspend fun performPairing(
@@ -443,19 +394,19 @@ class PumpIO(
 
                 logger(LogLevel.DEBUG) { "Initiating application layer connection" }
                 sendPacketWithResponse(
-                    ApplicationLayer.createCTRLConnectPacket(),
+                    ApplicationLayer.Packet.createCTRLConnect(),
                     ApplicationLayer.Command.CTRL_CONNECT_RESPONSE
                 )
 
                 logger(LogLevel.DEBUG) { "Requesting command mode service version" }
                 sendPacketWithResponse(
-                    ApplicationLayer.createCTRLGetServiceVersionPacket(ApplicationLayer.ServiceID.COMMAND_MODE),
+                    ApplicationLayer.Packet.createCTRLGetServiceVersion(ApplicationLayer.ServiceID.COMMAND_MODE),
                     ApplicationLayer.Command.CTRL_GET_SERVICE_VERSION_RESPONSE
                 )
 
                 logger(LogLevel.DEBUG) { "Sending BIND command" }
                 sendPacketWithResponse(
-                    ApplicationLayer.createCTRLBindPacket(),
+                    ApplicationLayer.Packet.createCTRLBind(),
                     ApplicationLayer.Command.CTRL_BIND_RESPONSE
                 )
 
@@ -477,7 +428,7 @@ class PumpIO(
                 }
                 throw t
             } finally {
-                val disconnectPacketInfo = ApplicationLayer.createCTRLDisconnectPacket()
+                val disconnectPacketInfo = ApplicationLayer.Packet.createCTRLDisconnect()
                 transportLayerIO.stop(
                     disconnectPacketInfo.toTransportLayerPacketInfo(),
                     ::disconnectBTDeviceAndCatchExceptions
@@ -571,7 +522,7 @@ class PumpIO(
 
             logger(LogLevel.DEBUG) { "Initiating application layer connection" }
             sendPacketWithResponse(
-                ApplicationLayer.createCTRLConnectPacket(),
+                ApplicationLayer.Packet.createCTRLConnect(),
                 ApplicationLayer.Command.CTRL_CONNECT_RESPONSE
             )
 
@@ -596,7 +547,7 @@ class PumpIO(
         stopCMDPingHeartbeat()
         stopRTKeepAliveHeartbeat()
 
-        val disconnectPacketInfo = ApplicationLayer.createCTRLDisconnectPacket()
+        val disconnectPacketInfo = ApplicationLayer.Packet.createCTRLDisconnect()
         logger(LogLevel.VERBOSE) { "Will send application layer disconnect packet:  $disconnectPacketInfo" }
 
         transportLayerIO.stop(
@@ -615,7 +566,7 @@ class PumpIO(
 
     suspend fun readCMDDateTime(): LocalDateTime = runPumpIOCall("get current pump datetime", Mode.COMMAND) {
         val packet = sendPacketWithResponse(
-            ApplicationLayer.createCMDReadDateTimePacket(),
+            ApplicationLayer.Packet.createCMDReadDateTime(),
             ApplicationLayer.Command.CMD_READ_DATE_TIME_RESPONSE
         )
         return@runPumpIOCall ApplicationLayer.parseCMDReadDateTimeResponsePacket(packet)
@@ -623,7 +574,7 @@ class PumpIO(
 
     suspend fun readCMDPumpStatus(): ApplicationLayer.CMDPumpStatus = runPumpIOCall("get pump status", Mode.COMMAND) {
         val packet = sendPacketWithResponse(
-            ApplicationLayer.createCMDReadPumpStatusPacket(),
+            ApplicationLayer.Packet.createCMDReadPumpStatus(),
             ApplicationLayer.Command.CMD_READ_PUMP_STATUS_RESPONSE
         )
         return@runPumpIOCall ApplicationLayer.parseCMDReadPumpStatusResponsePacket(packet)
@@ -632,7 +583,7 @@ class PumpIO(
     suspend fun readCMDErrorWarningStatus(): ApplicationLayer.CMDErrorWarningStatus =
         runPumpIOCall("get error/warning status", Mode.COMMAND) {
         val packet = sendPacketWithResponse(
-            ApplicationLayer.createCMDReadErrorWarningStatusPacket(),
+            ApplicationLayer.Packet.createCMDReadErrorWarningStatus(),
             ApplicationLayer.Command.CMD_READ_ERROR_WARNING_STATUS_RESPONSE
         )
         return@runPumpIOCall ApplicationLayer.parseCMDReadErrorWarningStatusResponsePacket(packet)
@@ -647,7 +598,7 @@ class PumpIO(
 
             for (requestNr in 1 until maxRequests) {
                 val packet = sendPacketWithResponse(
-                    ApplicationLayer.createCMDReadHistoryBlockPacket(),
+                    ApplicationLayer.Packet.createCMDReadHistoryBlock(),
                     ApplicationLayer.Command.CMD_READ_HISTORY_BLOCK_RESPONSE
                 )
 
@@ -661,7 +612,7 @@ class PumpIO(
                 }
 
                 sendPacketWithResponse(
-                    ApplicationLayer.createCMDConfirmHistoryBlockPacket(),
+                    ApplicationLayer.Packet.createCMDConfirmHistoryBlock(),
                     ApplicationLayer.Command.CMD_CONFIRM_HISTORY_BLOCK_RESPONSE
                 )
 
@@ -688,7 +639,7 @@ class PumpIO(
         runPumpIOCall("get current bolus delivery status", Mode.COMMAND) {
 
         val packet = sendPacketWithResponse(
-            ApplicationLayer.createCMDGetBolusStatusPacket(),
+            ApplicationLayer.Packet.createCMDGetBolusStatus(),
             ApplicationLayer.Command.CMD_GET_BOLUS_STATUS_RESPONSE
         )
 
@@ -712,7 +663,7 @@ class PumpIO(
         runPumpIOCall("deliver standard bolus", Mode.COMMAND) {
 
         val packet = sendPacketWithResponse(
-            ApplicationLayer.createCMDDeliverBolusPacket(
+            ApplicationLayer.Packet.createCMDDeliverBolus(
                 totalBolusAmount,
                 immediateBolusAmount,
                 durationInMinutes,
@@ -726,7 +677,7 @@ class PumpIO(
 
     suspend fun cancelCMDStandardBolus(): Boolean = runPumpIOCall("cancel bolus", Mode.COMMAND) {
         val packet = sendPacketWithResponse(
-            ApplicationLayer.createCMDCancelBolusPacket(ApplicationLayer.CMDImmediateBolusType.STANDARD),
+            ApplicationLayer.Packet.createCMDCancelBolus(ApplicationLayer.CMDImmediateBolusType.STANDARD),
             ApplicationLayer.Command.CMD_CANCEL_BOLUS_RESPONSE
         )
 
@@ -743,7 +694,7 @@ class PumpIO(
             var ignoreNoButtonError = false
 
             try {
-                sendPacketWithoutResponse(ApplicationLayer.createRTButtonStatusPacket(buttonCodes, true))
+                sendPacketWithoutResponse(ApplicationLayer.Packet.createRTButtonStatus(buttonCodes, true))
                 rtButtonConfirmationBarrier.receive()
             } catch (e: CancellationException) {
                 delayBeforeNoButton = true
@@ -760,7 +711,7 @@ class PumpIO(
 
                 try {
                     sendPacketWithoutResponse(
-                        ApplicationLayer.createRTButtonStatusPacket(ApplicationLayer.RTButton.NO_BUTTON.id, true)
+                        ApplicationLayer.Packet.createRTButtonStatus(ApplicationLayer.RTButton.NO_BUTTON.id, true)
                     )
                 } catch (t: Throwable) {
                     if (ignoreNoButtonError) {
@@ -838,7 +789,7 @@ class PumpIO(
                     _currentModeFlow.value?.let { modeToDeactivate ->
                         logger(LogLevel.DEBUG) { "Deactivating current service" }
                         sendAppLayerPacket(
-                            ApplicationLayer.createCTRLDeactivateServicePacket(
+                            ApplicationLayer.Packet.createCTRLDeactivateService(
                                 when (modeToDeactivate) {
                                     Mode.REMOTE_TERMINAL -> ApplicationLayer.ServiceID.RT_MODE
                                     Mode.COMMAND -> ApplicationLayer.ServiceID.COMMAND_MODE
@@ -857,7 +808,7 @@ class PumpIO(
 
                     logger(LogLevel.DEBUG) { "Activating new service" }
                     sendAppLayerPacket(
-                        ApplicationLayer.createCTRLActivateServicePacket(
+                        ApplicationLayer.Packet.createCTRLActivateService(
                             when (newMode) {
                                 Mode.REMOTE_TERMINAL -> ApplicationLayer.ServiceID.RT_MODE
                                 Mode.COMMAND -> ApplicationLayer.ServiceID.COMMAND_MODE
@@ -1117,7 +1068,7 @@ class PumpIO(
                 logger(LogLevel.VERBOSE) { "Transmitting CMD ping packet" }
                 try {
                     sendPacketWithResponse(
-                        ApplicationLayer.createCMDPingPacket(),
+                        ApplicationLayer.Packet.createCMDPing(),
                         ApplicationLayer.Command.CMD_PING_RESPONSE,
                         doRestartHeartbeat = false
                     )
@@ -1172,7 +1123,7 @@ class PumpIO(
                 logger(LogLevel.VERBOSE) { "Transmitting RT keep-alive packet" }
                 try {
                     sendPacketWithoutResponse(
-                        ApplicationLayer.createRTKeepAlivePacket(),
+                        ApplicationLayer.Packet.createRTKeepAlive(),
                         doRestartHeartbeat = false
                     )
                 } catch (e: CancellationException) {
@@ -1279,7 +1230,7 @@ class PumpIO(
                     }
 
                     sendPacketWithoutResponse(
-                        ApplicationLayer.createRTButtonStatusPacket(buttonCodes, buttonStatusChanged)
+                        ApplicationLayer.Packet.createRTButtonStatus(buttonCodes, buttonStatusChanged)
                     )
 
                     logger(LogLevel.DEBUG) { "Waiting for button confirmation" }
@@ -1308,7 +1259,7 @@ class PumpIO(
                             delay(200L)
 
                         sendPacketWithoutResponse(
-                            ApplicationLayer.createRTButtonStatusPacket(
+                            ApplicationLayer.Packet.createRTButtonStatus(
                                 ApplicationLayer.RTButton.NO_BUTTON.id,
                                 buttonStatusChanged = true
                             )
