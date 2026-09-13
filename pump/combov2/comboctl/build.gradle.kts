@@ -21,7 +21,7 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                // Android固有の依存関係
+                implementation(libs.androidx.core)
             }
         }
         val commonTest by getting {
