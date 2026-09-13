@@ -1,7 +1,7 @@
 package info.nightscout.comboctl.base
 
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 
 /**
  * Data class containing details about a TBR (temporary basal rate).
