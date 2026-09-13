@@ -1230,7 +1230,7 @@ class PumpIO(
                     }
 
                     sendPacketWithoutResponse(
-                        ApplicationLayer.Packet.createRTButtonStatus(buttonCodes, buttonStatusChanged)
+                        ApplicationLayer.Packet.createRTButtonStatus(buttonCodes, statusChanged = buttonStatusChanged)
                     )
 
                     logger(LogLevel.DEBUG) { "Waiting for button confirmation" }
@@ -1261,7 +1261,7 @@ class PumpIO(
                         sendPacketWithoutResponse(
                             ApplicationLayer.Packet.createRTButtonStatus(
                                 ApplicationLayer.RTButton.NO_BUTTON.id,
-                                buttonStatusChanged = true
+                                statusChanged = true
                             )
                         )
                     }
