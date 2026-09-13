@@ -39,8 +39,8 @@ private const val NUM_DISPLAY_FRAME_BYTES = NUM_DISPLAY_FRAME_PIXELS / 8
  *     val rtDisplayPayload = applicationLayer.parseRTDisplayPacket(packet)
  *
  *     val displayFrame = assembler.processRTDisplayPayload(
- *         rtDisplayPayload.index,
- *         rtDisplayPayload.row,
+ *         rtDisplayPayload.displayIndex,
+ *         rtDisplayPayload.rowIndex,
  *         rtDisplayPayload.pixels
  *     )
  *     if (displayFrame != null) {
@@ -110,7 +110,7 @@ class DisplayFrameAssembler {
      * index, row, pixels arguments.
      */
     fun processRTDisplayPayload(rtDisplayPayload: ApplicationLayer.RTDisplayPayload): DisplayFrame? =
-        processRTDisplayPayload(rtDisplayPayload.index, rtDisplayPayload.row, rtDisplayPayload.rowBytes)
+        processRTDisplayPayload(rtDisplayPayload.displayIndex, rtDisplayPayload.rowIndex, rtDisplayPayload.pixels)
 
     /**
      * Resets the state of the assembler.
