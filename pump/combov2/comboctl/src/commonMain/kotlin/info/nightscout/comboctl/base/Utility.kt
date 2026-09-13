@@ -1,11 +1,11 @@
 package info.nightscout.comboctl.base
 
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.atTime
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 // Utility function for cases when only the time and no date is known.
@@ -13,12 +13,12 @@ import kotlin.time.ExperimentalTime
 // outside of the valid range of these fields.
 internal fun timeWithoutDate(hour: Int = 0, minute: Int = 0, second: Int = 0) =
     LocalDateTime(
-        year = 0, month = 1, day = 1,
+        year = 0, monthNumber = 1, dayOfMonth = 1,
         hour = hour, minute = minute, second = second, nanosecond = 0
     )
 
 internal fun combinedDateTime(date: LocalDate, time: LocalDateTime) =
-    date.atTime(hour = time.hour, minute = time.minute, second = time.second, nanosecond = time.nanosecond)
+    date.atTime(hour = time.hour, minute = time.minute, second = second, nanosecond = time.nanosecond)
 
 // IMPORTANT: Only use this with local dates that always lie in the past or present,
 // never in the future. Read the comment block right below for an explanation why.
