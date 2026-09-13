@@ -38,9 +38,12 @@ tasks.withType<JavaCompile>().configureEach {
 kapt {
     correctErrorTypes = true
     keepJavacAnnotationProcessors = true
+    javacOptions {
+        option("-Xlint:-processing")
+    }
     arguments {
-        arg("dagger.fastInit", "enabled")
-        arg("dagger.formatGeneratedSource", "disabled")
+        arg("kotlin.suppress.metadata.version.check", "true")
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
 }
 
