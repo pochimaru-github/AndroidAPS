@@ -49,6 +49,32 @@ object ApplicationLayer {
     )
 
     /**
+     * Remote Terminal mode button types.
+     */
+    enum class RTButton(val id: Int) {
+        NO_BUTTON(0x00),
+        UP(0x01),
+        DOWN(0x02),
+        MENU(0x03),
+        CHECK(0x04);
+
+        companion object {
+            private val values = entries.toTypedArray()
+            fun fromInt(value: Int) = values.firstOrNull { it.id == value }
+        }
+    }
+
+    /**
+     * Remote Terminal mode display payload representation.
+     */
+    data class RTDisplayPayload(
+        val displayIndex: Int,
+        val rowIndex: Int,
+        val updateIndex: Int,
+        val pixels: List<Byte>
+    )
+
+    /**
      * Base class for application layer exceptions.
      *
      * @param message The detail message.
