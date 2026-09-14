@@ -1,12 +1,7 @@
 package info.nightscout.comboctl.main
 
-import info.nightscout.comboctl.base.Cipher
 import info.nightscout.comboctl.base.Logger
-import info.nightscout.comboctl.base.PairingData
-import info.nightscout.comboctl.base.ProductionCipher
 import info.nightscout.comboctl.base.PumpIO
-import info.nightscout.comboctl.parser.BasalProfile
-import info.nightscout.comboctl.parser.TddEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,6 +17,19 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
 
 private val logger = Logger.get("Pump")
+
+/**
+ * Placeholder / stub data structures for Pump configuration and history.
+ */
+data class PairingData(val address: String = "", val pin: String = "")
+data class BasalProfile(val name: String = "Default", val rates: List<Double> = emptyList())
+data class TddEntry(val dateString: String = "", val totalUnits: Double = 0.0)
+
+/**
+ * Dummy Cipher interface and production implementation.
+ */
+interface Cipher
+class ProductionCipher : Cipher
 
 /**
  * Exception class thrown when a Pump operation fails or times out.
@@ -173,7 +181,7 @@ class Pump(
         checkReadyForCommands()
         _stateFlow.value = State.EXECUTING_COMMAND
         try {
-            logger.i { "Setting basal profile with ${profile.factors.size} factors." }
+            logger.i { "Setting basal profile: $profile" }
             delay(500)
             _stateFlow.value = State.READY_FOR_COMMANDS
         } catch (e: Exception) {
