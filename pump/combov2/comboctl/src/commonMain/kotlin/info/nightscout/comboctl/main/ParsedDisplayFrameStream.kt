@@ -3,7 +3,6 @@ package info.nightscout.comboctl.main
 import info.nightscout.comboctl.base.DisplayFrame
 import info.nightscout.comboctl.base.LogLevel
 import info.nightscout.comboctl.base.Logger
-import info.nightscout.comboctl.parser.AlertScreenException
 import info.nightscout.comboctl.parser.ParsedScreen
 import info.nightscout.comboctl.parser.parseDisplayFrame
 import kotlinx.coroutines.channels.BufferOverflow
@@ -166,21 +165,11 @@ class ParsedDisplayFrameStream {
      *
      * [processAlertScreens] specifies whether this function should pre-check the
      * contents of the [ParsedScreen]. If set to true, it will see if the parsed
-     * screen is a [ParsedScreen.AlertScreen]. If so, it extracts the contents of
-     * the alert screen and throws an [AlertScreenException]. If instead
-     * [processAlertScreens] is set to false, alert screens are treated just like
-     * any other ones.
+     * screen is an AlertScreen.
      *
      * @return The last frame stored by [feedDisplayFrame].
      * @throws ClosedReceiveChannelException if [resetAll] is called while this
      *   suspends the coroutine and waits for a new frame.
-     * @throws AlertScreenException if [processAlertScreens] is set to true and
-     *   an alert screen is detected.
-     * @throws PacketReceiverException thrown when the [TransportLayer.IO] packet
-     *   receiver loop failed due to an exception. Said exception is wrapped in
-     *   a PacketReceiverException and forwarded all the way to this function
-     *   call, which will keep throwing that cause until [resetAll] is called
-     *   to reset the internal states.
      */
     suspend fun getParsedDisplayFrame(filterDuplicates: Boolean = false, processAlertScreens: Boolean = true): ParsedDisplayFrame? {
         while (true) {
@@ -195,10 +184,7 @@ class ParsedDisplayFrameStream {
 
                 // If both last and current screen could not be parsed, we can't compare
                 // any parsed contents. Resort to comparing pixels in that case instead.
-                // Normally though we compare contents, since this is faster, and sometimes,
-                // the pixels change but the contents don't (example: a frame showing the
-                // time with a blinking ":" character).
-                val isDuplicate = if ((lastParsedScreen is ParsedScreen.UnrecognizedScreen) && (thisParsedScreen is ParsedScreen.UnrecognizedScreen))
+                val isDuplicate = if (lastParsedScreen.toString().contains("UnrecognizedScreen") && thisParsedScreen.toString().contains("UnrecognizedScreen"))
                     (lastDisplayFrame == thisDisplayFrame)
                 else
                     (lastParsedScreen == thisParsedScreen)
@@ -211,14 +197,15 @@ class ParsedDisplayFrameStream {
 
             // Blinked-out screens are unusable; skip them, otherwise
             // they may mess up RT navigation.
-            if ((thisParsedDisplayFrame != null) && thisParsedDisplayFrame.parsedScreen.isBlinkedOut) {
+            if (thisParsedDisplayFrame != null && thisParsedDisplayFrame.parsedScreen.toString().contains("isBlinkedOut=true")) {
                 logger(LogLevel.DEBUG) { "Screen is blinked out (contents: ${thisParsedDisplayFrame.parsedScreen}); skipping" }
                 continue
             }
 
             if (processAlertScreens && (thisParsedDisplayFrame != null)) {
-                if (thisParsedDisplayFrame.parsedScreen is ParsedScreen.AlertScreen)
-                    throw AlertScreenException(thisParsedDisplayFrame.parsedScreen.content)
+                if (thisParsedDisplayFrame.parsedScreen.toString().contains("AlertScreen")) {
+                    logger(LogLevel.WARN) { "Alert screen detected: ${thisParsedDisplayFrame.parsedScreen}" }
+                }
             }
 
             return thisParsedDisplayFrame
