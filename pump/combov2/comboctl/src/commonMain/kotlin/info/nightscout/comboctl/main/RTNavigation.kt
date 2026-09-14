@@ -10,7 +10,26 @@ import info.nightscout.comboctl.base.connectBidirectionally
 import info.nightscout.comboctl.base.connectDirectionally
 import info.nightscout.comboctl.base.findShortestPath
 import info.nightscout.comboctl.base.getElapsedTimeInMs
+import info.nightscout.comboctl.parser.BasalRate1ProgrammingMenuScreen
+import info.nightscout.comboctl.parser.BasalRateFactorSettingScreen
+import info.nightscout.comboctl.parser.BasalRateTotalScreen
+import info.nightscout.comboctl.parser.MainScreen
+import info.nightscout.comboctl.parser.MyDataBolusDataScreen
+import info.nightscout.comboctl.parser.MyDataDailyTotalsScreen
+import info.nightscout.comboctl.parser.MyDataErrorDataScreen
+import info.nightscout.comboctl.parser.MyDataMenuScreen
+import info.nightscout.comboctl.parser.MyDataTbrDataScreen
 import info.nightscout.comboctl.parser.ParsedScreen
+import info.nightscout.comboctl.parser.QuickinfoMainScreen
+import info.nightscout.comboctl.parser.TemporaryBasalRateDurationScreen
+import info.nightscout.comboctl.parser.TemporaryBasalRateMenuScreen
+import info.nightscout.comboctl.parser.TemporaryBasalRatePercentageScreen
+import info.nightscout.comboctl.parser.TimeAndDateSettingsDayScreen
+import info.nightscout.comboctl.parser.TimeAndDateSettingsHourScreen
+import info.nightscout.comboctl.parser.TimeAndDateSettingsMenuScreen
+import info.nightscout.comboctl.parser.TimeAndDateSettingsMinuteScreen
+import info.nightscout.comboctl.parser.TimeAndDateSettingsMonthScreen
+import info.nightscout.comboctl.parser.TimeAndDateSettingsYearScreen
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
@@ -77,25 +96,25 @@ internal data class RTEdgeValue(val button: RTNavigationButton, val edgeValidity
 internal val rtNavigationGraph = Graph<KClassifier, RTEdgeValue>().apply {
     // Set up graph nodes for each ParsedScreen, to be able
     // to connect them below.
-    val mainNode = node(ParsedScreen.MainScreen::class)
-    val quickinfoNode = node(ParsedScreen.QuickinfoMainScreen::class)
-    val tbrMenuNode = node(ParsedScreen.TemporaryBasalRateMenuScreen::class)
-    val tbrPercentageNode = node(ParsedScreen.TemporaryBasalRatePercentageScreen::class)
-    val tbrDurationNode = node(ParsedScreen.TemporaryBasalRateDurationScreen::class)
-    val myDataMenuNode = node(ParsedScreen.MyDataMenuScreen::class)
-    val myDataBolusDataMenuNode = node(ParsedScreen.MyDataBolusDataScreen::class)
-    val myDataErrorDataMenuNode = node(ParsedScreen.MyDataErrorDataScreen::class)
-    val myDataDailyTotalsMenuNode = node(ParsedScreen.MyDataDailyTotalsScreen::class)
-    val myDataTbrDataMenuNode = node(ParsedScreen.MyDataTbrDataScreen::class)
-    val basalRate1MenuNode = node(ParsedScreen.BasalRate1ProgrammingMenuScreen::class)
-    val basalRateTotalNode = node(ParsedScreen.BasalRateTotalScreen::class)
-    val basalRateFactorSettingNode = node(ParsedScreen.BasalRateFactorSettingScreen::class)
-    val timeDateSettingsMenuNode = node(ParsedScreen.TimeAndDateSettingsMenuScreen::class)
-    val timeDateSettingsHourNode = node(ParsedScreen.TimeAndDateSettingsHourScreen::class)
-    val timeDateSettingsMinuteNode = node(ParsedScreen.TimeAndDateSettingsMinuteScreen::class)
-    val timeDateSettingsYearNode = node(ParsedScreen.TimeAndDateSettingsYearScreen::class)
-    val timeDateSettingsMonthNode = node(ParsedScreen.TimeAndDateSettingsMonthScreen::class)
-    val timeDateSettingsDayNode = node(ParsedScreen.TimeAndDateSettingsDayScreen::class)
+    val mainNode = node(MainScreen::class)
+    val quickinfoNode = node(QuickinfoMainScreen::class)
+    val tbrMenuNode = node(TemporaryBasalRateMenuScreen::class)
+    val tbrPercentageNode = node(TemporaryBasalRatePercentageScreen::class)
+    val tbrDurationNode = node(TemporaryBasalRateDurationScreen::class)
+    val myDataMenuNode = node(MyDataMenuScreen::class)
+    val myDataBolusDataMenuNode = node(MyDataBolusDataScreen::class)
+    val myDataErrorDataMenuNode = node(MyDataErrorDataScreen::class)
+    val myDataDailyTotalsMenuNode = node(MyDataDailyTotalsScreen::class)
+    val myDataTbrDataMenuNode = node(MyDataTbrDataScreen::class)
+    val basalRate1MenuNode = node(BasalRate1ProgrammingMenuScreen::class)
+    val basalRateTotalNode = node(BasalRateTotalScreen::class)
+    val basalRateFactorSettingNode = node(BasalRateFactorSettingScreen::class)
+    val timeDateSettingsMenuNode = node(TimeAndDateSettingsMenuScreen::class)
+    val timeDateSettingsHourNode = node(TimeAndDateSettingsHourScreen::class)
+    val timeDateSettingsMinuteNode = node(TimeAndDateSettingsMinuteScreen::class)
+    val timeDateSettingsYearNode = node(TimeAndDateSettingsYearScreen::class)
+    val timeDateSettingsMonthNode = node(TimeAndDateSettingsMonthScreen::class)
+    val timeDateSettingsDayNode = node(TimeAndDateSettingsDayScreen::class)
 
     // Below, nodes are connected. Connections are edges in the graph.
 
@@ -916,7 +935,7 @@ suspend fun navigateToRTScreen(
     // Get the current screen to know the starting point. If it is an
     // unrecognized screen, press BACK until we are at the main screen.
     var numAttemptsToRecognizeScreen = 0
-    lateinit me.currentParsedScreen: ParsedScreen
+    lateinit var currentParsedScreen: ParsedScreen
 
     rtNavigationContext.resetDuplicate()
 
@@ -966,7 +985,7 @@ suspend fun navigateToRTScreen(
         currentParsedScreen = cycleToRTScreen(
             rtNavigationContext,
             RTNavigationButton.BACK,
-            ParsedScreen.MainScreen::class
+            MainScreen::class
         )
 
         // Now try again to find a path. We should get a valid path now. We would
