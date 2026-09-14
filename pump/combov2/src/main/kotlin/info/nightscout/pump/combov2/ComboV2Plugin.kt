@@ -1310,16 +1310,16 @@ class ComboV2Plugin @Inject constructor(
         createFailurePumpEnactResult(R.string.combov2_extended_bolus_not_supported)
 
     override fun updateExtendedJsonStatus(extendedStatus: JSONObject) {
-        when (val alert = lastComboAlert) {
-            is AlertScreenContent.Warning ->
-                extendedStatus.put("WarningCode", alert.code)
+ 　   when (val alert = lastComboAlert) {
+ 　       is AlertScreenContent.Warning ->
+ 　           extendedStatus.put("WarningCode", alert.code)
 
-            is AlertScreenContent.Error   ->
-                extendedStatus.put("ErrorCode", alert.code)
+ 　       is AlertScreenContent.Error   ->
+  　          extendedStatus.put("ErrorCode", alert.code)
 
-            else                          -> Unit
-        }
-    }
+  　      else                          -> Unit
+  　  }
+　}
 
     override fun manufacturer() = ManufacturerType.Roche
 
@@ -2198,40 +2198,40 @@ class ComboV2Plugin @Inject constructor(
         _lastConnectionTimestampUIFlow.value = lastConnectionTimestamp
     }
 
-    private fun getAlertDescription(alert: AlertScreenContent) =
-        when (alert) {
-            is AlertScreenContent.Warning -> {
-                val desc = when (alert.code) {
-                    4    -> rh.gs(R.string.combov2_warning_4)
-                    10   -> rh.gs(R.string.combov2_warning_10)
-                    else -> ""
-                }
-
-                "${rh.gs(R.string.combov2_warning)} W${alert.code}" +
-                    if (desc.isEmpty()) "" else ": $desc"
+private fun getAlertDescription(alert: AlertScreenContent) =
+    when (alert) {
+        is AlertScreenContent.Warning -> {
+            val desc = when (alert.code) {
+                4    -> rh.gs(R.string.combov2_warning_4)
+                10   -> rh.gs(R.string.combov2_warning_10)
+                else -> ""
             }
 
-            is AlertScreenContent.Error   -> {
-                val desc = when (alert.code) {
-                    1    -> rh.gs(R.string.combov2_error_1)
-                    2    -> rh.gs(R.string.combov2_error_2)
-                    4    -> rh.gs(R.string.combov2_error_4)
-                    5    -> rh.gs(R.string.combov2_error_5)
-                    6    -> rh.gs(R.string.combov2_error_6)
-                    7    -> rh.gs(R.string.combov2_error_7)
-                    8    -> rh.gs(R.string.combov2_error_8)
-                    9    -> rh.gs(R.string.combov2_error_9)
-                    10   -> rh.gs(R.string.combov2_error_10)
-                    11   -> rh.gs(R.string.combov2_error_11)
-                    else -> ""
-                }
-
-                "${rh.gs(R.string.combov2_error)} E${alert.code}" +
-                    if (desc.isEmpty()) "" else ": $desc"
-            }
-
-            else                          -> rh.gs(R.string.combov2_unrecognized_alert)
+            "${rh.gs(R.string.combov2_warning)} W${alert.code}" +
+                if (desc.isEmpty()) "" else ": $desc"
         }
+
+        is AlertScreenContent.Error   -> {
+            val desc = when (alert.code) {
+                1    -> rh.gs(R.string.combov2_error_1)
+                2    -> rh.gs(R.string.combov2_error_2)
+                4    -> rh.gs(R.string.combov2_error_4)
+                5    -> rh.gs(R.string.combov2_error_5)
+                6    -> rh.gs(R.string.combov2_error_6)
+                7    -> rh.gs(R.string.combov2_error_7)
+                8    -> rh.gs(R.string.combov2_error_8)
+                9    -> rh.gs(R.string.combov2_error_9)
+                10   -> rh.gs(R.string.combov2_error_10)
+                11   -> rh.gs(R.string.combov2_error_11)
+                else -> ""
+            }
+
+            "${rh.gs(R.string.combov2_error)} E${alert.code}" +
+                if (desc.isEmpty()) "" else ": $desc"
+        }
+
+        else                          -> rh.gs(R.string.combov2_unrecognized_alert)
+    }
 
     private fun notifyAboutComboAlert(alert: AlertScreenContent) {
         if (alert is AlertScreenContent.Error) {
