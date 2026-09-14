@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.nightscout.androidaps"
@@ -231,10 +231,4 @@ if (!gitAvailable()) {
 }
 if (isMaster() && !allCommitted()) {
     throw GradleException("There are uncommitted changes. Clone sources again as described in wiki and do not allow gradle update")
-}
-
-afterEvaluate {
-    tasks.matching { it.name.contains("CheckAarMetadata") }.configureEach {
-        enabled = false
-    }
 }
