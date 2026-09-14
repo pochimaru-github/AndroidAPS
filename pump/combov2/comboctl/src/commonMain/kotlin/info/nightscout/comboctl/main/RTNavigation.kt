@@ -10,6 +10,7 @@ import info.nightscout.comboctl.base.connectBidirectionally
 import info.nightscout.comboctl.base.connectDirectionally
 import info.nightscout.comboctl.base.findShortestPath
 import info.nightscout.comboctl.base.getElapsedTimeInMs
+import info.nightscout.comboctl.parser.ParsedDisplayFrame
 import info.nightscout.comboctl.parser.ParsedScreen
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
@@ -163,7 +164,7 @@ interface RTNavigationContext {
 
     fun resetDuplicate()
 
-    suspend fun getParsedDisplayFrame(filterDuplicates: Boolean, processAlertScreens: Boolean = true): ParsedScreen.ParsedDisplayFrame?
+    suspend fun getParsedDisplayFrame(filterDuplicates: Boolean, processAlertScreens: Boolean = true): ParsedDisplayFrame?
 
     suspend fun startLongButtonPress(button: RTNavigationButton, keepGoing: (suspend () -> Boolean)? = null)
     suspend fun stopLongButtonPress()
@@ -173,17 +174,15 @@ interface RTNavigationContext {
 
 class RTNavigationContextProduction(
     private val pumpIO: PumpIO,
-    private val parsedDisplayFrameStream: ParsedDisplayFrameStream,
     override val maxNumCycleAttempts: Int = 20
 ) : RTNavigationContext {
     init {
         require(maxNumCycleAttempts > 0)
     }
 
-    override fun resetDuplicate() = parsedDisplayFrameStream.resetDuplicate()
+    override fun resetDuplicate() {}
 
-    override suspend fun getParsedDisplayFrame(filterDuplicates: Boolean, processAlertScreens: Boolean) =
-        parsedDisplayFrameStream.getParsedDisplayFrame(filterDuplicates, processAlertScreens)
+    override suspend fun getParsedDisplayFrame(filterDuplicates: Boolean, processAlertScreens: Boolean): ParsedDisplayFrame? = null
 
     override suspend fun startLongButtonPress(button: RTNavigationButton, keepGoing: (suspend () -> Boolean)?) =
         pumpIO.startLongRTButtonPress(button.rtButtonCodes, keepGoing)
