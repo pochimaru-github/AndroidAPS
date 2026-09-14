@@ -916,7 +916,7 @@ suspend fun navigateToRTScreen(
     // Get the current screen to know the starting point. If it is an
     // unrecognized screen, press BACK until we are at the main screen.
     var numAttemptsToRecognizeScreen = 0
-    lateinit var currentParsedScreen: ParsedScreen
+    lateinit me.currentParsedScreen: ParsedScreen
 
     rtNavigationContext.resetDuplicate()
 
