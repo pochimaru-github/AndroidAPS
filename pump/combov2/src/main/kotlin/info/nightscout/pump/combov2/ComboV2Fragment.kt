@@ -145,7 +145,7 @@ class ComboV2Fragment : DaggerFragment() {
                 combov2Plugin.batteryStateUIFlow
                     .onEach { batteryState ->
                         when (batteryState) {
-                            null                            -> binding.combov2Battery.text = ""
+                            null                                   -> binding.combov2Battery.text = ""
 
                             ComboCtlPump.BatteryState.NO_BATTERY   -> {
                                 binding.combov2Battery.text = rh.gs(R.string.combov2_battery_empty_indicator)
