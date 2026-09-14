@@ -3,6 +3,8 @@ package info.nightscout.comboctl.main
 import info.nightscout.comboctl.base.LogLevel
 import info.nightscout.comboctl.base.Logger
 import info.nightscout.comboctl.base.PumpIO
+import info.nightscout.comboctl.base.PumpStateStore
+import info.nightscout.comboctl.base.BluetoothDevice
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,10 +49,45 @@ class AlertScreenException(val alertCode: String, message: String) : Exception(m
  * Main class for controlling an Accu-Chek Combo insulin pump via comboctl.
  */
 class Pump(
-    private val pumpIO: PumpIO,
+    val pumpIO: PumpIO,
     private val cipher: Cipher = ProductionCipher(),
     private val clock: Clock = Clock.System
 ) {
+    /**
+     * Events reported by the Pump during operation.
+     */
+    sealed class Event {
+        object LowBattery : Event()
+        data class TbrStarted(val percentage: Int, val durationMinutes: Int) : Event()
+        data class AlarmRaised(val alarmCode: String) : Event()
+    }
+
+    /**
+     * Secondary constructor used by PumpManager.
+     */
+    constructor(
+        bluetoothDevice: BluetoothDevice,
+        pumpStateStore: PumpStateStore,
+        initialBasalProfile: BasalProfile? = null,
+        onEvent: (event: Event) -> Unit = { }
+    ) : this(
+        pumpIO = PumpIO(
+            pumpStateStore = pumpStateStore,
+            bluetoothDevice = bluetoothDevice,
+            onNewDisplayFrame = {},
+            onPacketReceiverException = {}
+        )
+    ) {
+        this.initialBasalProfile = initialBasalProfile
+        this.onEventHandler = onEvent
+    }
+
+    var initialBasalProfile: BasalProfile? = null
+        private set
+
+    var onEventHandler: ((event: Event) -> Unit)? = null
+        private set
+
     /**
      * Pump connection state.
      */
