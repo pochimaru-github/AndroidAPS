@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.nightscout.androidaps"
-        minSdk = 28
+        minSdk = 30
         targetSdk = 34
         versionCode = 3040206
         versionName = "3.4.2.6"
@@ -98,7 +98,7 @@ android {
     namespace = "app.aaps"
 
     defaultConfig {
-        minSdk = 28
+        minSdk = 30
         targetSdk = 34
 
         buildConfigField("String", "VERSION", "\"$version\"")
