@@ -44,19 +44,30 @@ import kotlinx.datetime.Instant
 private val logger = Logger.get("Pump")
 
 /**
- * High-level interface to an Accu-Chek Combo insulin pump.
- *
- * This class provides high-level operations for controlling and querying
- * an Accu-Chek Combo pump over Bluetooth, managing the connection state,
- * and executing complex sequences (such as reading history, delivering boluses,
- * setting TBRs, and setting basal profiles).
+ * Exception class thrown when a Pump operation fails or times out.
+ */
+class PumpException(message: String, cause: Throwable? = null) : Exception(message, cause)
+
+/**
+ * Exception thrown when pump is in an unexpected state.
+ */
+class PumpStateException(message: String, cause: Throwable? = null) : Exception(message, cause)
+
+/**
+ * Exception class thrown when an alert or warning is shown on the pump screen.
+ */
+class AlertScreenException(val alertCode: String, message: String) : Exception(message)
+
+/**
+ * Main class for controlling an Accu-Chek Combo insulin pump via comboctl.
  */
 class Pump(
     private val pumpIO: PumpIO,
+    private val cipher: Cipher = ProductionCipher(),
     private val clock: Clock = Clock.System
 ) {
     /**
-     * Current high-level state of the pump connection.
+     * Pump connection state.
      */
     enum class State {
         DISCONNECTED,
@@ -69,7 +80,7 @@ class Pump(
     }
 
     /**
-     * Represents a bolus delivery progress update.
+     * Progress update for bolus delivery.
      */
     data class BolusProgress(
         val deliveredUnits: Double,
@@ -77,20 +88,18 @@ class Pump(
         val isCompleted: Boolean
     )
 
+    private val mutex = Mutex()
     private val _stateFlow = MutableStateFlow(State.DISCONNECTED)
     val stateFlow: StateFlow<State> = _stateFlow.asStateFlow()
 
     private val _bolusProgressFlow = MutableSharedFlow<BolusProgress>()
     val bolusProgressFlow: SharedFlow<BolusProgress> = _bolusProgressFlow.asSharedFlow()
 
-    private val mutex = Mutex()
-    private var scope = CoroutineScope(Dispatchers.Default + Job())
-
     val currentState: State
         get() = _stateFlow.value
 
     /**
-     * Connects to the pump using the provided pairing data.
+     * Connects to the pump using the specified pairing data.
      */
     suspend fun connect(pairingData: PairingData) = mutex.withLock {
         if (_stateFlow.value != State.DISCONNECTED) {
@@ -138,7 +147,7 @@ class Pump(
     }
 
     /**
-     * Delivers a standard, extended, or multiwave bolus.
+     * Delivers a bolus.
      */
     suspend fun deliverBolus(
         units: Double,
@@ -149,7 +158,6 @@ class Pump(
         _stateFlow.value = State.EXECUTING_COMMAND
         try {
             logger.i { "Delivering bolus: $units U (extended: $extendedUnits U, duration: $durationMinutes min)" }
-            // Simulating bolus delivery progress for safety check
             _bolusProgressFlow.emit(BolusProgress(0.0, units + extendedUnits, false))
             delay(100)
             _bolusProgressFlow.emit(BolusProgress(units + extendedUnits, units + extendedUnits, true))
@@ -179,7 +187,7 @@ class Pump(
     }
 
     /**
-     * Sets the basal profile.
+     * Sets the basal profile on the pump.
      */
     suspend fun setBasalProfile(profile: BasalProfile) = mutex.withLock {
         checkReadyForCommands()
