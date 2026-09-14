@@ -11,10 +11,10 @@ import info.nightscout.comboctl.base.Tbr
 import info.nightscout.comboctl.base.toBluetoothAddress
 import info.nightscout.comboctl.base.toCipher
 import info.nightscout.comboctl.base.toNonce
+import kotlinx.datetime.Instant
 import kotlinx.datetime.UtcOffset
 import kotlin.reflect.KClassifier
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 /**
  * [PumpStateStore] subclass that uses AndroidAPS' [SP] class for storing the pump state.
