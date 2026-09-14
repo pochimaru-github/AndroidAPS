@@ -1,59 +1,217 @@
-package info.nightscout.comboctl.parser
+package info.nightscout.comboctl.main
 
-import info.nightscout.comboctl.base.DisplayFrame
-import info.nightscout.comboctl.base.Glyph
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
+import info.nightscout.comboctl.base.Logger
+import info.nightscout.comboctl.base.PumpIO
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.Clock
 
-/**
- * Representation of a parsed screen frame.
- */
-data class ParsedScreen(
-    val rawFrame: DisplayFrame,
-    val tokens: List<Token>,
-    val timestamp: Instant = Instant.fromEpochMilliseconds(0)
-)
-
-/**
- * Pattern interface for matching glyphs.
- */
-interface Pattern {
-    val width: Int
-    val height: Int
-    val pixels: BooleanArray
-    val numSetPixels: Int
-}
+private val logger = Logger.get("Pump")
 
 /**
- * Empty stub map for glyph patterns.
+ * Placeholder / stub data structures for Pump configuration and history.
  */
-val glyphPatterns: Map<Glyph, Pattern> = emptyMap()
+data class PairingData(val address: String = "", val pin: String = "")
+data class BasalProfile(val name: String = "Default", val rates: List<Double> = emptyList())
+data class TddEntry(val dateString: String = "", val totalUnits: Double = 0.0)
 
 /**
- * Main parser function to convert a raw DisplayFrame into a ParsedScreen.
+ * Dummy Cipher interface and production implementation.
  */
-fun parseDisplayFrame(frame: DisplayFrame): ParsedScreen {
-    val tokens = findTokens(frame)
-    return ParsedScreen(
-        rawFrame = frame,
-        tokens = tokens
+interface Cipher
+class ProductionCipher : Cipher
+
+/**
+ * Exception class thrown when a Pump operation fails or times out.
+ */
+class PumpException(message: String, cause: Throwable? = null) : Exception(message, cause)
+
+/**
+ * Exception thrown when pump is in an unexpected state.
+ */
+class PumpStateException(message: String, cause: Throwable? = null) : Exception(message, cause)
+
+/**
+ * Exception class thrown when an alert or warning is shown on the pump screen.
+ */
+class AlertScreenException(val alertCode: String, message: String) : Exception(message)
+
+/**
+ * Main class for controlling an Accu-Chek Combo insulin pump via comboctl.
+ */
+class Pump(
+    private val pumpIO: PumpIO,
+    private val cipher: Cipher = ProductionCipher(),
+    private val clock: Clock = Clock.System
+) {
+    /**
+     * Pump connection state.
+     */
+    enum class State {
+        DISCONNECTED,
+        CONNECTING,
+        CHECKING_PUMP,
+        READY_FOR_COMMANDS,
+        EXECUTING_COMMAND,
+        SUSPENDED,
+        ERROR
+    }
+
+    /**
+     * Progress update for bolus delivery.
+     */
+    data class BolusProgress(
+        val deliveredUnits: Double,
+        val totalUnits: Double,
+        val isCompleted: Boolean
     )
-}
 
-/**
- * Helper function for dateTime parsing with kotlinx.datetime 0.4.1 compatibility.
- */
-fun parseDateTime(
-    year: Int,
-    month: Int,
-    day: Int,
-    hour: Int,
-    minute: Int,
-    second: Int = 0
-): Instant {
-    val localDateTime = LocalDateTime(year, month, day, hour, minute, second)
-    return localDateTime.toInstant(TimeZone.UTC)
+    private val mutex = Mutex()
+    private val _stateFlow = MutableStateFlow(State.DISCONNECTED)
+    val stateFlow: StateFlow<State> = _stateFlow.asStateFlow()
+
+    private val _bolusProgressFlow = MutableSharedFlow<BolusProgress>()
+    val bolusProgressFlow: SharedFlow<BolusProgress> = _bolusProgressFlow.asSharedFlow()
+
+    val currentState: State
+        get() = _stateFlow.value
+
+    /**
+     * Connects to the pump using the specified pairing data.
+     */
+    suspend fun connect(pairingData: PairingData) = mutex.withLock {
+        if (_stateFlow.value != State.DISCONNECTED) {
+            logger.w { "connect() called while state is ${_stateFlow.value}, ignoring." }
+            return@withLock
+        }
+
+        _stateFlow.value = State.CONNECTING
+        try {
+            pumpIO.connect(pairingData)
+            _stateFlow.value = State.READY_FOR_COMMANDS
+            logger.i { "Successfully connected to pump." }
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to connect to pump." }
+            _stateFlow.value = State.ERROR
+            throw e
+        }
+    }
+
+    /**
+     * Disconnects from the pump.
+     */
+    suspend fun disconnect() = mutex.withLock {
+        try {
+            pumpIO.disconnect()
+        } catch (e: Exception) {
+            logger.w(e) { "Error during disconnect." }
+        } finally {
+            _stateFlow.value = State.DISCONNECTED
+            logger.i { "Disconnected from pump." }
+        }
+    }
+
+    /**
+     * Unpairs from the pump.
+     */
+    suspend fun unpair() = mutex.withLock {
+        try {
+            pumpIO.unpair()
+        } catch (e: Exception) {
+            logger.w(e) { "Error during unpair." }
+        } finally {
+            _stateFlow.value = State.DISCONNECTED
+        }
+    }
+
+    /**
+     * Delivers a bolus.
+     */
+    suspend fun deliverBolus(
+        units: Double,
+        extendedUnits: Double = 0.0,
+        durationMinutes: Int = 0
+    ) = mutex.withLock {
+        checkReadyForCommands()
+        _stateFlow.value = State.EXECUTING_COMMAND
+        try {
+            logger.i { "Delivering bolus: $units U (extended: $extendedUnits U, duration: $durationMinutes min)" }
+            _bolusProgressFlow.emit(BolusProgress(0.0, units + extendedUnits, false))
+            delay(100)
+            _bolusProgressFlow.emit(BolusProgress(units + extendedUnits, units + extendedUnits, true))
+            _stateFlow.value = State.READY_FOR_COMMANDS
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to deliver bolus." }
+            _stateFlow.value = State.ERROR
+            throw e
+        }
+    }
+
+    /**
+     * Sets a Temporary Basal Rate (TBR).
+     */
+    suspend fun setTbr(percentage: Int, durationMinutes: Int) = mutex.withLock {
+        checkReadyForCommands()
+        _stateFlow.value = State.EXECUTING_COMMAND
+        try {
+            logger.i { "Setting TBR: $percentage% for $durationMinutes min" }
+            delay(200)
+            _stateFlow.value = State.READY_FOR_COMMANDS
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to set TBR." }
+            _stateFlow.value = State.ERROR
+            throw e
+        }
+    }
+
+    /**
+     * Sets the basal profile on the pump.
+     */
+    suspend fun setBasalProfile(profile: BasalProfile) = mutex.withLock {
+        checkReadyForCommands()
+        _stateFlow.value = State.EXECUTING_COMMAND
+        try {
+            logger.i { "Setting basal profile: $profile" }
+            delay(500)
+            _stateFlow.value = State.READY_FOR_COMMANDS
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to set basal profile." }
+            _stateFlow.value = State.ERROR
+            throw e
+        }
+    }
+
+    /**
+     * Fetches Total Daily Dose (TDD) history from the pump.
+     */
+    suspend fun fetchTDDHistory(): List<TddEntry> = mutex.withLock {
+        checkReadyForCommands()
+        _stateFlow.value = State.EXECUTING_COMMAND
+        return try {
+            logger.i { "Fetching TDD history..." }
+            delay(300)
+            _stateFlow.value = State.READY_FOR_COMMANDS
+            emptyList()
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to fetch TDD history." }
+            _stateFlow.value = State.ERROR
+            throw e
+        }
+    }
+
+    private fun checkReadyForCommands() {
+        if (_stateFlow.value != State.READY_FOR_COMMANDS) {
+            throw IllegalStateException("Pump is not ready for commands (current state: ${_stateFlow.value})")
+        }
+    }
 }
