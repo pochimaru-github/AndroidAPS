@@ -18,7 +18,7 @@ internal fun timeWithoutDate(hour: Int = 0, minute: Int = 0, second: Int = 0) =
     )
 
 internal fun combinedDateTime(date: LocalDate, time: LocalDateTime) =
-    date.atTime(hour = time.hour, minute = time.minute, second = second, nanosecond = time.nanosecond)
+    date.atTime(time.time)
 
 // IMPORTANT: Only use this with local dates that always lie in the past or present,
 // never in the future. Read the comment block right below for an explanation why.
@@ -34,9 +34,9 @@ internal fun LocalDate.withFixedYearFrom(reference: LocalDate): LocalDate {
     // would produce a future date though (since 2024-12-29 > 2024-01-02). Therefore,
     // if we see that the newly constructed local date is in the future relative to
     // the reference date, we subtract 1 from the year.
-    val date = LocalDate(year = reference.year, month = this.month, day = this.day)
+    val date = LocalDate(year = reference.year, monthNumber = this.monthNumber, dayOfMonth = this.dayOfMonth)
     return if (date > reference) {
-        LocalDate(year = reference.year - 1, month = this.month, day = this.day)
+        LocalDate(year = reference.year - 1, monthNumber = this.monthNumber, dayOfMonth = this.dayOfMonth)
     } else
         date
 }
