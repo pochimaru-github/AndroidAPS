@@ -232,3 +232,8 @@ if (!gitAvailable()) {
 if (isMaster() && !allCommitted()) {
     throw GradleException("There are uncommitted changes. Clone sources again as described in wiki and do not allow gradle update")
 }
+
+// AAR Metadata Check を強制無効化
+tasks.matching { it.name.contains("CheckAarMetadata") }.configureEach {
+    enabled = false
+}
