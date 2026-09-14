@@ -2298,7 +2298,7 @@ class ComboV2Plugin @Inject constructor(
                     ctx = context, intentKey = ComboIntentKey.UnpairPump, title = R.string.combov2_unpair_pump_title, summary = R.string.combov2_unpair_pump_summary
                 ).apply {
                     onPreferenceClickListener = Preference.OnPreferenceClickListener { preference ->
-                        OKDialog.showConfirmation(preference.context, "Confirm pump unpairing", "Do you really want to unpair the pump?", ok = { unpair() })
+                        OKDialog.showConfirmation(preference.context, "Confirm pump unpairing", "Do you really want to unpair the pump?", ok = Runnable { unpair() })
                         false
                     }
                 }
