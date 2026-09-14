@@ -22,7 +22,6 @@ private val logger = Logger.get("Pump")
  * Placeholder / stub data structures for Pump configuration and history.
  */
 data class PairingData(val address: String = "", val pin: String = "")
-data class BasalProfile(val name: String = "Default", val rates: List<Double> = emptyList())
 data class TddEntry(val dateString: String = "", val totalUnits: Double = 0.0)
 
 /**
@@ -91,7 +90,7 @@ class Pump(
      */
     suspend fun connect(pairingData: PairingData) = mutex.withLock {
         if (_stateFlow.value != State.DISCONNECTED) {
-            logger.w { "connect() called while state is ${_stateFlow.value}, ignoring." }
+            logger.w("connect() called while state is ${_stateFlow.value}, ignoring.")
             return@withLock
         }
 
@@ -114,7 +113,7 @@ class Pump(
         try {
             pumpIO.disconnect()
         } catch (e: Exception) {
-            logger.w(e) { "Error during disconnect." }
+            logger.w("Error during disconnect: ${e.message}")
         } finally {
             _stateFlow.value = State.DISCONNECTED
             logger.i { "Disconnected from pump." }
@@ -128,7 +127,7 @@ class Pump(
         try {
             pumpIO.unpair()
         } catch (e: Exception) {
-            logger.w(e) { "Error during unpair." }
+            logger.w("Error during unpair: ${e.message}")
         } finally {
             _stateFlow.value = State.DISCONNECTED
         }
