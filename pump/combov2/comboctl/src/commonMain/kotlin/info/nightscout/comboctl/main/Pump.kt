@@ -1,30 +1,15 @@
 package info.nightscout.comboctl.main
 
 import info.nightscout.comboctl.base.Cipher
-import info.nightscout.comboctl.base.ClientNonce
-import info.nightscout.comboctl.base.ComboAddress
-import info.nightscout.comboctl.base.Key
 import info.nightscout.comboctl.base.Logger
 import info.nightscout.comboctl.base.PairingData
-import info.nightscout.comboctl.base.PairingTransaction
-import info.nightscout.comboctl.base.Pincode
 import info.nightscout.comboctl.base.ProductionCipher
-import info.nightscout.comboctl.base.PumpAddress
 import info.nightscout.comboctl.base.PumpIO
-import info.nightscout.comboctl.base.PumpState
-import info.nightscout.comboctl.base.ServerNonce
-import info.nightscout.comboctl.base.toByteString
 import info.nightscout.comboctl.parser.BasalProfile
-import info.nightscout.comboctl.parser.BasalProfileFactor
-import info.nightscout.comboctl.parser.DisplayFrame
-import info.nightscout.comboctl.parser.ParsedDisplayFrame
 import info.nightscout.comboctl.parser.TddEntry
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,14 +17,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 
 private val logger = Logger.get("Pump")
 
@@ -104,7 +84,7 @@ class Pump(
     suspend fun connect(pairingData: PairingData) = mutex.withLock {
         if (_stateFlow.value != State.DISCONNECTED) {
             logger.w { "connect() called while state is ${_stateFlow.value}, ignoring." }
-            return
+            return@withLock
         }
 
         _stateFlow.value = State.CONNECTING
