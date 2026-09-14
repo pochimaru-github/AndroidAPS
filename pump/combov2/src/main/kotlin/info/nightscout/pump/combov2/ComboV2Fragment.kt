@@ -12,8 +12,6 @@ import app.aaps.core.interfaces.queue.CommandQueue
 import app.aaps.core.interfaces.resources.ResourceHelper
 import dagger.android.support.DaggerFragment
 import info.nightscout.comboctl.base.NullDisplayFrame
-import info.nightscout.comboctl.main.BatteryState
-import info.nightscout.comboctl.main.GettingBasalProfileCommandDesc
 import info.nightscout.comboctl.parser.ReservoirState
 import info.nightscout.pump.combov2.databinding.Combov2FragmentBinding
 import kotlinx.coroutines.delay
@@ -147,19 +145,19 @@ class ComboV2Fragment : DaggerFragment() {
                 combov2Plugin.batteryStateUIFlow
                     .onEach { batteryState ->
                         when (batteryState) {
-                            null                      -> binding.combov2Battery.text = ""
+                            null                            -> binding.combov2Battery.text = ""
 
-                            BatteryState.NO_BATTERY   -> {
+                            ComboCtlPump.BatteryState.NO_BATTERY   -> {
                                 binding.combov2Battery.text = rh.gs(R.string.combov2_battery_empty_indicator)
                                 binding.combov2Battery.setTextColor(rh.gac(context, app.aaps.core.ui.R.attr.warningColor))
                             }
 
-                            BatteryState.LOW_BATTERY  -> {
+                            ComboCtlPump.BatteryState.LOW_BATTERY  -> {
                                 binding.combov2Battery.text = rh.gs(R.string.combov2_battery_low_indicator)
                                 binding.combov2Battery.setTextColor(rh.gac(context, app.aaps.core.ui.R.attr.urgentColor))
                             }
 
-                            BatteryState.FULL_BATTERY -> {
+                            ComboCtlPump.BatteryState.FULL_BATTERY -> {
                                 binding.combov2Battery.text = rh.gs(R.string.combov2_battery_full_indicator)
                                 binding.combov2Battery.setTextColor(rh.gac(context, app.aaps.core.ui.R.attr.defaultTextColor))
                             }
