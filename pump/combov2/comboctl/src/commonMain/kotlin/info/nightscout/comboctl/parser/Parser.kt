@@ -32,14 +32,17 @@ sealed class ParsedScreen {
     object TimeAndDateSettingsMonthScreen : ParsedScreen()
     object TimeAndDateSettingsDayScreen : ParsedScreen()
     object UnrecognizedScreen : ParsedScreen()
-
-    data class ParsedDisplayFrame(
-        val rawFrame: DisplayFrame,
-        val tokens: List<Token>,
-        val timestamp: Instant = Instant.fromEpochMilliseconds(0),
-        val parsedScreen: ParsedScreen = UnrecognizedScreen
-    )
 }
+
+/**
+ * Data class representing a parsed display frame.
+ */
+data class ParsedDisplayFrame(
+    val rawFrame: DisplayFrame,
+    val tokens: List<Token>,
+    val timestamp: Instant = Instant.fromEpochMilliseconds(0),
+    val parsedScreen: ParsedScreen = ParsedScreen.UnrecognizedScreen
+)
 
 /**
  * Main parser function to convert a raw DisplayFrame into a ParsedScreen.
