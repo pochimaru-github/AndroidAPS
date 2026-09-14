@@ -6,16 +6,41 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 
 /**
  * Representation of a parsed screen frame.
  */
-data class ParsedScreen(
-    val rawFrame: DisplayFrame,
-    val tokens: List<Token>,
-    val timestamp: Instant = Instant.fromEpochMilliseconds(0)
-)
+sealed class ParsedScreen {
+    open val isBlinkedOut: Boolean = false
+
+    object MainScreen : ParsedScreen()
+    object QuickinfoMainScreen : ParsedScreen()
+    object TemporaryBasalRateMenuScreen : ParsedScreen()
+    object TemporaryBasalRatePercentageScreen : ParsedScreen()
+    object TemporaryBasalRateDurationScreen : ParsedScreen()
+    object MyDataMenuScreen : ParsedScreen()
+    object MyDataBolusDataScreen : ParsedScreen()
+    object MyDataErrorDataScreen : ParsedScreen()
+    object MyDataDailyTotalsScreen : ParsedScreen()
+    object MyDataTbrDataScreen : ParsedScreen()
+    object BasalRate1ProgrammingMenuScreen : ParsedScreen()
+    object BasalRateTotalScreen : ParsedScreen()
+    object BasalRateFactorSettingScreen : ParsedScreen()
+    object TimeAndDateSettingsMenuScreen : ParsedScreen()
+    object TimeAndDateSettingsHourScreen : ParsedScreen()
+    object TimeAndDateSettingsMinuteScreen : ParsedScreen()
+    object TimeAndDateSettingsYearScreen : ParsedScreen()
+    object TimeAndDateSettingsMonthScreen : ParsedScreen()
+    object TimeAndDateSettingsDayScreen : ParsedScreen()
+    object UnrecognizedScreen : ParsedScreen()
+
+    data class ParsedDisplayFrame(
+        val rawFrame: DisplayFrame,
+        val tokens: List<Token>,
+        val timestamp: Instant = Instant.fromEpochMilliseconds(0),
+        val parsedScreen: ParsedScreen = UnrecognizedScreen
+    )
+}
 
 /**
  * Pattern interface for matching glyphs.
@@ -37,10 +62,7 @@ val glyphPatterns: Map<Glyph, Pattern> = emptyMap()
  */
 fun parseDisplayFrame(frame: DisplayFrame): ParsedScreen {
     val tokens = findTokens(frame)
-    return ParsedScreen(
-        rawFrame = frame,
-        tokens = tokens
-    )
+    return ParsedScreen.UnrecognizedScreen
 }
 
 /**
