@@ -1,7 +1,6 @@
 package info.nightscout.comboctl.parser
 
 import info.nightscout.comboctl.base.DisplayFrame
-import info.nightscout.comboctl.base.Glyph
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -40,16 +39,6 @@ sealed class ParsedScreen {
         val timestamp: Instant = Instant.fromEpochMilliseconds(0),
         val parsedScreen: ParsedScreen = UnrecognizedScreen
     )
-}
-
-/**
- * Pattern interface for matching glyphs.
- */
-interface Pattern {
-    val width: Int
-    val height: Int
-    val pixels: BooleanArray
-    val numSetPixels: Int
 }
 
 /**
