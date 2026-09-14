@@ -12,7 +12,8 @@ import app.aaps.core.interfaces.queue.CommandQueue
 import app.aaps.core.interfaces.resources.ResourceHelper
 import dagger.android.support.DaggerFragment
 import info.nightscout.comboctl.base.NullDisplayFrame
-import info.nightscout.comboctl.parser.BatteryState
+import info.nightscout.comboctl.main.BatteryState
+import info.nightscout.comboctl.main.GettingBasalProfileCommandDesc
 import info.nightscout.comboctl.parser.ReservoirState
 import info.nightscout.pump.combov2.databinding.Combov2FragmentBinding
 import kotlinx.coroutines.delay
