@@ -53,11 +53,6 @@ interface Pattern {
 }
 
 /**
- * Empty stub map for glyph patterns.
- */
-val glyphPatterns: Map<Glyph, Pattern> = emptyMap()
-
-/**
  * Main parser function to convert a raw DisplayFrame into a ParsedScreen.
  */
 fun parseDisplayFrame(frame: DisplayFrame): ParsedScreen {
