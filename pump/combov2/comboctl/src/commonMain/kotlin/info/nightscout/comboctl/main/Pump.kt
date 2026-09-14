@@ -1,10 +1,8 @@
 package info.nightscout.comboctl.main
 
+import info.nightscout.comboctl.base.LogLevel
 import info.nightscout.comboctl.base.Logger
 import info.nightscout.comboctl.base.PumpIO
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,21 +84,21 @@ class Pump(
         get() = _stateFlow.value
 
     /**
-     * Connects to the pump using the specified pairing data.
+     * Connects to the pump using specified initial mode.
      */
-    suspend fun connect(pairingData: PairingData) = mutex.withLock {
+    suspend fun connect(mode: PumpIO.Mode = PumpIO.Mode.REMOTE_TERMINAL) = mutex.withLock {
         if (_stateFlow.value != State.DISCONNECTED) {
-            logger.w("connect() called while state is ${_stateFlow.value}, ignoring.")
+            logger(LogLevel.WARN) { "connect() called while state is ${_stateFlow.value}, ignoring." }
             return@withLock
         }
 
         _stateFlow.value = State.CONNECTING
         try {
-            pumpIO.connect(pairingData)
+            pumpIO.connect(initialMode = mode)
             _stateFlow.value = State.READY_FOR_COMMANDS
-            logger.i { "Successfully connected to pump." }
+            logger(LogLevel.INFO) { "Successfully connected to pump." }
         } catch (e: Exception) {
-            logger.e(e) { "Failed to connect to pump." }
+            logger(LogLevel.ERROR, e) { "Failed to connect to pump." }
             _stateFlow.value = State.ERROR
             throw e
         }
@@ -113,23 +111,10 @@ class Pump(
         try {
             pumpIO.disconnect()
         } catch (e: Exception) {
-            logger.w("Error during disconnect: ${e.message}")
+            logger(LogLevel.WARN) { "Error during disconnect: ${e.message}" }
         } finally {
             _stateFlow.value = State.DISCONNECTED
-            logger.i { "Disconnected from pump." }
-        }
-    }
-
-    /**
-     * Unpairs from the pump.
-     */
-    suspend fun unpair() = mutex.withLock {
-        try {
-            pumpIO.unpair()
-        } catch (e: Exception) {
-            logger.w("Error during unpair: ${e.message}")
-        } finally {
-            _stateFlow.value = State.DISCONNECTED
+            logger(LogLevel.INFO) { "Disconnected from pump." }
         }
     }
 
@@ -144,13 +129,13 @@ class Pump(
         checkReadyForCommands()
         _stateFlow.value = State.EXECUTING_COMMAND
         try {
-            logger.i { "Delivering bolus: $units U (extended: $extendedUnits U, duration: $durationMinutes min)" }
+            logger(LogLevel.INFO) { "Delivering bolus: $units U (extended: $extendedUnits U, duration: $durationMinutes min)" }
             _bolusProgressFlow.emit(BolusProgress(0.0, units + extendedUnits, false))
             delay(100)
             _bolusProgressFlow.emit(BolusProgress(units + extendedUnits, units + extendedUnits, true))
             _stateFlow.value = State.READY_FOR_COMMANDS
         } catch (e: Exception) {
-            logger.e(e) { "Failed to deliver bolus." }
+            logger(LogLevel.ERROR, e) { "Failed to deliver bolus." }
             _stateFlow.value = State.ERROR
             throw e
         }
@@ -163,11 +148,11 @@ class Pump(
         checkReadyForCommands()
         _stateFlow.value = State.EXECUTING_COMMAND
         try {
-            logger.i { "Setting TBR: $percentage% for $durationMinutes min" }
+            logger(LogLevel.INFO) { "Setting TBR: $percentage% for $durationMinutes min" }
             delay(200)
             _stateFlow.value = State.READY_FOR_COMMANDS
         } catch (e: Exception) {
-            logger.e(e) { "Failed to set TBR." }
+            logger(LogLevel.ERROR, e) { "Failed to set TBR." }
             _stateFlow.value = State.ERROR
             throw e
         }
@@ -180,11 +165,11 @@ class Pump(
         checkReadyForCommands()
         _stateFlow.value = State.EXECUTING_COMMAND
         try {
-            logger.i { "Setting basal profile: $profile" }
+            logger(LogLevel.INFO) { "Setting basal profile: $profile" }
             delay(500)
             _stateFlow.value = State.READY_FOR_COMMANDS
         } catch (e: Exception) {
-            logger.e(e) { "Failed to set basal profile." }
+            logger(LogLevel.ERROR, e) { "Failed to set basal profile." }
             _stateFlow.value = State.ERROR
             throw e
         }
@@ -197,12 +182,12 @@ class Pump(
         checkReadyForCommands()
         _stateFlow.value = State.EXECUTING_COMMAND
         return try {
-            logger.i { "Fetching TDD history..." }
+            logger(LogLevel.INFO) { "Fetching TDD history..." }
             delay(300)
             _stateFlow.value = State.READY_FOR_COMMANDS
             emptyList()
         } catch (e: Exception) {
-            logger.e(e) { "Failed to fetch TDD history." }
+            logger(LogLevel.ERROR, e) { "Failed to fetch TDD history." }
             _stateFlow.value = State.ERROR
             throw e
         }
