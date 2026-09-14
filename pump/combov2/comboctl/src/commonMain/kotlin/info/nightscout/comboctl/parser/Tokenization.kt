@@ -6,25 +6,6 @@ import info.nightscout.comboctl.base.DisplayFrame
 import kotlin.math.sign
 
 /**
- * Interface representing pattern details.
- */
-interface Pattern {
-    val width: Int
-    val height: Int
-    val pixels: List<Boolean>
-    val numSetPixels: Int
-}
-
-/**
- * Class representing a Glyph with size properties.
- */
-data class Glyph(
-    val isLarge: Boolean = false
-)
-
-val glyphPatterns: Map<Glyph, Pattern> = emptyMap()
-
-/**
  * Structure containing details about a match discovered in a [DisplayFrame].
  */
 data class Token(
