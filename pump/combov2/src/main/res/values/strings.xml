@@ -62,7 +62,7 @@ buttons at the same time to cancel pairing)\n
     <string name="combov2_setting_current_pump_date">Setting current pump date</string>
     <string name="combov2_not_initialized">Not initialized</string>
     <string name="combov2_disconnected">Disconnected</string>
-    <string name="combov2_connecting">Connecting</string>
+    <string name="conbov2_connecting">Connecting</string>
     <string name="combov2_checking_pump">Checking pump</string>
     <string name="combov2_ready">Ready</string>
     <string name="combov2_suspended">Suspended</string>
