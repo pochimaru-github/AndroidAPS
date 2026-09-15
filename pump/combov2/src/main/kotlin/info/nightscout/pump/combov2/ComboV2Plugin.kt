@@ -62,10 +62,11 @@ import info.nightscout.comboctl.base.NullDisplayFrame
 import info.nightscout.comboctl.base.PairingPIN
 import info.nightscout.comboctl.main.BasalProfile
 import info.nightscout.comboctl.main.QuantityNotChangingException
-import info.nightscout.comboctl.main.RTCommandProgressStage
-import info.nightscout.comboctl.parser.AlertScreenContent
-import info.nightscout.comboctl.parser.AlertScreenException
-import info.nightscout.comboctl.parser.BatteryState
+import info.nightscout.comboctl.model.AlertScreenContent
+import info.nightscout.comboctl.model.AlertScreenException
+import info.nightscout.comboctl.model.BatteryState
+import info.nightscout.comboctl.model.CommandDescription
+import info.nightscout.comboctl.model.RTCommandProgressStage
 import info.nightscout.comboctl.parser.ReservoirState
 import info.nightscout.pump.combov2.activities.ComboV2PairingActivity
 import info.nightscout.pump.combov2.keys.ComboBooleanKey
@@ -600,22 +601,22 @@ class ComboV2Plugin @Inject constructor(
                 coroutineScope {
                     acquiredPump.stateFlow
                         .onEach { pumpState ->
-                            val driverState = when (pumpState) {
-                                // The Disconnected pump state is ignored, since the Disconnected
-                                // *driver* state is manually set anyway when disconnecting in
-                                // in connect() and disconnectInternal(). Passing it to setDriverState()
-                                // here would trigger an EventPumpStatusChanged event to be sent over
-                                // the rxBus too early, potentially causing a situation where the connect()
-                                // call isn't fully done yet, but the queue gets that event and thinks that
-                                // it can try to reconnect now.
-                                ComboCtlPump.State.Disconnected        -> return@onEach
-                                ComboCtlPump.State.Connecting          -> DriverState.Connecting
-                                ComboCtlPump.State.CheckingPump        -> DriverState.CheckingPump
-                                ComboCtlPump.State.ReadyForCommands    -> DriverState.Ready
-                                is ComboCtlPump.State.ExecutingCommand -> DriverState.ExecutingCommand(pumpState.description)
-                                ComboCtlPump.State.Suspended           -> DriverState.Suspended
-                                is ComboCtlPump.State.Error            -> DriverState.Error
-                            }
+    val driverState = when (pumpState) {
+        // The Disconnected pump state is ignored, since the Disconnected
+        // *driver* state is manually set anyway when disconnecting in
+        // in connect() and disconnectInternal(). Passing it to setDriverState()
+        // here would trigger an EventPumpStatusChanged event to be sent over
+        // the rxBus too early, potentially causing a situation where the connect()
+        // call isn't fully done yet, but the queue gets that event and thinks that
+        // it can try to reconnect now.
+        ComboCtlPump.State.DISCONNECTED        -> return@onEach
+        ComboCtlPump.State.CONNECTING          -> DriverState.Connecting
+        ComboCtlPump.State.CHECKING_PUMP        -> DriverState.CheckingPump
+        ComboCtlPump.State.READY_FOR_COMMANDS    -> DriverState.Ready
+        ComboCtlPump.State.EXECUTING_COMMAND   -> DriverState.ExecutingCommand(pumpState.description)
+        ComboCtlPump.State.SUSPENDED           -> DriverState.Suspended
+        ComboCtlPump.State.ERROR               -> DriverState.Error
+    }
                             setDriverState(driverState)
                         }
                         .launchIn(this)
