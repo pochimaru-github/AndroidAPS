@@ -941,7 +941,7 @@ acquiredPump.currentTbr
     override val batteryLevel: Int?
         get() = _batteryLevel
 
-    private fun updateLevels() {
+private fun updateLevels() {
         pumpStatus?.availableUnitsInReservoir?.let { newLevel ->
             _reservoirLevel?.let { currentLevel ->
                 aapsLogger.debug(LTag.PUMP, "Current/new reservoir levels: $currentLevel / $newLevel")
@@ -960,13 +960,12 @@ acquiredPump.currentTbr
             _reservoirLevel = newLevel.toDouble()
         }
 
-pumpStatus?.batteryState?.let { newState ->
-    val newLevel = when (newState) {
-        PumpStatus.BatteryState.NO_BATTERY   -> 5
-        PumpStatus.BatteryState.LOW_BATTERY  -> 25
-        PumpStatus.BatteryState.FULL_BATTERY -> 100
-    }
-}
+        pumpStatus?.batteryState?.let { newState ->
+            val newLevel = when (newState) {
+                PumpStatus.BatteryState.NO_BATTERY   -> 5
+                PumpStatus.BatteryState.LOW_BATTERY  -> 25
+                PumpStatus.BatteryState.FULL_BATTERY -> 100
+            }
 
             _batteryLevel?.let { currentLevel ->
                 aapsLogger.debug(LTag.PUMP, "Current/new battery levels: $currentLevel / $newLevel")
