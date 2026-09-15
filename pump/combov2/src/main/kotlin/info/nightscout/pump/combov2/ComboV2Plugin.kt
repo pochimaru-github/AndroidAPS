@@ -112,6 +112,7 @@ import info.nightscout.comboctl.base.Logger as ComboCtlLogger
 import info.nightscout.comboctl.base.Tbr as ComboCtlTbr
 import info.nightscout.comboctl.main.Pump as ComboCtlPump
 import info.nightscout.comboctl.main.PumpManager as ComboCtlPumpManager
+import info.nightscout.comboctl.main.PumpStatus
 
 internal const val PUMP_ERROR_TIMEOUT_INTERVAL_MSECS = 1000L * 60 * 5
 
@@ -170,7 +171,7 @@ class ComboV2Plugin @Inject constructor(
     private var pumpUIFlowsDeferred: Deferred<Unit>? = null
 
     // States for the Pump interface and for the UI.
-    private var pumpStatus: ComboCtlPump.Status? = null
+    private var pumpStatus: PumpStatus? = null
     private var lastConnectionTimestamp = 0L
     private var lastComboAlert: AlertScreenContent? = null
 
@@ -613,48 +614,39 @@ class ComboV2Plugin @Inject constructor(
         ComboCtlPump.State.CONNECTING          -> DriverState.Connecting
         ComboCtlPump.State.CHECKING_PUMP        -> DriverState.CheckingPump
         ComboCtlPump.State.READY_FOR_COMMANDS    -> DriverState.Ready
-        ComboCtlPump.State.EXECUTING_COMMAND   -> DriverState.ExecutingCommand(pumpState.description)
+        ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.ExecutingCommand(null)
         ComboCtlPump.State.SUSPENDED           -> DriverState.Suspended
         ComboCtlPump.State.ERROR               -> DriverState.Error
     }
                             setDriverState(driverState)
                         }
                         .launchIn(this)
-                    acquiredPump.statusFlow
-                        .onEach { newPumpStatus ->
-                            if (newPumpStatus == null)
-                                return@onEach
+                    acquiredPump.pumpStatus
+    .onEach { newPumpStatus ->
+        if (newPumpStatus == null) return@onEach
+        _batteryStateUIFlow.value = newPumpStatus.batteryState
+        _reservoirLevelUIFlow.value = ReservoirLevel(
+            newPumpStatus.reservoirState,
+            newPumpStatus.availableUnitsInReservoir
+        )
+        pumpStatus = newPumpStatus
+        updateLevels()
+        rxBus.send(EventRefreshOverview("ComboV2 pump status updated"))
+    }
+    .launchIn(this)
 
-                            _batteryStateUIFlow.value = newPumpStatus.batteryState
-                            _reservoirLevelUIFlow.value = ReservoirLevel(
-                                newPumpStatus.reservoirState,
-                                newPumpStatus.availableUnitsInReservoir
-                            )
+acquiredPump.lastBolus
+    .onEach { lastBolus ->
+        if (lastBolus == null) return@onEach
+        _lastBolusUIFlow.value = lastBolus
+    }
+    .launchIn(this)
 
-                            pumpStatus = newPumpStatus
-                            updateLevels()
-
-                            // Send the EventRefreshOverview to keep the overview fragment's content
-                            // up to date. Other actions like a CommandQueue.readStatus() call trigger
-                            // such a refresh, but if the pump status is updated by something else,
-                            // a refresh may not happen automatically. This event send call eliminates
-                            // that possibility.
-                            rxBus.send(EventRefreshOverview("ComboV2 pump status updated"))
-                        }
-                        .launchIn(this)
-                    acquiredPump.lastBolusFlow
-                        .onEach { lastBolus ->
-                            if (lastBolus == null)
-                                return@onEach
-
-                            _lastBolusUIFlow.value = lastBolus
-                        }
-                        .launchIn(this)
-                    acquiredPump.currentTbrFlow
-                        .onEach { currentTbr ->
-                            _currentTbrUIFlow.value = currentTbr
-                        }
-                        .launchIn(this)
+acquiredPump.currentTbr
+    .onEach { currentTbr ->
+        _currentTbrUIFlow.value = currentTbr
+    }
+    .launchIn(this)
                 }
             }
 
