@@ -2089,3 +2089,74 @@ class ComboV2Plugin @Inject constructor(
             level = if (isWarning) Notification.NORMAL else Notification.URGENT
         )
     }
+
+    private fun reportFinishedBolus(status: String, id: Long, pumpEnactResult: PumpEnactResult, succeeded: Boolean) {
+        rxBus.send(EventOverviewBolusProgress(rh, percent = 100, id = id))
+
+        pumpEnactResult.apply {
+            success = succeeded
+            comment = status
+        }
+    }
+
+    private fun reportFinishedBolus(stringId: Int, id: Long, pumpEnactResult: PumpEnactResult, succeeded: Boolean) =
+        reportFinishedBolus(rh.gs(stringId), id, pumpEnactResult, succeeded)
+
+    private fun createFailurePumpEnactResult(comment: Int) =
+        pumpEnactResultProvider.get()
+            .success(false)
+            .enacted(false)
+            .comment(comment)
+
+    private fun getBluetoothAddress(): ComboCtlBluetoothAddress? =
+        pumpManager?.getPairedPumpAddresses()?.firstOrNull()
+
+    private fun getAcquiredPump() = pump ?: throw Error("There is no currently acquired pump; this should not happen. Please report this as a bug.")
+
+    private fun isDisconnected() =
+        when (driverStateFlow.value) {
+            DriverState.NotInitialized,
+            DriverState.Disconnected -> true
+
+            else                     -> false
+        }
+
+    override fun addPreferenceScreen(preferenceManager: PreferenceManager, parent: PreferenceScreen, context: Context, requiredKey: String?) {
+        if (requiredKey != null) return
+
+        val category = PreferenceCategory(context)
+        parent.addPreference(category)
+        category.apply {
+            key = "combov2_settings"
+            title = rh.gs(R.string.combov2_title)
+            initialExpandedChildrenCount = 0
+            addPreference(
+                AdaptiveIntentPreference(
+                    ctx = context, intentKey = ComboIntentKey.PairWithPump, title = R.string.combov2_pair_with_pump_title, summary = R.string.combov2_pair_with_pump_summary,
+                    intent = Intent(context, ComboV2PairingActivity::class.java)
+                )
+            )
+            addPreference(
+                AdaptiveIntentPreference(
+                    ctx = context, intentKey = ComboIntentKey.UnpairPump, title = R.string.combov2_unpair_pump_title, summary = R.string.combov2_unpair_pump_summary
+                ).apply {
+                    onPreferenceClickListener = Preference.OnPreferenceClickListener { preference ->
+                        OKDialog.showConfirmation(preference.context, "Confirm pump unpairing", "Do you really want to unpair the pump?", ok = Runnable { unpair() })
+                        false
+                    }
+                }
+            )
+            addPreference(AdaptiveIntPreference(ctx = context, intKey = ComboIntKey.DiscoveryDuration, title = R.string.combov2_discovery_duration))
+            addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.AutomaticReservoirEntry, title = R.string.combov2_automatic_reservoir_entry))
+            addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.AutomaticBatteryEntry, title = R.string.combov2_automatic_battery_entry))
+            addPreference(
+                AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.VerboseLogging, title = R.string.combov2_verbose_logging).apply {
+                    onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+                        updateComboCtlLogLevel(newValue as Boolean)
+                        true
+                    }
+                }
+            )
+        }
+    }
+}
