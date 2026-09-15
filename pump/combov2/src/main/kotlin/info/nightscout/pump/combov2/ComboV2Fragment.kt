@@ -8,8 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import info.nightscout.pump.combov2.R
-import info.nightscout.pump.combov2.databinding.Combov2FragmentBinding
+import info.nightscout.androidaps.data.R
+import info.nightscout.androidaps.databinding.Combov2FragmentBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -54,21 +54,21 @@ class ComboV2Fragment : Fragment() {
     private fun updateDriverStateUI(state: ComboV2Plugin.DriverState) {
         val context = context ?: return
         val statusText = when (state) {
-            ComboV2Plugin.DriverState.NotInitialized -> context.getString(R.string.combov2_not_initialized)
-            ComboV2Plugin.DriverState.Disconnected   -> context.getString(R.string.combov2_could_not_connect)
-            ComboV2Plugin.DriverState.Connecting     -> context.getString(R.string.combov2_establishing_bt_connection)
-            ComboV2Plugin.DriverState.CheckingPump   -> context.getString(R.string.combov2_checking_pump)
-            is ComboV2Plugin.DriverState.ExecutingCommand -> context.getString(R.string.combov2_executing_command)
-            ComboV2Plugin.DriverState.Ready          -> context.getString(R.string.combov2_ready)
-            ComboV2Plugin.DriverState.Suspended      -> context.getString(R.string.combov2_suspended)
-            ComboV2Plugin.DriverState.Error          -> context.getString(R.string.combov2_error)
+            ComboV2Plugin.DriverState.NotInitialized -> context.getString(R.string.combov2_state_not_initialized)
+            ComboV2Plugin.DriverState.Disconnected   -> context.getString(R.string.combov2_state_disconnected)
+            ComboV2Plugin.DriverState.Connecting     -> context.getString(R.string.combov2_state_connecting)
+            ComboV2Plugin.DriverState.CheckingPump   -> context.getString(R.string.combov2_state_checking_pump)
+            is ComboV2Plugin.DriverState.ExecutingCommand -> context.getString(R.string.combov2_state_executing_command)
+            ComboV2Plugin.DriverState.Ready          -> context.getString(R.string.combov2_state_ready)
+            ComboV2Plugin.DriverState.Suspended      -> context.getString(R.string.combov2_state_suspended)
+            ComboV2Plugin.DriverState.Error          -> context.getString(R.string.combov2_state_error)
         }
         binding.combov2DriverState.text = statusText
     }
 
     private fun updatePairedUI(isPaired: Boolean) {
         binding.combov2PairedStatus.text = if (isPaired) {
-            getString(R.string.combov2_plugin_name)
+            getString(R.string.combov2_paired)
         } else {
             getString(R.string.combov2_not_paired)
         }
