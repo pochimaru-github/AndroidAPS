@@ -65,7 +65,6 @@ import info.nightscout.comboctl.main.QuantityNotChangingException
 import info.nightscout.comboctl.base.*
 import info.nightscout.comboctl.parser.*
 import info.nightscout.comboctl.main.*
-import info.nightscout.comboctl.main.CommandDescription
 import info.nightscout.comboctl.main.RTCommandProgressStage
 import info.nightscout.comboctl.main.ReservoirState
 import info.nightscout.pump.combov2.activities.ComboV2PairingActivity
