@@ -62,11 +62,11 @@ import info.nightscout.comboctl.base.NullDisplayFrame
 import info.nightscout.comboctl.base.PairingPIN
 import info.nightscout.comboctl.main.BasalProfile
 import info.nightscout.comboctl.main.QuantityNotChangingException
-import info.nightscout.comboctl.base.CommandDescription
-import info.nightscout.comboctl.main.RTCommandProgressStage
 import info.nightscout.comboctl.parser.AlertScreenContent
 import info.nightscout.comboctl.parser.AlertScreenException
 import info.nightscout.comboctl.parser.BatteryState
+import info.nightscout.comboctl.parser.CommandDescription
+import info.nightscout.comboctl.parser.RTCommandProgressStage
 import info.nightscout.comboctl.parser.ReservoirState
 import info.nightscout.pump.combov2.activities.ComboV2PairingActivity
 import info.nightscout.pump.combov2.keys.ComboBooleanKey
