@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import info.nightscout.pump.combov2.R
+import app.androidaps.R
 import info.nightscout.pump.combov2.databinding.Combov2FragmentBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
