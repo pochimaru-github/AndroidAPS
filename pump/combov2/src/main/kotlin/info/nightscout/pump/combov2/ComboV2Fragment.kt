@@ -71,33 +71,10 @@ class ComboV2Fragment : DaggerFragment() {
                             ComboV2Plugin.DriverState.Suspended           -> rh.gs(R.string.combov2_suspended)
                             ComboV2Plugin.DriverState.Error               -> rh.gs(app.aaps.core.ui.R.string.error)
                             is ComboV2Plugin.DriverState.ExecutingCommand ->
-                                when (val desc = connectionState.description) {
-                                    is ComboCtlPump.GettingBasalProfileCommandDesc  ->
-                                        rh.gs(R.string.combov2_getting_basal_profile_cmddesc)
-
-                                    is ComboCtlPump.SettingBasalProfileCommandDesc  ->
-                                        rh.gs(R.string.combov2_setting_basal_profile_cmddesc)
-
-                                    is ComboCtlPump.SettingTbrCommandDesc           ->
-                                        if (desc.percentage != 100)
-                                            rh.gs(R.string.combov2_setting_tbr_cmddesc, desc.percentage, desc.durationInMinutes)
-                                        else
-                                            rh.gs(R.string.combov2_cancelling_tbr)
-
-                                    is ComboCtlPump.DeliveringBolusCommandDesc      ->
-                                        rh.gs(R.string.combov2_delivering_bolus_cmddesc, desc.immediateBolusAmount.cctlBolusToIU())
-
-                                    is ComboCtlPump.FetchingTDDHistoryCommandDesc   ->
-                                        rh.gs(R.string.combov2_fetching_tdd_history_cmddesc)
-
-                                    is ComboCtlPump.UpdatingPumpDateTimeCommandDesc ->
-                                        rh.gs(R.string.combov2_updating_pump_datetime_cmddesc)
-
-                                    is ComboCtlPump.UpdatingPumpStatusCommandDesc   ->
-                                        rh.gs(R.string.combov2_updating_pump_status_cmddesc)
-
-                                    else                                            -> rh.gs(R.string.combov2_executing_command)
-                                }
+                                if (connectionState.description.isNotEmpty())
+                                    connectionState.description
+                                else
+                                    rh.gs(R.string.combov2_executing_command)
                         }
                         binding.combov2DriverState.text = text
 
