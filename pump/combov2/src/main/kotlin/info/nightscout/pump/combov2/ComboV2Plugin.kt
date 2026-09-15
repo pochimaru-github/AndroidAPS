@@ -173,7 +173,7 @@ class ComboV2Plugin @Inject constructor(
     // States for the Pump interface and for the UI.
     private var pumpStatus: PumpStatus? = null
     private var lastConnectionTimestamp = 0L
-    private var lastComboAlert: AlertScreenContent? = null
+    private var lastComboAlert: AlertScreen.Content? = null
 
     // States for when the pump reports an error. We then want isInitialized()
     // to return false until either the user presses the Refresh button or the
@@ -960,12 +960,13 @@ acquiredPump.currentTbr
             _reservoirLevel = newLevel.toDouble()
         }
 
-        pumpStatus?.batteryState?.let { newState ->
-            val newLevel = when (newState) {
-                BatteryState.NO_BATTERY   -> 5
-                BatteryState.LOW_BATTERY  -> 25
-                BatteryState.FULL_BATTERY -> 100
-            }
+pumpStatus?.batteryState?.let { newState ->
+    val newLevel = when (newState) {
+        PumpStatus.BatteryState.NO_BATTERY   -> 5
+        PumpStatus.BatteryState.LOW_BATTERY  -> 25
+        PumpStatus.BatteryState.FULL_BATTERY -> 100
+    }
+}
 
             _batteryLevel?.let { currentLevel ->
                 aapsLogger.debug(LTag.PUMP, "Current/new battery levels: $currentLevel / $newLevel")
