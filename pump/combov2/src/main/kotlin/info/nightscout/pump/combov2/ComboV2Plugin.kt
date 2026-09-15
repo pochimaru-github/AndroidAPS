@@ -2024,7 +2024,7 @@ class ComboV2Plugin @Inject constructor(
             executePendingDisconnect()
         } catch (e: CancellationException) {
             throw e
-        } catch (e: AlertScreenException) {
+        } catch (e: ComboCtlPump.AlertScreenException) {
             lastComboAlert = e.alertCode
 
             notifyAboutComboAlert(e.alertCode)
