@@ -63,7 +63,6 @@ import info.nightscout.comboctl.base.PairingPIN
 import info.nightscout.comboctl.main.BasalProfile
 import info.nightscout.comboctl.main.QuantityNotChangingException
 import info.nightscout.comboctl.main.RTCommandProgressStage
-import info.nightscout.comboctl.parser.AlertScreenContent
 import info.nightscout.comboctl.parser.AlertScreenException
 import info.nightscout.comboctl.parser.BatteryState
 import info.nightscout.comboctl.parser.ReservoirState
@@ -171,7 +170,7 @@ class ComboV2Plugin @Inject constructor(
     // States for the Pump interface and for the UI.
     private var pumpStatus: ComboCtlPump.Status? = null
     private var lastConnectionTimestamp = 0L
-    private var lastComboAlert: AlertScreenContent? = null
+    private var lastComboAlert: String? = null
 
     // States for when the pump reports an error. We then want isInitialized()
     // to return false until either the user presses the Refresh button or the
@@ -267,7 +266,7 @@ class ComboV2Plugin @Inject constructor(
 
         // Driver is currently executing a command.
         // isBusy() will return true in this state.
-        class ExecutingCommand(val description: ComboCtlPump.CommandDescription) : DriverState("executingCommand")
+        class ExecutingCommand(val description: String = "") : DriverState("executingCommand")
         data object Error : DriverState("error")
     }
 
@@ -608,13 +607,13 @@ class ComboV2Plugin @Inject constructor(
                                 // the rxBus too early, potentially causing a situation where the connect()
                                 // call isn't fully done yet, but the queue gets that event and thinks that
                                 // it can try to reconnect now.
-                                ComboCtlPump.State.Disconnected        -> return@onEach
-                                ComboCtlPump.State.Connecting          -> DriverState.Connecting
-                                ComboCtlPump.State.CheckingPump        -> DriverState.CheckingPump
-                                ComboCtlPump.State.ReadyForCommands    -> DriverState.Ready
-                                is ComboCtlPump.State.ExecutingCommand -> DriverState.ExecutingCommand(pumpState.description)
-                                ComboCtlPump.State.Suspended           -> DriverState.Suspended
-                                is ComboCtlPump.State.Error            -> DriverState.Error
+                                ComboCtlPump.State.DISCONNECTED        -> return@onEach
+                                ComboCtlPump.State.CONNECTING          -> DriverState.Connecting
+                                ComboCtlPump.State.CHECKING_PUMP        -> DriverState.CheckingPump
+                                ComboCtlPump.State.READY_FOR_COMMANDS    -> DriverState.Ready
+                                ComboCtlPump.State.EXECUTING_COMMAND   -> DriverState.ExecutingCommand()
+                                ComboCtlPump.State.SUSPENDED           -> DriverState.Suspended
+                                ComboCtlPump.State.ERROR               -> DriverState.Error
                             }
                             setDriverState(driverState)
                         }
@@ -733,7 +732,7 @@ class ComboV2Plugin @Inject constructor(
                     // Re-throw to mark this coroutine as cancelled.
                     throw e
                 } catch (e: AlertScreenException) {
-                    notifyAboutComboAlert(e.alertScreenContent)
+                    notifyAboutComboAlert(e.alertCode)
                     forciblyDisconnectDueToError = true
                 } catch (e: Exception) {
                     uiInteraction.addNotification(
@@ -1842,7 +1841,7 @@ class ComboV2Plugin @Inject constructor(
         aapsLogger.debug(LTag.PUMP, "Handling pump event $event")
 
         when (event) {
-            is ComboCtlPump.Event.BatteryLow           -> {
+            is ComboCtlPump.Event.LowBattery           -> {
                 uiInteraction.addNotification(
                     Notification.COMBO_PUMP_ALARM,
                     text = rh.gs(R.string.combov2_battery_low_warning),
@@ -1850,110 +1849,10 @@ class ComboV2Plugin @Inject constructor(
                 )
             }
 
-            is ComboCtlPump.Event.ReservoirLow         -> {
+            is ComboCtlPump.Event.AlarmRaised          -> {
                 uiInteraction.addNotification(
                     Notification.COMBO_PUMP_ALARM,
-                    text = rh.gs(R.string.combov2_reservoir_low_warning),
-                    level = Notification.NORMAL
-                )
-            }
-
-            is ComboCtlPump.Event.QuickBolusInfused    -> {
-                pumpSync.syncBolusWithPumpId(
-                    event.timestamp.toEpochMilliseconds(),
-                    event.bolusAmount.cctlBolusToIU(),
-                    BS.Type.NORMAL,
-                    event.bolusId,
-                    PumpType.ACCU_CHEK_COMBO,
-                    serialNumber()
-                )
-            }
-
-            is ComboCtlPump.Event.StandardBolusInfused -> {
-                val bolusType = when (event.standardBolusReason) {
-                    ComboCtlPump.StandardBolusReason.NORMAL               -> BS.Type.NORMAL
-                    ComboCtlPump.StandardBolusReason.SUPERBOLUS           -> BS.Type.SMB
-                    ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET -> BS.Type.PRIMING
-                }
-                pumpSync.syncBolusWithPumpId(
-                    event.timestamp.toEpochMilliseconds(),
-                    event.bolusAmount.cctlBolusToIU(),
-                    bolusType,
-                    event.bolusId,
-                    PumpType.ACCU_CHEK_COMBO,
-                    serialNumber()
-                )
-            }
-
-            is ComboCtlPump.Event.ExtendedBolusStarted -> {
-                pumpSync.syncExtendedBolusWithPumpId(
-                    event.timestamp.toEpochMilliseconds(),
-                    event.totalBolusAmount.cctlBolusToIU(),
-                    event.totalDurationMinutes.toLong() * 60 * 1000,
-                    false,
-                    event.bolusId,
-                    PumpType.ACCU_CHEK_COMBO,
-                    serialNumber()
-                )
-            }
-
-            is ComboCtlPump.Event.ExtendedBolusEnded   -> {
-                pumpSync.syncStopExtendedBolusWithPumpId(
-                    event.timestamp.toEpochMilliseconds(),
-                    event.bolusId,
-                    PumpType.ACCU_CHEK_COMBO,
-                    serialNumber()
-                )
-            }
-
-            is ComboCtlPump.Event.TbrStarted           -> {
-                aapsLogger.debug(LTag.PUMP, "Pump reports TBR started; expected state according to AAPS: ${pumpSync.expectedPumpState()}")
-                val tbrStartTimestampInMs = event.tbr.timestamp.toEpochMilliseconds()
-                val tbrType = when (event.tbr.type) {
-                    ComboCtlTbr.Type.NORMAL               -> PumpSync.TemporaryBasalType.NORMAL
-                    ComboCtlTbr.Type.EMULATED_100_PERCENT -> PumpSync.TemporaryBasalType.NORMAL
-                    ComboCtlTbr.Type.SUPERBOLUS           -> PumpSync.TemporaryBasalType.SUPERBOLUS
-                    ComboCtlTbr.Type.EMULATED_COMBO_STOP  -> PumpSync.TemporaryBasalType.EMULATED_PUMP_SUSPEND
-                    ComboCtlTbr.Type.COMBO_STOPPED        -> PumpSync.TemporaryBasalType.PUMP_SUSPEND
-                }
-                pumpSync.syncTemporaryBasalWithPumpId(
-                    timestamp = tbrStartTimestampInMs,
-                    rate = event.tbr.percentage.toDouble(),
-                    duration = event.tbr.durationInMinutes.toLong() * 60 * 1000,
-                    isAbsolute = false,
-                    type = tbrType,
-                    pumpId = tbrStartTimestampInMs,
-                    pumpType = PumpType.ACCU_CHEK_COMBO,
-                    pumpSerial = serialNumber()
-                )
-            }
-
-            is ComboCtlPump.Event.TbrEnded             -> {
-                aapsLogger.debug(LTag.PUMP, "Pump reports TBR ended; expected state according to AAPS: ${pumpSync.expectedPumpState()}")
-                val tbrEndTimestampInMs = event.timestampWhenTbrEnded.toEpochMilliseconds()
-                pumpSync.syncStopTemporaryBasalWithPumpId(
-                    timestamp = tbrEndTimestampInMs,
-                    endPumpId = tbrEndTimestampInMs,
-                    pumpType = PumpType.ACCU_CHEK_COMBO,
-                    pumpSerial = serialNumber()
-                )
-            }
-
-            is ComboCtlPump.Event.UnknownTbrDetected   -> {
-                // Inform about this unknown TBR that was observed (and automatically aborted).
-                val remainingDurationString = String.format(
-                    Locale.getDefault(),
-                    "%02d:%02d",
-                    event.remainingTbrDurationInMinutes / 60,
-                    event.remainingTbrDurationInMinutes % 60
-                )
-                uiInteraction.addNotification(
-                    Notification.COMBO_UNKNOWN_TBR,
-                    text = rh.gs(
-                        R.string.combov2_unknown_tbr_detected,
-                        event.tbrPercentage,
-                        remainingDurationString
-                    ),
+                    text = "${rh.gs(R.string.combov2_combo_alert)}: ${event.alarmCode}",
                     level = Notification.URGENT
                 )
             }
@@ -1994,37 +1893,7 @@ class ComboV2Plugin @Inject constructor(
         // we can end up with race conditions because the coroutines
         // are still ongoing in the background.
         runBlocking {
-            // Disconnecting the pump needs to be done in one of two
-            // ways, depending on whether we try to disconnect while
-            // the pump is in the Connecting state or not:
-            //
-            // 1. Pump is in the Connecting state. A disconnectInternal()
-            // call then means that we are aborting the ongoing connect
-            // attempt. Internally, the pump may be waiting for a blocking
-            // Bluetooth device connect procedure to complete.
-            // 2. Pump is past the Connecting state. The blocking connect
-            // procedure is already over.
-            //
-            // In case #1, the internal IO loops inside the pump are not
-            // yet running. Also, connectionSetupJob.join() won't finish
-            // because of the blocking connect procedure. In this case,
-            // cancel that coroutine/Job, but don't join yet. Cancel,
-            // then disconnect the pump, then join. That way, the blocking
-            // Bluetooth connect procedure is aborted (closing a Bluetooth
-            // socket usually does that), the connectionSetupJob is unblocked,
-            // it can be canceled, and join() can finish. Since there is no
-            // IO coroutine running, there won't be any IO errors when
-            // disconnecting before joining connectionSetupJob.
-            //
-            // In case #2, the internal IO loops inside the pump *are*
-            // running, so disconnecting before joining is risky. Therefore,
-            // in this case, do cancel *and* join connectionSetupJob before
-            // actually disconnecting the pump. Otherwise, errors occur, since
-            // the connection setup code will try to communicate even though
-            // the Pump.disconnect() call shuts down the RFCOMM socket,
-            // making all send/receive calls fail.
-
-            if (pumpToDisconnect.stateFlow.value == ComboCtlPump.State.Connecting) {
+            if (pumpToDisconnect.stateFlow.value == ComboCtlPump.State.CONNECTING) {
                 // Case #1 from above
                 aapsLogger.debug(LTag.PUMP, "Cancelling ongoing connect attempt")
                 connectionSetupJob?.cancel()
@@ -2073,19 +1942,9 @@ class ComboV2Plugin @Inject constructor(
         if (oldState == newState)
             return
 
-        // Update the last connection timestamp after executing a command.
-        // Other components like CommandReadStatus expect the lastDataTime()
-        // timestamp to be updated right after a command execution.
-        // As a special case, if all we did was to check the pump status,
-        // and afterwards disconnected, also update. The CheckingPump
-        // state masks multiple command executions.
         if ((oldState is DriverState.ExecutingCommand) || ((oldState == DriverState.CheckingPump) && (newState == DriverState.Disconnected)))
             updateLastConnectionTimestamp()
 
-        // If the pump is suspended, or if an error occurred, we want
-        // to show the "suspended" and "error" state labels on the UI
-        // even after disconnecting. Otherwise, the user may not see
-        // that an error occurred or the pump is suspended.
         val updateUIState = when (newState) {
             DriverState.Disconnected -> {
                 when (driverStateUIFlow.value) {
@@ -2101,9 +1960,6 @@ class ComboV2Plugin @Inject constructor(
         if (updateUIState) {
             _driverStateUIFlow.value = newState
 
-            // Also show a notification to alert the user to the fact
-            // that the Combo is currently suspended, otherwise this
-            // only shows up in the Combo fragment.
             if (newState == DriverState.Suspended) {
                 uiInteraction.addNotification(
                     Notification.PUMP_SUSPENDED,
@@ -2123,7 +1979,6 @@ class ComboV2Plugin @Inject constructor(
         when (newState) {
             DriverState.Disconnected -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED))
             DriverState.Connecting   -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTING))
-            // Filter Ready<->Suspended state changes to avoid sending CONNECTED unnecessarily often.
             DriverState.Ready        -> {
                 if (oldState != DriverState.Suspended)
                     rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED))
@@ -2158,11 +2013,6 @@ class ComboV2Plugin @Inject constructor(
         unpair()
     }
 
-    // Utility function to run a ComboCtlPump command (deliverBolus for example)
-    // and do common checks afterwards (like handling AlertScreenException).
-    // IMPORTANT: This disconnects in case of an error, so if any other
-    // nontrivial procedure needs to be done for the command in case of an
-    // error, do this inside a try-finally block in the block.
     private suspend fun executeCommand(
         block: suspend CoroutineScope.() -> Unit
     ) {
@@ -2171,23 +2021,18 @@ class ComboV2Plugin @Inject constructor(
                 block.invoke(this)
             }
 
-            // The AAPS pump command queue may have asked for a disconnect
-            // while the command was being executed. Do this postponed
-            // disconnect now that we are done with the command.
             executePendingDisconnect()
         } catch (e: CancellationException) {
             throw e
         } catch (e: AlertScreenException) {
-            lastComboAlert = e.alertScreenContent
+            lastComboAlert = e.alertCode
 
-            notifyAboutComboAlert(e.alertScreenContent)
+            notifyAboutComboAlert(e.alertCode)
 
-            // Disconnect since we are now in the Error state.
             disconnectInternal(forceDisconnect = true)
 
             throw e
         } catch (t: Throwable) {
-            // Disconnect since we are now in the Error state.
             disconnectInternal(forceDisconnect = true)
             throw t
         }
@@ -2198,43 +2043,41 @@ class ComboV2Plugin @Inject constructor(
         _lastConnectionTimestampUIFlow.value = lastConnectionTimestamp
     }
 
-    private fun getAlertDescription(alert: AlertScreenContent) =
-        when (alert) {
-            is AlertScreenContent.Warning -> {
-                val desc = when (alert.code) {
-                    4    -> rh.gs(R.string.combov2_warning_4)
-                    10   -> rh.gs(R.string.combov2_warning_10)
-                    else -> ""
-                }
+    private fun getAlertDescription(alertCode: String): String {
+        val isWarning = alertCode.startsWith("W", ignoreCase = true)
+        val isError = alertCode.startsWith("E", ignoreCase = true)
+        val codeNum = alertCode.removePrefix("W").removePrefix("w").removePrefix("E").removePrefix("e").toIntOrNull()
 
-                "${rh.gs(R.string.combov2_warning)} W${alert.code}" +
-                    if (desc.isEmpty()) "" else ": $desc"
+        return if (isWarning) {
+            val desc = when (codeNum) {
+                4    -> rh.gs(R.string.combov2_warning_4)
+                10   -> rh.gs(R.string.combov2_warning_10)
+                else -> ""
             }
-
-            is AlertScreenContent.Error   -> {
-                val desc = when (alert.code) {
-                    1    -> rh.gs(R.string.combov2_error_1)
-                    2    -> rh.gs(R.string.combov2_error_2)
-                    4    -> rh.gs(R.string.combov2_error_4)
-                    5    -> rh.gs(R.string.combov2_error_5)
-                    6    -> rh.gs(R.string.combov2_error_6)
-                    7    -> rh.gs(R.string.combov2_error_7)
-                    8    -> rh.gs(R.string.combov2_error_8)
-                    9    -> rh.gs(R.string.combov2_error_9)
-                    10   -> rh.gs(R.string.combov2_error_10)
-                    11   -> rh.gs(R.string.combov2_error_11)
-                    else -> ""
-                }
-
-                "${rh.gs(R.string.combov2_error)} E${alert.code}" +
-                    if (desc.isEmpty()) "" else ": $desc"
+            "${rh.gs(R.string.combov2_warning)} $alertCode" + if (desc.isEmpty()) "" else ": $desc"
+        } else if (isError || codeNum != null) {
+            val desc = when (codeNum) {
+                1    -> rh.gs(R.string.combov2_error_1)
+                2    -> rh.gs(R.string.combov2_error_2)
+                4    -> rh.gs(R.string.combov2_error_4)
+                5    -> rh.gs(R.string.combov2_error_5)
+                6    -> rh.gs(R.string.combov2_error_6)
+                7    -> rh.gs(R.string.combov2_error_7)
+                8    -> rh.gs(R.string.combov2_error_8)
+                9    -> rh.gs(R.string.combov2_error_9)
+                10   -> rh.gs(R.string.combov2_error_10)
+                11   -> rh.gs(R.string.combov2_error_11)
+                else -> ""
             }
-
-            else                          -> rh.gs(R.string.combov2_unrecognized_alert)
+            "${rh.gs(R.string.combov2_error)} $alertCode" + if (desc.isEmpty()) "" else ": $desc"
+        } else {
+            rh.gs(R.string.combov2_unrecognized_alert)
         }
+    }
 
-    private fun notifyAboutComboAlert(alert: AlertScreenContent) {
-        if (alert is AlertScreenContent.Error) {
+    private fun notifyAboutComboAlert(alertCode: String) {
+        val isWarning = alertCode.startsWith("W", ignoreCase = true)
+        if (!isWarning) {
             aapsLogger.info(LTag.PUMP, "Error screen observed - setting pumpErrorObserved flag")
             pumpErrorObserved = true
             startPumpErrorTimeout()
@@ -2242,78 +2085,7 @@ class ComboV2Plugin @Inject constructor(
 
         uiInteraction.addNotification(
             Notification.COMBO_PUMP_ALARM,
-            text = "${rh.gs(R.string.combov2_combo_alert)}: ${getAlertDescription(alert)}",
-            level = if (alert is AlertScreenContent.Warning) Notification.NORMAL else Notification.URGENT
+            text = "${rh.gs(R.string.combov2_combo_alert)}: ${getAlertDescription(alertCode)}",
+            level = if (isWarning) Notification.NORMAL else Notification.URGENT
         )
     }
-
-    private fun reportFinishedBolus(status: String, id: Long, pumpEnactResult: PumpEnactResult, succeeded: Boolean) {
-        rxBus.send(EventOverviewBolusProgress(rh, percent = 100, id = id))
-
-        pumpEnactResult.apply {
-            success = succeeded
-            comment = status
-        }
-    }
-
-    private fun reportFinishedBolus(stringId: Int, id: Long, pumpEnactResult: PumpEnactResult, succeeded: Boolean) =
-        reportFinishedBolus(rh.gs(stringId), id, pumpEnactResult, succeeded)
-
-    private fun createFailurePumpEnactResult(comment: Int) =
-        pumpEnactResultProvider.get()
-            .success(false)
-            .enacted(false)
-            .comment(comment)
-
-    private fun getBluetoothAddress(): ComboCtlBluetoothAddress? =
-        pumpManager?.getPairedPumpAddresses()?.firstOrNull()
-
-    private fun getAcquiredPump() = pump ?: throw Error("There is no currently acquired pump; this should not happen. Please report this as a bug.")
-
-    private fun isDisconnected() =
-        when (driverStateFlow.value) {
-            DriverState.NotInitialized,
-            DriverState.Disconnected -> true
-
-            else                     -> false
-        }
-
-    override fun addPreferenceScreen(preferenceManager: PreferenceManager, parent: PreferenceScreen, context: Context, requiredKey: String?) {
-        if (requiredKey != null) return
-
-        val category = PreferenceCategory(context)
-        parent.addPreference(category)
-        category.apply {
-            key = "combov2_settings"
-            title = rh.gs(R.string.combov2_title)
-            initialExpandedChildrenCount = 0
-            addPreference(
-                AdaptiveIntentPreference(
-                    ctx = context, intentKey = ComboIntentKey.PairWithPump, title = R.string.combov2_pair_with_pump_title, summary = R.string.combov2_pair_with_pump_summary,
-                    intent = Intent(context, ComboV2PairingActivity::class.java)
-                )
-            )
-            addPreference(
-                AdaptiveIntentPreference(
-                    ctx = context, intentKey = ComboIntentKey.UnpairPump, title = R.string.combov2_unpair_pump_title, summary = R.string.combov2_unpair_pump_summary
-                ).apply {
-                    onPreferenceClickListener = Preference.OnPreferenceClickListener { preference ->
-                        OKDialog.showConfirmation(preference.context, "Confirm pump unpairing", "Do you really want to unpair the pump?", ok = Runnable { unpair() })
-                        false
-                    }
-                }
-            )
-            addPreference(AdaptiveIntPreference(ctx = context, intKey = ComboIntKey.DiscoveryDuration, title = R.string.combov2_discovery_duration))
-            addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.AutomaticReservoirEntry, title = R.string.combov2_automatic_reservoir_entry))
-            addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.AutomaticBatteryEntry, title = R.string.combov2_automatic_battery_entry))
-            addPreference(
-                AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.VerboseLogging, title = R.string.combov2_verbose_logging).apply {
-                    onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-                        updateComboCtlLogLevel(newValue as Boolean)
-                        true
-                    }
-                }
-            )
-        }
-    }
-}
