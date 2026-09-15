@@ -2306,14 +2306,7 @@ class ComboV2Plugin @Inject constructor(
             addPreference(AdaptiveIntPreference(ctx = context, intKey = ComboIntKey.DiscoveryDuration, title = R.string.combov2_discovery_duration))
             addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.AutomaticReservoirEntry, title = R.string.combov2_automatic_reservoir_entry))
             addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.AutomaticBatteryEntry, title = R.string.combov2_automatic_battery_entry))
-            addPreference(
-                AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.VerboseLogging, title = R.string.combov2_verbose_logging).apply {
-                    onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-                        updateComboCtlLogLevel(newValue as Boolean)
-                        true
-                    }
-                }
-            )
+            addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.VerboseLogging, title = R.string.combov2_verbose_logging))
         }
     }
 }
