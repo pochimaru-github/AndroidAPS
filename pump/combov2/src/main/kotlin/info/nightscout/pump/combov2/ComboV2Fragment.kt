@@ -1,25 +1,20 @@
 package info.nightscout.pump.combov2
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import info.nightscout.androidaps.data.R
 import info.nightscout.androidaps.databinding.Combov2FragmentBinding
-import info.nightscout.androidaps.interfaces.PumpPlugin
-import info.nightscout.androidaps.plugins.pump.common.hw.comboctl.ComboCtlLogger
-import info.nightscout.androidaps.plugins.pump.common.hw.comboctl.ComboCtlLogLevel
-import info.nightscout.androidaps.plugins.pump.common.hw.comboctl.ComboCtlPump
-import info.nightscout.androidaps.ui.AAPSBaseFragment
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class ComboV2Fragment : AAPSBaseFragment() {
+class ComboV2Fragment : Fragment() {
 
     @Inject
     lateinit var comboV2Plugin: ComboV2Plugin
