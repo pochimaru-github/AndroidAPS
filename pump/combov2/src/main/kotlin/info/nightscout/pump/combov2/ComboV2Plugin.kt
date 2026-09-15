@@ -111,6 +111,7 @@ import info.nightscout.comboctl.base.Logger as ComboCtlLogger
 import info.nightscout.comboctl.base.Tbr as ComboCtlTbr
 import info.nightscout.comboctl.main.Pump as ComboCtlPump
 import info.nightscout.comboctl.main.PumpManager as ComboCtlPumpManager
+import info.nightscout.comboctl.model.AlertScreenContent
 
 internal const val PUMP_ERROR_TIMEOUT_INTERVAL_MSECS = 1000L * 60 * 5
 
