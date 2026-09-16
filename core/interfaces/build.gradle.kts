@@ -10,8 +10,19 @@ plugins {
 
 android {
     namespace = "app.aaps.core.interfaces"
+    compileSdk = 33
+
     defaultConfig {
-        minSdk = 26 // ← Versions 参照から直値 26 へ変更
+        minSdk = 26
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
