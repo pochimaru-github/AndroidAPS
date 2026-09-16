@@ -14,9 +14,7 @@ tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "17"
         freeCompilerArgs = freeCompilerArgs + listOf(
-            "-opt-in=kotlin.ExperimentalStdlibApi",
-            "-language-version=1.9",
-            "-Xskip-prerelease-check"
+            "-opt-in=kotlin.ExperimentalStdlibApi"
         )
     }
 }
