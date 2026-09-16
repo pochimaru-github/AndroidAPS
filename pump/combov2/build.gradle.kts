@@ -34,14 +34,14 @@ kapt {
 }
 
 dependencies {
-    implementation(project(":core:data"))
-    implementation(project(":core:interfaces"))
-    implementation(project(":core:keys"))
-    implementation(project(":core:libraries"))
-    implementation(project(":core:objects"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:utils"))
-    implementation(project(":core:validators"))
+    api(project(":core:data"))
+    api(project(":core:interfaces"))
+    api(project(":core:keys"))
+    api(project(":core:libraries"))
+    api(project(":core:objects"))
+    api(project(":core:ui"))
+    api(project(":core:utils"))
+    api(project(":core:validators"))
 
     api(project(":pump:combov2:comboctl"))
 
