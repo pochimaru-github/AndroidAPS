@@ -9,6 +9,22 @@ plugins {
 
 android {
     namespace = "info.nightscout.pump.combov2"
+    compileSdk = 33
+
+    defaultConfig {
+        minSdk = 26
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xmulti-platform", "-Xexpect-actual-classes")
+    }
+
     buildFeatures {
         dataBinding = true
     }
