@@ -62,9 +62,6 @@ import info.nightscout.comboctl.base.NullDisplayFrame
 import info.nightscout.comboctl.base.PairingPIN
 import info.nightscout.comboctl.main.BasalProfile
 import info.nightscout.comboctl.main.QuantityNotChangingException
-import info.nightscout.comboctl.base.*
-import info.nightscout.comboctl.parser.*
-import info.nightscout.comboctl.main.*
 import info.nightscout.pump.combov2.activities.ComboV2PairingActivity
 import info.nightscout.pump.combov2.keys.ComboBooleanKey
 import info.nightscout.pump.combov2.keys.ComboIntKey
@@ -110,6 +107,9 @@ import info.nightscout.comboctl.base.Tbr as ComboCtlTbr
 import info.nightscout.comboctl.main.Pump as ComboCtlPump
 import info.nightscout.comboctl.main.PumpManager as ComboCtlPumpManager
 import info.nightscout.comboctl.main.PumpStatus
+import info.nightscout.comboctl.main.PumpStatus
+import info.nightscout.comboctl.main.AlertScreen
+import info.nightscout.comboctl.main.CommandDescription
 
 internal const val PUMP_ERROR_TIMEOUT_INTERVAL_MSECS = 1000L * 60 * 5
 
