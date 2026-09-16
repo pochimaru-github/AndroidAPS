@@ -90,7 +90,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.joda.time.DateTime
+import orgorg.joda.time.DateTime
 import org.json.JSONObject
 import java.util.Locale
 import javax.inject.Inject
@@ -106,7 +106,6 @@ import info.nightscout.comboctl.base.Logger as ComboCtlLogger
 import info.nightscout.comboctl.base.Tbr as ComboCtlTbr
 import info.nightscout.comboctl.main.Pump as ComboCtlPump
 import info.nightscout.comboctl.main.PumpManager as ComboCtlPumpManager
-import info.nightscout.comboctl.main.PumpStatus
 import info.nightscout.comboctl.main.PumpStatus
 import info.nightscout.comboctl.main.AlertScreen
 import info.nightscout.comboctl.main.CommandDescription
@@ -1301,10 +1300,10 @@ private fun updateLevels() {
 
     override fun updateExtendedJsonStatus(extendedStatus: JSONObject) {
         when (val alert = lastComboAlert) {
-            is AlertScreenContent.Warning ->
+            is AlertScreen.Content.Warning ->
                 extendedStatus.put("WarningCode", alert.code)
 
-            is AlertScreenContent.Error   ->
+            is AlertScreen.Content.Error   ->
                 extendedStatus.put("ErrorCode", alert.code)
 
             else                          -> Unit
@@ -2188,9 +2187,9 @@ private fun updateLevels() {
         _lastConnectionTimestampUIFlow.value = lastConnectionTimestamp
     }
 
-    private fun getAlertDescription(alert: AlertScreenContent) =
+    private fun getAlertDescription(alert: AlertScreen.Content) =
         when (alert) {
-            is AlertScreenContent.Warning -> {
+            is AlertScreen.Content.Warning -> {
                 val desc = when (alert.code) {
                     4    -> rh.gs(R.string.combov2_warning_4)
                     10   -> rh.gs(R.string.combov2_warning_10)
@@ -2201,7 +2200,7 @@ private fun updateLevels() {
                     if (desc.isEmpty()) "" else ": $desc"
             }
 
-            is AlertScreenContent.Error   -> {
+            is AlertScreen.Content.Error   -> {
                 val desc = when (alert.code) {
                     1    -> rh.gs(R.string.combov2_error_1)
                     2    -> rh.gs(R.string.combov2_error_2)
@@ -2223,8 +2222,8 @@ private fun updateLevels() {
             else                          -> rh.gs(R.string.combov2_unrecognized_alert)
         }
 
-    private fun notifyAboutComboAlert(alert: AlertScreenContent) {
-        if (alert is AlertScreenContent.Error) {
+    private fun notifyAboutComboAlert(alert: AlertScreen.Content) {
+        if (alert is AlertScreen.Content.Error) {
             aapsLogger.info(LTag.PUMP, "Error screen observed - setting pumpErrorObserved flag")
             pumpErrorObserved = true
             startPumpErrorTimeout()
@@ -2233,7 +2232,7 @@ private fun updateLevels() {
         uiInteraction.addNotification(
             Notification.COMBO_PUMP_ALARM,
             text = "${rh.gs(R.string.combov2_combo_alert)}: ${getAlertDescription(alert)}",
-            level = if (alert is AlertScreenContent.Warning) Notification.NORMAL else Notification.URGENT
+            level = if (alert is AlertScreen.Content.Warning) Notification.NORMAL else Notification.URGENT
         )
     }
 
