@@ -8,19 +8,30 @@ plugins {
 }
 
 android {
-
     namespace = "app.aaps.pump.diaconn"
-
-    buildFeatures {
-        dataBinding = true
-        viewBinding = true
-    }
+    compileSdk = 33
 
     defaultConfig {
+        minSdk = 26
+
         ksp {
             arg("room.incremental", "true")
             arg("room.schemaLocation", "$projectDir/schemas")
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
     }
 }
 
@@ -33,7 +44,7 @@ dependencies {
     implementation(project(":core:utils"))
     implementation(project(":core:ui"))
     implementation(project(":core:validators"))
-    implementation(project(":pump:common"))
+    api(project(":pump:common"))
     implementation(project(":shared:impl"))
 
     api(libs.androidx.room)
