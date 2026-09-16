@@ -23,9 +23,11 @@ android {
     sourceSets {
         getByName("main") {
             java.srcDirs("src/commonMain/kotlin", "src/androidMain/kotlin", "src/main/kotlin")
+            kotlin.srcDirs("src/commonMain/kotlin", "src/androidMain/kotlin", "src/main/kotlin")
         }
         getByName("test") {
             java.srcDirs("src/commonTest/kotlin", "src/test/kotlin")
+            kotlin.srcDirs("src/commonTest/kotlin", "src/test/kotlin")
         }
     }
 }
