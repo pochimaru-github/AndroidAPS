@@ -7,6 +7,16 @@ plugins {
 android {
     namespace = "info.nightscout.comboctl"
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xexpect-actual-classes")
+    }
+
     sourceSets {
         getByName("main") {
             java.srcDirs("src/commonMain/kotlin", "src/androidMain/kotlin", "src/main/kotlin")
