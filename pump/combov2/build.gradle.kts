@@ -29,6 +29,10 @@ android {
     }
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:interfaces"))
@@ -38,7 +42,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:utils"))
     implementation(project(":core:validators"))
-    implementation(project(":pump:combov2:comboctl"))
+
+    api(project(":pump:combov2:comboctl"))
 
     api(libs.androidx.lifecycle.viewmodel)
     api(libs.kotlinx.datetime)
