@@ -1,21 +1,34 @@
 plugins {
     alias(libs.plugins.android.library)
     id("kotlin-android")
-    id("kotlin-kapt") // ←【追加】DataBinding の自動生成処理（kapt）を有効化
+    id("kotlin-kapt")
 }
 
 android {
     namespace = "app.aaps.core.ui"
+    compileSdk = 33
 
     defaultConfig {
         minSdk = 26
     }
 
-    // 【追加】DataBinding と ViewBinding の自動生成を有効化
     buildFeatures {
         dataBinding = true
         viewBinding = true
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+kapt {
+    correctErrorTypes = true
 }
 
 dependencies {
