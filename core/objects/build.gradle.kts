@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
-    id("kotlin-kapt") // ← 【変更】alias(libs.plugins.ksp) から kapt へ変更
+    id("kotlin-kapt")
     id("kotlin-android")
     id("kotlin-parcelize")
     id("android-module-dependencies")
@@ -11,12 +11,25 @@ plugins {
 
 android {
     namespace = "app.aaps.core.objects"
+    compileSdk = 33
 
     defaultConfig {
         minSdk = 26
-        // ベクター画像の互換処理（リソースマージ時の Workers クラッシュを防止）
         vectorDrawables.useSupportLibrary = true
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+kapt {
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -41,7 +54,6 @@ dependencies {
     //WorkManager
     api(libs.androidx.work.runtime)  // DataWorkerStorage
 
-    // 【変更】Dagger アノテーションプロセッサを ksp から kapt へ変更
     kapt(libs.com.google.dagger.compiler)
     kapt(libs.com.google.dagger.android.processor)
 }
