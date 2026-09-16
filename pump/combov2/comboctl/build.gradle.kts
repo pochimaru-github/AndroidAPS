@@ -24,19 +24,21 @@ android {
     sourceSets {
         getByName("main") {
             java.srcDirs("src/commonMain/kotlin", "src/androidMain/kotlin", "src/main/kotlin")
-            kotlin.srcDirs("src/commonMain/kotlin", "src/androidMain/kotlin", "src/main/kotlin")
             manifest.srcFile("src/androidMain/AndroidManifest.xml")
         }
         getByName("test") {
             java.srcDirs("src/commonTest/kotlin", "src/test/kotlin")
-            kotlin.srcDirs("src/commonTest/kotlin", "src/test/kotlin")
         }
     }
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.datetime)
-    implementation(libs.androidx.core)
+    api(libs.kotlinx.coroutines.core)
+    api(libs.kotlinx.datetime)
+    api(libs.androidx.core)
+
+    api(platform(libs.kotlinx.serialization.bom))
+    runtimeOnly(libs.kotlinx.serialization.core)
+
     testImplementation(kotlin("test"))
 }
