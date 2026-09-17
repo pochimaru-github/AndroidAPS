@@ -1326,19 +1326,20 @@ private fun updateLevels() {
     override val pumpDescription: PumpDescription
         get() = _pumpDescription
 
-    override fun pumpSpecificShortStatus(veryShort: Boolean): String {
-        val lines = mutableListOf<String>()
+    // 修正後
+override fun pumpSpecificShortStatus(veryShort: Boolean): String {
+    val lines = mutableListOf<String>()
 
-        val alertCodeString = when (val alert = lastComboAlert) {
-            is AlertScreenContent.Warning -> "W${alert.code}"
-            is AlertScreenContent.Error   -> "E${alert.code}"
-            else                          -> null
-        }
-        if (alertCodeString != null)
-            lines += rh.gs(R.string.combov2_short_status_alert, alertCodeString)
-
-        return lines.joinToString("\n")
+    val alertCodeString = when (val alert = lastComboAlert) {
+        is AlertScreen.Content.Warning -> "W${alert.code}"
+        is AlertScreen.Content.Error   -> "E${alert.code}"
+        else                           -> null
     }
+    if (alertCodeString != null)
+        lines += rh.gs(R.string.combov2_short_status_alert, alertCodeString)
+
+    return lines.joinToString("\n")
+}
 
     override val isFakingTempsByExtendedBoluses = false
 
