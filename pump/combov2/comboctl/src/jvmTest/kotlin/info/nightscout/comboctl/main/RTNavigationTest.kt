@@ -7,7 +7,7 @@ import info.nightscout.comboctl.base.NullDisplayFrame
 import info.nightscout.comboctl.base.PathSegment
 import info.nightscout.comboctl.base.findShortestPath
 import info.nightscout.comboctl.base.testUtils.runBlockingWithWatchdog
-import info.nightscout.comboctl.parser.AlertScreenContent
+import info.nightscout.comboctl.parser.AlertScreen
 import info.nightscout.comboctl.parser.AlertScreenException
 import info.nightscout.comboctl.parser.BatteryState
 import info.nightscout.comboctl.parser.MainScreenContent
@@ -770,10 +770,6 @@ class RTNavigationTest : TestBase() {
 
     @Test
     fun checkLongPressRTButtonInnerAbort() {
-        // Modified checkLongPressRTButtonUntil() test with a W6 warning
-        // screen in between. We except the long button press to be aborted
-        // and an AlertScreenException to be thrown.
-
         val rtNavigationContext = TestRTNavigationContext(
             listOf(
                 ParsedScreen.MainScreen(
@@ -786,7 +782,8 @@ class RTNavigationTest : TestBase() {
                 ),
                 ParsedScreen.BasalRate1ProgrammingMenuScreen,
                 ParsedScreen.BasalRate2ProgrammingMenuScreen,
-                ParsedScreen.AlertScreen(AlertScreenContent.Warning(code = 6, AlertScreenContent.AlertScreenState.TO_SNOOZE)),
+                // 修正箇所：AlertScreen.Content を使用
+                ParsedScreen.AlertScreen(AlertScreen.Content.Warning(code = 6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)),
                 ParsedScreen.BasalRate3ProgrammingMenuScreen,
                 ParsedScreen.BasalRate4ProgrammingMenuScreen,
                 ParsedScreen.BasalRate5ProgrammingMenuScreen
@@ -795,7 +792,6 @@ class RTNavigationTest : TestBase() {
 
         runBlockingWithWatchdog(12000) {
             val e = assertFailsWith<AlertScreenException> {
-                // Keep long-pressing the button. Eventually, the W6 screen is received.
                 longPressRTButtonUntil(rtNavigationContext, RTNavigationButton.MENU) { parsedScreen ->
                     if (parsedScreen is ParsedScreen.BasalRate4ProgrammingMenuScreen)
                         LongPressRTButtonsCommand.ReleaseButton
@@ -803,13 +799,9 @@ class RTNavigationTest : TestBase() {
                         LongPressRTButtonsCommand.ContinuePressingButton
                 }
             }
-            assertIs<AlertScreenContent.Warning>(e.alertScreenContent)
+            // 修正箇所：AlertScreen.Content.Warning を指定
+            assertIs<AlertScreen.Content.Warning>(e.alertScreenContent)
             assertEquals(6, e.alertScreenContent.code)
-            // Simulate a short RT button press that would be used after the exception
-            // was thrown to dismiss the W6 warning. This also checks that the long
-            // button press has been finished correctly; if not, this call may fail
-            // because the code incorrectly thinks that a long press button job
-            // is still ongoing.
             rtNavigationContext.shortPressButton(RTNavigationButton.CHECK)
         }
     }
@@ -913,12 +905,6 @@ class RTNavigationTest : TestBase() {
 
     @Test
     fun checkAdjustQuantityOnScreenWithW6WarningDuringShortButtonPresses() {
-        // Modified checkAdjustQuantityOnScreen() variant with a W6 warning screen in between
-        // the screens that are received by the code when it corrects a long button press
-        // overshoot with a number of short button presses. We expect an AlertScreenException
-        // to be thrown. Such a warning screen interrupts and aborts whatever operation we
-        // were doing and returns the Combo back to the main screen.
-
         val rtNavigationContext = TestRTNavigationContext(
             listOf(
                 ParsedScreen.TemporaryBasalRatePercentageScreen(100, remainingDurationInMinutes = 30),
@@ -927,15 +913,11 @@ class RTNavigationTest : TestBase() {
                 ParsedScreen.TemporaryBasalRatePercentageScreen(130, remainingDurationInMinutes = 30),
                 ParsedScreen.TemporaryBasalRatePercentageScreen(140, remainingDurationInMinutes = 30),
                 ParsedScreen.TemporaryBasalRatePercentageScreen(150, remainingDurationInMinutes = 30),
-                // No 160 quantity here, on purpose, to test overshoot handling.
-                // During the screens below, short button presses will be used
-                // to fix the overshoot, so we place the W6 in between these
-                // to test that the AlertScreenException is correctly thrown
-                // while short-pressing the button.
                 ParsedScreen.TemporaryBasalRatePercentageScreen(170, remainingDurationInMinutes = 30),
                 ParsedScreen.TemporaryBasalRatePercentageScreen(170, remainingDurationInMinutes = 30),
                 ParsedScreen.TemporaryBasalRatePercentageScreen(170, remainingDurationInMinutes = 30),
-                ParsedScreen.AlertScreen(AlertScreenContent.Warning(code = 6, AlertScreenContent.AlertScreenState.TO_SNOOZE)),
+                // 修正箇所：AlertScreen.Content を使用
+                ParsedScreen.AlertScreen(AlertScreen.Content.Warning(code = 6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)),
                 ParsedScreen.TemporaryBasalRatePercentageScreen(160, remainingDurationInMinutes = 30),
                 ParsedScreen.TemporaryBasalRatePercentageScreen(160, remainingDurationInMinutes = 30)
             )
@@ -954,7 +936,8 @@ class RTNavigationTest : TestBase() {
                 }
             }
         }
-        assertIs<AlertScreenContent.Warning>(e.alertScreenContent)
+        // 修正箇所：AlertScreen.Content.Warning を指定
+        assertIs<AlertScreen.Content.Warning>(e.alertScreenContent)
         assertEquals(6, e.alertScreenContent.code)
     }
 
