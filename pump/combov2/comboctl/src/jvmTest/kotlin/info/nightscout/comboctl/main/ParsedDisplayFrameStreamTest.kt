@@ -6,7 +6,7 @@ import info.nightscout.comboctl.base.LogLevel
 import info.nightscout.comboctl.base.Logger
 import info.nightscout.comboctl.base.NUM_DISPLAY_FRAME_PIXELS
 import info.nightscout.comboctl.base.timeWithoutDate
-import info.nightscout.comboctl.parser.AlertScreenContent
+import info.nightscout.comboctl.parser.AlertScreen
 import info.nightscout.comboctl.parser.AlertScreenException
 import info.nightscout.comboctl.parser.BatteryState
 import info.nightscout.comboctl.parser.MainScreenContent
@@ -302,7 +302,7 @@ class ParsedDisplayFrameStreamTest : TestBase() {
         // We expect normal parsing behavior.
         stream.feedDisplayFrame(testFrameW6CancelTbrWarningScreen)
         val parsedWarningFrame = stream.getParsedDisplayFrame(processAlertScreens = false)
-        assertEquals(ParsedScreen.AlertScreen(AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)), parsedWarningFrame!!.parsedScreen)
+        assertEquals(ParsedScreen.AlertScreen(AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)), parsedWarningFrame!!.parsedScreen)
 
         // Feed a W6 screen, but with alert screen detection enabled.
         // We expect the alert screen to be detected and an exception
@@ -311,8 +311,8 @@ class ParsedDisplayFrameStreamTest : TestBase() {
             stream.feedDisplayFrame(testFrameW6CancelTbrWarningScreen)
             stream.getParsedDisplayFrame(processAlertScreens = true)
         }
-        assertIs<AlertScreenContent.Warning>(alertScreenException.alertScreenContent)
-        assertEquals(6, (alertScreenException.alertScreenContent as AlertScreenContent.Warning).code)
+        assertIs<AlertScreen.Content.Warning>(alertScreenException.AlertScreen.Content)
+        assertEquals(6, (alertScreenException.AlertScreen.Content as AlertScreen.Content.Warning).code)
 
         // Feed another dummy non-alert screen to see that the stream
         // parses correctly even after an AlertScreenException.
