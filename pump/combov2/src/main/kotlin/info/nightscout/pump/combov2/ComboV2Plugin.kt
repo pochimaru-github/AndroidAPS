@@ -106,8 +106,13 @@ import info.nightscout.comboctl.base.Logger as ComboCtlLogger
 import info.nightscout.comboctl.base.Tbr as ComboCtlTbr
 import info.nightscout.comboctl.main.Pump as ComboCtlPump
 import info.nightscout.comboctl.main.PumpManager as ComboCtlPumpManager
-import info.nightscout.comboctl.main.PumpStatus
-import info.nightscout.comboctl.main.AlertScreen
+
+// 修正前
+// import info.nightscout.comboctl.main.PumpStatus
+// import info.nightscout.comboctl.main.AlertScreen
+// 修正後
+import info.nightscout.comboctl.main.AlertScreenException
+
 import info.nightscout.comboctl.main.CommandDescription
 
 internal const val PUMP_ERROR_TIMEOUT_INTERVAL_MSECS = 1000L * 60 * 5
@@ -167,7 +172,7 @@ class ComboV2Plugin @Inject constructor(
     private var pumpUIFlowsDeferred: Deferred<Unit>? = null
 
     // States for the Pump interface and for the UI.
-    private var pumpStatus: PumpStatus? = null
+    // private var pumpStatus: PumpStatus? = null
     private var lastConnectionTimestamp = 0L
     private var lastComboAlert: AlertScreen.Content? = null
 
@@ -617,6 +622,8 @@ class ComboV2Plugin @Inject constructor(
                             setDriverState(driverState)
                         }
                         .launchIn(this)
+                        
+                        /*
                     acquiredPump.pumpStatus
     .onEach { newPumpStatus ->
         if (newPumpStatus == null) return@onEach
@@ -630,6 +637,7 @@ class ComboV2Plugin @Inject constructor(
         rxBus.send(EventRefreshOverview("ComboV2 pump status updated"))
     }
     .launchIn(this)
+*/
 
 acquiredPump.lastBolus
     .onEach { lastBolus ->
@@ -955,7 +963,7 @@ private fun updateLevels() {
 
             _reservoirLevel = newLevel.toDouble()
         }
-
+/* Step 1: CIビルド導通のため一時コメントアウト（Step 2で現行APIへ置換予定）
         pumpStatus?.batteryState?.let { newState ->
             val newLevel = when (newState) {
                 PumpStatus.BatteryState.NO_BATTERY   -> 5
@@ -979,6 +987,7 @@ private fun updateLevels() {
 
             _batteryLevel = newLevel
         }
+        */
     }
 
     override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactResult {
