@@ -35,4 +35,4 @@ jobs:
         run: |
           ./gradlew clean
           ./gradlew :pump:combov2:kaptGenerateStubsReleaseKotlin
-        // run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache --no-daemon --no-parallel -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+        # run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache --no-daemon --no-parallel -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
