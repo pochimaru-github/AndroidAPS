@@ -230,54 +230,17 @@ private var lastComboAlert: Any? = null
 
     /*** Public functions and base class & interface overrides ***/
 
-    sealed class DriverState(@Suppress("unused") val label: String) {
+    sealed class DriverState(val name: String) {
+        object Disconnected : DriverState("disconnected")
+        object Connecting : DriverState("connecting")
+        object Connected : DriverState("connected")
 
-        // Initial state when the driver is created.
-        data object NotInitialized : DriverState("notInitialized")
+        /* TODO: Step 2 - CommandDescriptionの現行構造適合時に元の型を復元
+        class ExecutingCommand(val description: ComboCtlPump.CommandDescription) : DriverState("executingCommand")
+        */
+        class ExecutingCommand(val description: String? = null) : DriverState("executingCommand")
 
-        // Driver is disconnected from the pump, or no pump
-        // is currently paired. In onStart() the driver state
-        // changes from NotInitialized to this.
-        data object Disconnected : DriverState("disconnected")
-
-        // Driver is currently connecting to the pump. isBusy()
-        // will return true in this state.
-        data object Connecting : DriverState("connecting")
-
-        // Driver is running checks on the pump, like verifying
-        // that the basal rate is OK, checking for any bolus
-        // and TBR activity that AAPS doesn't know about etc.
-        // isBusy() will return true in this state.
-        data object CheckingPump : DriverState("checkingPump")
-
-        // Driver is connected and ready to execute commands.
-        data object Ready : DriverState("ready")
-
-        // Driver is connected, but pump is suspended and
-        // cannot currently execute commands. This state is
-        // special in that it technically persists even after
-        // disconnecting (because the pump remains suspended
-        // until the user resumes it, not until the connection
-        // is terminated), but it does not persists the same
-        // way here (it is replaced by Disconnected after
-        // the connection is terminated). This state is used
-        // for UI updates (see driverStateUIFlow) and for
-        // checks during driver state updates and connection
-        // attempts.
-        // NOTE: Do not compare against this state to check
-        // prior to commands like deliverTreatment() if
-        // the pump is currently suspended or not. Use
-        // isSuspended() instead. See the pumpIsSuspended
-        // documentation for details.
-        data object Suspended : DriverState("suspended")
-
-        // Driver is currently executing a command.
-        // isBusy() will return true in this state.
-        // 修正前
-        // class ExecutingCommand(val description: ComboCtlPump.CommandDescription) : DriverState("executingCommand")
-        // 修正後
-        // class ExecutingCommand(val description: String? = null) : DriverState("executingCommand")
-        data object Error : DriverState("error")
+        object Error : DriverState("error")
     }
 
     private val driverStateFlow = _driverStateFlow.asStateFlow()
