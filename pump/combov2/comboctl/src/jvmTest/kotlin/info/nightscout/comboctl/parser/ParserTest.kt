@@ -681,16 +681,16 @@ class ParserTest : TestBase() {
 
         assertEquals(ParseResult.Value::class, result::class)
         val alertScreen = (result as ParseResult.Value<*>).value as ParsedScreen.AlertScreen
-        assertEquals(AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE), alertScreen.content)
+        assertEquals(AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE), alertScreen.content)
     }
 
     @Test
     fun checkW8CancelBolusWarningScreenParsing() {
         val testScreens = listOf(
-            Pair(testFrameW8CancelBolusWarningScreen0, AlertScreenContent.None),
-            Pair(testFrameW8CancelBolusWarningScreen1, AlertScreenContent.Warning(8, AlertScreenContent.AlertScreenState.TO_SNOOZE)),
-            Pair(testFrameW8CancelBolusWarningScreen2, AlertScreenContent.None),
-            Pair(testFrameW8CancelBolusWarningScreen3, AlertScreenContent.Warning(8, AlertScreenContent.AlertScreenState.TO_CONFIRM))
+            Pair(testFrameW8CancelBolusWarningScreen0, AlertScreen.Content.None),
+            Pair(testFrameW8CancelBolusWarningScreen1, AlertScreen.Content.Warning(8, AlertScreen.Content.AlertScreenState.TO_SNOOZE)),
+            Pair(testFrameW8CancelBolusWarningScreen2, AlertScreen.Content.None),
+            Pair(testFrameW8CancelBolusWarningScreen3, AlertScreen.Content.Warning(8, AlertScreen.Content.AlertScreenState.TO_CONFIRM))
         )
 
         for (testScreen in testScreens) {
@@ -705,8 +705,8 @@ class ParserTest : TestBase() {
     @Test
     fun checkE2BatteryEmptyErrorScreenParsing() {
         val testScreens = listOf(
-            Pair(testFrameE2BatteryEmptyErrorScreen0, AlertScreenContent.None),
-            Pair(testFrameE2BatteryEmptyErrorScreen1, AlertScreenContent.Error(2, AlertScreenContent.AlertScreenState.ERROR_TEXT))
+            Pair(testFrameE2BatteryEmptyErrorScreen0, AlertScreen.Content.None),
+            Pair(testFrameE2BatteryEmptyErrorScreen1, AlertScreen.Content.Error(2, AlertScreen.Content.AlertScreenState.ERROR_TEXT))
         )
 
         for (testScreen in testScreens) {
@@ -721,10 +721,10 @@ class ParserTest : TestBase() {
     @Test
     fun checkE4OcclusionErrorScreenParsing() {
         val testScreens = listOf(
-            Pair(testFrameE4OcclusionErrorScreen0, AlertScreenContent.Error(4, AlertScreenContent.AlertScreenState.ERROR_TEXT)),
-            Pair(testFrameE4OcclusionErrorScreen1, AlertScreenContent.None),
-            Pair(testFrameE4OcclusionErrorScreen2, AlertScreenContent.Error(4, AlertScreenContent.AlertScreenState.ERROR_TEXT)),
-            Pair(testFrameE4OcclusionErrorScreen3, AlertScreenContent.None),
+            Pair(testFrameE4OcclusionErrorScreen0, AlertScreen.Content.Error(4, AlertScreen.Content.AlertScreenState.ERROR_TEXT)),
+            Pair(testFrameE4OcclusionErrorScreen1, AlertScreen.Content.None),
+            Pair(testFrameE4OcclusionErrorScreen2, AlertScreen.Content.Error(4, AlertScreen.Content.AlertScreenState.ERROR_TEXT)),
+            Pair(testFrameE4OcclusionErrorScreen3, AlertScreen.Content.None),
         )
 
         for (testScreen in testScreens) {
@@ -1009,7 +1009,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 1, day = 28, hour = 11, minute = 0, second = 0),
-                    alert = AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1040,7 +1040,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 1, day = 28, hour = 11, minute = 0, second = 0),
-                    alert = AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1071,7 +1071,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 5, day = 11, hour = 21, minute = 56, second = 0),
-                    alert = AlertScreenContent.Warning(7, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(7, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1102,7 +1102,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 5, day = 11, hour = 21, minute = 56, second = 0),
-                    alert = AlertScreenContent.Warning(7, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(7, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1133,7 +1133,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 5, day = 11, hour = 21, minute = 56, second = 0),
-                    alert = AlertScreenContent.Warning(7, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(7, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1164,7 +1164,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 5, day = 11, hour = 21, minute = 56, second = 0),
-                    alert = AlertScreenContent.Warning(7, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(7, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1195,7 +1195,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 5, day = 11, hour = 21, minute = 56, second = 0),
-                    alert = AlertScreenContent.Warning(7, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(7, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1226,7 +1226,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 5, day = 11, hour = 21, minute = 56, second = 0),
-                    alert = AlertScreenContent.Warning(7, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(7, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1257,7 +1257,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 5, day = 11, hour = 21, minute = 56, second = 0),
-                    alert = AlertScreenContent.Warning(7, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(7, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1288,7 +1288,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 5, day = 11, hour = 21, minute = 56, second = 0),
-                    alert = AlertScreenContent.Warning(7, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(7, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1319,7 +1319,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 5, day = 11, hour = 21, minute = 56, second = 0),
-                    alert = AlertScreenContent.Warning(7, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(7, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1350,7 +1350,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 2, day = 1, hour = 1, minute = 6, second = 0),
-                    alert = AlertScreenContent.Warning(1, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(1, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1381,7 +1381,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 2, day = 1, hour = 1, minute = 6, second = 0),
-                    alert = AlertScreenContent.Warning(1, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(1, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1412,7 +1412,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 2, day = 1, hour = 1, minute = 6, second = 0),
-                    alert = AlertScreenContent.Warning(1, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(1, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1443,7 +1443,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 2, day = 1, hour = 1, minute = 6, second = 0),
-                    alert = AlertScreenContent.Warning(1, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(1, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1474,7 +1474,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 2, day = 1, hour = 1, minute = 6, second = 0),
-                    alert = AlertScreenContent.Warning(1, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(1, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1505,7 +1505,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 2, day = 1, hour = 1, minute = 6, second = 0),
-                    alert = AlertScreenContent.Warning(1, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(1, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1536,7 +1536,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 2, day = 1, hour = 1, minute = 6, second = 0),
-                    alert = AlertScreenContent.Warning(1, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(1, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1567,7 +1567,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 2, day = 1, hour = 1, minute = 6, second = 0),
-                    alert = AlertScreenContent.Warning(1, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(1, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1598,7 +1598,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 1, day = 28, hour = 11, minute = 0, second = 0),
-                    alert = AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1629,7 +1629,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 3, day = 8, hour = 17, minute = 31, second = 0),
-                    alert = AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1660,7 +1660,7 @@ class ParserTest : TestBase() {
                 ParsedScreen.MyDataErrorDataScreen(
                     index = 1, totalNumEntries = 30,
                     timestamp = LocalDateTime(year = 0, month = 3, day = 8, hour = 20, minute = 6, second = 0),
-                    alert = AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.HISTORY_ENTRY)
+                    alert = AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.HISTORY_ENTRY)
                 )
             ),
             Pair(
@@ -1709,179 +1709,179 @@ class ParserTest : TestBase() {
         val testScreens = listOf(
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextEnglishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextEnglishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextSpanishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextSpanishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextFrenchScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextFrenchScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextItalianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextItalianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextRussianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextRussianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextTurkishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextTurkishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextPolishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextPolishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextCzechScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextCzechScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextHungarianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextHungarianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextSlovakScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextSlovakScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextRomanianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextRomanianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextCroatianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextCroatianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextDutchScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextDutchScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextGreekScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextGreekScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextFinnishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextFinnishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextNorwegianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextNorwegianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextPortugueseScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextPortugueseScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextSwedishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextSwedishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextDanishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextDanishScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextGermanScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextGermanScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextSlovenianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextSlovenianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenSnoozeTextLithuanianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_SNOOZE)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_SNOOZE)
             ),
             Pair(
                 AlertSnoozeAndConfirmScreens.testAlertScreenConfirmTextLithuanianScreen,
-                AlertScreenContent.Warning(6, AlertScreenContent.AlertScreenState.TO_CONFIRM)
+                AlertScreen.Content.Warning(6, AlertScreen.Content.AlertScreenState.TO_CONFIRM)
             ),
         )
 
