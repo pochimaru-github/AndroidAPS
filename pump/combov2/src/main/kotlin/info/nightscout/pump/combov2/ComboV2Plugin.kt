@@ -106,7 +106,7 @@ import info.nightscout.comboctl.base.Logger as ComboCtlLogger
 import info.nightscout.comboctl.base.Tbr as ComboCtlTbr
 import info.nightscout.comboctl.main.Pump as ComboCtlPump
 import info.nightscout.comboctl.main.PumpManager as ComboCtlPumpManager
-import info.nightscout.comboctl.main.PumpStatus
+import info.nightscout.comboctl.base.PumpStatus
 import info.nightscout.comboctl.main.AlertScreen
 import info.nightscout.comboctl.main.CommandDescription
 
