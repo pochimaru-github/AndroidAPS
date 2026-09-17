@@ -32,5 +32,5 @@ jobs:
           git commit -am "chore: temporary replace vector drawable attributes for build" || true
 
       - name: Build with Gradle
-        run: ./gradlew :pump:combov2:compileReleaseKotlin -Pkapt.enabled=false
+        run: ./gradlew clean :pump:combov2:compileReleaseKotlin -x :pump:combov2:kaptGenerateStubsReleaseKotlin -x :pump:combov2:kaptReleaseKotlin
         # run: ./gradlew clean assemble${{ github.event.inputs.build_variant }} --stacktrace --no-build-cache --no-daemon --no-parallel -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
