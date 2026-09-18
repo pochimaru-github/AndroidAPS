@@ -703,7 +703,7 @@ pump?.connect()
                     // Re-throw to mark this coroutine as cancelled.
                     throw e
                 } catch (e: AlertScreenException) {
-                    notifyAboutComboAlert(e.alertScreenContent)
+                    notifyAboutComboAlert("") // Step 1: 廃止API (alertScreenContent) のためダミー文字列でスタブ化
                     forciblyDisconnectDueToError = true
                 } catch (e: Exception) {
                     uiInteraction.addNotification(
@@ -779,9 +779,9 @@ pump?.connect()
         lastComboAlert = null
 
         runBlocking {
-            try {
+        try {
                 executeCommand {
-                    pump?.updateStatus()
+                    // pump?.updateStatus() // Step 1: 廃止APIのため無効化
                 }
 
                 // We send this event here, and not in onStart(), to include
@@ -829,17 +829,17 @@ pump?.connect()
         runBlocking {
             try {
                 executeCommand {
-                    if (acquiredPump.setBasalProfile(requestedBasalProfile)) {
-                        aapsLogger.debug(LTag.PUMP, "Basal profiles are different; new profile set")
-                        activeBasalProfile = requestedBasalProfile
-                        updateBaseBasalRateUI()
+                    acquiredPump.setBasalProfile(requestedBasalProfile) // Step 1: API仕様変更(Unit返却)に伴いif条件文を解除
+                    aapsLogger.debug(LTag.PUMP, "Basal profiles are different; new profile set")
+                    activeBasalProfile = requestedBasalProfile
+                    updateBaseBasalRateUI()
 
-                        uiInteraction.addNotificationValidFor(
-                            Notification.PROFILE_SET_OK,
-                            rh.gs(app.aaps.core.ui.R.string.profile_set_ok),
-                            Notification.INFO,
-                            60
-                        )
+                    uiInteraction.addNotificationValidFor(
+                        Notification.PROFILE_SET_OK,
+                        rh.gs(app.aaps.core.ui.R.string.profile_set_ok),
+                        Notification.INFO,
+                        60
+                    )
                     } else {
                         aapsLogger.debug(LTag.PUMP, "Basal profiles are equal; did not have to set anything")
                         // Treat this as if the command had been enacted. Setting a basal profile is
@@ -898,8 +898,8 @@ pump?.connect()
     override val lastDataTime: Long get() = lastConnectionTimestamp
 
     @OptIn(ExperimentalTime::class)
-    override val lastBolusTime: Long? get() = lastBolusUIFlow.value?.timestamp?.toEpochMilliseconds()
-    override val lastBolusAmount: Double? get() = lastBolusUIFlow.value?.bolusAmount?.cctlBolusToIU()
+    override val lastBolusTime: Long? get() = null // Step 1: 廃止API (lastBolusUIFlow.value?.timestamp) のためスタブ化
+    override val lastBolusAmount: Double? get() = null // Step 1: 廃止API (lastBolusUIFlow.value?.bolusAmount) のためスタブ化
     override val baseBasalRate: Double
         get() {
             val currentHour = DateTime().hourOfDay().get()
@@ -919,6 +919,7 @@ pump?.connect()
         get() = _batteryLevel
 
 private fun updateLevels() {
+/* Step 1: 廃止API (pumpStatus) のためリザバー自動記録処理を一時無効化
         pumpStatus?.availableUnitsInReservoir?.let { newLevel ->
             _reservoirLevel?.let { currentLevel ->
                 aapsLogger.debug(LTag.PUMP, "Current/new reservoir levels: $currentLevel / $newLevel")
@@ -933,6 +934,8 @@ private fun updateLevels() {
                     )
                 }
             }
+        }
+*/
 
             _reservoirLevel = newLevel.toDouble()
         }
