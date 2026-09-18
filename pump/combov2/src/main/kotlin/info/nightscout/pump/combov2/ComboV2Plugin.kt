@@ -1669,129 +1669,136 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
     /*** Misc private functions ***/
 
     private fun setupUiFlows(acquiredPump: ComboCtlPump) {
-        pumpUIFlowsDeferred = pumpCoroutineScope.async {
-            try {
-                coroutineScope {
-                    acquiredPump.connectProgressFlow
-                        .onEach { progressReport ->
-                            val description = when (val progStage = progressReport.stage) {
-                                is BasicProgressStage.EstablishingBtConnection   ->
-                                    rh.gs(
-                                        R.string.combov2_establishing_bt_connection,
-                                        progStage.currentAttemptNr
-                                    )
+        // =========================================================================
+        // Step 1: comboctl API変更に伴う一時無効化（UI Flow / RTCommandProgressStage 構造変更のため）
+        // 実コードを1行も消さずに全保持しています。
+        // Step 2で新Flow・新型定義に合わせて再接続します。
+        // =========================================================================
+        // pumpUIFlowsDeferred = pumpCoroutineScope.async {
+        //     try {
+        //         coroutineScope {
+        //             acquiredPump.connectProgressFlow
+        //                 .onEach { progressReport ->
+        //                     val description = when (val progStage = progressReport.stage) {
+        //                         is BasicProgressStage.EstablishingBtConnection   ->
+        //                             rh.gs(
+        //                                 R.string.combov2_establishing_bt_connection,
+        //                                 progStage.currentAttemptNr
+        //                             )
+        //
+        //                         BasicProgressStage.PerformingConnectionHandshake -> rh.gs(R.string.combov2_pairing_performing_handshake)
+        //                         else                                             -> ""
+        //                     }
+        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
+        //                         description,
+        //                         progressReport.overallProgress
+        //                     )
+        //                 }
+        //                 .launchIn(this)
+        //
+        //             acquiredPump.setDateTimeProgressFlow
+        //                 .onEach { progressReport ->
+        //                     val description = when (progressReport.stage) {
+        //                         RTCommandProgressStage.SettingDateTimeHour,
+        //                         RTCommandProgressStage.SettingDateTimeMinute -> rh.gs(R.string.combov2_setting_current_pump_time)
+        //
+        //                         RTCommandProgressStage.SettingDateTimeYear,
+        //                         RTCommandProgressStage.SettingDateTimeMonth,
+        //                         RTCommandProgressStage.SettingDateTimeDay    -> rh.gs(R.string.combov2_setting_current_pump_date)
+        //
+        //                         else                                         -> ""
+        //                     }
+        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
+        //                         description,
+        //                         progressReport.overallProgress
+        //                     )
+        //                 }
+        //                 .launchIn(this)
+        //
+        //             acquiredPump.getBasalProfileFlow
+        //                 .onEach { progressReport ->
+        //                     val description = when (val stage = progressReport.stage) {
+        //                         is RTCommandProgressStage.GettingBasalProfile ->
+        //                             rh.gs(R.string.combov2_getting_basal_profile, stage.numSetFactors)
+        //
+        //                         else                                          -> ""
+        //                     }
+        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
+        //                         description,
+        //                         progressReport.overallProgress
+        //                     )
+        //                 }
+        //                 .launchIn(this)
+        //
+        //             acquiredPump.setBasalProfileFlow
+        //                 .onEach { progressReport ->
+        //                     val description = when (val stage = progressReport.stage) {
+        //                         is RTCommandProgressStage.SettingBasalProfile ->
+        //                             rh.gs(R.string.combov2_setting_basal_profile, stage.numSetFactors)
+        //
+        //                         else                                          -> ""
+        //                     }
+        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
+        //                         description,
+        //                         progressReport.overallProgress
+        //                     )
+        //                 }
+        //                 .launchIn(this)
+        //
+        //             acquiredPump.bolusDeliveryProgressFlow
+        //                 .onEach { progressReport ->
+        //                     val description = when (val stage = progressReport.stage) {
+        //                         is RTCommandProgressStage.DeliveringBolus ->
+        //                             rh.gs(
+        //                                 R.string.combov2_delivering_bolus,
+        //                                 stage.deliveredImmediateAmount.cctlBolusToIU(),
+        //                                 stage.totalImmediateAmount.cctlBolusToIU()
+        //                             )
+        //
+        //                         else                                      -> ""
+        //                     }
+        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
+        //                         description,
+        //                         progressReport.overallProgress
+        //                     )
+        //                 }
+        //                 .launchIn(this)
+        //
+        //             acquiredPump.parsedDisplayFrameFlow
+        //                 .onEach { parsedDisplayFrame ->
+        //                     _displayFrameUIFlow.emit(
+        //                         parsedDisplayFrame?.displayFrame ?: NullDisplayFrame
+        //                     )
+        //                 }
+        //                 .launchIn(this)
+        //
+        //             launch {
+        //                 while (true) {
+        //                     updateBaseBasalRateUI()
+        //                     val currentMinute = DateTime().minuteOfHour().get()
+        //
+        //                     // Calculate how many minutes need to pass until we
+        //                     // reach the next hour and thus the next basal profile
+        //                     // factor becomes active. That way, the amount of UI
+        //                     // refreshes is minimized.
+        //                     // We cap the max waiting period to 58 minutes instead
+        //                     // of 60 to allow for a small tolerance range for cases
+        //                     // when this loop iterates exactly when the current hour
+        //                     // is about to turn.
+        //                     val minutesUntilNextFactor = max((58 - currentMinute), 0)
+        //                     delay(minutesUntilNextFactor * 60 * 1000L)
+        //                 }
+        //             }
+        //         }
+        //     } catch (e: CancellationException) {
+        //         throw e
+        //     } catch (e: Exception) {
+        //         aapsLogger.error(LTag.PUMP, "Exception thrown in UI flows coroutine scope: $e")
+        //         throw e
+        //     }
+        // }
 
-                                BasicProgressStage.PerformingConnectionHandshake -> rh.gs(R.string.combov2_pairing_performing_handshake)
-                                else                                             -> ""
-                            }
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
-                                progressReport.overallProgress
-                            )
-                        }
-                        .launchIn(this)
-
-                    acquiredPump.setDateTimeProgressFlow
-                        .onEach { progressReport ->
-                            val description = when (progressReport.stage) {
-                                RTCommandProgressStage.SettingDateTimeHour,
-                                RTCommandProgressStage.SettingDateTimeMinute -> rh.gs(R.string.combov2_setting_current_pump_time)
-
-                                RTCommandProgressStage.SettingDateTimeYear,
-                                RTCommandProgressStage.SettingDateTimeMonth,
-                                RTCommandProgressStage.SettingDateTimeDay    -> rh.gs(R.string.combov2_setting_current_pump_date)
-
-                                else                                         -> ""
-                            }
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
-                                progressReport.overallProgress
-                            )
-                        }
-                        .launchIn(this)
-
-                    acquiredPump.getBasalProfileFlow
-                        .onEach { progressReport ->
-                            val description = when (val stage = progressReport.stage) {
-                                is RTCommandProgressStage.GettingBasalProfile ->
-                                    rh.gs(R.string.combov2_getting_basal_profile, stage.numSetFactors)
-
-                                else                                          -> ""
-                            }
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
-                                progressReport.overallProgress
-                            )
-                        }
-                        .launchIn(this)
-
-                    acquiredPump.setBasalProfileFlow
-                        .onEach { progressReport ->
-                            val description = when (val stage = progressReport.stage) {
-                                is RTCommandProgressStage.SettingBasalProfile ->
-                                    rh.gs(R.string.combov2_setting_basal_profile, stage.numSetFactors)
-
-                                else                                          -> ""
-                            }
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
-                                progressReport.overallProgress
-                            )
-                        }
-                        .launchIn(this)
-
-                    acquiredPump.bolusDeliveryProgressFlow
-                        .onEach { progressReport ->
-                            val description = when (val stage = progressReport.stage) {
-                                is RTCommandProgressStage.DeliveringBolus ->
-                                    rh.gs(
-                                        R.string.combov2_delivering_bolus,
-                                        stage.deliveredImmediateAmount.cctlBolusToIU(),
-                                        stage.totalImmediateAmount.cctlBolusToIU()
-                                    )
-
-                                else                                      -> ""
-                            }
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
-                                progressReport.overallProgress
-                            )
-                        }
-                        .launchIn(this)
-
-                    acquiredPump.parsedDisplayFrameFlow
-                        .onEach { parsedDisplayFrame ->
-                            _displayFrameUIFlow.emit(
-                                parsedDisplayFrame?.displayFrame ?: NullDisplayFrame
-                            )
-                        }
-                        .launchIn(this)
-
-                    launch {
-                        while (true) {
-                            updateBaseBasalRateUI()
-                            val currentMinute = DateTime().minuteOfHour().get()
-
-                            // Calculate how many minutes need to pass until we
-                            // reach the next hour and thus the next basal profile
-                            // factor becomes active. That way, the amount of UI
-                            // refreshes is minimized.
-                            // We cap the max waiting period to 58 minutes instead
-                            // of 60 to allow for a small tolerance range for cases
-                            // when this loop iterates exactly when the current hour
-                            // is about to turn.
-                            val minutesUntilNextFactor = max((58 - currentMinute), 0)
-                            delay(minutesUntilNextFactor * 60 * 1000L)
-                        }
-                    }
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                aapsLogger.error(LTag.PUMP, "Exception thrown in UI flows coroutine scope: $e")
-                throw e
-            }
-        }
+        pumpUIFlowsDeferred = kotlinx.coroutines.CompletableDeferred(Unit)
     }
 
     private fun startPumpErrorTimeout() {
