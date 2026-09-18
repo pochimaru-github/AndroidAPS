@@ -1182,57 +1182,67 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             return
         }
 
-        val acquiredPump = getAcquiredPump()
+        // =========================================================================
+        // Step 1: comboctl API変更に伴う一時無効化（実コードを全保持）
+        // setTbr シグネチャ変更、SetTbrOutcome / UnexpectedTbrStateException 廃止のため
+        // Step 2の実装時に以下の `//` を解除して新APIへ移行します。
+        // =========================================================================
+        // val acquiredPump = getAcquiredPump()
+        //
+        // runBlocking {
+        //     try {
+        //         executeCommand {
+        //
+        //             val tbrComment = when (acquiredPump.setTbr(percentage, durationInMinutes, tbrType, force100Percent)) {
+        //                 ComboCtlPump.SetTbrOutcome.SET_NORMAL_TBR                   ->
+        //                     rh.gs(R.string.combov2_setting_tbr_succeeded)
+        //
+        //                 ComboCtlPump.SetTbrOutcome.SET_EMULATED_100_TBR             ->
+        //                     rh.gs(R.string.combov2_set_emulated_100_tbr)
+        //
+        //                 ComboCtlPump.SetTbrOutcome.LETTING_EMULATED_100_TBR_FINISH  ->
+        //                     rh.gs(R.string.combov2_letting_emulated_100_tbr_finish)
+        //
+        //                 ComboCtlPump.SetTbrOutcome.IGNORED_REDUNDANT_100_TBR        ->
+        //                     rh.gs(R.string.combov2_ignoring_redundant_100_tbr)
+        //             }
+        //
+        //             pumpEnactResult.apply {
+        //                 success = true
+        //                 enacted = true
+        //                 comment = tbrComment
+        //             }
+        //         }
+        //     } catch (e: QuantityNotChangingException) {
+        //         aapsLogger.error(LTag.PUMP, "TBR percentage adjustment hit a limit: $e")
+        //         pumpEnactResult.apply {
+        //             success = false
+        //             enacted = false
+        //             comment = rh.gs(R.string.combov2_hit_unexpected_tbr_limit, e.targetQuantity, e.hitLimitAt)
+        //         }
+        //     } catch (e: ComboCtlPump.UnexpectedTbrStateException) {
+        //         aapsLogger.error(LTag.PUMP, "Setting TBR failed with exception: $e")
+        //         pumpEnactResult.apply {
+        //             success = false
+        //             enacted = false
+        //             comment = rh.gs(R.string.combov2_setting_tbr_failed)
+        //         }
+        //     } catch (e: Exception) {
+        //         aapsLogger.error(LTag.PUMP, "Setting TBR failed with exception: $e")
+        //         pumpEnactResult.apply {
+        //             success = false
+        //             enacted = false
+        //             comment = rh.gs(R.string.combov2_setting_tbr_failed)
+        //         }
+        //     }
+        // }
 
-        runBlocking {
-            try {
-                executeCommand {
-
-                    val tbrComment = when (acquiredPump.setTbr(percentage, durationInMinutes, tbrType, force100Percent)) {
-                        ComboCtlPump.SetTbrOutcome.SET_NORMAL_TBR                  ->
-                            rh.gs(R.string.combov2_setting_tbr_succeeded)
-
-                        ComboCtlPump.SetTbrOutcome.SET_EMULATED_100_TBR            ->
-                            rh.gs(R.string.combov2_set_emulated_100_tbr)
-
-                        ComboCtlPump.SetTbrOutcome.LETTING_EMULATED_100_TBR_FINISH ->
-                            rh.gs(R.string.combov2_letting_emulated_100_tbr_finish)
-
-                        ComboCtlPump.SetTbrOutcome.IGNORED_REDUNDANT_100_TBR       ->
-                            rh.gs(R.string.combov2_ignoring_redundant_100_tbr)
-                    }
-
-                    pumpEnactResult.apply {
-                        success = true
-                        enacted = true
-                        comment = tbrComment
-                    }
-                }
-            } catch (e: QuantityNotChangingException) {
-                aapsLogger.error(LTag.PUMP, "TBR percentage adjustment hit a limit: $e")
-                pumpEnactResult.apply {
-                    success = false
-                    enacted = false
-                    comment = rh.gs(R.string.combov2_hit_unexpected_tbr_limit, e.targetQuantity, e.hitLimitAt)
-                }
-            } catch (e: ComboCtlPump.UnexpectedTbrStateException) {
-                aapsLogger.error(LTag.PUMP, "Setting TBR failed with exception: $e")
-                pumpEnactResult.apply {
-                    success = false
-                    enacted = false
-                    comment = rh.gs(R.string.combov2_setting_tbr_failed)
-                }
-            } catch (e: Exception) {
-                aapsLogger.error(LTag.PUMP, "Setting TBR failed with exception: $e")
-                pumpEnactResult.apply {
-                    success = false
-                    enacted = false
-                    comment = rh.gs(R.string.combov2_setting_tbr_failed)
-                }
-            }
+        pumpEnactResult.apply {
+            success = false
+            enacted = false
+            comment = "Not implemented (Step 1 Stub)"
         }
     }
-
     // It is currently not known how to program an extended bolus into the Combo.
     // Until that is reverse engineered, inform callers that we can't handle this.
 
