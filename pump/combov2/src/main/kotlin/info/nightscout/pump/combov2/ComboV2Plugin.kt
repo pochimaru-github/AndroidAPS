@@ -959,19 +959,8 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             .value()
         aapsLogger.debug(
             LTag.PUMP,
-            "Applied bolus constraints:  old insulin amount: $oldInsulinAmount  new: ${detailedBolusInfo.insulin}"
+            "Applied bolus constraints:  old insulin amount: $oldInsulinAmount  new:${detailedBolusInfo.insulin}"
         )
-
-        // Step 1: 後続処理無効化に伴い一時コメントアウト（Step 2で復元）
-        // val acquiredPump = getAcquiredPump()
-        // val requestedBolusAmount = detailedBolusInfo.insulin.iuToCctlBolus()
-
-        // Step 1: comboctl API変更に伴い StandardBolusReason が廃止/変更されたため一時無効化
-        // val bolusReason = when (detailedBolusInfo.bolusType) {
-        //     BS.Type.NORMAL  -> ComboCtlPump.StandardBolusReason.NORMAL
-        //     BS.Type.SMB     -> ComboCtlPump.StandardBolusReason.SUPERBOLUS
-        //     BS.Type.PRIMING -> ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET
-        // }
 
         val pumpEnactResult = pumpEnactResultProvider.get()
         pumpEnactResult.success = false
@@ -986,7 +975,19 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             return pumpEnactResult
         }
 
-        // Step 1: ビルド導通最優先のためボラス配信非同期処理全体を一時無効化（Step 2で再実装）
+        // =========================================================================
+        // Step 1: comboctl API大幅変更に伴う一時無効化（実コード保持）
+        // Step 2の実装時に以下のコメントアウトを解除して使用します。
+        // =========================================================================
+        // val acquiredPump = getAcquiredPump()
+        // val requestedBolusAmount = detailedBolusInfo.insulin.iuToCctlBolus()
+        // /* Step 1: comboctl API変更に伴い StandardBolusReason が廃止/変更されたため一時無効化
+        // val bolusReason = when (detailedBolusInfo.bolusType) {
+        //     BS.Type.NORMAL  -> ComboCtlPump.StandardBolusReason.NORMAL
+        //     BS.Type.SMB     -> ComboCtlPump.StandardBolusReason.SUPERBOLUS
+        //     BS.Type.PRIMING -> ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET
+        // }
+        // */
         // val bolusProgressJob = pumpCoroutineScope.launch {
         //     acquiredPump.bolusDeliveryProgressFlow
         //         .collect { progressReport ->
@@ -994,22 +995,18 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         //                 is RTCommandProgressStage.DeliveringBolus -> {
         //                     rxBus.send(EventOverviewBolusProgress(rh, id = detailedBolusInfo.id, percent = (progressReport.overallProgress * 100).toInt()))
         //                 }
-        //
         //                 BasicProgressStage.Finished               -> {
         //                     rxBus.send(EventOverviewBolusProgress("Bolus finished, performing post-bolus checks", detailedBolusInfo.id, (progressReport.overallProgress * 100).toInt()))
         //                 }
-        //
         //                 else                                      -> Unit
         //             }
         //         }
         // }
-        //
         // val newBolusJob = pumpCoroutineScope.async {
         //     try {
         //         executeCommand {
         //             acquiredPump.deliverBolus(requestedBolusAmount, bolusReason)
         //         }
-        //
         //         reportFinishedBolus(rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, detailedBolusInfo.insulin), detailedBolusInfo.id, pumpEnactResult, succeeded = true)
         //     } catch (e: CancellationException) {
         //         reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
@@ -1039,12 +1036,13 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         //         }
         //         aapsLogger.debug(
         //             LTag.PUMP,
-        //             "Pump enact result: success ${pumpEnactResult.success} enacted ${pumpEnactResult.enacted} bolusDelivered ${pumpEnactResult.bolusDelivered}"
+        //             "Pump enact result: success ${pumpEnactResult.success} enacted ${pumpEnactResult.enacted} bolusDelivered${pumpEnactResult.bolusDelivered}"
         //         )
         //         bolusJob = null
         //         bolusProgressJob.cancelAndJoin()
         //     }
         // }
+        // ※ もしこの直後に `bolusJob = newBolusJob` のような参照行がある場合は、その1行も `//` で無効化してください。
 
         return pumpEnactResult.apply {
             success = false
