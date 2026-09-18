@@ -1540,7 +1540,10 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         runBlocking {
             try {
                 val pump = pumpManager?.acquirePump(bluetoothAddress) ?: return@runBlocking
-                pump.unpair()
+                // =========================================================================
+                // Step 1: comboctl API変更に伴う一時無効化（unpair 廃止のため）
+                // =========================================================================
+                // pump.unpair()
                 pumpManager?.releasePump(bluetoothAddress)
             } catch (_: ComboException) {
             } catch (_: BluetoothException) {
@@ -1597,32 +1600,46 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
     // updates. Using this for other purposes can cause race conditions
     // to appear, such as when immediately after the Pump.connect() call
     // finishes, the state is checked. Use isSuspended() instead.
-    private val _driverStateUIFlow = MutableStateFlow<DriverState>(DriverState.NotInitialized)
-    val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
+    // =========================================================================
+        // Step 1: comboctl API変更に伴う一時無効化（DriverState.NotInitialized 廃止のため）
+        // 実コードを全保持し、Step 1用のスタブプロパティを用意しています。
+        // =========================================================================
+        // private val _driverStateUIFlow = MutableStateFlow<DriverState>(DriverState.NotInitialized)
+        // val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
+        private val _driverStateUIFlow = MutableStateFlow<Any?>(null)
+        val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
 
-    // "Activity" is not to be confused with the Android Activity class.
-    // An "activity" is something that a command does, for example
-    // establishing a BT connection, or delivering a bolus, setting
-    // a basal rate factor, reading the current pump datetime etc.
-    data class CurrentActivityInfo(val description: String, val overallProgress: Double)
+        // "Activity" is not to be confused with the Android Activity class.
+        // An "activity" is something that a command does, for example
+        // establishing a BT connection, or delivering a bolus, setting
+        // a basal rate factor, reading the current pump datetime etc.
+        data class CurrentActivityInfo(val description: String, val overallProgress: Double)
 
-    private fun noCurrentActivity() = CurrentActivityInfo("", 0.0)
-    private var _currentActivityUIFlow = MutableStateFlow(noCurrentActivity())
-    val currentActivityUIFlow = _currentActivityUIFlow.asStateFlow()
+        private fun noCurrentActivity() = CurrentActivityInfo("", 0.0)
+        private var _currentActivityUIFlow = MutableStateFlow(noCurrentActivity())
+        val currentActivityUIFlow = _currentActivityUIFlow.asStateFlow()
 
-    private var _lastConnectionTimestampUIFlow = MutableStateFlow<Long?>(null)
-    val lastConnectionTimestampUIFlow = _lastConnectionTimestampUIFlow.asStateFlow()
+        private var _lastConnectionTimestampUIFlow = MutableStateFlow<Long?>(null)
+        val lastConnectionTimestampUIFlow = _lastConnectionTimestampUIFlow.asStateFlow()
 
-    private var _batteryStateUIFlow = MutableStateFlow<BatteryState?>(null)
-    val batteryStateUIFlow = _batteryStateUIFlow.asStateFlow()
+        // =========================================================================
+        // Step 1: comboctl API変更に伴う一時無効化（BatteryState, ReservoirState, LastBolus 変更のため）
+        // =========================================================================
+        // private var _batteryStateUIFlow = MutableStateFlow<BatteryState?>(null)
+        // val batteryStateUIFlow = _batteryStateUIFlow.asStateFlow()
+        private var _batteryStateUIFlow = MutableStateFlow<Any?>(null)
+        val batteryStateUIFlow = _batteryStateUIFlow.asStateFlow()
 
-    data class ReservoirLevel(val state: ReservoirState, val availableUnits: Int)
+        // data class ReservoirLevel(val state: ReservoirState, val availableUnits: Int)
+        data class ReservoirLevel(val state: Any?, val availableUnits: Int)
 
-    private var _reservoirLevelUIFlow = MutableStateFlow<ReservoirLevel?>(null)
-    val reservoirLevelUIFlow = _reservoirLevelUIFlow.asStateFlow()
+        private var _reservoirLevelUIFlow = MutableStateFlow<ReservoirLevel?>(null)
+        val reservoirLevelUIFlow = _reservoirLevelUIFlow.asStateFlow()
 
-    private var _lastBolusUIFlow = MutableStateFlow<ComboCtlPump.LastBolus?>(null)
-    val lastBolusUIFlow = _lastBolusUIFlow.asStateFlow()
+        // private var _lastBolusUIFlow = MutableStateFlow<ComboCtlPump.LastBolus?>(null)
+        // val lastBolusUIFlow = _lastBolusUIFlow.asStateFlow()
+        private var _lastBolusUIFlow = MutableStateFlow<Any?>(null)
+        val lastBolusUIFlow = _lastBolusUIFlow.asStateFlow()
 
     private var _currentTbrUIFlow = MutableStateFlow<ComboCtlTbr?>(null)
     val currentTbrUIFlow = _currentTbrUIFlow.asStateFlow()
