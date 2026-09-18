@@ -985,6 +985,7 @@ pump?.connect()
             return pumpEnactResult
         }
 
+        /* Step 1: comboctl API大幅変更に伴い、ビルド導通を最優先してボラス配信処理を一時無効化（Step 2で再実装）
         val bolusProgressJob = pumpCoroutineScope.launch {
             acquiredPump.bolusDeliveryProgressFlow
                 .collect { progressReport ->
@@ -1069,6 +1070,14 @@ pump?.connect()
                 bolusProgressJob.cancelAndJoin()
             }
         }
+        */
+
+        return pumpEnactResult.apply {
+            success = false
+            enacted = false
+            comment = "Not implemented (Step 1 Stub)"
+        }
+    }
 
         bolusJob = newBolusJob
 
