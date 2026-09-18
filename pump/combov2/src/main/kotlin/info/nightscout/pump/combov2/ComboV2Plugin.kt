@@ -985,92 +985,71 @@ pump?.connect()
             return pumpEnactResult
         }
 
-        /* Step 1: comboctl API大幅変更に伴い、ビルド導通を最優先してボラス配信処理を一時無効化（Step 2で再実装）
-        val bolusProgressJob = pumpCoroutineScope.launch {
-            acquiredPump.bolusDeliveryProgressFlow
-                .collect { progressReport ->
-                    when (progressReport.stage) {
-                        is RTCommandProgressStage.DeliveringBolus -> {
-                            rxBus.send(EventOverviewBolusProgress(rh, id = detailedBolusInfo.id, percent = (progressReport.overallProgress * 100).toInt()))
-                        }
-
-                        BasicProgressStage.Finished               -> {
-                            rxBus.send(EventOverviewBolusProgress("Bolus finished, performing post-bolus checks", detailedBolusInfo.id, (progressReport.overallProgress * 100).toInt()))
-                        }
-
-                        else                                      -> Unit
-                    }
-                }
-        }
-
-        // Run the delivery in a sub-coroutine to be able
-        // to cancel it via stopBolusDelivering().
-        val newBolusJob = pumpCoroutineScope.async {
-            // NOTE: Above, we take a local reference to the acquired Pump instance,
-            // with a check that throws an exception in case the "pump" member is
-            // null. This local reference is particularly important inside this
-            // coroutine, because the "pump" member is set to null in case of an
-            // error or other disconnect reason (see disconnectInternal()). However,
-            // we still need to access the last delivered bolus inside this coroutine
-            // from the pump's lastBolusFlow, even if an error happened. Accessing
-            // it through the "pump" member would then result in an NPE. This is
-            // solved by instead accessing the lastBolusFlow through the local
-            // "acquiredPump" reference.
-
-            try {
-                executeCommand {
-                    acquiredPump.deliverBolus(requestedBolusAmount, bolusReason)
-                }
-
-                reportFinishedBolus(rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, detailedBolusInfo.insulin), detailedBolusInfo.id, pumpEnactResult, succeeded = true)
-            } catch (e: CancellationException) {
-                // Cancellation is not an error, but it also means
-                // that the profile update was not enacted.
-
-                reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
-
-                // Rethrowing to finish coroutine cancellation.
-                throw e
-            } catch (_: ComboCtlPump.BolusCancelledByUserException) {
-                aapsLogger.info(LTag.PUMP, "Bolus cancelled via Combo CMD_CANCEL_BOLUS command")
-
-                // This exception is thrown when the bolus is cancelled
-                // through a cancel bolus command that was sent to the Combo,
-                // and not due to a coroutine cancellation. Like the
-                // CancellationException block above, this is not an
-                // error, hence the "success = true".
-
-                reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
-            } catch (_: ComboCtlPump.BolusNotDeliveredException) {
-                aapsLogger.error(LTag.PUMP, "Bolus not delivered")
-                reportFinishedBolus(R.string.combov2_bolus_not_delivered, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-            } catch (_: ComboCtlPump.UnaccountedBolusDetectedException) {
-                aapsLogger.error(LTag.PUMP, "Unaccounted bolus detected")
-                reportFinishedBolus(R.string.combov2_unaccounted_bolus_detected_cancelling_bolus, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-            } catch (_: ComboCtlPump.InsufficientInsulinAvailableException) {
-                aapsLogger.error(LTag.PUMP, "Insufficient insulin in reservoir")
-                reportFinishedBolus(R.string.combov2_insufficient_insulin_in_reservoir, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-            } catch (e: Exception) {
-                aapsLogger.error(LTag.PUMP, "Exception thrown during bolus delivery: $e")
-                reportFinishedBolus(R.string.combov2_bolus_delivery_failed, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-            } finally {
-                // The delivery was enacted if even a partial amount was infused.
-                acquiredPump.lastBolusFlow.value?.also {
-                    pumpEnactResult.enacted = (it.bolusAmount > 0)
-                    pumpEnactResult.bolusDelivered = it.bolusAmount.cctlBolusToIU()
-                } ?: run {
-                    pumpEnactResult.enacted = false
-                    pumpEnactResult.bolusDelivered = 0.0
-                }
-                aapsLogger.debug(
-                    LTag.PUMP,
-                    "Pump enact result: success ${pumpEnactResult.success} enacted ${pumpEnactResult.enacted} bolusDelivered ${pumpEnactResult.bolusDelivered}"
-                )
-                bolusJob = null
-                bolusProgressJob.cancelAndJoin()
-            }
-        }
-        */
+        // Step 1: comboctl API大幅変更に伴い、ビルド導通を最優先してボラス配信処理を一時無効化（Step 2で再実装）
+        // val bolusReason = when (detailedBolusInfo.bolusType) {
+        //     BS.Type.NORMAL  -> ComboCtlPump.StandardBolusReason.NORMAL
+        //     BS.Type.SMB     -> ComboCtlPump.StandardBolusReason.SUPERBOLUS
+        //     BS.Type.PRIMING -> ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET
+        // }
+        //
+        // val bolusProgressJob = pumpCoroutineScope.launch {
+        //     acquiredPump.bolusDeliveryProgressFlow
+        //         .collect { progressReport ->
+        //             when (progressReport.stage) {
+        //                 is RTCommandProgressStage.DeliveringBolus -> {
+        //                     rxBus.send(EventOverviewBolusProgress(rh, id = detailedBolusInfo.id, percent = (progressReport.overallProgress * 100).toInt()))
+        //                 }
+        //
+        //                 BasicProgressStage.Finished               -> {
+        //                     rxBus.send(EventOverviewBolusProgress("Bolus finished, performing post-bolus checks", detailedBolusInfo.id, (progressReport.overallProgress * 100).toInt()))
+        //                 }
+        //
+        //                 else                                      -> Unit
+        //             }
+        //         }
+        // }
+        //
+        // val newBolusJob = pumpCoroutineScope.async {
+        //     try {
+        //         executeCommand {
+        //             acquiredPump.deliverBolus(requestedBolusAmount, bolusReason)
+        //         }
+        //
+        //         reportFinishedBolus(rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, detailedBolusInfo.insulin), detailedBolusInfo.id, pumpEnactResult, succeeded = true)
+        //     } catch (e: CancellationException) {
+        //         reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
+        //         throw e
+        //     } catch (_: ComboCtlPump.BolusCancelledByUserException) {
+        //         aapsLogger.info(LTag.PUMP, "Bolus cancelled via Combo CMD_CANCEL_BOLUS command")
+        //         reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
+        //     } catch (_: ComboCtlPump.BolusNotDeliveredException) {
+        //         aapsLogger.error(LTag.PUMP, "Bolus not delivered")
+        //         reportFinishedBolus(R.string.combov2_bolus_not_delivered, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
+        //     } catch (_: ComboCtlPump.UnaccountedBolusDetectedException) {
+        //         aapsLogger.error(LTag.PUMP, "Unaccounted bolus detected")
+        //         reportFinishedBolus(R.string.combov2_unaccounted_bolus_detected_cancelling_bolus, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
+        //     } catch (_: ComboCtlPump.InsufficientInsulinAvailableException) {
+        //         aapsLogger.error(LTag.PUMP, "Insufficient insulin in reservoir")
+        //         reportFinishedBolus(R.string.combov2_insufficient_insulin_in_reservoir, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
+        //     } catch (e: Exception) {
+        //         aapsLogger.error(LTag.PUMP, "Exception thrown during bolus delivery: $e")
+        //         reportFinishedBolus(R.string.combov2_bolus_delivery_failed, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
+        //     } finally {
+        //         acquiredPump.lastBolusFlow.value?.also {
+        //             pumpEnactResult.enacted = (it.bolusAmount > 0)
+        //             pumpEnactResult.bolusDelivered = it.bolusAmount.cctlBolusToIU()
+        //         } ?: run {
+        //             pumpEnactResult.enacted = false
+        //             pumpEnactResult.bolusDelivered = 0.0
+        //         }
+        //         aapsLogger.debug(
+        //             LTag.PUMP,
+        //             "Pump enact result: success ${pumpEnactResult.success} enacted ${pumpEnactResult.enacted} bolusDelivered ${pumpEnactResult.bolusDelivered}"
+        //         )
+        //         bolusJob = null
+        //         bolusProgressJob.cancelAndJoin()
+        //     }
+        // }
 
         return pumpEnactResult.apply {
             success = false
