@@ -149,9 +149,11 @@ class ComboV2Plugin @Inject constructor(
         ),
         aapsLogger, rh, preferences, commandQueue
     ), Pump, PluginConstraints {
-    override val isFakingTempsByExtendedBoluses: Boolean get() = false // Step 1: インターフェース要求プロパティのスタブ実装
-    override val pumpDescription: PumpDescription get() = PumpDescription() // Step 1: インターフェース要求プロパティのスタブ実装
-    override fun canHandleDST(): Boolean = false // Step 1: インターフェース要求メソッドのスタブ実装
+        
+// --- Step 1: インターフェース要求メンバーのスタブ実装群 ---
+    override val isFakingTempsByExtendedBoluses: Boolean get() = false
+    override val pumpDescription: PumpDescription get() = PumpDescription()
+    override fun canHandleDST(): Boolean = false
 
     override fun cancelExtendedBolus(): PumpEnactResult {
         return pumpEnactResultProvider.get().apply {
@@ -160,6 +162,7 @@ class ComboV2Plugin @Inject constructor(
             comment = "Not implemented (Step 1 Stub)"
         }
     }
+
     override fun cancelTempBasal(enforceNew: Boolean): PumpEnactResult {
         return pumpEnactResultProvider.get().apply {
             success = false
@@ -167,13 +170,7 @@ class ComboV2Plugin @Inject constructor(
             comment = "Not implemented (Step 1 Stub)"
         }
     }
-    override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactResult {
-        return pumpEnactResultProvider.get().apply {
-            success = false
-            enacted = false
-            comment = "Not implemented (Step 1 Stub)"
-        }
-    }
+
     override fun loadTDDs(): PumpEnactResult {
         return pumpEnactResultProvider.get().apply {
             success = false
@@ -181,7 +178,8 @@ class ComboV2Plugin @Inject constructor(
             comment = "Not implemented (Step 1 Stub)"
         }
     }
-    override fun manufacturer(): ManufacturerType = ManufacturerType.ACCU_CHEK // Step 1: インターフェース要求メソッドのスタブ実装
+
+    override fun manufacturer(): ManufacturerType = ManufacturerType.ROCHE // Step 1: インターフェース要求メソッドのスタブ実装
     
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
