@@ -948,7 +948,7 @@ pump?.connect()
         */
     }
 
-    override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactResult {
+override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactResult {
         // Insulin value must be greater than 0
         require(detailedBolusInfo.carbs == 0.0) { detailedBolusInfo.toString() }
         require(detailedBolusInfo.insulin > 0) { detailedBolusInfo.toString() }
@@ -962,17 +962,16 @@ pump?.connect()
             "Applied bolus constraints:  old insulin amount: $oldInsulinAmount  new: ${detailedBolusInfo.insulin}"
         )
 
-        // Step 1: 後続処理の無効化に伴い一時コメントアウト（Step 2で復元）
+        // Step 1: 後続処理無効化に伴い一時コメントアウト（Step 2で復元）
         // val acquiredPump = getAcquiredPump()
         // val requestedBolusAmount = detailedBolusInfo.insulin.iuToCctlBolus()
 
-        /* Step 1: comboctl API変更に伴い StandardBolusReason が廃止/変更されたため一時無効化
-        val bolusReason = when (detailedBolusInfo.bolusType) {
-            BS.Type.NORMAL  -> ComboCtlPump.StandardBolusReason.NORMAL
-            BS.Type.SMB     -> ComboCtlPump.StandardBolusReason.SUPERBOLUS
-            BS.Type.PRIMING -> ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET
-        }
-        */
+        // Step 1: comboctl API変更に伴い StandardBolusReason が廃止/変更されたため一時無効化
+        // val bolusReason = when (detailedBolusInfo.bolusType) {
+        //     BS.Type.NORMAL  -> ComboCtlPump.StandardBolusReason.NORMAL
+        //     BS.Type.SMB     -> ComboCtlPump.StandardBolusReason.SUPERBOLUS
+        //     BS.Type.PRIMING -> ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET
+        // }
 
         val pumpEnactResult = pumpEnactResultProvider.get()
         pumpEnactResult.success = false
@@ -987,7 +986,7 @@ pump?.connect()
             return pumpEnactResult
         }
 
-        // --- Step 1: ビルド導通優先のため、以下ボラス配信非同期処理を一時無効化（Step 2で再実装） ---
+        // Step 1: ビルド導通最優先のためボラス配信非同期処理全体を一時無効化（Step 2で再実装）
         // val bolusProgressJob = pumpCoroutineScope.launch {
         //     acquiredPump.bolusDeliveryProgressFlow
         //         .collect { progressReport ->
@@ -1053,7 +1052,6 @@ pump?.connect()
             comment = "Not implemented (Step 1 Stub)"
         }
     }
-
         bolusJob = newBolusJob
 
         // Do a blocking wait until the bolus coroutine completes or is cancelled.
