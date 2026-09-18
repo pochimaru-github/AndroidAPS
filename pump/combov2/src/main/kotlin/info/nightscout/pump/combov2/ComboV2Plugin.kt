@@ -375,7 +375,7 @@ private var lastComboAlert: Any? = null
         // callback being invoked.
         unpairing = false
 
-        setDriverState(DriverState.NotInitialized)
+        setDriverState(DriverState.Disconnected) // Step 1: 廃止APIのため無効化（Disconnectedで代用）
 
         rxBus.send(EventInitializationChanged())
         initializationChangedEventSent = false
@@ -423,7 +423,7 @@ private var lastComboAlert: Any? = null
     }
 
     override fun isInitialized(): Boolean =
-        isPaired() && (driverStateFlow.value != DriverState.NotInitialized) && !pumpErrorObserved
+        isPaired() && (driverStateFlow.value != DriverState.Disconnected) && !pumpErrorObserved
 
     override fun isSuspended(): Boolean = pumpIsSuspended
 
@@ -432,8 +432,8 @@ private var lastComboAlert: Any? = null
             // DriverState.Connecting is _not_ listed here. Even though the pump
             // is technically busy and unable to execute commands in that state,
             // returning true then causes problems with AAPS' KeepAlive mechanism.
-            DriverState.CheckingPump,
-            is DriverState.ExecutingCommand -> true
+            // DriverState.CheckingPump, // Step 1: 廃止APIのため無効化
+            // is DriverState.ExecutingCommand -> true // Step 1: 廃止APIのため無効化
 
             else                            -> false
         }
@@ -447,21 +447,20 @@ private var lastComboAlert: Any? = null
             // that state, but that function is not always called before commands
             // are dispatched, so we announce to the queue thread that we aren't
             // connected yet.
-            DriverState.Ready,
-            DriverState.Suspended,
-            is DriverState.ExecutingCommand -> true
+            // DriverState.Ready, // Step 1: 廃止APIのため無効化
+            // DriverState.Suspended, // Step 1: 廃止APIのため無効化
+            // is DriverState.ExecutingCommand -> true // Step 1: 廃止APIのため無効化
 
             else                            -> false
         }
 
     override fun isConnecting(): Boolean =
         when (driverStateFlow.value) {
-            DriverState.Connecting,
-            DriverState.CheckingPump -> true
+            DriverState.Connecting -> true
+            // DriverState.CheckingPump -> true // Step 1: 廃止APIのため無効化
 
             else                     -> false
         }
-
     // There is no corresponding indicator for this
     // in Combo connections, so just return false
     override fun isHandshakeInProgress() = false
