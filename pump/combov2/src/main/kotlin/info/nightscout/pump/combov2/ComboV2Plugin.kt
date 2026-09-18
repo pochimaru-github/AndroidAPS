@@ -1253,15 +1253,19 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         createFailurePumpEnactResult(R.string.combov2_extended_bolus_not_supported)
 
     override fun updateExtendedJsonStatus(extendedStatus: JSONObject) {
-        when (val alert = lastComboAlert) {
-            is AlertScreen.Content.Warning ->
-                extendedStatus.put("WarningCode", alert.code)
-
-            is AlertScreen.Content.Error   ->
-                extendedStatus.put("ErrorCode", alert.code)
-
-            else                          -> Unit
-        }
+        // =========================================================================
+        // Step 1: comboctl API変更に伴う一時無効化（AlertScreen 変更・廃止のため）
+        // Step 2で新APIの警告・エラー取得処理に置き換えます。
+        // =========================================================================
+        // when (val alert = lastComboAlert) {
+        //     is AlertScreen.Content.Warning ->
+        //         extendedStatus.put("WarningCode", alert.code)
+        //
+        //     is AlertScreen.Content.Error   ->
+        //         extendedStatus.put("ErrorCode", alert.code)
+        //
+        //     else                           -> Unit
+        // }
     }
 
     override fun manufacturer() = ManufacturerType.Roche
@@ -1280,20 +1284,25 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
     override val pumpDescription: PumpDescription
         get() = _pumpDescription
 
-    // 修正後
-override fun pumpSpecificShortStatus(veryShort: Boolean): String {
-    val lines = mutableListOf<String>()
+    override fun pumpSpecificShortStatus(veryShort: Boolean): String {
+        val lines = mutableListOf<String>()
 
-    val alertCodeString = when (val alert = lastComboAlert) {
-        is AlertScreen.Content.Warning -> "W${alert.code}"
-        is AlertScreen.Content.Error   -> "E${alert.code}"
-        else                           -> null
+        // =========================================================================
+        // Step 1: comboctl API変更に伴う一時無効化（AlertScreen 変更・廃止のため）
+        // Step 2で新APIの警告・エラー取得処理に置き換えます。
+        // =========================================================================
+        // val alertCodeString = when (val alert = lastComboAlert) {
+        //     is AlertScreen.Content.Warning -> "W${alert.code}"
+        //     is AlertScreen.Content.Error   -> "E${alert.code}"
+        //     else                           -> null
+        // }
+        val alertCodeString: String? = null
+
+        if (alertCodeString != null)
+            lines += rh.gs(R.string.combov2_short_status_alert, alertCodeString)
+
+        return lines.joinToString("\n")
     }
-    if (alertCodeString != null)
-        lines += rh.gs(R.string.combov2_short_status_alert, alertCodeString)
-
-    return lines.joinToString("\n")
-}
 
     override val isFakingTempsByExtendedBoluses = false
 
