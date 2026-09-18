@@ -976,18 +976,17 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         }
 
         // =========================================================================
-        // Step 1: comboctl API大幅変更に伴う一時無効化（実コード保持）
-        // Step 2の実装時に以下のコメントアウトを解除して使用します。
+        // Step 1: comboctl API変更に伴う一時無効化（実コードを全保持）
+        // Step 2の実装時に以下の `//` を解除して復元します。
         // =========================================================================
         // val acquiredPump = getAcquiredPump()
         // val requestedBolusAmount = detailedBolusInfo.insulin.iuToCctlBolus()
-        // /* Step 1: comboctl API変更に伴い StandardBolusReason が廃止/変更されたため一時無効化
         // val bolusReason = when (detailedBolusInfo.bolusType) {
         //     BS.Type.NORMAL  -> ComboCtlPump.StandardBolusReason.NORMAL
         //     BS.Type.SMB     -> ComboCtlPump.StandardBolusReason.SUPERBOLUS
         //     BS.Type.PRIMING -> ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET
         // }
-        // */
+        //
         // val bolusProgressJob = pumpCoroutineScope.launch {
         //     acquiredPump.bolusDeliveryProgressFlow
         //         .collect { progressReport ->
@@ -995,18 +994,22 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         //                 is RTCommandProgressStage.DeliveringBolus -> {
         //                     rxBus.send(EventOverviewBolusProgress(rh, id = detailedBolusInfo.id, percent = (progressReport.overallProgress * 100).toInt()))
         //                 }
+        //
         //                 BasicProgressStage.Finished               -> {
         //                     rxBus.send(EventOverviewBolusProgress("Bolus finished, performing post-bolus checks", detailedBolusInfo.id, (progressReport.overallProgress * 100).toInt()))
         //                 }
+        //
         //                 else                                      -> Unit
         //             }
         //         }
         // }
+        //
         // val newBolusJob = pumpCoroutineScope.async {
         //     try {
         //         executeCommand {
         //             acquiredPump.deliverBolus(requestedBolusAmount, bolusReason)
         //         }
+        //
         //         reportFinishedBolus(rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, detailedBolusInfo.insulin), detailedBolusInfo.id, pumpEnactResult, succeeded = true)
         //     } catch (e: CancellationException) {
         //         reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
@@ -1042,31 +1045,24 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         //         bolusProgressJob.cancelAndJoin()
         //     }
         // }
-        // ※ もしこの直後に `bolusJob = newBolusJob` のような参照行がある場合は、その1行も `//` で無効化してください。
+        //
+        // bolusJob = newBolusJob
+        //
+        // runBlocking {
+        //     try {
+        //         aapsLogger.debug(LTag.PUMP, "Waiting for bolus coroutine to finish")
+        //         newBolusJob.join()
+        //         aapsLogger.debug(LTag.PUMP, "Bolus coroutine finished")
+        //     } catch (_: CancellationException) {
+        //         aapsLogger.debug(LTag.PUMP, "Bolus coroutine was cancelled")
+        //     }
+        // }
 
         return pumpEnactResult.apply {
             success = false
             enacted = false
             comment = "Not implemented (Step 1 Stub)"
         }
-    }
-        bolusJob = newBolusJob
-
-        // Do a blocking wait until the bolus coroutine completes or is cancelled.
-        // AndroidAPS expects deliverTreatment() calls to block and to be cancellable
-        // (via stopBolusDelivering()), so we run a separate bolus coroutine and
-        // wait here until it is done.
-        runBlocking {
-            try {
-                aapsLogger.debug(LTag.PUMP, "Waiting for bolus coroutine to finish")
-                newBolusJob.join()
-                aapsLogger.debug(LTag.PUMP, "Bolus coroutine finished")
-            } catch (_: CancellationException) {
-                aapsLogger.debug(LTag.PUMP, "Bolus coroutine was cancelled")
-            }
-        }
-
-        return pumpEnactResult
     }
 
     override fun stopBolusDelivering() {
