@@ -160,7 +160,15 @@ class ComboV2Plugin @Inject constructor(
             comment = "Not implemented (Step 1 Stub)"
         }
     }
-    
+    override fun cancelTempBasal(enforceNew: Boolean): PumpEnactResult {
+        return pumpEnactResultProvider.get().apply {
+            success = false
+            enacted = false
+            comment = "Not implemented (Step 1 Stub)"
+        }
+    }
+
+
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
     private var pumpCoroutineScopeJob = SupervisorJob()
