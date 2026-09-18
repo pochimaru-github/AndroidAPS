@@ -829,7 +829,7 @@ pump?.connect()
         runBlocking {
             try {
                 executeCommand {
-                    acquiredPump.setBasalProfile(requestedBasalProfile) // Step 1: API仕様変更(Unit返却)に伴いif条件文を解除
+                    acquiredPump.setBasalProfile(requestedBasalProfile)
                     aapsLogger.debug(LTag.PUMP, "Basal profiles are different; new profile set")
                     activeBasalProfile = requestedBasalProfile
                     updateBaseBasalRateUI()
@@ -840,21 +840,6 @@ pump?.connect()
                         Notification.INFO,
                         60
                     )
-                    } else {
-                        aapsLogger.debug(LTag.PUMP, "Basal profiles are equal; did not have to set anything")
-                        // Treat this as if the command had been enacted. Setting a basal profile is
-                        // an idempotent operation, meaning that setting the exact same profile factors
-                        // twice in a row does not actually change anything. Therefore, we can just
-                        // completely skip such a redundant set basal profile operation and still get
-                        // the exact same result.
-                        // Furthermore, it is actually important to also set enacted to true in this case
-                        // because even though this _driver_ might know that the Combo uses this profile
-                        // already, _AAPS_ might not. A good example is when AAPS is set up the first time
-                        // and no profile has been activated. If in this case the profile happens to be
-                        // identical to what's already in the Combo, then enacted=false would cause errors,
-                        // because AAPS expects the driver to always enact the profile change in this case
-                        // (since it thinks that no profile is set yet).
-                    }
 
                     pumpEnactResult.apply {
                         success = true
