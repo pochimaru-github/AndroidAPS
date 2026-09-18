@@ -36,6 +36,7 @@ class ComboV2Fragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                /* Step 1: 廃止API (driverStateUIFlow / pairedStateUIFlow) のため一時無効化
                 launch {
                     comboV2Plugin.driverStateUIFlow.collectLatest { state ->
                         updateDriverStateUI(state)
@@ -47,6 +48,7 @@ class ComboV2Fragment : Fragment() {
                         updatePairedUI(isPaired)
                     }
                 }
+                */
             }
         }
     }
