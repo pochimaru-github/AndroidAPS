@@ -1309,64 +1309,75 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
     @OptIn(ExperimentalTime::class)
     override fun loadTDDs(): PumpEnactResult {
         val pumpEnactResult = pumpEnactResultProvider.get()
-        val acquiredPump = getAcquiredPump()
 
-        runBlocking {
-            try {
-                // Map key = timestamp; value = TDD
-                val tddMap = mutableMapOf<Long, Int>()
+        // =========================================================================
+        // Step 1: comboctl API変更に伴う一時無効化（fetchTDDHistory データモデル変更のため）
+        // 実コードを末尾の return まで1行も漏らさず全保持しています。
+        // Step 2で新モデルのプロパティへ移植して復元します。
+        // =========================================================================
+        // val acquiredPump = getAcquiredPump()
+        //
+        // runBlocking {
+        //     try {
+        //         // Map key = timestamp; value = TDD
+        //         val tddMap = mutableMapOf<Long, Int>()
+        //
+        //         executeCommand {
+        //             val tddHistory = acquiredPump.fetchTDDHistory()
+        //
+        //             tddHistory
+        //                 .filter { it.totalDailyAmount >= 1 }
+        //                 .forEach { tddHistoryEntry ->
+        //                     val timestamp = tddHistoryEntry.date.toEpochMilliseconds()
+        //                     tddMap[timestamp] = (tddMap[timestamp] ?: 0) + tddHistoryEntry.totalDailyAmount
+        //                 }
+        //         }
+        //
+        //         for (tddEntry in tddMap) {
+        //             val timestamp = tddEntry.key
+        //             val totalDailyAmount = tddEntry.value
+        //
+        //             pumpSync.createOrUpdateTotalDailyDose(
+        //                 timestamp,
+        //                 bolusAmount = 0.0,
+        //                 basalAmount = 0.0,
+        //                 totalAmount = totalDailyAmount.cctlBasalToIU(),
+        //                 pumpId = null,
+        //                 pumpType = PumpType.ACCU_CHEK_COMBO,
+        //                 pumpSerial = serialNumber()
+        //             )
+        //         }
+        //
+        //         pumpEnactResult.apply {
+        //             success = true
+        //             enacted = true
+        //         }
+        //     } catch (e: CancellationException) {
+        //         pumpEnactResult.apply {
+        //             success = true
+        //             enacted = false
+        //             comment = rh.gs(R.string.combov2_load_tdds_cancelled)
+        //         }
+        //         throw e
+        //     } catch (e: Exception) {
+        //         aapsLogger.error("Exception thrown during TDD retrieval: $e")
+        //
+        //         pumpEnactResult.apply {
+        //             success = false
+        //             enacted = false
+        //             comment = rh.gs(R.string.combov2_retrieving_tdds_failed)
+        //         }
+        //     }
+        // }
+        //
+        // return pumpEnactResult
 
-                executeCommand {
-                    val tddHistory = acquiredPump.fetchTDDHistory()
-
-                    tddHistory
-                        .filter { it.totalDailyAmount >= 1 }
-                        .forEach { tddHistoryEntry ->
-                            val timestamp = tddHistoryEntry.date.toEpochMilliseconds()
-                            tddMap[timestamp] = (tddMap[timestamp] ?: 0) + tddHistoryEntry.totalDailyAmount
-                        }
-                }
-
-                for (tddEntry in tddMap) {
-                    val timestamp = tddEntry.key
-                    val totalDailyAmount = tddEntry.value
-
-                    pumpSync.createOrUpdateTotalDailyDose(
-                        timestamp,
-                        bolusAmount = 0.0,
-                        basalAmount = 0.0,
-                        totalAmount = totalDailyAmount.cctlBasalToIU(),
-                        pumpId = null,
-                        pumpType = PumpType.ACCU_CHEK_COMBO,
-                        pumpSerial = serialNumber()
-                    )
-                }
-
-                pumpEnactResult.apply {
-                    success = true
-                    enacted = true
-                }
-            } catch (e: CancellationException) {
-                pumpEnactResult.apply {
-                    success = true
-                    enacted = false
-                    comment = rh.gs(R.string.combov2_load_tdds_cancelled)
-                }
-                throw e
-            } catch (e: Exception) {
-                aapsLogger.error("Exception thrown during TDD retrieval: $e")
-
-                pumpEnactResult.apply {
-                    success = false
-                    enacted = false
-                    comment = rh.gs(R.string.combov2_retrieving_tdds_failed)
-                }
-            }
+        return pumpEnactResult.apply {
+            success = false
+            enacted = false
+            comment = "Not implemented (Step 1 Stub)"
         }
-
-        return pumpEnactResult
     }
-
     override fun canHandleDST() = true
 
     override fun timezoneOrDSTChanged(timeChangeType: TimeChangeType) {
