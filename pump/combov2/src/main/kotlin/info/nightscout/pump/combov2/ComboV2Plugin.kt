@@ -2277,4 +2277,3 @@ private fun getAlertDescription(alert: Any): String {
             addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.VerboseLogging, title = R.string.combov2_verbose_logging))
         }
     }
-}
