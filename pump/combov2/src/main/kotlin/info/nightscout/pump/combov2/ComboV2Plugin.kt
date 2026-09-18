@@ -174,7 +174,14 @@ class ComboV2Plugin @Inject constructor(
             comment = "Not implemented (Step 1 Stub)"
         }
     }
-
+    override fun loadTDDs(): PumpEnactResult {
+        return pumpEnactResultProvider.get().apply {
+            success = false
+            enacted = false
+            comment = "Not implemented (Step 1 Stub)"
+        }
+    }
+    
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
     private var pumpCoroutineScopeJob = SupervisorJob()
@@ -928,8 +935,8 @@ pump?.connect()
     override val batteryLevel: Int?
         get() = _batteryLevel
 
-private fun updateLevels() {
-/* Step 1: 廃止API (pumpStatus) のためリザバー自動記録処理を一時無効化
+    private fun updateLevels() {
+        /* Step 1: 廃止API (pumpStatus) のためリザバー自動記録処理を一時無効化
         pumpStatus?.availableUnitsInReservoir?.let { newLevel ->
             _reservoirLevel?.let { currentLevel ->
                 aapsLogger.debug(LTag.PUMP, "Current/new reservoir levels: $currentLevel / $newLevel")
@@ -944,11 +951,10 @@ private fun updateLevels() {
                     )
                 }
             }
-        }
-*/
-
             _reservoirLevel = newLevel.toDouble()
         }
+        */
+    }
 /* Step 1: CIビルド導通のため一時コメントアウト（Step 2で現行APIへ置換予定）
         pumpStatus?.batteryState?.let { newState ->
             val newLevel = when (newState) {
