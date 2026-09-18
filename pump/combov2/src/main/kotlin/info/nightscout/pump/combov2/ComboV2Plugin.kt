@@ -199,7 +199,7 @@ private var lastComboAlert: Any? = null
 
     // The current driver state. We use a StateFlow here to
     // allow other components to react to state changes.
-    private val _driverStateFlow = MutableStateFlow<DriverState>(DriverState.NotInitialized)
+    private val _driverStateFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
 
     // If true, the pump was found to be suspended during the connect()
     // call. This is separate from driverStateFlow and driverStateUIFlow.
