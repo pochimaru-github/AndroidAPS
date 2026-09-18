@@ -2060,77 +2060,84 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         ComboCtlLogger.threshold = if (enableVerbose) ComboCtlLogLevel.VERBOSE else ComboCtlLogLevel.DEBUG
     }
 
-    private fun setDriverState(newState: DriverState) {
-        val oldState = _driverStateFlow.value
-
-        if (oldState == newState)
-            return
-
-        // Update the last connection timestamp after executing a command.
-        // Other components like CommandReadStatus expect the lastDataTime()
-        // timestamp to be updated right after a command execution.
-        // As a special case, if all we did was to check the pump status,
-        // and afterwards disconnected, also update. The CheckingPump
-        // state masks multiple command executions.
-        if ((oldState is DriverState.ExecutingCommand) || ((oldState == DriverState.CheckingPump) && (newState == DriverState.Disconnected)))
-            updateLastConnectionTimestamp()
-
-        // If the pump is suspended, or if an error occurred, we want
-        // to show the "suspended" and "error" state labels on the UI
-        // even after disconnecting. Otherwise, the user may not see
-        // that an error occurred or the pump is suspended.
-        val updateUIState = when (newState) {
-            DriverState.Disconnected -> {
-                when (driverStateUIFlow.value) {
-                    DriverState.Error,
-                    DriverState.Suspended -> false
-
-                    else                  -> true
-                }
-            }
-
-            else                     -> true
-        }
-        if (updateUIState) {
-            _driverStateUIFlow.value = newState
-
-            // Also show a notification to alert the user to the fact
-            // that the Combo is currently suspended, otherwise this
-            // only shows up in the Combo fragment.
-            if (newState == DriverState.Suspended) {
-                uiInteraction.addNotification(
-                    Notification.PUMP_SUSPENDED,
-                    text = rh.gs(R.string.combov2_pump_is_suspended),
-                    level = Notification.NORMAL
-                )
-            }
-        }
+private fun setDriverState(newState: DriverState) {
+        // =========================================================================
+        // Step 1: comboctl API変更に伴う一時無効化（DriverState の各状態参照エラーのため）
+        // 実コードを1行も消さずに全保持しています。
+        // Step 2で新DriverState構造に合わせて再実装します。
+        // =========================================================================
+        // val oldState = _driverStateFlow.value
+        //
+        // if (oldState == newState)
+        //     return
+        //
+        // // Update the last connection timestamp after executing a command.
+        // // Other components like CommandReadStatus expect the lastDataTime()
+        // // timestamp to be updated right after a command execution.
+        // // As a special case, if all we did was to check the pump status,
+        // // and afterwards disconnected, also update. The CheckingPump
+        // // state masks multiple command executions.
+        // if ((oldState is DriverState.ExecutingCommand) || ((oldState == DriverState.CheckingPump) && (newState == DriverState.Disconnected)))
+        //     updateLastConnectionTimestamp()
+        //
+        // // If the pump is suspended, or if an error occurred, we want
+        // // to show the "suspended" and "error" state labels on the UI
+        // // even after disconnecting. Otherwise, the user may not see
+        // // that an error occurred or the pump is suspended.
+        // val updateUIState = when (newState) {
+        //     DriverState.Disconnected -> {
+        //         when (driverStateUIFlow.value) {
+        //             DriverState.Error,
+        //             DriverState.Suspended -> false
+        //
+        //             else                  -> true
+        //         }
+        //     }
+        //
+        //     else                     -> true
+        // }
+        // if (updateUIState) {
+        //     _driverStateUIFlow.value = newState
+        //
+        //     // Also show a notification to alert the user to the fact
+        //     // that the Combo is currently suspended, otherwise this
+        //     // only shows up in the Combo fragment.
+        //     if (newState == DriverState.Suspended) {
+        //         uiInteraction.addNotification(
+        //             Notification.PUMP_SUSPENDED,
+        //             text = rh.gs(R.string.combov2_pump_is_suspended),
+        //             level = Notification.NORMAL
+        //         )
+        //     }
+        // }
+        //
+        // _driverStateFlow.value = newState
+        //
+        // if (newState == DriverState.Disconnected)
+        //     _currentActivityUIFlow.value = noCurrentActivity()
+        //
+        // aapsLogger.info(LTag.PUMP, "Setting Combo driver state:  old: $oldState  new: $newState")
+        //
+        // when (newState) {
+        //     DriverState.Disconnected -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED))
+        //     DriverState.Connecting   -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTING))
+        //     // Filter Ready<->Suspended state changes to avoid sending CONNECTED unnecessarily often.
+        //     DriverState.Ready        -> {
+        //         if (oldState != DriverState.Suspended)
+        //             rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED))
+        //     }
+        //
+        //     DriverState.Suspended    -> {
+        //         if (oldState != DriverState.Ready)
+        //             rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED))
+        //     }
+        //
+        //     else                     -> Unit
+        // }
 
         _driverStateFlow.value = newState
-
-        if (newState == DriverState.Disconnected)
-            _currentActivityUIFlow.value = noCurrentActivity()
-
-        aapsLogger.info(LTag.PUMP, "Setting Combo driver state:  old: $oldState  new: $newState")
-
-        when (newState) {
-            DriverState.Disconnected -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED))
-            DriverState.Connecting   -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTING))
-            // Filter Ready<->Suspended state changes to avoid sending CONNECTED unnecessarily often.
-            DriverState.Ready        -> {
-                if (oldState != DriverState.Suspended)
-                    rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED))
-            }
-
-            DriverState.Suspended    -> {
-                if (oldState != DriverState.Ready)
-                    rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED))
-            }
-
-            else                     -> Unit
-        }
+        _driverStateUIFlow.value = newState
     }
-
     private fun executePendingDisconnect() {
         if (!disconnectRequestPending)
             return
