@@ -54,13 +54,13 @@ class ComboV2Fragment : Fragment() {
     private fun updateDriverStateUI(state: ComboV2Plugin.DriverState) {
         val context = context ?: return
         val statusText = when (state) {
-            ComboV2Plugin.DriverState.NotInitialized -> context.getString(R.string.combov2_not_initialized)
+            // ComboV2Plugin.DriverState.NotInitialized -> context.getString(R.string.combov2_not_initialized) // Step 1: 廃止APIのため無効化
             ComboV2Plugin.DriverState.Disconnected   -> context.getString(R.string.combov2_disconnected)
             ComboV2Plugin.DriverState.Connecting     -> context.getString(R.string.combov2_connecting)
-            ComboV2Plugin.DriverState.CheckingPump   -> context.getString(R.string.combov2_checking_pump)
+            // ComboV2Plugin.DriverState.CheckingPump   -> context.getString(R.string.combov2_checking_pump) // Step 1: 廃止APIのため無効化
             // is ComboV2Plugin.DriverState.ExecutingCommand -> context.getString(R.string.combov2_executing_command) // Step 1: 廃止APIのため無効化
-            ComboV2Plugin.DriverState.Ready          -> context.getString(R.string.combov2_ready)
-            ComboV2Plugin.DriverState.Suspended      -> context.getString(R.string.combov2_suspended)
+            // ComboV2Plugin.DriverState.Ready          -> context.getString(R.string.combov2_ready) // Step 1: 廃止APIのため無効化
+            // ComboV2Plugin.DriverState.Suspended      -> context.getString(R.string.combov2_suspended) // Step 1: 廃止APIのため無効化
             ComboV2Plugin.DriverState.Error          -> context.getString(R.string.combov2_error)
             else                                     -> ""
         }
