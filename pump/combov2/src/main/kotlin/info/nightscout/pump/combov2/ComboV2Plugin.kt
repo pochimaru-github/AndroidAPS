@@ -2177,15 +2177,20 @@ private fun setDriverState(newState: DriverState) {
             executePendingDisconnect()
         } catch (e: CancellationException) {
             throw e
-        } catch (e: AlertScreenException) {
-            lastComboAlert = e.alertScreenContent
-
-            notifyAboutComboAlert(e.alertScreenContent)
-
-            // Disconnect since we are now in the Error state.
-            disconnectInternal(forceDisconnect = true)
-
-            throw e
+        // =========================================================================
+        // Step 1: comboctl API変更に伴う一時無効化（AlertScreenException / alertScreenContent 変更のため）
+        // 実コードを1行も消さずに全保持しています。
+        // Step 2で新アラート構造に移植・再接続します。
+        // =========================================================================
+        // } catch (e: AlertScreenException) {
+        //     lastComboAlert = e.alertScreenContent
+        //
+        //     notifyAboutComboAlert(e.alertScreenContent)
+        //
+        //     // Disconnect since we are now in the Error state.
+        //     disconnectInternal(forceDisconnect = true)
+        //
+        //     throw e
         } catch (t: Throwable) {
             // Disconnect since we are now in the Error state.
             disconnectInternal(forceDisconnect = true)
@@ -2198,7 +2203,7 @@ private fun setDriverState(newState: DriverState) {
         _lastConnectionTimestampUIFlow.value = lastConnectionTimestamp
     }
 
-private fun getAlertDescription(alert: Any): String {
+    private fun getAlertDescription(alert: Any): String {
         /* Step 1: CIビルド導通のため一時無効化（Step 2でAlertScreenException等へ再実装予定）
     private fun getAlertDescription(alert: AlertScreen.Content) =
         when (alert) {
@@ -2280,7 +2285,11 @@ private fun getAlertDescription(alert: Any): String {
 
     private fun isDisconnected() =
         when (driverStateFlow.value) {
-            DriverState.NotInitialized,
+            // =========================================================================
+            // Step 1: comboctl API変更に伴う一時無効化（DriverState.NotInitialized 廃止のため）
+            // 実コードを1行も消さずに全保持しています。
+            // =========================================================================
+            // DriverState.NotInitialized,
             DriverState.Disconnected -> true
 
             else                     -> false
