@@ -2017,18 +2017,27 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             // the Pump.disconnect() call shuts down the RFCOMM socket,
             // making all send/receive calls fail.
 
-            if (pumpToDisconnect.stateFlow.value == ComboCtlPump.State.Connecting) {
-                // Case #1 from above
-                aapsLogger.debug(LTag.PUMP, "Cancelling ongoing connect attempt")
-                connectionSetupJob?.cancel()
-                pumpToDisconnect.disconnect()
-                connectionSetupJob?.join()
-            } else {
-                // Case #2 from above
-                aapsLogger.debug(LTag.PUMP, "Disconnecting Combo (if not disconnected already by a cancelling request)")
-                connectionSetupJob?.cancelAndJoin()
-                pumpToDisconnect.disconnect()
-            }
+            // =========================================================================
+            // Step 1: comboctl API変更に伴う一時無効化（ComboCtlPump.State.Connecting 変更のため）
+            // 実コードを1行も消さずに全保持しています。
+            // =========================================================================
+            // if (pumpToDisconnect.stateFlow.value == ComboCtlPump.State.Connecting) {
+            //     // Case #1 from above
+            //     aapsLogger.debug(LTag.PUMP, "Cancelling ongoing connect attempt")
+            //     connectionSetupJob?.cancel()
+            //     pumpToDisconnect.disconnect()
+            //     connectionSetupJob?.join()
+            // } else {
+            //     // Case #2 from above
+            //     aapsLogger.debug(LTag.PUMP, "Disconnecting Combo (if not disconnected already by a cancelling request)")
+            //     connectionSetupJob?.cancelAndJoin()
+            //     pumpToDisconnect.disconnect()
+            // }
+
+            // Step 1用フォールバック処理
+            aapsLogger.debug(LTag.PUMP, "Disconnecting Combo (if not disconnected already by a cancelling request)")
+            connectionSetupJob?.cancelAndJoin()
+            pumpToDisconnect.disconnect()
 
             aapsLogger.debug(LTag.PUMP, "Combo disconnected; cancelling UI flows coroutine")
             pumpUIFlowsDeferred?.cancelAndJoin()
@@ -2197,7 +2206,7 @@ private fun setDriverState(newState: DriverState) {
             throw t
         }
     }
-
+    
     private fun updateLastConnectionTimestamp() {
         lastConnectionTimestamp = System.currentTimeMillis()
         _lastConnectionTimestampUIFlow.value = lastConnectionTimestamp
