@@ -150,6 +150,7 @@ class ComboV2Plugin @Inject constructor(
         aapsLogger, rh, preferences, commandQueue
     ), Pump, PluginConstraints {
     override val isFakingTempsByExtendedBoluses: Boolean get() = false // Step 1: インターフェース要求プロパティのスタブ実装
+    override val pumpDescription: PumpDescription get() = PumpDescription() // Step 1: インターフェース要求プロパティのスタブ実装
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
     private var pumpCoroutineScopeJob = SupervisorJob()
