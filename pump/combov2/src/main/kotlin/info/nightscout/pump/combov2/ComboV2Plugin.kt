@@ -512,10 +512,10 @@ private var lastComboAlert: Any? = null
 
         when (driverStateFlow.value) {
             DriverState.Connecting,
-            DriverState.CheckingPump,
-            DriverState.Ready,
-            DriverState.Suspended,
-            is DriverState.ExecutingCommand,
+            // DriverState.CheckingPump, // Step 1: 廃止APIのため無効化
+            // DriverState.Ready, // Step 1: 廃止APIのため無効化
+            // DriverState.Suspended, // Step 1: 廃止APIのため無効化
+            // is DriverState.ExecutingCommand, // Step 1: 廃止APIのため無効化
             DriverState.Error -> {
                 aapsLogger.debug(
                     LTag.PUMP,
@@ -537,7 +537,7 @@ private var lastComboAlert: Any? = null
         assert(pump == null)
 
         lastComboAlert = null
-        pumpStatus = null
+        // pumpStatus = null // Step 1: 廃止APIのため無効化
 
         val bluetoothAddress = when (val address = getBluetoothAddress()) {
             null -> {
@@ -581,10 +581,10 @@ private var lastComboAlert: Any? = null
         // it can try to reconnect now.
         ComboCtlPump.State.DISCONNECTED        -> return@onEach
         ComboCtlPump.State.CONNECTING          -> DriverState.Connecting
-        ComboCtlPump.State.CHECKING_PUMP        -> DriverState.CheckingPump
-        ComboCtlPump.State.READY_FOR_COMMANDS    -> DriverState.Ready
-        ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.ExecutingCommand(null)
-        ComboCtlPump.State.SUSPENDED           -> DriverState.Suspended
+        ComboCtlPump.State.CHECKING_PUMP        -> DriverState.Connecting // Step 1: 廃止APIのためConnectingで代用
+        ComboCtlPump.State.READY_FOR_COMMANDS    -> DriverState.Connecting // Step 1: 廃止APIのためConnectingで代用
+        ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.Connecting // Step 1: 廃止APIのためConnectingで代用
+        ComboCtlPump.State.SUSPENDED           -> DriverState.Connecting // Step 1: 廃止APIのためConnectingで代用
         ComboCtlPump.State.ERROR               -> DriverState.Error
     }
                             setDriverState(driverState)
@@ -668,7 +668,8 @@ pump?.connect()
                             // the user. We also keep a copy of that number to be able to disable
                             // loop invocation if this isn't profile #1 (see the implementation of
                             // isLoopInvocationAllowed() below).
-                            val activeBasalProfileNumber = it.statusFlow.value?.activeBasalProfileNumber
+                            // val activeBasalProfileNumber = it.statusFlow.value?.activeBasalProfileNumber
+                            val activeBasalProfileNumber: Int? = null // Step 1: 廃止APIのためスタブ化
                             aapsLogger.debug(LTag.PUMP, "Active basal profile number: $activeBasalProfileNumber")
                             if ((activeBasalProfileNumber != null) && (activeBasalProfileNumber != 1)) {
                                 uiInteraction.addNotification(
@@ -687,7 +688,7 @@ pump?.connect()
                                 LTag.PUMP,
                                 "No basal profile specified by pump queue (yet); using the basal profile that got read from the pump"
                             )
-                            activeBasalProfile = it.currentBasalProfile
+                            // activeBasalProfile = it.currentBasalProfile // Step 1: 廃止APIのため無効化
                         }
                         updateBaseBasalRateUI()
                     }
