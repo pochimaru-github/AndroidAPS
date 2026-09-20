@@ -156,12 +156,7 @@ class ComboV2Plugin @Inject constructor(
     override val isFakingTempsByExtendedBoluses: Boolean = false
     override val lastBolusAmount: Double? = null
     override val lastBolusTime: Long? = null
-
-    private val _driverStateFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
-    val driverStateFlow: StateFlow<DriverState> = _driverStateFlow.asStateFlow()
-
-    private val _pairedStateFlow = MutableStateFlow<Boolean>(false)
-    val pairedStateFlow: StateFlow<Boolean> = _pairedStateFlow.asStateFlow()
+    override val lastDataTime: Long = 0L
     
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
@@ -220,6 +215,7 @@ class ComboV2Plugin @Inject constructor(
 
         private val _driverStateUIFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
         val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
+        val driverStateFlow: StateFlow<DriverState> = driverStateUIFlow
 
         data class CurrentActivityInfo(val description: String, val overallProgress: Double)
 
@@ -230,10 +226,10 @@ class ComboV2Plugin @Inject constructor(
         private var _lastConnectionTimestampUIFlow = MutableStateFlow<Long?>(null)
         val lastConnectionTimestampUIFlow = _lastConnectionTimestampUIFlow.asStateFlow()
 
-        private var _batteryStateUIFlow = MutableStateFlow<BatteryState?>(null)
+        private var _batteryStateUIFlow = MutableStateFlow<Any?>(null)
         val batteryStateUIFlow = _batteryStateUIFlow.asStateFlow()
 
-        data class ReservoirLevel(val state: ReservoirState, val availableUnits: Int)
+        data class ReservoirLevel(val state: Any?, val availableUnits: Int)
 
         private var _reservoirLevelUIFlow = MutableStateFlow<ReservoirLevel?>(null)
         val reservoirLevelUIFlow = _reservoirLevelUIFlow.asStateFlow()
