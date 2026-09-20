@@ -149,18 +149,19 @@ class ComboV2Plugin @Inject constructor(
             ComboStringNonKey::class.java, ComboIntNonKey::class.java, ComboLongNonKey::class.java
         ),
         aapsLogger, rh, preferences, commandQueue
-    ), Pump, PluginConstraints {
+), Pump, PluginConstraints {
 
     override var baseBasalRate: Double = 0.0
     override val batteryLevel: Int? = null
+    override fun canHandleDST(): Boolean = false
     override val isFakingTempsByExtendedBoluses: Boolean = false
     override val lastBolusAmount: Double? = null
     override val lastBolusTime: Long? = null
     override val lastDataTime: Long = 0L
     override val reservoirLevel: Double = 0.0
     override val pumpDescription: PumpDescription
-        get() = PumpDescription()
-    
+        get() = PumpDescription() 
+        
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
     private var pumpCoroutineScopeJob = SupervisorJob()
