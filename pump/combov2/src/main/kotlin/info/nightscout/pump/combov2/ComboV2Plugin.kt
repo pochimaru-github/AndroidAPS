@@ -199,8 +199,35 @@ private var lastComboAlert: Any? = null
 
     // The current driver state. We use a StateFlow here to
     // allow other components to react to state changes.
-    private val _driverStateFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
+        private val _driverStateFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
+        val driverStateFlow: StateFlow<DriverState> = _driverStateFlow.asStateFlow()
 
+        private val _pairedStateFlow = MutableStateFlow<Boolean>(false)
+        val pairedStateFlow: StateFlow<Boolean> = _pairedStateFlow.asStateFlow()
+
+        private val _driverStateUIFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
+        val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
+
+        data class CurrentActivityInfo(val description: String, val overallProgress: Double)
+
+        private fun noCurrentActivity() = CurrentActivityInfo("", 0.0)
+        private var _currentActivityUIFlow = MutableStateFlow(noCurrentActivity())
+        val currentActivityUIFlow = _currentActivityUIFlow.asStateFlow()
+
+        private var _lastConnectionTimestampUIFlow = MutableStateFlow<Long?>(null)
+        val lastConnectionTimestampUIFlow = _lastConnectionTimestampUIFlow.asStateFlow()
+
+        private var _batteryStateUIFlow = MutableStateFlow<BatteryState?>(null)
+        val batteryStateUIFlow = _batteryStateUIFlow.asStateFlow()
+
+        data class ReservoirLevel(val state: ReservoirState, val availableUnits: Int)
+
+        private var _reservoirLevelUIFlow = MutableStateFlow<ReservoirLevel?>(null)
+        val reservoirLevelUIFlow = _reservoirLevelUIFlow.asStateFlow()
+
+        private var _lastBolusUIFlow = MutableStateFlow<Any?>(null)
+        val lastBolusUIFlow = _lastBolusUIFlow.asStateFlow()
+        
     // If true, the pump was found to be suspended during the connect()
     // call. This is separate from driverStateFlow and driverStateUIFlow.
     // It is set immediately after connect() (while the other two may be
