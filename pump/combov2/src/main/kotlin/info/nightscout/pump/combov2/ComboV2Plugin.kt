@@ -1851,136 +1851,47 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         _baseBasalRateUIFlow.value = activeBasalProfile?.get(currentHour)?.cctlBasalToIU()
     }
 
-    @OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class)
     private fun handlePumpEvent(event: ComboCtlPump.Event) {
         aapsLogger.debug(LTag.PUMP, "Handling pump event $event")
 
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（ComboCtlPump.Event 型変更のため）
-        // 実コードを1行も消さずに全保持しています。
-        // Step 2で新Event構造に移植・再接続します。
-        // =========================================================================
-        // when (event) {
-        //     is ComboCtlPump.Event.BatteryLow           -> {
-        //         uiInteraction.addNotification(
-        //             Notification.COMBO_PUMP_ALARM,
-        //             text = rh.gs(R.string.combov2_battery_low_warning),
-        //             level = Notification.NORMAL
-        //         )
-        //     }
-        //
-        //     is ComboCtlPump.Event.ReservoirLow         -> {
-        //         uiInteraction.addNotification(
-        //             Notification.COMBO_PUMP_ALARM,
-        //             text = rh.gs(R.string.combov2_reservoir_low_warning),
-        //             level = Notification.NORMAL
-        //         )
-        //     }
-        //
-        //     is ComboCtlPump.Event.QuickBolusInfused    -> {
-        //         pumpSync.syncBolusWithPumpId(
-        //             event.timestamp.toEpochMilliseconds(),
-        //             event.bolusAmount.cctlBolusToIU(),
-        //             BS.Type.NORMAL,
-        //             event.bolusId,
-        //             PumpType.ACCU_CHEK_COMBO,
-        //             serialNumber()
-        //         )
-        //     }
-        //
-        //     is ComboCtlPump.Event.StandardBolusInfused -> {
-        //         val bolusType = when (event.standardBolusReason) {
-        //             ComboCtlPump.StandardBolusReason.NORMAL               -> BS.Type.NORMAL
-        //             ComboCtlPump.StandardBolusReason.SUPERBOLUS           -> BS.Type.SMB
-        //             ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET -> BS.Type.PRIMING
-        //         }
-        //         pumpSync.syncBolusWithPumpId(
-        //             event.timestamp.toEpochMilliseconds(),
-        //             event.bolusAmount.cctlBolusToIU(),
-        //             bolusType,
-        //             event.bolusId,
-        //             PumpType.ACCU_CHEK_COMBO,
-        //             serialNumber()
-        //         )
-        //     }
-        //
-        //     is ComboCtlPump.Event.ExtendedBolusStarted -> {
-        //         pumpSync.syncExtendedBolusWithPumpId(
-        //             event.timestamp.toEpochMilliseconds(),
-        //             event.totalBolusAmount.cctlBolusToIU(),
-        //             event.totalDurationMinutes.toLong() * 60 * 1000,
-        //             false,
-        //             event.bolusId,
-        //             PumpType.ACCU_CHEK_COMBO,
-        //             serialNumber()
-        //         )
-        //     }
-        //
-        //     is ComboCtlPump.Event.ExtendedBolusEnded   -> {
-        //         pumpSync.syncStopExtendedBolusWithPumpId(
-        //             event.timestamp.toEpochMilliseconds(),
-        //             event.bolusId,
-        //             PumpType.ACCU_CHEK_COMBO,
-        //             serialNumber()
-        //         )
-        //     }
-        //
-        //     is ComboCtlPump.Event.TbrStarted           -> {
-        //         aapsLogger.debug(LTag.PUMP, "Pump reports TBR started; expected state according to AAPS: ${pumpSync.expectedPumpState()}")
-        //         val tbrStartTimestampInMs = event.tbr.timestamp.toEpochMilliseconds()
-        //         val tbrType = when (event.tbr.type) {
-        //             ComboCtlTbr.Type.NORMAL               -> PumpSync.TemporaryBasalType.NORMAL
-        //             ComboCtlTbr.Type.EMULATED_100_PERCENT -> PumpSync.TemporaryBasalType.NORMAL
-        //             ComboCtlTbr.Type.SUPERBOLUS           -> PumpSync.TemporaryBasalType.SUPERBOLUS
-        //             ComboCtlTbr.Type.EMULATED_COMBO_STOP  -> PumpSync.TemporaryBasalType.EMULATED_PUMP_SUSPEND
-        //             ComboCtlTbr.Type.COMBO_STOPPED        -> PumpSync.TemporaryBasalType.PUMP_SUSPEND
-        //         }
-        //         pumpSync.syncTemporaryBasalWithPumpId(
-        //             timestamp = tbrStartTimestampInMs,
-        //             rate = event.tbr.percentage.toDouble(),
-        //             duration = event.tbr.durationInMinutes.toLong() * 60 * 1000,
-        //             isAbsolute = false,
-        //             type = tbrType,
-        //             pumpId = tbrStartTimestampInMs,
-        //             pumpType = PumpType.ACCU_CHEK_COMBO,
-        //             pumpSerial = serialNumber()
-        //         )
-        //     }
-        //
-        //     is ComboCtlPump.Event.TbrEnded             -> {
-        //         aapsLogger.debug(LTag.PUMP, "Pump reports TBR ended; expected state according to AAPS: ${pumpSync.expectedPumpState()}")
-        //         val tbrEndTimestampInMs = event.timestampWhenTbrEnded.toEpochMilliseconds()
-        //         pumpSync.syncStopTemporaryBasalWithPumpId(
-        //             timestamp = tbrEndTimestampInMs,
-        //             endPumpId = tbrEndTimestampInMs,
-        //             pumpType = PumpType.ACCU_CHEK_COMBO,
-        //             pumpSerial = serialNumber()
-        //         )
-        //     }
-        //
-        //     is ComboCtlPump.Event.UnknownTbrDetected   -> {
-        //         // Inform about this unknown TBR that was observed (and automatically aborted).
-        //         val remainingDurationString = String.format(
-        //             Locale.getDefault(),
-        //             "%02d:%02d",
-        //             event.remainingTbrDurationInMinutes / 60,
-        //             event.remainingTbrDurationInMinutes % 60
-        //         )
-        //         uiInteraction.addNotification(
-        //             Notification.COMBO_UNKNOWN_TBR,
-        //             text = rh.gs(
-        //                 R.string.combov2_unknown_tbr_detected,
-        //                 event.tbrPercentage,
-        //                 remainingDurationString
-        //             ),
-        //             level = Notification.URGENT
-        //         )
-        //     }
-        //
-        //     else                                       -> Unit
-        // }
-    }
+        when (event) {
+            is ComboCtlPump.Event.LowBattery -> {
+                uiInteraction.addNotification(
+                    Notification.COMBO_PUMP_ALARM,
+                    text = rh.gs(R.string.combov2_battery_low_warning),
+                    level = Notification.NORMAL
+                )
+            }
 
+            is ComboCtlPump.Event.TbrStarted -> {
+                aapsLogger.debug(
+                    LTag.PUMP,
+                    "Pump reports TBR started: ${event.percentage}% for ${event.durationMinutes}m; expected state according to AAPS: ${pumpSync.expectedPumpState()}"
+                )
+                val tbrStartTimestampInMs = System.currentTimeMillis()
+                pumpSync.syncTemporaryBasalWithPumpId(
+                    timestamp = tbrStartTimestampInMs,
+                    rate = event.percentage.toDouble(),
+                    duration = event.durationMinutes.toLong() * 60 * 1000,
+                    isAbsolute = false,
+                    type = PumpSync.TemporaryBasalType.NORMAL,
+                    pumpId = tbrStartTimestampInMs,
+                    pumpType = PumpType.ACCU_CHEK_COMBO,
+                    pumpSerial = serialNumber()
+                )
+            }
+
+            is ComboCtlPump.Event.AlarmRaised -> {
+                aapsLogger.warn(LTag.PUMP, "Pump alarm raised: ${event.alarmCode}")
+                uiInteraction.addNotification(
+                    Notification.COMBO_PUMP_ALARM,
+                    text = "Pump Alarm: ${event.alarmCode}",
+                    level = Notification.URGENT
+                )
+            }
+        }
+    }
     // Marked as synchronized since this may get called by a finishing
     // connect operation and by the command queue at the same time.
     @Synchronized private fun disconnectInternal(forceDisconnect: Boolean) {
