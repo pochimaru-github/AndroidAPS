@@ -1892,3 +1892,4 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.VerboseLogging, title = R.string.combov2_verbose_logging))
         }
     }
+}
