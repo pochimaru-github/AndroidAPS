@@ -1002,30 +1002,17 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         }
 
         val acquiredPump = getAcquiredPump()
-        val requestedBolusAmount = detailedBolusInfo.insulin.iuToCctlBolus()
 
         val newBolusJob = pumpCoroutineScope.async {
             try {
                 executeCommand {
-                    acquiredPump.deliverBolus(requestedBolusAmount)
+                    acquiredPump.deliverBolus(detailedBolusInfo.insulin)
                 }
 
                 reportFinishedBolus(rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, detailedBolusInfo.insulin), detailedBolusInfo.id, pumpEnactResult, succeeded = true)
             } catch (e: CancellationException) {
                 reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
                 throw e
-            } catch (_: ComboCtlPump.BolusCancelledByUserException) {
-                aapsLogger.info(LTag.PUMP, "Bolus cancelled via Combo CMD_CANCEL_BOLUS command")
-                reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
-            } catch (_: ComboCtlPump.BolusNotDeliveredException) {
-                aapsLogger.error(LTag.PUMP, "Bolus not delivered")
-                reportFinishedBolus(R.string.combov2_bolus_not_delivered, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-            } catch (_: ComboCtlPump.UnaccountedBolusDetectedException) {
-                aapsLogger.error(LTag.PUMP, "Unaccounted bolus detected")
-                reportFinishedBolus(R.string.combov2_unaccounted_bolus_detected_cancelling_bolus, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-            } catch (_: ComboCtlPump.InsufficientInsulinAvailableException) {
-                aapsLogger.error(LTag.PUMP, "Insufficient insulin in reservoir")
-                reportFinishedBolus(R.string.combov2_insufficient_insulin_in_reservoir, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
             } catch (e: Exception) {
                 aapsLogger.error(LTag.PUMP, "Exception thrown during bolus delivery: $e")
                 reportFinishedBolus(R.string.combov2_bolus_delivery_failed, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
