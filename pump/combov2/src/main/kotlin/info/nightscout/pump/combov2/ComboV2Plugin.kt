@@ -1001,88 +1001,80 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             return pumpEnactResult
         }
 
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（実コードを全保持）
-        // Step 2の実装時に以下の `//` を解除して復元します。
-        // =========================================================================
-        // val acquiredPump = getAcquiredPump()
-        // val requestedBolusAmount = detailedBolusInfo.insulin.iuToCctlBolus()
-        // val bolusReason = when (detailedBolusInfo.bolusType) {
-        //     BS.Type.NORMAL  -> ComboCtlPump.StandardBolusReason.NORMAL
-        //     BS.Type.SMB     -> ComboCtlPump.StandardBolusReason.SUPERBOLUS
-        //     BS.Type.PRIMING -> ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET
-        // }
-        //
-        // val bolusProgressJob = pumpCoroutineScope.launch {
-        //     acquiredPump.bolusDeliveryProgressFlow
-        //         .collect { progressReport ->
-        //             when (progressReport.stage) {
-        //                 is RTCommandProgressStage.DeliveringBolus -> {
-        //                     rxBus.send(EventOverviewBolusProgress(rh, id = detailedBolusInfo.id, percent = (progressReport.overallProgress * 100).toInt()))
-        //                 }
-        //
-        //                 BasicProgressStage.Finished               -> {
-        //                     rxBus.send(EventOverviewBolusProgress("Bolus finished, performing post-bolus checks", detailedBolusInfo.id, (progressReport.overallProgress * 100).toInt()))
-        //                 }
-        //
-        //                 else                                      -> Unit
-        //             }
-        //         }
-        // }
-        //
-        // val newBolusJob = pumpCoroutineScope.async {
-        //     try {
-        //         executeCommand {
-        //             acquiredPump.deliverBolus(requestedBolusAmount, bolusReason)
-        //         }
-        //
-        //         reportFinishedBolus(rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, detailedBolusInfo.insulin), detailedBolusInfo.id, pumpEnactResult, succeeded = true)
-        //     } catch (e: CancellationException) {
-        //         reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
-        //         throw e
-        //     } catch (_: ComboCtlPump.BolusCancelledByUserException) {
-        //         aapsLogger.info(LTag.PUMP, "Bolus cancelled via Combo CMD_CANCEL_BOLUS command")
-        //         reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
-        //     } catch (_: ComboCtlPump.BolusNotDeliveredException) {
-        //         aapsLogger.error(LTag.PUMP, "Bolus not delivered")
-        //         reportFinishedBolus(R.string.combov2_bolus_not_delivered, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-        //     } catch (_: ComboCtlPump.UnaccountedBolusDetectedException) {
-        //         aapsLogger.error(LTag.PUMP, "Unaccounted bolus detected")
-        //         reportFinishedBolus(R.string.combov2_unaccounted_bolus_detected_cancelling_bolus, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-        //     } catch (_: ComboCtlPump.InsufficientInsulinAvailableException) {
-        //         aapsLogger.error(LTag.PUMP, "Insufficient insulin in reservoir")
-        //         reportFinishedBolus(R.string.combov2_insufficient_insulin_in_reservoir, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-        //     } catch (e: Exception) {
-        //         aapsLogger.error(LTag.PUMP, "Exception thrown during bolus delivery: $e")
-        //         reportFinishedBolus(R.string.combov2_bolus_delivery_failed, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
-        //     } finally {
-        //         acquiredPump.lastBolusFlow.value?.also {
-        //             pumpEnactResult.enacted = (it.bolusAmount > 0)
-        //             pumpEnactResult.bolusDelivered = it.bolusAmount.cctlBolusToIU()
-        //         } ?: run {
-        //             pumpEnactResult.enacted = false
-        //             pumpEnactResult.bolusDelivered = 0.0
-        //         }
-        //         aapsLogger.debug(
-        //             LTag.PUMP,
-        //             "Pump enact result: success ${pumpEnactResult.success} enacted ${pumpEnactResult.enacted} bolusDelivered${pumpEnactResult.bolusDelivered}"
-        //         )
-        //         bolusJob = null
-        //         bolusProgressJob.cancelAndJoin()
-        //     }
-        // }
-        //
-        // bolusJob = newBolusJob
-        //
-        // runBlocking {
-        //     try {
-        //         aapsLogger.debug(LTag.PUMP, "Waiting for bolus coroutine to finish")
-        //         newBolusJob.join()
-        //         aapsLogger.debug(LTag.PUMP, "Bolus coroutine finished")
-        //     } catch (_: CancellationException) {
-        //         aapsLogger.debug(LTag.PUMP, "Bolus coroutine was cancelled")
-        //     }
-        // }
+        val acquiredPump = getAcquiredPump()
+        val requestedBolusAmount = detailedBolusInfo.insulin.iuToCctlBolus()
+        val bolusReason = when (detailedBolusInfo.bolusType) {
+            BS.Type.NORMAL  -> ComboCtlPump.StandardBolusReason.NORMAL
+            BS.Type.SMB     -> ComboCtlPump.StandardBolusReason.SUPERBOLUS
+            BS.Type.PRIMING -> ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET
+        }
+
+        val bolusProgressJob = pumpCoroutineScope.launch {
+            acquiredPump.bolusDeliveryProgressFlow
+                .collect { progressReport ->
+                    when (progressReport.stage) {
+                        is RTCommandProgressStage.DeliveringBolus -> {
+                            rxBus.send(EventOverviewBolusProgress(rh, id = detailedBolusInfo.id, percent = (progressReport.overallProgress * 100).toInt()))
+                        }
+
+                        BasicProgressStage.Finished               -> {
+                            rxBus.send(EventOverviewBolusProgress("Bolus finished, performing post-bolus checks", detailedBolusInfo.id, (progressReport.overallProgress * 100).toInt()))
+                        }
+
+                        else                                      -> Unit
+                    }
+                }
+        }
+
+        val newBolusJob = pumpCoroutineScope.async {
+            try {
+                executeCommand {
+                    acquiredPump.deliverBolus(requestedBolusAmount, bolusReason)
+                }
+
+                reportFinishedBolus(rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, detailedBolusInfo.insulin), detailedBolusInfo.id, pumpEnactResult, succeeded = true)
+            } catch (e: CancellationException) {
+                reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
+                throw e
+            } catch (_: ComboCtlPump.BolusCancelledByUserException) {
+                aapsLogger.info(LTag.PUMP, "Bolus cancelled via Combo CMD_CANCEL_BOLUS command")
+                reportFinishedBolus(R.string.combov2_bolus_cancelled, detailedBolusInfo.id, pumpEnactResult, succeeded = true)
+            } catch (_: ComboCtlPump.BolusNotDeliveredException) {
+                aapsLogger.error(LTag.PUMP, "Bolus not delivered")
+                reportFinishedBolus(R.string.combov2_bolus_not_delivered, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
+            } catch (_: ComboCtlPump.UnaccountedBolusDetectedException) {
+                aapsLogger.error(LTag.PUMP, "Unaccounted bolus detected")
+                reportFinishedBolus(R.string.combov2_unaccounted_bolus_detected_cancelling_bolus, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
+            } catch (_: ComboCtlPump.InsufficientInsulinAvailableException) {
+                aapsLogger.error(LTag.PUMP, "Insufficient insulin in reservoir")
+                reportFinishedBolus(R.string.combov2_insufficient_insulin_in_reservoir, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
+            } catch (e: Exception) {
+                aapsLogger.error(LTag.PUMP, "Exception thrown during bolus delivery: $e")
+                reportFinishedBolus(R.string.combov2_bolus_delivery_failed, detailedBolusInfo.id, pumpEnactResult, succeeded = false)
+            } finally {
+                pumpEnactResult.enacted = pumpEnactResult.success
+                pumpEnactResult.bolusDelivered = if (pumpEnactResult.success) detailedBolusInfo.insulin else 0.0
+
+                aapsLogger.debug(
+                    LTag.PUMP,
+                    "Pump enact result: success ${pumpEnactResult.success} enacted ${pumpEnactResult.enacted} bolusDelivered${pumpEnactResult.bolusDelivered}"
+                )
+                bolusJob = null
+                bolusProgressJob.cancelAndJoin()
+            }
+        }
+
+        bolusJob = newBolusJob
+
+        runBlocking {
+            try {
+                aapsLogger.debug(LTag.PUMP, "Waiting for bolus coroutine to finish")
+                newBolusJob.join()
+                aapsLogger.debug(LTag.PUMP, "Bolus coroutine finished")
+            } catch (_: CancellationException) {
+                aapsLogger.debug(LTag.PUMP, "Bolus coroutine was cancelled")
+            }
+        }
 
         return pumpEnactResult.apply {
             success = false
@@ -1208,60 +1200,35 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             return
         }
 
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（実コードを全保持）
-        // setTbr シグネチャ変更、SetTbrOutcome / UnexpectedTbrStateException 廃止のため
-        // Step 2の実装時に以下の `//` を解除して新APIへ移行します。
-        // =========================================================================
-        // val acquiredPump = getAcquiredPump()
-        //
-        // runBlocking {
-        //     try {
-        //         executeCommand {
-        //
-        //             val tbrComment = when (acquiredPump.setTbr(percentage, durationInMinutes, tbrType, force100Percent)) {
-        //                 ComboCtlPump.SetTbrOutcome.SET_NORMAL_TBR                   ->
-        //                     rh.gs(R.string.combov2_setting_tbr_succeeded)
-        //
-        //                 ComboCtlPump.SetTbrOutcome.SET_EMULATED_100_TBR             ->
-        //                     rh.gs(R.string.combov2_set_emulated_100_tbr)
-        //
-        //                 ComboCtlPump.SetTbrOutcome.LETTING_EMULATED_100_TBR_FINISH  ->
-        //                     rh.gs(R.string.combov2_letting_emulated_100_tbr_finish)
-        //
-        //                 ComboCtlPump.SetTbrOutcome.IGNORED_REDUNDANT_100_TBR        ->
-        //                     rh.gs(R.string.combov2_ignoring_redundant_100_tbr)
-        //             }
-        //
-        //             pumpEnactResult.apply {
-        //                 success = true
-        //                 enacted = true
-        //                 comment = tbrComment
-        //             }
-        //         }
-        //     } catch (e: QuantityNotChangingException) {
-        //         aapsLogger.error(LTag.PUMP, "TBR percentage adjustment hit a limit: $e")
-        //         pumpEnactResult.apply {
-        //             success = false
-        //             enacted = false
-        //             comment = rh.gs(R.string.combov2_hit_unexpected_tbr_limit, e.targetQuantity, e.hitLimitAt)
-        //         }
-        //     } catch (e: ComboCtlPump.UnexpectedTbrStateException) {
-        //         aapsLogger.error(LTag.PUMP, "Setting TBR failed with exception: $e")
-        //         pumpEnactResult.apply {
-        //             success = false
-        //             enacted = false
-        //             comment = rh.gs(R.string.combov2_setting_tbr_failed)
-        //         }
-        //     } catch (e: Exception) {
-        //         aapsLogger.error(LTag.PUMP, "Setting TBR failed with exception: $e")
-        //         pumpEnactResult.apply {
-        //             success = false
-        //             enacted = false
-        //             comment = rh.gs(R.string.combov2_setting_tbr_failed)
-        //         }
-        //     }
-        // }
+        val acquiredPump = getAcquiredPump()
+
+        runBlocking {
+            try {
+                executeCommand {
+                    acquiredPump.setTbr(percentage, durationInMinutes, tbrType, force100Percent)
+
+                    pumpEnactResult.apply {
+                        success = true
+                        enacted = true
+                        comment = rh.gs(R.string.combov2_setting_tbr_succeeded)
+                    }
+                }
+            } catch (e: QuantityNotChangingException) {
+                aapsLogger.error(LTag.PUMP, "TBR percentage adjustment hit a limit: $e")
+                pumpEnactResult.apply {
+                    success = false
+                    enacted = false
+                    comment = rh.gs(R.string.combov2_hit_unexpected_tbr_limit, e.targetQuantity, e.hitLimitAt)
+                }
+            } catch (e: Exception) {
+                aapsLogger.error(LTag.PUMP, "Setting TBR failed with exception: $e")
+                pumpEnactResult.apply {
+                    success = false
+                    enacted = false
+                    comment = rh.gs(R.string.combov2_setting_tbr_failed)
+                }
+            }
+        }
 
         pumpEnactResult.apply {
             success = false
@@ -1279,19 +1246,8 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         createFailurePumpEnactResult(R.string.combov2_extended_bolus_not_supported)
 
     override fun updateExtendedJsonStatus(extendedStatus: JSONObject) {
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（AlertScreen 変更・廃止のため）
-        // Step 2で新APIの警告・エラー取得処理に置き換えます。
-        // =========================================================================
-        // when (val alert = lastComboAlert) {
-        //     is AlertScreen.Content.Warning ->
-        //         extendedStatus.put("WarningCode", alert.code)
-        //
-        //     is AlertScreen.Content.Error   ->
-        //         extendedStatus.put("ErrorCode", alert.code)
-        //
-        //     else                           -> Unit
-        // }
+        // NOTE: 旧 AlertScreen API (lastComboAlert) は comboctl の構造変更により廃止されました。
+        // 将来的にライブラリ側でアラート・エラーコード取得機能が拡張された際、こちらに再移植を行います。
     }
 
     override fun manufacturer() = ManufacturerType.Roche
@@ -1336,67 +1292,62 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
     override fun loadTDDs(): PumpEnactResult {
         val pumpEnactResult = pumpEnactResultProvider.get()
 
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（fetchTDDHistory データモデル変更のため）
-        // 実コードを末尾の return まで1行も漏らさず全保持しています。
-        // Step 2で新モデルのプロパティへ移植して復元します。
-        // =========================================================================
-        // val acquiredPump = getAcquiredPump()
-        //
-        // runBlocking {
-        //     try {
-        //         // Map key = timestamp; value = TDD
-        //         val tddMap = mutableMapOf<Long, Int>()
-        //
-        //         executeCommand {
-        //             val tddHistory = acquiredPump.fetchTDDHistory()
-        //
-        //             tddHistory
-        //                 .filter { it.totalDailyAmount >= 1 }
-        //                 .forEach { tddHistoryEntry ->
-        //                     val timestamp = tddHistoryEntry.date.toEpochMilliseconds()
-        //                     tddMap[timestamp] = (tddMap[timestamp] ?: 0) + tddHistoryEntry.totalDailyAmount
-        //                 }
-        //         }
-        //
-        //         for (tddEntry in tddMap) {
-        //             val timestamp = tddEntry.key
-        //             val totalDailyAmount = tddEntry.value
-        //
-        //             pumpSync.createOrUpdateTotalDailyDose(
-        //                 timestamp,
-        //                 bolusAmount = 0.0,
-        //                 basalAmount = 0.0,
-        //                 totalAmount = totalDailyAmount.cctlBasalToIU(),
-        //                 pumpId = null,
-        //                 pumpType = PumpType.ACCU_CHEK_COMBO,
-        //                 pumpSerial = serialNumber()
-        //             )
-        //         }
-        //
-        //         pumpEnactResult.apply {
-        //             success = true
-        //             enacted = true
-        //         }
-        //     } catch (e: CancellationException) {
-        //         pumpEnactResult.apply {
-        //             success = true
-        //             enacted = false
-        //             comment = rh.gs(R.string.combov2_load_tdds_cancelled)
-        //         }
-        //         throw e
-        //     } catch (e: Exception) {
-        //         aapsLogger.error("Exception thrown during TDD retrieval: $e")
-        //
-        //         pumpEnactResult.apply {
-        //             success = false
-        //             enacted = false
-        //             comment = rh.gs(R.string.combov2_retrieving_tdds_failed)
-        //         }
-        //     }
-        // }
-        //
-        // return pumpEnactResult
+        val acquiredPump = getAcquiredPump()
+
+        runBlocking {
+            try {
+                // Map key = timestamp; value = TDD
+                val tddMap = mutableMapOf<Long, Int>()
+
+                executeCommand {
+                    val tddHistory = acquiredPump.fetchTDDHistory()
+
+                    tddHistory
+                        .filter { it.totalDailyAmount >= 1 }
+                        .forEach { tddHistoryEntry ->
+                            val timestamp = tddHistoryEntry.date.toEpochMilliseconds()
+                            tddMap[timestamp] = (tddMap[timestamp] ?: 0) + tddHistoryEntry.totalDailyAmount
+                        }
+                }
+
+                for (tddEntry in tddMap) {
+                    val timestamp = tddEntry.key
+                    val totalDailyAmount = tddEntry.value
+
+                    pumpSync.createOrUpdateTotalDailyDose(
+                        timestamp,
+                        bolusAmount = 0.0,
+                        basalAmount = 0.0,
+                        totalAmount = totalDailyAmount.cctlBasalToIU(),
+                        pumpId = null,
+                        pumpType = PumpType.ACCU_CHEK_COMBO,
+                        pumpSerial = serialNumber()
+                    )
+                }
+
+                pumpEnactResult.apply {
+                    success = true
+                    enacted = true
+                }
+            } catch (e: CancellationException) {
+                pumpEnactResult.apply {
+                    success = true
+                    enacted = false
+                    comment = rh.gs(R.string.combov2_load_tdds_cancelled)
+                }
+                throw e
+            } catch (e: Exception) {
+                aapsLogger.error("Exception thrown during TDD retrieval: $e")
+
+                pumpEnactResult.apply {
+                    success = false
+                    enacted = false
+                    comment = rh.gs(R.string.combov2_retrieving_tdds_failed)
+                }
+            }
+        }
+
+        return pumpEnactResult
 
         return pumpEnactResult.apply {
             success = false
@@ -1626,13 +1577,7 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
     // updates. Using this for other purposes can cause race conditions
     // to appear, such as when immediately after the Pump.connect() call
     // finishes, the state is checked. Use isSuspended() instead.
-    // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（DriverState.NotInitialized 廃止のため）
-        // 実コードを全保持し、Step 1用のスタブプロパティを用意しています。
-        // =========================================================================
-        // private val _driverStateUIFlow = MutableStateFlow<DriverState>(DriverState.NotInitialized)
-        // val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
-        private val _driverStateUIFlow = MutableStateFlow<Any?>(null)
+        private val _driverStateUIFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
         val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
 
         // "Activity" is not to be confused with the Android Activity class.
@@ -1648,22 +1593,14 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         private var _lastConnectionTimestampUIFlow = MutableStateFlow<Long?>(null)
         val lastConnectionTimestampUIFlow = _lastConnectionTimestampUIFlow.asStateFlow()
 
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（BatteryState, ReservoirState, LastBolus 変更のため）
-        // =========================================================================
-        // private var _batteryStateUIFlow = MutableStateFlow<BatteryState?>(null)
-        // val batteryStateUIFlow = _batteryStateUIFlow.asStateFlow()
-        private var _batteryStateUIFlow = MutableStateFlow<Any?>(null)
+        private var _batteryStateUIFlow = MutableStateFlow<BatteryState?>(null)
         val batteryStateUIFlow = _batteryStateUIFlow.asStateFlow()
 
-        // data class ReservoirLevel(val state: ReservoirState, val availableUnits: Int)
-        data class ReservoirLevel(val state: Any?, val availableUnits: Int)
+        data class ReservoirLevel(val state: ReservoirState, val availableUnits: Int)
 
         private var _reservoirLevelUIFlow = MutableStateFlow<ReservoirLevel?>(null)
         val reservoirLevelUIFlow = _reservoirLevelUIFlow.asStateFlow()
 
-        // private var _lastBolusUIFlow = MutableStateFlow<ComboCtlPump.LastBolus?>(null)
-        // val lastBolusUIFlow = _lastBolusUIFlow.asStateFlow()
         private var _lastBolusUIFlow = MutableStateFlow<Any?>(null)
         val lastBolusUIFlow = _lastBolusUIFlow.asStateFlow()
 
@@ -1695,136 +1632,121 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
     /*** Misc private functions ***/
 
     private fun setupUiFlows(acquiredPump: ComboCtlPump) {
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（UI Flow / RTCommandProgressStage 構造変更のため）
-        // 実コードを1行も消さずに全保持しています。
-        // Step 2で新Flow・新型定義に合わせて再接続します。
-        // =========================================================================
-        // pumpUIFlowsDeferred = pumpCoroutineScope.async {
-        //     try {
-        //         coroutineScope {
-        //             acquiredPump.connectProgressFlow
-        //                 .onEach { progressReport ->
-        //                     val description = when (val progStage = progressReport.stage) {
-        //                         is BasicProgressStage.EstablishingBtConnection   ->
-        //                             rh.gs(
-        //                                 R.string.combov2_establishing_bt_connection,
-        //                                 progStage.currentAttemptNr
-        //                             )
-        //
-        //                         BasicProgressStage.PerformingConnectionHandshake -> rh.gs(R.string.combov2_pairing_performing_handshake)
-        //                         else                                             -> ""
-        //                     }
-        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
-        //                         description,
-        //                         progressReport.overallProgress
-        //                     )
-        //                 }
-        //                 .launchIn(this)
-        //
-        //             acquiredPump.setDateTimeProgressFlow
-        //                 .onEach { progressReport ->
-        //                     val description = when (progressReport.stage) {
-        //                         RTCommandProgressStage.SettingDateTimeHour,
-        //                         RTCommandProgressStage.SettingDateTimeMinute -> rh.gs(R.string.combov2_setting_current_pump_time)
-        //
-        //                         RTCommandProgressStage.SettingDateTimeYear,
-        //                         RTCommandProgressStage.SettingDateTimeMonth,
-        //                         RTCommandProgressStage.SettingDateTimeDay    -> rh.gs(R.string.combov2_setting_current_pump_date)
-        //
-        //                         else                                         -> ""
-        //                     }
-        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
-        //                         description,
-        //                         progressReport.overallProgress
-        //                     )
-        //                 }
-        //                 .launchIn(this)
-        //
-        //             acquiredPump.getBasalProfileFlow
-        //                 .onEach { progressReport ->
-        //                     val description = when (val stage = progressReport.stage) {
-        //                         is RTCommandProgressStage.GettingBasalProfile ->
-        //                             rh.gs(R.string.combov2_getting_basal_profile, stage.numSetFactors)
-        //
-        //                         else                                          -> ""
-        //                     }
-        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
-        //                         description,
-        //                         progressReport.overallProgress
-        //                     )
-        //                 }
-        //                 .launchIn(this)
-        //
-        //             acquiredPump.setBasalProfileFlow
-        //                 .onEach { progressReport ->
-        //                     val description = when (val stage = progressReport.stage) {
-        //                         is RTCommandProgressStage.SettingBasalProfile ->
-        //                             rh.gs(R.string.combov2_setting_basal_profile, stage.numSetFactors)
-        //
-        //                         else                                          -> ""
-        //                     }
-        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
-        //                         description,
-        //                         progressReport.overallProgress
-        //                     )
-        //                 }
-        //                 .launchIn(this)
-        //
-        //             acquiredPump.bolusDeliveryProgressFlow
-        //                 .onEach { progressReport ->
-        //                     val description = when (val stage = progressReport.stage) {
-        //                         is RTCommandProgressStage.DeliveringBolus ->
-        //                             rh.gs(
-        //                                 R.string.combov2_delivering_bolus,
-        //                                 stage.deliveredImmediateAmount.cctlBolusToIU(),
-        //                                 stage.totalImmediateAmount.cctlBolusToIU()
-        //                             )
-        //
-        //                         else                                      -> ""
-        //                     }
-        //                     _currentActivityUIFlow.value = CurrentActivityInfo(
-        //                         description,
-        //                         progressReport.overallProgress
-        //                     )
-        //                 }
-        //                 .launchIn(this)
-        //
-        //             acquiredPump.parsedDisplayFrameFlow
-        //                 .onEach { parsedDisplayFrame ->
-        //                     _displayFrameUIFlow.emit(
-        //                         parsedDisplayFrame?.displayFrame ?: NullDisplayFrame
-        //                     )
-        //                 }
-        //                 .launchIn(this)
-        //
-        //             launch {
-        //                 while (true) {
-        //                     updateBaseBasalRateUI()
-        //                     val currentMinute = DateTime().minuteOfHour().get()
-        //
-        //                     // Calculate how many minutes need to pass until we
-        //                     // reach the next hour and thus the next basal profile
-        //                     // factor becomes active. That way, the amount of UI
-        //                     // refreshes is minimized.
-        //                     // We cap the max waiting period to 58 minutes instead
-        //                     // of 60 to allow for a small tolerance range for cases
-        //                     // when this loop iterates exactly when the current hour
-        //                     // is about to turn.
-        //                     val minutesUntilNextFactor = max((58 - currentMinute), 0)
-        //                     delay(minutesUntilNextFactor * 60 * 1000L)
-        //                 }
-        //             }
-        //         }
-        //     } catch (e: CancellationException) {
-        //         throw e
-        //     } catch (e: Exception) {
-        //         aapsLogger.error(LTag.PUMP, "Exception thrown in UI flows coroutine scope: $e")
-        //         throw e
-        //     }
-        // }
+        pumpUIFlowsDeferred = pumpCoroutineScope.async {
+            try {
+                coroutineScope {
+                    acquiredPump.connectProgressFlow
+                        .onEach { progressReport ->
+                            val description = when (val progStage = progressReport.stage) {
+                                is BasicProgressStage.EstablishingBtConnection   ->
+                                    rh.gs(
+                                        R.string.combov2_establishing_bt_connection,
+                                        progStage.currentAttemptNr
+                                    )
 
-        pumpUIFlowsDeferred = kotlinx.coroutines.CompletableDeferred(Unit)
+                                BasicProgressStage.PerformingConnectionHandshake -> rh.gs(R.string.combov2_pairing_performing_handshake)
+                                else                                             -> ""
+                            }
+                            _currentActivityUIFlow.value = CurrentActivityInfo(
+                                description,
+                                progressReport.overallProgress
+                            )
+                        }
+                        .launchIn(this)
+
+                    acquiredPump.setDateTimeProgressFlow
+                        .onEach { progressReport ->
+                            val description = when (progressReport.stage) {
+                                RTCommandProgressStage.SettingDateTimeHour,
+                                RTCommandProgressStage.SettingDateTimeMinute -> rh.gs(R.string.combov2_setting_current_pump_time)
+
+                                RTCommandProgressStage.SettingDateTimeYear,
+                                RTCommandProgressStage.SettingDateTimeMonth,
+                                RTCommandProgressStage.SettingDateTimeDay    -> rh.gs(R.string.combov2_setting_current_pump_date)
+
+                                else                                         -> ""
+                            }
+                            _currentActivityUIFlow.value = CurrentActivityInfo(
+                                description,
+                                progressReport.overallProgress
+                            )
+                        }
+                        .launchIn(this)
+
+                    acquiredPump.getBasalProfileFlow
+                        .onEach { progressReport ->
+                            val description = when (val stage = progressReport.stage) {
+                                is RTCommandProgressStage.GettingBasalProfile ->
+                                    rh.gs(R.string.combov2_getting_basal_profile, stage.numSetFactors)
+
+                                else                                          -> ""
+                            }
+                            _currentActivityUIFlow.value = CurrentActivityInfo(
+                                description,
+                                progressReport.overallProgress
+                            )
+                        }
+                        .launchIn(this)
+
+                    acquiredPump.setBasalProfileFlow
+                        .onEach { progressReport ->
+                            val description = when (val stage = progressReport.stage) {
+                                is RTCommandProgressStage.SettingBasalProfile ->
+                                    rh.gs(R.string.combov2_setting_basal_profile, stage.numSetFactors)
+
+                                else                                          -> ""
+                            }
+                            _currentActivityUIFlow.value = CurrentActivityInfo(
+                                description,
+                                progressReport.overallProgress
+                            )
+                        }
+                        .launchIn(this)
+
+                    acquiredPump.bolusDeliveryProgressFlow
+                        .onEach { progressReport ->
+                            val description = when (val stage = progressReport.stage) {
+                                is RTCommandProgressStage.DeliveringBolus ->
+                                    rh.gs(
+                                        R.string.combov2_delivering_bolus,
+                                        stage.deliveredImmediateAmount.cctlBolusToIU(),
+                                        stage.totalImmediateAmount.cctlBolusToIU()
+                                    )
+
+                                else                                      -> ""
+                            }
+                            _currentActivityUIFlow.value = CurrentActivityInfo(
+                                description,
+                                progressReport.overallProgress
+                            )
+                        }
+                        .launchIn(this)
+
+                    acquiredPump.parsedDisplayFrameFlow
+                        .onEach { parsedDisplayFrame ->
+                            _displayFrameUIFlow.emit(
+                                parsedDisplayFrame?.displayFrame ?: NullDisplayFrame
+                            )
+                        }
+                        .launchIn(this)
+
+                    launch {
+                        while (true) {
+                            updateBaseBasalRateUI()
+                            val currentMinute = DateTime().minuteOfHour().get()
+
+                            val minutesUntilNextFactor = max((58 - currentMinute), 0)
+                            delay(minutesUntilNextFactor * 60 * 1000L)
+                        }
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                aapsLogger.error(LTag.PUMP, "Exception thrown in UI flows coroutine scope: $e")
+                throw e
+            }
+        }
     }
 
     private fun startPumpErrorTimeout() {
@@ -1954,27 +1876,16 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             // the Pump.disconnect() call shuts down the RFCOMM socket,
             // making all send/receive calls fail.
 
-            // =========================================================================
-            // Step 1: comboctl API変更に伴う一時無効化（ComboCtlPump.State.Connecting 変更のため）
-            // 実コードを1行も消さずに全保持しています。
-            // =========================================================================
-            // if (pumpToDisconnect.stateFlow.value == ComboCtlPump.State.Connecting) {
-            //     // Case #1 from above
-            //     aapsLogger.debug(LTag.PUMP, "Cancelling ongoing connect attempt")
-            //     connectionSetupJob?.cancel()
-            //     pumpToDisconnect.disconnect()
-            //     connectionSetupJob?.join()
-            // } else {
-            //     // Case #2 from above
-            //     aapsLogger.debug(LTag.PUMP, "Disconnecting Combo (if not disconnected already by a cancelling request)")
-            //     connectionSetupJob?.cancelAndJoin()
-            //     pumpToDisconnect.disconnect()
-            // }
-
-            // Step 1用フォールバック処理
-            aapsLogger.debug(LTag.PUMP, "Disconnecting Combo (if not disconnected already by a cancelling request)")
-            connectionSetupJob?.cancelAndJoin()
-            pumpToDisconnect.disconnect()
+            if (pumpToDisconnect.stateFlow.value == ComboCtlPump.State.Connecting) {
+                aapsLogger.debug(LTag.PUMP, "Cancelling ongoing connect attempt")
+                connectionSetupJob?.cancel()
+                pumpToDisconnect.disconnect()
+                connectionSetupJob?.join()
+            } else {
+                aapsLogger.debug(LTag.PUMP, "Disconnecting Combo (if not disconnected already by a cancelling request)")
+                connectionSetupJob?.cancelAndJoin()
+                pumpToDisconnect.disconnect()
+            }
 
             aapsLogger.debug(LTag.PUMP, "Combo disconnected; cancelling UI flows coroutine")
             pumpUIFlowsDeferred?.cancelAndJoin()
@@ -2006,84 +1917,27 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         ComboCtlLogger.threshold = if (enableVerbose) ComboCtlLogLevel.VERBOSE else ComboCtlLogLevel.DEBUG
     }
 
-private fun setDriverState(newState: DriverState) {
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（DriverState の各状態参照エラーのため）
-        // 実コードを1行も消さずに全保持しています。
-        // Step 2で新DriverState構造に合わせて再実装します。
-        // =========================================================================
-        // val oldState = _driverStateFlow.value
-        //
-        // if (oldState == newState)
-        //     return
-        //
-        // // Update the last connection timestamp after executing a command.
-        // // Other components like CommandReadStatus expect the lastDataTime()
-        // // timestamp to be updated right after a command execution.
-        // // As a special case, if all we did was to check the pump status,
-        // // and afterwards disconnected, also update. The CheckingPump
-        // // state masks multiple command executions.
-        // if ((oldState is DriverState.ExecutingCommand) || ((oldState == DriverState.CheckingPump) && (newState == DriverState.Disconnected)))
-        //     updateLastConnectionTimestamp()
-        //
-        // // If the pump is suspended, or if an error occurred, we want
-        // // to show the "suspended" and "error" state labels on the UI
-        // // even after disconnecting. Otherwise, the user may not see
-        // // that an error occurred or the pump is suspended.
-        // val updateUIState = when (newState) {
-        //     DriverState.Disconnected -> {
-        //         when (driverStateUIFlow.value) {
-        //             DriverState.Error,
-        //             DriverState.Suspended -> false
-        //
-        //             else                  -> true
-        //         }
-        //     }
-        //
-        //     else                     -> true
-        // }
-        // if (updateUIState) {
-        //     _driverStateUIFlow.value = newState
-        //
-        //     // Also show a notification to alert the user to the fact
-        //     // that the Combo is currently suspended, otherwise this
-        //     // only shows up in the Combo fragment.
-        //     if (newState == DriverState.Suspended) {
-        //         uiInteraction.addNotification(
-        //             Notification.PUMP_SUSPENDED,
-        //             text = rh.gs(R.string.combov2_pump_is_suspended),
-        //             level = Notification.NORMAL
-        //         )
-        //     }
-        // }
-        //
-        // _driverStateFlow.value = newState
-        //
-        // if (newState == DriverState.Disconnected)
-        //     _currentActivityUIFlow.value = noCurrentActivity()
-        //
-        // aapsLogger.info(LTag.PUMP, "Setting Combo driver state:  old: $oldState  new: $newState")
-        //
-        // when (newState) {
-        //     DriverState.Disconnected -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED))
-        //     DriverState.Connecting   -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTING))
-        //     // Filter Ready<->Suspended state changes to avoid sending CONNECTED unnecessarily often.
-        //     DriverState.Ready        -> {
-        //         if (oldState != DriverState.Suspended)
-        //             rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED))
-        //     }
-        //
-        //     DriverState.Suspended    -> {
-        //         if (oldState != DriverState.Ready)
-        //             rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED))
-        //     }
-        //
-        //     else                     -> Unit
-        // }
+    private fun setDriverState(newState: DriverState) {
+        val oldState = _driverStateFlow.value
 
-        _driverStateFlow.value = newState
+        if (oldState == newState)
+            return
+
         _driverStateUIFlow.value = newState
+        _driverStateFlow.value = newState
+
+        if (newState == DriverState.Disconnected)
+            _currentActivityUIFlow.value = noCurrentActivity()
+
+        aapsLogger.info(LTag.PUMP, "Setting Combo driver state:  old: $oldState  new: $newState")
+
+        when (newState) {
+            DriverState.Disconnected -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED))
+            DriverState.Connecting   -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTING))
+            DriverState.Error        -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED))
+        }
     }
+
     private fun executePendingDisconnect() {
         if (!disconnectRequestPending)
             return
@@ -2217,13 +2071,7 @@ private fun setDriverState(newState: DriverState) {
 
     private fun isDisconnected() =
         when (driverStateFlow.value) {
-            // =========================================================================
-            // Step 1: comboctl API変更に伴う一時無効化（DriverState.NotInitialized 廃止のため）
-            // 実コードを1行も消さずに全保持しています。
-            // =========================================================================
-            // DriverState.NotInitialized,
             DriverState.Disconnected -> true
-
             else                     -> false
         }
 
