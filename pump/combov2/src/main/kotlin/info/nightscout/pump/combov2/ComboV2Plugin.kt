@@ -85,7 +85,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import info.nightscout.comboctl.main.PumpStatus.BatteryState
+import info.nightscout.comboctl.main.PumpStatus.ReservoirState
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -149,11 +152,17 @@ class ComboV2Plugin @Inject constructor(
         ),
         aapsLogger, rh, preferences, commandQueue
     ), Pump, PluginConstraints {
-        
+
     override var baseBasalRate: Double = 0.0
     override val batteryLevel: Int? = null
     override val isFakingTempsByExtendedBoluses: Boolean = false
-        
+    override val lastBolusAmount: Double? = null
+
+    private val _driverStateFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
+    val driverStateFlow: StateFlow<DriverState> = _driverStateFlow.asStateFlow()
+
+    private val _pairedStateFlow = MutableStateFlow<Boolean>(false)
+    val pairedStateFlow: StateFlow<Boolean> = _pairedStateFlow.asStateFlow()        
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
     private var pumpCoroutineScopeJob = SupervisorJob()
