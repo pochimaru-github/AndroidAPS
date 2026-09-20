@@ -777,7 +777,6 @@ val DriverState.isConnected: Boolean
                     comment = rh.gs(app.aaps.core.ui.R.string.failed_update_basal_profile)
                 }
             }
-        }
         return pumpEnactResult
     }
 
