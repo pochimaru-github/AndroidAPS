@@ -150,6 +150,8 @@ class ComboV2Plugin @Inject constructor(
         aapsLogger, rh, preferences, commandQueue
     ), Pump, PluginConstraints {
         
+    override var baseBasalRate: Double = 0.0    
+        
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
     private var pumpCoroutineScopeJob = SupervisorJob()
@@ -1892,4 +1894,3 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = ComboBooleanKey.VerboseLogging, title = R.string.combov2_verbose_logging))
         }
     }
-}
