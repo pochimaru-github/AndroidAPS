@@ -507,7 +507,7 @@ val DriverState.isConnected: Boolean
             else                            -> false
         }
 
-    override fun connect(reason: String) {
+override fun connect(reason: String) {
         aapsLogger.debug(LTag.PUMP, "Connecting to Combo; reason: $reason")
 
         if (unpairing) {
@@ -557,10 +557,10 @@ val DriverState.isConnected: Boolean
             else -> address
         }
 
-        try {
-            val curPumpManager = pumpManager ?: throw Error("Could not get pump manager; this should not happen. Please report this as a bug.")
+        pumpCoroutineScope.launch {
+            try {
+                val curPumpManager = pumpManager ?: throw Error("Could not get pump manager; this should not happen. Please report this as a bug.")
 
-            pumpCoroutineScope.launch {
                 val acquiredPump = 
                     curPumpManager.acquirePump(bluetoothAddress, activeBasalProfile) { event -> handlePumpEvent(event) }
 
@@ -570,120 +570,117 @@ val DriverState.isConnected: Boolean
                 _serialNumberUIFlow.value = curPumpManager.getPumpID(bluetoothAddress)
 
                 rxBus.send(EventDismissNotification(Notification.BLUETOOTH_NOT_ENABLED))
-            }
-        } catch (e: Exception) {
-            // エラーハンドリング
-        }
 
-            // Erase any display frame that may be left over from a previous connection.
-            @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-            _displayFrameUIFlow.resetReplayCache()
+                // Erase any display frame that may be left over from a previous connection.
+                @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+                _displayFrameUIFlow.resetReplayCache()
 
-            stateAndStatusFlowsDeferred = pumpCoroutineScope.async {
-                coroutineScope {
-                    acquiredPump.stateFlow
-                        .onEach { pumpState ->
-                            val driverState = when (pumpState) {
-                                ComboCtlPump.State.DISCONNECTED        -> return@onEach
-                                ComboCtlPump.State.CONNECTING          -> DriverState.Connecting
-                                ComboCtlPump.State.CHECKING_PUMP        -> DriverState.Connecting
-                                ComboCtlPump.State.READY_FOR_COMMANDS    -> DriverState.Connecting
-                                ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.Connecting
-                                ComboCtlPump.State.SUSPENDED           -> DriverState.Connecting
-                                ComboCtlPump.State.ERROR               -> DriverState.Error
+                stateAndStatusFlowsDeferred = pumpCoroutineScope.async {
+                    coroutineScope {
+                        acquiredPump.stateFlow
+                            .onEach { pumpState ->
+                                val driverState = when (pumpState) {
+                                    ComboCtlPump.State.DISCONNECTED        -> return@onEach
+                                    ComboCtlPump.State.CONNECTING          -> DriverState.Connecting
+                                    ComboCtlPump.State.CHECKING_PUMP        -> DriverState.Connecting
+                                    ComboCtlPump.State.READY_FOR_COMMANDS    -> DriverState.Connecting
+                                    ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.Connecting
+                                    ComboCtlPump.State.SUSPENDED           -> DriverState.Connecting
+                                    ComboCtlPump.State.ERROR               -> DriverState.Error
+                                }
+                                setDriverState(driverState)
                             }
-                            setDriverState(driverState)
-                        }
-                        .launchIn(this)
-                }
-            }
-
-            setupUiFlows(acquiredPump)
-
-            disconnectRequestPending = false
-            setDriverState(DriverState.Connecting)
-
-            connectionSetupJob = pumpCoroutineScope.launch {
-                var forciblyDisconnectDueToError = false
-
-                try {
-                    runWithPermissionCheck(
-                        context, config, aapsLogger, androidPermission,
-                        permissionsToCheckFor = listOf("android.permission.BLUETOOTH_CONNECT")
-                    ) {
-                        pump?.connect()
+                            .launchIn(this)
                     }
+                }
 
-                    pump?.let {
-                        pumpIsSuspended = when (it.stateFlow.value) {
-                            ComboCtlPump.State.SUSPENDED,
-                            ComboCtlPump.State.ERROR -> true
+                setupUiFlows(acquiredPump)
 
-                            else                        -> false
+                disconnectRequestPending = false
+                setDriverState(DriverState.Connecting)
+
+                connectionSetupJob = pumpCoroutineScope.launch {
+                    var forciblyDisconnectDueToError = false
+
+                    try {
+                        runWithPermissionCheck(
+                            context, config, aapsLogger, androidPermission,
+                            permissionsToCheckFor = listOf("android.permission.BLUETOOTH_CONNECT")
+                        ) {
+                            pump?.connect()
                         }
 
-                        aapsLogger.debug(LTag.PUMP, "Pump is suspended: $pumpIsSuspended")
+                        pump?.let {
+                            pumpIsSuspended = when (it.stateFlow.value) {
+                                ComboCtlPump.State.SUSPENDED,
+                                ComboCtlPump.State.ERROR -> true
 
-                        if (!isSuspended()) {
-                            val activeBasalProfileNumber: Int? = null
-                            aapsLogger.debug(LTag.PUMP, "Active basal profile number: $activeBasalProfileNumber")
-                            if ((activeBasalProfileNumber != null) && (activeBasalProfileNumber != 1)) {
-                                uiInteraction.addNotification(
-                                    Notification.COMBO_PUMP_ALARM,
-                                    text = rh.gs(R.string.combov2_incorrect_active_basal_profile, activeBasalProfileNumber),
-                                    level = Notification.URGENT
+                                else                        -> false
+                            }
+
+                            aapsLogger.debug(LTag.PUMP, "Pump is suspended: $pumpIsSuspended")
+
+                            if (!isSuspended()) {
+                                val activeBasalProfileNumber: Int? = null
+                                aapsLogger.debug(LTag.PUMP, "Active basal profile number: $activeBasalProfileNumber")
+                                if ((activeBasalProfileNumber != null) && (activeBasalProfileNumber != 1)) {
+                                    uiInteraction.addNotification(
+                                        Notification.COMBO_PUMP_ALARM,
+                                        text = rh.gs(R.string.combov2_incorrect_active_basal_profile, activeBasalProfileNumber),
+                                        level = Notification.URGENT
+                                    )
+                                }
+                                lastActiveBasalProfileNumber = activeBasalProfileNumber
+                            }
+
+                            if (activeBasalProfile == null) {
+                                aapsLogger.debug(
+                                    LTag.PUMP,
+                                    "No basal profile specified by pump queue (yet); using the basal profile that got read from the pump"
                                 )
                             }
-                            lastActiveBasalProfileNumber = activeBasalProfileNumber
+                            updateBaseBasalRateUI()
                         }
+                    } catch (e: CancellationException) {
+                        disconnectRequestPending = false
+                        setDriverState(DriverState.Disconnected)
+                        throw e
+                    } catch (e: AlertScreenException) {
+                        notifyAboutComboAlert("")
+                        forciblyDisconnectDueToError = true
+                    } catch (e: Exception) {
+                        uiInteraction.addNotification(
+                            Notification.COMBO_PUMP_ALARM,
+                            text = rh.gs(R.string.combov2_connection_error, e.message),
+                            level = Notification.URGENT
+                        )
 
-                        if (activeBasalProfile == null) {
-                            aapsLogger.debug(
-                                LTag.PUMP,
-                                "No basal profile specified by pump queue (yet); using the basal profile that got read from the pump"
-                            )
-                        }
-                        updateBaseBasalRateUI()
+                        aapsLogger.error(LTag.PUMP, "Exception while connecting: ${e.stackTraceToString()}")
+
+                        forciblyDisconnectDueToError = true
                     }
-                } catch (e: CancellationException) {
-                    disconnectRequestPending = false
-                    setDriverState(DriverState.Disconnected)
-                    throw e
-                } catch (e: AlertScreenException) {
-                    notifyAboutComboAlert("")
-                    forciblyDisconnectDueToError = true
-                } catch (e: Exception) {
-                    uiInteraction.addNotification(
-                        Notification.COMBO_PUMP_ALARM,
-                        text = rh.gs(R.string.combov2_connection_error, e.message),
-                        level = Notification.URGENT
-                    )
 
-                    aapsLogger.error(LTag.PUMP, "Exception while connecting: ${e.stackTraceToString()}")
+                    if (forciblyDisconnectDueToError) {
+                        connectionSetupJob = null
+                        disconnectInternal(forceDisconnect = true)
 
-                    forciblyDisconnectDueToError = true
+                        ToastUtils.showToastInUiThread(context, rh.gs(R.string.combov2_could_not_connect))
+                    } else {
+                        connectionSetupJob = null
+                        executePendingDisconnect()
+                    }
                 }
-
-                if (forciblyDisconnectDueToError) {
-                    connectionSetupJob = null
-                    disconnectInternal(forceDisconnect = true)
-
-                    ToastUtils.showToastInUiThread(context, rh.gs(R.string.combov2_could_not_connect))
-                } else {
-                    connectionSetupJob = null
-                    executePendingDisconnect()
-                }
+            } catch (_: BluetoothNotEnabledException) {
+                uiInteraction.addNotification(
+                    Notification.BLUETOOTH_NOT_ENABLED,
+                    text = rh.gs(R.string.combov2_bluetooth_disabled),
+                    level = Notification.INFO
+                )
+            } catch (e: Exception) {
+                aapsLogger.error(LTag.PUMP, "Connection failure: $e")
+                ToastUtils.showToastInUiThread(context, rh.gs(R.string.combov2_could_not_connect))
+                disconnectInternal(forceDisconnect = true)
             }
-        } catch (_: BluetoothNotEnabledException) {
-            uiInteraction.addNotification(
-                Notification.BLUETOOTH_NOT_ENABLED,
-                text = rh.gs(R.string.combov2_bluetooth_disabled),
-                level = Notification.INFO
-            )
-        } catch (e: Exception) {
-            aapsLogger.error(LTag.PUMP, "Connection failure: $e")
-            ToastUtils.showToastInUiThread(context, rh.gs(R.string.combov2_could_not_connect))
-            disconnectInternal(forceDisconnect = true)
         }
     }
 
