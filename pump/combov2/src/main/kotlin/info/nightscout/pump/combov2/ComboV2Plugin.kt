@@ -377,7 +377,7 @@ val DriverState.isConnected: Boolean
     override fun onStop() {
         aapsLogger.info(LTag.PUMP, "Stopping combov2 driver")
 
-        runBlocking {
+        
             // Cancel any ongoing background coroutines. This includes an ongoing
             // unfinished initialization that still waits for the user to grant
             // Bluetooth permissions. Also join to wait for the coroutines to
@@ -578,7 +578,7 @@ val DriverState.isConnected: Boolean
         try {
             val curPumpManager = pumpManager ?: throw Error("Could not get pump manager; this should not happen. Please report this as a bug.")
 
-            val acquiredPump = runBlocking {
+            val acquiredPump = 
                 curPumpManager.acquirePump(bluetoothAddress, activeBasalProfile) { event -> handlePumpEvent(event) }
             }
 
@@ -804,7 +804,7 @@ pump?.connect()
 
         lastComboAlert = null
 
-runBlocking {
+
             try {
                 executeCommand {
                     // ステータス更新は ComboCtlPump.State / Event 経由で自動同調されるため空処理
@@ -852,7 +852,7 @@ runBlocking {
         val requestedBasalProfile = profile.toComboCtlBasalProfile()
         aapsLogger.debug(LTag.PUMP, "Basal profile to set: $requestedBasalProfile")
 
-        runBlocking {
+        
             try {
                 executeCommand {
                     acquiredPump.setBasalProfile(requestedBasalProfile)
@@ -1169,20 +1169,13 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         runBlocking {
             try {
                 executeCommand {
-                    acquiredPump.setTbr(percentage, durationInMinutes, tbrType, force100Percent)
+                    acquiredPump.setTbr(percentage, durationInMinutes)
 
                     pumpEnactResult.apply {
                         success = true
                         enacted = true
                         comment = rh.gs(R.string.combov2_setting_tbr_succeeded)
                     }
-                }
-            } catch (e: QuantityNotChangingException) {
-                aapsLogger.error(LTag.PUMP, "TBR percentage adjustment hit a limit: $e")
-                pumpEnactResult.apply {
-                    success = false
-                    enacted = false
-                    comment = rh.gs(R.string.combov2_hit_unexpected_tbr_limit, e.targetQuantity, e.hitLimitAt)
                 }
             } catch (e: Exception) {
                 aapsLogger.error(LTag.PUMP, "Setting TBR failed with exception: $e")
