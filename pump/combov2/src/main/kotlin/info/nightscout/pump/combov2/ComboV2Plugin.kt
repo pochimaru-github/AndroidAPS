@@ -157,6 +157,8 @@ class ComboV2Plugin @Inject constructor(
     override val lastBolusAmount: Double? = null
     override val lastBolusTime: Long? = null
     override val lastDataTime: Long = 0L
+    override val pumpDescription: PumpDescription
+        get() = PumpDescription(rh, R.string.combov2_plugin_name)
     
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
@@ -216,6 +218,9 @@ class ComboV2Plugin @Inject constructor(
         private val _driverStateUIFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
         val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
         val driverStateFlow: StateFlow<DriverState> = driverStateUIFlow
+
+        private val _pairedStateFlow = MutableStateFlow<Boolean>(false)
+        val pairedStateFlow: StateFlow<Boolean> = _pairedStateFlow.asStateFlow()
 
         data class CurrentActivityInfo(val description: String, val overallProgress: Double)
 
@@ -305,7 +310,7 @@ val DriverState.isDisconnected: Boolean
 val DriverState.isConnected: Boolean
     get() = this is DriverState.Connected || this is DriverState.ExecutingCommand
 
-    private val driverStateFlow = _driverStateFlow.asStateFlow()
+    // private val driverStateFlow = _driverStateFlow.asStateFlow()
 
     // Used by ComboV2PairingActivity to launch its own
     // custom activities that have a result.
