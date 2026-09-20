@@ -150,7 +150,9 @@ class ComboV2Plugin @Inject constructor(
         aapsLogger, rh, preferences, commandQueue
     ), Pump, PluginConstraints {
         
-    override var baseBasalRate: Double = 0.0    
+    override var baseBasalRate: Double = 0.0
+    override val batteryLevel: Int?
+        get() = _batteryStateUIFlow.value?.percent
         
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
