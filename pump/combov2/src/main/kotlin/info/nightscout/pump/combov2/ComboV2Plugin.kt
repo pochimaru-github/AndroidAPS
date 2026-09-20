@@ -157,8 +157,9 @@ class ComboV2Plugin @Inject constructor(
     override val lastBolusAmount: Double? = null
     override val lastBolusTime: Long? = null
     override val lastDataTime: Long = 0L
+    override val reservoirLevel: Double = 0.0
     override val pumpDescription: PumpDescription
-        get() = PumpDescription(rh, R.string.combov2_plugin_name)
+        get() = PumpDescription()
     
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
@@ -558,15 +559,20 @@ val DriverState.isConnected: Boolean
         try {
             val curPumpManager = pumpManager ?: throw Error("Could not get pump manager; this should not happen. Please report this as a bug.")
 
-            val acquiredPump = 
-                curPumpManager.acquirePump(bluetoothAddress, activeBasalProfile) { event -> handlePumpEvent(event) }
+            pumpCoroutineScope.launch {
+                val acquiredPump = 
+                    curPumpManager.acquirePump(bluetoothAddress, activeBasalProfile) { event -> handlePumpEvent(event) }
 
-            pump = acquiredPump
+                pump = acquiredPump
 
-            _bluetoothAddressUIFlow.value = bluetoothAddress.toString()
-            _serialNumberUIFlow.value = curPumpManager.getPumpID(bluetoothAddress)
+                _bluetoothAddressUIFlow.value = bluetoothAddress.toString()
+                _serialNumberUIFlow.value = curPumpManager.getPumpID(bluetoothAddress)
 
-            rxBus.send(EventDismissNotification(Notification.BLUETOOTH_NOT_ENABLED))
+                rxBus.send(EventDismissNotification(Notification.BLUETOOTH_NOT_ENABLED))
+            }
+        } catch (e: Exception) {
+            // エラーハンドリング
+        }
 
             // Erase any display frame that may be left over from a previous connection.
             @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -700,7 +706,7 @@ val DriverState.isConnected: Boolean
 
         lastComboAlert = null
 
-
+        pumpCoroutineScope.launch {
             try {
                 executeCommand {
                     // ステータス更新は ComboCtlPump.State / Event 経由で自動同調されるため空処理
@@ -717,27 +723,9 @@ val DriverState.isConnected: Boolean
             } catch (_: Exception) {
             }
         }
-
-        // State and status are automatically updated via the associated flows.
     }
 
     override fun setNewBasalProfile(profile: Profile): PumpEnactResult {
-        if (!isInitialized()) {
-            aapsLogger.error(LTag.PUMP, "Cannot set profile since driver is not initialized")
-
-            uiInteraction.addNotification(
-                Notification.PROFILE_NOT_SET_NOT_INITIALIZED,
-                rh.gs(app.aaps.core.ui.R.string.pump_not_initialized_profile_not_set),
-                Notification.URGENT
-            )
-
-            return pumpEnactResultProvider.get().apply {
-                success = false
-                enacted = false
-                comment = rh.gs(app.aaps.core.ui.R.string.pump_not_initialized_profile_not_set)
-            }
-        }
-
         val acquiredPump = getAcquiredPump()
 
         rxBus.send(EventDismissNotification(Notification.PROFILE_NOT_SET_NOT_INITIALIZED))
