@@ -491,60 +491,6 @@ val DriverState.isConnected: Boolean
             else                            -> false
         }
 
-    override fun isConnected(): Boolean =
-        when (driverStateFlow.value) {
-            // NOTE: Even though the Combo is technically already connected by the
-            // time the DriverState.CheckingPump state is reached, do not return
-            // true then. That's because the pump still tries to issue commands
-            // during that state. isBusy() informs about the pump being busy during
-            // that state, but that function is not always called before commands
-            // are dispatched, so we announce to the queue thread that we aren't
-            // connected yet.
-            // DriverState.Ready, // Step 1: 廃止APIのため無効化
-            // DriverState.Suspended, // Step 1: 廃止APIのため無効化
-            // is DriverState.ExecutingCommand -> true // Step 1: 廃止APIのため無効化
-
-            else                            -> false
-        }
-
-    override fun isConnecting(): Boolean =
-        when (driverStateFlow.value) {
-            DriverState.Connecting -> true
-            // DriverState.CheckingPump -> true // Step 1: 廃止APIのため無効化
-
-            else                     -> false
-        }
-    // There is no corresponding indicator for this
-    // in Combo connections, so just return false
-    override fun isHandshakeInProgress() = false
-
-    override fun beforeImport() {
-        pumpStateBackup = pumpStateStore.createBackup()
-        if (pumpStateBackup != null)
-            aapsLogger.debug(LTag.PUMP, "Making backup of pump state before importing new configuration")
-        else
-            aapsLogger.debug(LTag.PUMP, "There is no pump state present; not making any pump state backup before importing new configuration")
-    }
-
-    override fun afterImport() {
-        val pumpStateExistsInConfig = pumpStateStore.hasAnyPumpState()
-
-        pumpStateBackup?.let { backup ->
-            if (pumpStateExistsInConfig)
-                aapsLogger.debug(LTag.PUMP, "Restoring pump state backup after importing new configuration, overwriting the existing one from the imported configuration")
-            else
-                aapsLogger.debug(LTag.PUMP, "Restoring pump state backup after importing new configuration (the configuration does not have a pump state of its own)")
-
-            pumpStateStore.applyBackup(backup)
-            pumpStateBackup = null
-        } ?: run {
-            if (pumpStateExistsInConfig)
-                aapsLogger.debug(LTag.PUMP, "There is no pump state backup to restore after importing new configuration; keeping existing one from the imported configuration")
-            else
-                aapsLogger.debug(LTag.PUMP, "There is no pump state backup to restore after importing new configuration, and the configuration does not have a pump state of its own")
-        }
-    }
-
     override fun connect(reason: String) {
         aapsLogger.debug(LTag.PUMP, "Connecting to Combo; reason: $reason")
 
@@ -565,10 +511,6 @@ val DriverState.isConnected: Boolean
 
         when (driverStateFlow.value) {
             DriverState.Connecting,
-            // DriverState.CheckingPump, // Step 1: 廃止APIのため無効化
-            // DriverState.Ready, // Step 1: 廃止APIのため無効化
-            // DriverState.Suspended, // Step 1: 廃止APIのため無効化
-            // is DriverState.ExecutingCommand, // Step 1: 廃止APIのため無効化
             DriverState.Error -> {
                 aapsLogger.debug(
                     LTag.PUMP,
@@ -585,12 +527,9 @@ val DriverState.isConnected: Boolean
             return
         }
 
-        // It makes no sense to reach this location with pump
-        // being non-null due to the checks above.
         assert(pump == null)
 
         lastComboAlert = null
-        // pumpStatus = null // Step 1: 廃止APIのため無効化
 
         val bluetoothAddress = when (val address = getBluetoothAddress()) {
             null -> {
@@ -607,7 +546,6 @@ val DriverState.isConnected: Boolean
 
             val acquiredPump = 
                 curPumpManager.acquirePump(bluetoothAddress, activeBasalProfile) { event -> handlePumpEvent(event) }
-            }
 
             pump = acquiredPump
 
@@ -624,63 +562,22 @@ val DriverState.isConnected: Boolean
                 coroutineScope {
                     acquiredPump.stateFlow
                         .onEach { pumpState ->
-    val driverState = when (pumpState) {
-        // The Disconnected pump state is ignored, since the Disconnected
-        // *driver* state is manually set anyway when disconnecting in
-        // in connect() and disconnectInternal(). Passing it to setDriverState()
-        // here would trigger an EventPumpStatusChanged event to be sent over
-        // the rxBus too early, potentially causing a situation where the connect()
-        // call isn't fully done yet, but the queue gets that event and thinks that
-        // it can try to reconnect now.
-        ComboCtlPump.State.DISCONNECTED        -> return@onEach
-        ComboCtlPump.State.CONNECTING          -> DriverState.Connecting
-        ComboCtlPump.State.CHECKING_PUMP        -> DriverState.Connecting // Step 1: 廃止APIのためConnectingで代用
-        ComboCtlPump.State.READY_FOR_COMMANDS    -> DriverState.Connecting // Step 1: 廃止APIのためConnectingで代用
-        ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.Connecting // Step 1: 廃止APIのためConnectingで代用
-        ComboCtlPump.State.SUSPENDED           -> DriverState.Connecting // Step 1: 廃止APIのためConnectingで代用
-        ComboCtlPump.State.ERROR               -> DriverState.Error
-    }
+                            val driverState = when (pumpState) {
+                                ComboCtlPump.State.DISCONNECTED        -> return@onEach
+                                ComboCtlPump.State.CONNECTING          -> DriverState.Connecting
+                                ComboCtlPump.State.CHECKING_PUMP        -> DriverState.Connecting
+                                ComboCtlPump.State.READY_FOR_COMMANDS    -> DriverState.Connecting
+                                ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.Connecting
+                                ComboCtlPump.State.SUSPENDED           -> DriverState.Connecting
+                                ComboCtlPump.State.ERROR               -> DriverState.Error
+                            }
                             setDriverState(driverState)
                         }
                         .launchIn(this)
-                        
-/* Step 1: CIビルド導通のため一時無効化
-                    acquiredPump.pumpStatus
-    .onEach { newPumpStatus ->
-        if (newPumpStatus == null) return@onEach
-        _batteryStateUIFlow.value = newPumpStatus.batteryState
-        _reservoirLevelUIFlow.value = ReservoirLevel(
-            newPumpStatus.reservoirState,
-            newPumpStatus.availableUnitsInReservoir
-        )
-        pumpStatus = newPumpStatus
-        updateLevels()
-        rxBus.send(EventRefreshOverview("ComboV2 pump status updated"))
-    }
-    .launchIn(this)
-
-acquiredPump.lastBolus
-    .onEach { lastBolus ->
-        if (lastBolus == null) return@onEach
-        _lastBolusUIFlow.value = lastBolus
-    }
-    .launchIn(this)
-
-acquiredPump.currentTbr
-    .onEach { currentTbr ->
-        _currentTbrUIFlow.value = currentTbr
-    }
-    .launchIn(this)
-    */
-
                 }
             }
 
             setupUiFlows(acquiredPump)
-
-            ////
-            // The actual connect procedure begins here.
-            ////
 
             disconnectRequestPending = false
             setDriverState(DriverState.Connecting)
@@ -693,16 +590,8 @@ acquiredPump.currentTbr
                         context, config, aapsLogger, androidPermission,
                         permissionsToCheckFor = listOf("android.permission.BLUETOOTH_CONNECT")
                     ) {
-                        // Set maxNumAttempts to null to turn off the connection attempt limit inside the connect() call.
-                        // The AAPS queue thread will anyway cause the connectionSetupJob to be canceled when its
-                        // connection timeout expires, so the Pump class' own connection attempt limiter is redundant.
-// 修正前
-// pump?.connect(maxNumAttempts = null)
-// 修正後
-pump?.connect()
+                        pump?.connect()
                     }
-
-                    // No need to set the driver state here, since the pump's stateFlow will announce that.
 
                     pump?.let {
                         pumpIsSuspended = when (it.stateFlow.value) {
@@ -714,15 +603,8 @@ pump?.connect()
 
                         aapsLogger.debug(LTag.PUMP, "Pump is suspended: $pumpIsSuspended")
 
-                        // We can't read the active profile number in the suspended state, since
-                        // the Combo's screen does not show any profile number then.
                         if (!isSuspended()) {
-                            // Get the active basal profile number. If it is not profile #1, alert
-                            // the user. We also keep a copy of that number to be able to disable
-                            // loop invocation if this isn't profile #1 (see the implementation of
-                            // isLoopInvocationAllowed() below).
-                            // val activeBasalProfileNumber = it.statusFlow.value?.activeBasalProfileNumber
-                            val activeBasalProfileNumber: Int? = null // Step 1: 廃止APIのためスタブ化
+                            val activeBasalProfileNumber: Int? = null
                             aapsLogger.debug(LTag.PUMP, "Active basal profile number: $activeBasalProfileNumber")
                             if ((activeBasalProfileNumber != null) && (activeBasalProfileNumber != 1)) {
                                 uiInteraction.addNotification(
@@ -734,29 +616,20 @@ pump?.connect()
                             lastActiveBasalProfileNumber = activeBasalProfileNumber
                         }
 
-                        // Read the pump's basal profile to know later, when the loop attempts
-                        // to set new profile, whether this procedure is redundant or now.
                         if (activeBasalProfile == null) {
                             aapsLogger.debug(
                                 LTag.PUMP,
                                 "No basal profile specified by pump queue (yet); using the basal profile that got read from the pump"
                             )
-                            // activeBasalProfile = it.currentBasalProfile // Step 1: 廃止APIのため無効化
                         }
                         updateBaseBasalRateUI()
                     }
                 } catch (e: CancellationException) {
-                    // In case of a cancellation, the Pump.connect() call
-                    // rolls back any partially started connection and
-                    // switches back to the disconnected state automatically.
-                    // We just clean up our states here to reflect that the
-                    // pump is already disconnected by this point.
                     disconnectRequestPending = false
                     setDriverState(DriverState.Disconnected)
-                    // Re-throw to mark this coroutine as cancelled.
                     throw e
                 } catch (e: AlertScreenException) {
-                    notifyAboutComboAlert("") // Step 1: 廃止API (alertScreenContent) のためダミー文字列でスタブ化
+                    notifyAboutComboAlert("")
                     forciblyDisconnectDueToError = true
                 } catch (e: Exception) {
                     uiInteraction.addNotification(
@@ -771,30 +644,12 @@ pump?.connect()
                 }
 
                 if (forciblyDisconnectDueToError) {
-                    // In case of a connection failure, just disconnect. The command
-                    // queue will retry after a while. Repeated failed attempts will
-                    // eventually trigger a "pump unreachable" error message.
-                    //
-                    // Set this to null _before_ disconnecting, since
-                    // disconnectInternal() tries to call cancelAndJoin()
-                    // on connectionSetupJob, leading to a deadlock.
-                    // connectionSetupJob is set to null further below
-                    // as well before the executePendingDisconnect()
-                    // call, for the same reason. This coroutine is
-                    // close to ending anyway, and there won't be any
-                    // coroutine suspension happening anymore, so there's
-                    // no point in a such cancelAndJoin() call by now.
                     connectionSetupJob = null
                     disconnectInternal(forceDisconnect = true)
 
                     ToastUtils.showToastInUiThread(context, rh.gs(R.string.combov2_could_not_connect))
                 } else {
                     connectionSetupJob = null
-                    // In case the pump queue issued a disconnect while the checks
-                    // were running inside the connect() call above, do that
-                    // postponed disconnect now. (The checks can take a long time
-                    // if for example the pump's datetime deviates significantly
-                    // from the system's current datetime.)
                     executePendingDisconnect()
                 }
             }
