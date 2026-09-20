@@ -151,8 +151,8 @@ class ComboV2Plugin @Inject constructor(
     ), Pump, PluginConstraints {
         
     override var baseBasalRate: Double = 0.0
-    override val batteryLevel: Int?
-        get() = _batteryStateUIFlow.value?.percent
+    override val batteryLevel: Int? = null
+    override val isFakingTempsByExtendedBoluses: Boolean = false
         
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
