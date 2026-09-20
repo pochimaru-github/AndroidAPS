@@ -62,6 +62,9 @@ import info.nightscout.comboctl.base.NullDisplayFrame
 import info.nightscout.comboctl.base.PairingPIN
 import info.nightscout.comboctl.main.BasalProfile
 import info.nightscout.comboctl.main.QuantityNotChangingException
+import info.nightscout.comboctl.StandardBolusReason
+import info.nightscout.comboctl.RTCommandProgressStage
+import info.nightscout.comboctl.BasicProgressStage
 import info.nightscout.pump.combov2.activities.ComboV2PairingActivity
 import info.nightscout.pump.combov2.keys.ComboBooleanKey
 import info.nightscout.pump.combov2.keys.ComboIntKey
@@ -1004,13 +1007,13 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
         val acquiredPump = getAcquiredPump()
         val requestedBolusAmount = detailedBolusInfo.insulin.iuToCctlBolus()
         val bolusReason = when (detailedBolusInfo.bolusType) {
-            BS.Type.NORMAL  -> ComboCtlPump.StandardBolusReason.NORMAL
-            BS.Type.SMB     -> ComboCtlPump.StandardBolusReason.SUPERBOLUS
-            BS.Type.PRIMING -> ComboCtlPump.StandardBolusReason.PRIMING_INFUSION_SET
+            BS.Type.NORMAL  -> StandardBolusReason.NORMAL
+            BS.Type.SMB     -> StandardBolusReason.SUPERBOLUS
+            BS.Type.PRIMING -> StandardBolusReason.PRIMING_INFUSION_SET
         }
 
         val bolusProgressJob = pumpCoroutineScope.launch {
-            acquiredPump.bolusDeliveryProgressFlow
+            acquiredPump.deliverBolusProgressFlow
                 .collect { progressReport ->
                     when (progressReport.stage) {
                         is RTCommandProgressStage.DeliveringBolus -> {
@@ -1703,7 +1706,7 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
                         }
                         .launchIn(this)
 
-                    acquiredPump.bolusDeliveryProgressFlow
+                    acquiredPump.deliverBolusProgressFlow
                         .onEach { progressReport ->
                             val description = when (val stage = progressReport.stage) {
                                 is RTCommandProgressStage.DeliveringBolus ->
