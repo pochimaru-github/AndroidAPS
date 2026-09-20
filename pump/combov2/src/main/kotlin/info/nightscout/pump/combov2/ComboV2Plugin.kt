@@ -804,7 +804,7 @@ pump?.connect()
 
         lastComboAlert = null
 
-        runBlocking {
+runBlocking {
             try {
                 executeCommand {
                     // ステータス更新は ComboCtlPump.State / Event 経由で自動同調されるため空処理
