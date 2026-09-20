@@ -164,35 +164,6 @@ class ComboV2PairingActivity : TranslatedDaggerAppCompatActivity() {
                 combov2Plugin.driverStateUIFlow
                     .onEach { driverState ->
                         if (!uiInitialized) {
-                            // =========================================================================
-                            // Step 1: comboctl API変更に伴う一時無効化（DriverState.NotInitialized 廃止のため）
-                            // 実コードを1行も消さずに全保持しています。
-                            // =========================================================================
-                            // when (driverState) {
-                            //     // In the NotInitialized state, the PumpManager is unavailable because it cannot
-                            //     // function without Bluetooth permissions. Several of ComboV2Plugin's functions
-                            //     // such as getPairingProgressFlow() depend on PumpManager though. To prevent UI
-                            //     // controls from becoming active without having a PumpManager, show instead a
-                            //     // view on the activity that explains why pairing is currently not possible.
-                            //     ComboV2Plugin.DriverState.NotInitialized -> {
-                            //         aapsLogger.info(LTag.PUMP, "Cannot pair right now; disabling pairing UI controls, showing message instead")
-                            //
-                            //         binding.combov2PairingSectionInitial.visibility = View.GONE
-                            //         binding.combov2PairingSectionCannotPairDriverNotInitialized.visibility = View.VISIBLE
-                            //
-                            //         binding.combov2CannotPairGoBack.setOnClickListener {
-                            //             finish()
-                            //         }
-                            //     }
-                            //
-                            //     else                                     -> {
-                            //         binding.combov2PairingSectionCannotPairDriverNotInitialized.visibility = View.GONE
-                            //         setupUi(binding)
-                            //         uiInitialized = true
-                            //     }
-                            // }
-
-                            // Step 1用フォールバック処理（NotInitializedチェックをスキップして通常UI初期化を通す）
                             binding.combov2PairingSectionCannotPairDriverNotInitialized.visibility = View.GONE
                             setupUi(binding)
                             uiInitialized = true
@@ -225,28 +196,20 @@ class ComboV2PairingActivity : TranslatedDaggerAppCompatActivity() {
         // In the NotInitialized state, getPairingProgressFlow() crashes because there
         // is no PumpManager present. But in that state, the pairing progress flow needs
         // no reset because no pairing can happen in that state anyway.
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（DriverState.NotInitialized 廃止のため）
-        // 実コードを1行も消さずに全保持しています。
-        // =========================================================================
-        // if (combov2Plugin.driverStateUIFlow.value != ComboV2Plugin.DriverState.NotInitialized) {
-            // Reset the pairing progress reported to allow for future pairing attempts.
-            // Do this only after pairing was finished or aborted. onDestroy() can be
-            // called in the middle of a pairing process, and we do not want to reset
-            // the progress reporter mid-pairing.
-            when (combov2Plugin.getPairingProgressFlow().value.stage) {
-                BasicProgressStage.Finished,
-                is BasicProgressStage.Aborted -> {
-                    aapsLogger.debug(
-                        LTag.PUMP,
-                        "Resetting pairing progress reporter after pairing was finished/aborted"
-                    )
-                    combov2Plugin.resetPairingProgress()
-                }
-
-                else                          -> Unit
+        // DriverState.NotInitialized 廃止に伴い、ガード条件を外してペアリング進捗のリセット処理を復元
+        when (combov2Plugin.getPairingProgressFlow().value.stage) {
+            BasicProgressStage.Finished,
+            is BasicProgressStage.Aborted -> {
+                aapsLogger.debug(
+                    LTag.PUMP,
+                    "Resetting pairing progress reporter after pairing was finished/aborted"
+                )
+                combov2Plugin.resetPairingProgress()
             }
-        // }
+
+            else -> Unit
+        }
+
         // Remove the activity start callback and unregister the activity
         // launcher to make sure that future registerForActivityResult()
         // calls start from a blank slate. (This is about the discovery
