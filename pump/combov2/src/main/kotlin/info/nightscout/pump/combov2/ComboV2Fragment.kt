@@ -37,13 +37,13 @@ class ComboV2Fragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    comboV2Plugin.driverStateFlow.collectLatest { state ->
+                    comboV2Plugin.driverStateFlow.collectLatest { state: ComboV2Plugin.DriverState ->
                         updateDriverStateUI(state)
                     }
                 }
 
                 launch {
-                    comboV2Plugin.pairedStateFlow.collectLatest { isPaired ->
+                    comboV2Plugin.pairedStateFlow.collectLatest { isPaired: Boolean ->
                         updatePairedUI(isPaired)
                     }
                 }
