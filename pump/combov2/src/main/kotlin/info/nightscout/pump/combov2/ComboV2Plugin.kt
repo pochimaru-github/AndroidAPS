@@ -230,18 +230,44 @@ private var lastComboAlert: Any? = null
 
     /*** Public functions and base class & interface overrides ***/
 
-    sealed class DriverState(val name: String) {
-        object Disconnected : DriverState("disconnected")
-        object Connecting : DriverState("connecting")
-        object Connected : DriverState("connected")
+// ============================================================================
+// DriverState 定義および Pump.State 相互変換ヘルパー
+// ============================================================================
 
-        /* TODO: Step 2 - CommandDescriptionの現行構造適合時に元の型を復元
-        class ExecutingCommand(val description: ComboCtlPump.CommandDescription) : DriverState("executingCommand")
-        */
-        class ExecutingCommand(val description: String? = null) : DriverState("executingCommand")
+sealed class DriverState(val name: String) {
+    object Disconnected : DriverState("disconnected")
+    object Connecting : DriverState("connecting")
+    object Connected : DriverState("connected")
 
-        object Error : DriverState("error")
-    }
+    /* TODO: Step 2 - CommandDescriptionの現行構造適合時に元の型を復元
+    class ExecutingCommand(val description: ComboCtlPump.CommandDescription) : DriverState("executingCommand")
+    */
+    class ExecutingCommand(val description: String? = null) : DriverState("executingCommand")
+
+    object Error : DriverState("error")
+}
+
+/**
+ * Pump.State から DriverState への変換ロジック
+ */
+fun Pump.State.toDriverState(commandDescription: String? = null): DriverState = when (this) {
+    Pump.State.DISCONNECTED -> DriverState.Disconnected
+    Pump.State.CONNECTING,
+    Pump.State.CHECKING_PUMP -> DriverState.Connecting
+    Pump.State.READY_FOR_COMMANDS,
+    Pump.State.SUSPENDED -> DriverState.Connected
+    Pump.State.EXECUTING_COMMAND -> DriverState.ExecutingCommand(commandDescription)
+    Pump.State.ERROR -> DriverState.Error
+}
+
+/**
+ * 切断状態判定プロパティ・関数
+ */
+val DriverState.isDisconnected: Boolean
+    get() = this is DriverState.Disconnected
+
+val DriverState.isConnected: Boolean
+    get() = this is DriverState.Connected || this is DriverState.ExecutingCommand
 
     private val driverStateFlow = _driverStateFlow.asStateFlow()
 
