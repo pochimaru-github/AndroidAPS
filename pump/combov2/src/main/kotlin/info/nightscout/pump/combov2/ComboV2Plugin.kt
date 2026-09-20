@@ -62,9 +62,6 @@ import info.nightscout.comboctl.base.NullDisplayFrame
 import info.nightscout.comboctl.base.PairingPIN
 import info.nightscout.comboctl.main.BasalProfile
 import info.nightscout.comboctl.main.QuantityNotChangingException
-import info.nightscout.comboctl.StandardBolusReason
-import info.nightscout.comboctl.RTCommandProgressStage
-import info.nightscout.comboctl.BasicProgressStage
 import info.nightscout.pump.combov2.activities.ComboV2PairingActivity
 import info.nightscout.pump.combov2.keys.ComboBooleanKey
 import info.nightscout.pump.combov2.keys.ComboIntKey
@@ -1006,33 +1003,11 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
 
         val acquiredPump = getAcquiredPump()
         val requestedBolusAmount = detailedBolusInfo.insulin.iuToCctlBolus()
-        val bolusReason = when (detailedBolusInfo.bolusType) {
-            BS.Type.NORMAL  -> StandardBolusReason.NORMAL
-            BS.Type.SMB     -> StandardBolusReason.SUPERBOLUS
-            BS.Type.PRIMING -> StandardBolusReason.PRIMING_INFUSION_SET
-        }
-
-        val bolusProgressJob = pumpCoroutineScope.launch {
-            acquiredPump.deliverBolusProgressFlow
-                .collect { progressReport ->
-                    when (progressReport.stage) {
-                        is RTCommandProgressStage.DeliveringBolus -> {
-                            rxBus.send(EventOverviewBolusProgress(rh, id = detailedBolusInfo.id, percent = (progressReport.overallProgress * 100).toInt()))
-                        }
-
-                        BasicProgressStage.Finished               -> {
-                            rxBus.send(EventOverviewBolusProgress("Bolus finished, performing post-bolus checks", detailedBolusInfo.id, (progressReport.overallProgress * 100).toInt()))
-                        }
-
-                        else                                      -> Unit
-                    }
-                }
-        }
 
         val newBolusJob = pumpCoroutineScope.async {
             try {
                 executeCommand {
-                    acquiredPump.deliverBolus(requestedBolusAmount, bolusReason)
+                    acquiredPump.deliverBolus(requestedBolusAmount)
                 }
 
                 reportFinishedBolus(rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, detailedBolusInfo.insulin), detailedBolusInfo.id, pumpEnactResult, succeeded = true)
@@ -1063,7 +1038,6 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
                     "Pump enact result: success ${pumpEnactResult.success} enacted ${pumpEnactResult.enacted} bolusDelivered${pumpEnactResult.bolusDelivered}"
                 )
                 bolusJob = null
-                bolusProgressJob.cancelAndJoin()
             }
         }
 
@@ -1640,18 +1614,8 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
                 coroutineScope {
                     acquiredPump.connectProgressFlow
                         .onEach { progressReport ->
-                            val description = when (val progStage = progressReport.stage) {
-                                is BasicProgressStage.EstablishingBtConnection   ->
-                                    rh.gs(
-                                        R.string.combov2_establishing_bt_connection,
-                                        progStage.currentAttemptNr
-                                    )
-
-                                BasicProgressStage.PerformingConnectionHandshake -> rh.gs(R.string.combov2_pairing_performing_handshake)
-                                else                                             -> ""
-                            }
                             _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
+                                rh.gs(R.string.combov2_establishing_bt_connection, 1),
                                 progressReport.overallProgress
                             )
                         }
@@ -1659,18 +1623,8 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
 
                     acquiredPump.setDateTimeProgressFlow
                         .onEach { progressReport ->
-                            val description = when (progressReport.stage) {
-                                RTCommandProgressStage.SettingDateTimeHour,
-                                RTCommandProgressStage.SettingDateTimeMinute -> rh.gs(R.string.combov2_setting_current_pump_time)
-
-                                RTCommandProgressStage.SettingDateTimeYear,
-                                RTCommandProgressStage.SettingDateTimeMonth,
-                                RTCommandProgressStage.SettingDateTimeDay    -> rh.gs(R.string.combov2_setting_current_pump_date)
-
-                                else                                         -> ""
-                            }
                             _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
+                                rh.gs(R.string.combov2_setting_current_pump_time),
                                 progressReport.overallProgress
                             )
                         }
@@ -1678,14 +1632,8 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
 
                     acquiredPump.getBasalProfileFlow
                         .onEach { progressReport ->
-                            val description = when (val stage = progressReport.stage) {
-                                is RTCommandProgressStage.GettingBasalProfile ->
-                                    rh.gs(R.string.combov2_getting_basal_profile, stage.numSetFactors)
-
-                                else                                          -> ""
-                            }
                             _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
+                                rh.gs(R.string.combov2_getting_basal_profile, 1),
                                 progressReport.overallProgress
                             )
                         }
@@ -1693,33 +1641,8 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
 
                     acquiredPump.setBasalProfileFlow
                         .onEach { progressReport ->
-                            val description = when (val stage = progressReport.stage) {
-                                is RTCommandProgressStage.SettingBasalProfile ->
-                                    rh.gs(R.string.combov2_setting_basal_profile, stage.numSetFactors)
-
-                                else                                          -> ""
-                            }
                             _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
-                                progressReport.overallProgress
-                            )
-                        }
-                        .launchIn(this)
-
-                    acquiredPump.deliverBolusProgressFlow
-                        .onEach { progressReport ->
-                            val description = when (val stage = progressReport.stage) {
-                                is RTCommandProgressStage.DeliveringBolus ->
-                                    rh.gs(
-                                        R.string.combov2_delivering_bolus,
-                                        stage.deliveredImmediateAmount.cctlBolusToIU(),
-                                        stage.totalImmediateAmount.cctlBolusToIU()
-                                    )
-
-                                else                                      -> ""
-                            }
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                description,
+                                rh.gs(R.string.combov2_setting_basal_profile, 1),
                                 progressReport.overallProgress
                             )
                         }
@@ -1751,7 +1674,6 @@ override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactRe
             }
         }
     }
-
     private fun startPumpErrorTimeout() {
         if (pumpErrorTimeoutJob != null)
             return
