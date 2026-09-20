@@ -158,11 +158,12 @@ class ComboV2Plugin @Inject constructor(
     override val isFakingTempsByExtendedBoluses: Boolean = false
     override val lastBolusAmount: Double? = null
 
-    private val _driverStateFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
-    val driverStateFlow: StateFlow<DriverState> = _driverStateFlow.asStateFlow()
+    // private val _driverStateFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
+    // val driverStateFlow: StateFlow<DriverState> = _driverStateFlow.asStateFlow()
 
-    private val _pairedStateFlow = MutableStateFlow<Boolean>(false)
-    val pairedStateFlow: StateFlow<Boolean> = _pairedStateFlow.asStateFlow()        
+    // private val _pairedStateFlow = MutableStateFlow<Boolean>(false)
+    // val pairedStateFlow: StateFlow<Boolean> = _pairedStateFlow.asStateFlow() 
+    
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
     private var pumpCoroutineScopeJob = SupervisorJob()
@@ -187,10 +188,10 @@ class ComboV2Plugin @Inject constructor(
     // States for the Pump interface and for the UI.
     // private var pumpStatus: PumpStatus? = null
     private var lastConnectionTimestamp = 0L
-// 修正前
-// private var lastComboAlert: AlertScreen.Content? = null
-// 修正後
-private var lastComboAlert: Any? = null
+    // 修正前
+    // private var lastComboAlert: AlertScreen.Content? = null
+    // 修正後
+    private var lastComboAlert: Any? = null
 
     // States for when the pump reports an error. We then want isInitialized()
     // to return false until either the user presses the Refresh button or the
