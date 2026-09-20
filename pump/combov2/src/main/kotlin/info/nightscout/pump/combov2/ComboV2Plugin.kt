@@ -231,7 +231,7 @@ private var lastComboAlert: Any? = null
     /*** Public functions and base class & interface overrides ***/
 
 // ============================================================================
-// DriverState 定義および Pump.State 相互変換ヘルパー
+// DriverState 定義および ComboCtlPump.State 相互変換ヘルパー
 // ============================================================================
 
 sealed class DriverState(val name: String) {
@@ -248,16 +248,16 @@ sealed class DriverState(val name: String) {
 }
 
 /**
- * Pump.State から DriverState への変換ロジック
+ * ComboCtlPump.State から DriverState への変換ロジック
  */
-fun Pump.State.toDriverState(commandDescription: String? = null): DriverState = when (this) {
-    Pump.State.DISCONNECTED -> DriverState.Disconnected
-    Pump.State.CONNECTING,
-    Pump.State.CHECKING_PUMP -> DriverState.Connecting
-    Pump.State.READY_FOR_COMMANDS,
-    Pump.State.SUSPENDED -> DriverState.Connected
-    Pump.State.EXECUTING_COMMAND -> DriverState.ExecutingCommand(commandDescription)
-    Pump.State.ERROR -> DriverState.Error
+fun ComboCtlPump.State.toDriverState(commandDescription: String? = null): DriverState = when (this) {
+    ComboCtlPump.State.DISCONNECTED -> DriverState.Disconnected
+    ComboCtlPump.State.CONNECTING,
+    ComboCtlPump.State.CHECKING_PUMP -> DriverState.Connecting
+    ComboCtlPump.State.READY_FOR_COMMANDS,
+    ComboCtlPump.State.SUSPENDED -> DriverState.Connected
+    ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.ExecutingCommand(commandDescription)
+    ComboCtlPump.State.ERROR -> DriverState.Error
 }
 
 /**
