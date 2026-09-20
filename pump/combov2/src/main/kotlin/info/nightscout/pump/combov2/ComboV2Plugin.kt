@@ -805,9 +805,9 @@ pump?.connect()
         lastComboAlert = null
 
         runBlocking {
-        try {
+            try {
                 executeCommand {
-                    // pump?.updateStatus() // Step 1: 廃止APIのため無効化
+                    // ステータス更新は ComboCtlPump.State / Event 経由で自動同調されるため空処理
                 }
 
                 // We send this event here, and not in onStart(), to include
@@ -2123,20 +2123,6 @@ private fun setDriverState(newState: DriverState) {
             executePendingDisconnect()
         } catch (e: CancellationException) {
             throw e
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（AlertScreenException / alertScreenContent 変更のため）
-        // 実コードを1行も消さずに全保持しています。
-        // Step 2で新アラート構造に移植・再接続します。
-        // =========================================================================
-        // } catch (e: AlertScreenException) {
-        //     lastComboAlert = e.alertScreenContent
-        //
-        //     notifyAboutComboAlert(e.alertScreenContent)
-        //
-        //     // Disconnect since we are now in the Error state.
-        //     disconnectInternal(forceDisconnect = true)
-        //
-        //     throw e
         } catch (t: Throwable) {
             // Disconnect since we are now in the Error state.
             disconnectInternal(forceDisconnect = true)
