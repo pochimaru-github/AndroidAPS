@@ -404,7 +404,7 @@ val DriverState.isConnected: Boolean
     override fun onStop() {
         aapsLogger.info(LTag.PUMP, "Stopping combov2 driver")
 
-        
+        runBlocking {
             // Cancel any ongoing background coroutines. This includes an ongoing
             // unfinished initialization that still waits for the user to grant
             // Bluetooth permissions. Also join to wait for the coroutines to
@@ -428,7 +428,7 @@ val DriverState.isConnected: Boolean
         // callback being invoked.
         unpairing = false
 
-        setDriverState(DriverState.Disconnected) // Step 1: 廃止APIのため無効化（Disconnectedで代用）
+        setDriverState(DriverState.Disconnected)
 
         rxBus.send(EventInitializationChanged())
         initializationChangedEventSent = false
