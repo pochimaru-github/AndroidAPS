@@ -191,15 +191,13 @@ class Pump(
         _stateFlow.value = State.EXECUTING_COMMAND
         try {
             logger(LogLevel.INFO) { "Setting TBR: $percentage% for $durationMinutes min" }
-            pumpIO.setTbr(percentage, durationMinutes)
-            _stateFlow.value = State.READY_FOR_COMMANDS
+            throw UnsupportedOperationException("TBR via command mode is not supported by PumpIO")
         } catch (e: Exception) {
             logger(LogLevel.ERROR, e) { "Failed to set TBR." }
             _stateFlow.value = State.ERROR
             throw e
         }
     }
-
     /**
      * Sets the basal profile on the pump.
      */
