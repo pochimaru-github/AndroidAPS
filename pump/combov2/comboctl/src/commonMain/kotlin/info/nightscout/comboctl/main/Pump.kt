@@ -173,9 +173,9 @@ class Pump(
         try {
             logger(LogLevel.INFO) { "Delivering bolus: $units U (extended: $extendedUnits U, duration: $durationMinutes min)" }
             _bolusProgressFlow.emit(BolusProgress(0.0, units + extendedUnits, false))
-            
-            // PumpIO のボーラス送信コマンドを呼び出し
-            pumpIO.deliverCMDStandardBolus(units)
+
+            val totalAmountInt = ((units + extendedUnits) * 100).toInt()
+            pumpIO.deliverCMDStandardBolus(totalAmountInt)
 
             _bolusProgressFlow.emit(BolusProgress(units + extendedUnits, units + extendedUnits, true))
             _stateFlow.value = State.READY_FOR_COMMANDS
