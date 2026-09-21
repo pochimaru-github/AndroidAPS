@@ -1399,10 +1399,10 @@ override fun connect(reason: String) {
         private var _lastConnectionTimestampUIFlow = MutableStateFlow<Long?>(null)
         val lastConnectionTimestampUIFlow = _lastConnectionTimestampUIFlow.asStateFlow()
 
-        private var _batteryStateUIFlow = MutableStateFlow<BatteryState?>(null)
+        private var _batteryStateUIFlow = MutableStateFlow<Any?>(null)
         val batteryStateUIFlow = _batteryStateUIFlow.asStateFlow()
 
-        data class ReservoirLevel(val state: ReservoirState, val availableUnits: Int)
+        data class ReservoirLevel(val state: Any?, val availableUnits: Int)
 
         private var _reservoirLevelUIFlow = MutableStateFlow<ReservoirLevel?>(null)
         val reservoirLevelUIFlow = _reservoirLevelUIFlow.asStateFlow()
