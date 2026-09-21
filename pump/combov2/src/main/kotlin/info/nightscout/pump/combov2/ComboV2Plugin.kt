@@ -1406,6 +1406,7 @@ override fun connect(reason: String) {
     // finishes, the state is checked. Use isSuspended() instead.
         private val _driverStateUIFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
         val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
+        val driverStateFlow: StateFlow<DriverState> = driverStateUIFlow
 
         // "Activity" is not to be confused with the Android Activity class.
         // An "activity" is something that a command does, for example
