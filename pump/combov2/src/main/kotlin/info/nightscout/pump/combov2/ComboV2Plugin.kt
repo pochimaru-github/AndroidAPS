@@ -1340,6 +1340,10 @@ val DriverState.isConnected: Boolean
         _lastConnectionTimestampUIFlow.value = null
         _batteryStateUIFlow.value = null
         _reservoirLevelUIFlow.value = null
+        data class LastBolusInfo(
+            val timestamp: Long,
+            val bolusAmount: Double
+)        
         _lastBolusUIFlow.value = null
         _baseBasalRateUIFlow.value = null
         _serialNumberUIFlow.value = ""
@@ -1402,8 +1406,8 @@ val DriverState.isConnected: Boolean
         private var _reservoirLevelUIFlow = MutableStateFlow<ReservoirLevel?>(null)
         val reservoirLevelUIFlow = _reservoirLevelUIFlow.asStateFlow()
 
-        private var _lastBolusUIFlow = MutableStateFlow<Any?>(null)
-        val lastBolusUIFlow = _lastBolusUIFlow.asStateFlow()
+    private var _lastBolusUIFlow = MutableStateFlow<LastBolusInfo?>(null)
+    val lastBolusUIFlow = _lastBolusUIFlow.asStateFlow()
 
     private var _currentTbrUIFlow = MutableStateFlow<ComboCtlTbr?>(null)
     val currentTbrUIFlow = _currentTbrUIFlow.asStateFlow()
