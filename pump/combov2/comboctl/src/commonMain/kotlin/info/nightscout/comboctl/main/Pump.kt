@@ -223,11 +223,9 @@ class Pump(
     suspend fun fetchTDDHistory(): List<TddEntry> = mutex.withLock {
         checkReadyForCommands()
         _stateFlow.value = State.EXECUTING_COMMAND
-        return try {
+        try {
             logger(LogLevel.INFO) { "Fetching TDD history..." }
-            delay(300)
-            _stateFlow.value = State.READY_FOR_COMMANDS
-            emptyList()
+            throw UnsupportedOperationException("Fetching TDD history via command mode is not supported by PumpIO")
         } catch (e: Exception) {
             logger(LogLevel.ERROR, e) { "Failed to fetch TDD history." }
             _stateFlow.value = State.ERROR
