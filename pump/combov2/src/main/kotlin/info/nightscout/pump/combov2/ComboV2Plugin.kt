@@ -149,9 +149,10 @@ class ComboV2Plugin @Inject constructor(
             ComboStringNonKey::class.java, ComboIntNonKey::class.java, ComboLongNonKey::class.java
         ),
         aapsLogger, rh, preferences, commandQueue
-), Pump, PluginConstraints {
+    ), Pump, PluginConstraints {
 
     override fun isConnected(): Boolean = driverStateFlow.value == DriverState.Connected
+    override fun isConnecting(): Boolean = driverStateFlow.value == DriverState.Connecting
 
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
