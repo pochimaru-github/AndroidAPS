@@ -1415,51 +1415,32 @@ val DriverState.isConnected: Boolean
         pumpUIFlowsDeferred = pumpCoroutineScope.async {
             try {
                 coroutineScope {
-                    /* TODO: 現行 ComboCtlPump の Flow プロパティ名に合わせて 1 つずつ再接続します
-                    acquiredPump.connectProgressFlow
-                        .onEach { progressReport ->
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                rh.gs(R.string.combov2_establishing_bt_connection, 1),
-                                progressReport.overallProgress
-                            )
+                    // ポンプ状態の変更（State）を監視して UI Flow へ反映
+                    acquiredPump.stateFlow
+                        .onEach { state ->
+                            val statusText = when (state) {
+                                Pump.State.CONNECTING -> rh.gs(R.string.combov2_establishing_bt_connection, 1)
+                                Pump.State.EXECUTING_COMMAND -> rh.gs(R.string.combov2_setting_current_pump_time)
+                                else -> ""
+                            }
+                            if (statusText.isNotEmpty()) {
+                                _currentActivityUIFlow.value = CurrentActivityInfo(statusText, 0)
+                            }
                         }
                         .launchIn(this)
 
-                    acquiredPump.setDateTimeProgressFlow
-                        .onEach { progressReport ->
+                    // ボウラス配信進捗の監視
+                    acquiredPump.bolusProgressFlow
+                        .onEach { progress ->
+                            val percent = if (progress.totalUnits > 0) {
+                                ((progress.deliveredUnits / progress.totalUnits) * 100).toInt()
+                            } else 0
                             _currentActivityUIFlow.value = CurrentActivityInfo(
-                                rh.gs(R.string.combov2_setting_current_pump_time),
-                                progressReport.overallProgress
+                                "Bolus: ${progress.deliveredUnits} / ${progress.totalUnits} U",
+                                percent
                             )
                         }
                         .launchIn(this)
-
-                    acquiredPump.getBasalProfileFlow
-                        .onEach { progressReport ->
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                rh.gs(R.string.combov2_getting_basal_profile, 1),
-                                progressReport.overallProgress
-                            )
-                        }
-                        .launchIn(this)
-
-                    acquiredPump.setBasalProfileFlow
-                        .onEach { progressReport ->
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                rh.gs(R.string.combov2_setting_basal_profile, 1),
-                                progressReport.overallProgress
-                            )
-                        }
-                        .launchIn(this)
-
-                    acquiredPump.parsedDisplayFrameFlow
-                        .onEach { parsedDisplayFrame ->
-                            _displayFrameUIFlow.emit(
-                                parsedDisplayFrame?.displayFrame ?: NullDisplayFrame
-                            )
-                        }
-                        .launchIn(this)
-                    */
 
                     launch {
                         while (true) {
