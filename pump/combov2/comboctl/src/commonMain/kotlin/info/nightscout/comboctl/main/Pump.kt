@@ -173,7 +173,10 @@ class Pump(
         try {
             logger(LogLevel.INFO) { "Delivering bolus: $units U (extended: $extendedUnits U, duration: $durationMinutes min)" }
             _bolusProgressFlow.emit(BolusProgress(0.0, units + extendedUnits, false))
-            delay(100)
+            
+            // PumpIO のボーラス送信コマンドを呼び出し
+            pumpIO.deliverCMDStandardBolus(units)
+
             _bolusProgressFlow.emit(BolusProgress(units + extendedUnits, units + extendedUnits, true))
             _stateFlow.value = State.READY_FOR_COMMANDS
         } catch (e: Exception) {
