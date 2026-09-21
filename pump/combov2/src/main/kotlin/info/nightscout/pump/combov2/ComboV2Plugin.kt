@@ -1441,6 +1441,7 @@ override fun connect(reason: String) {
         pumpUIFlowsDeferred = pumpCoroutineScope.async {
             try {
                 coroutineScope {
+                    /* TODO: Re-enable flow collectors once these flows are implemented in Pump/ComboCtlPump
                     acquiredPump.connectProgressFlow
                         .onEach { progressReport ->
                             _currentActivityUIFlow.value = CurrentActivityInfo(
@@ -1484,6 +1485,7 @@ override fun connect(reason: String) {
                             )
                         }
                         .launchIn(this)
+                    */
 
                     launch {
                         while (true) {
@@ -1503,6 +1505,7 @@ override fun connect(reason: String) {
             }
         }
     }
+
     private fun startPumpErrorTimeout() {
         if (pumpErrorTimeoutJob != null)
             return
