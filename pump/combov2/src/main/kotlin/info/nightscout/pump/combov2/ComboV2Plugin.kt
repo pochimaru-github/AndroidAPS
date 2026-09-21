@@ -1633,7 +1633,7 @@ override fun connect(reason: String) {
             // the Pump.disconnect() call shuts down the RFCOMM socket,
             // making all send/receive calls fail.
 
-            if (pumpToDisconnect.stateFlow.value == ComboCtlPump.State.Connecting) {
+            if (pumpToDisconnect.stateFlow.value == ComboCtlPump.State.CONNECTING) {
                 aapsLogger.debug(LTag.PUMP, "Cancelling ongoing connect attempt")
                 connectionSetupJob?.cancel()
                 pumpToDisconnect.disconnect()
@@ -1643,7 +1643,7 @@ override fun connect(reason: String) {
                 connectionSetupJob?.cancelAndJoin()
                 pumpToDisconnect.disconnect()
             }
-
+            
             aapsLogger.debug(LTag.PUMP, "Combo disconnected; cancelling UI flows coroutine")
             pumpUIFlowsDeferred?.cancelAndJoin()
             aapsLogger.debug(LTag.PUMP, "Cancelling state and status flows coroutine")
