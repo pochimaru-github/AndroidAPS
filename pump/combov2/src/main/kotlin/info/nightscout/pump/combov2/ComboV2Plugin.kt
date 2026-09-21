@@ -151,17 +151,8 @@ class ComboV2Plugin @Inject constructor(
         aapsLogger, rh, preferences, commandQueue
 ), Pump, PluginConstraints {
 
-    override var baseBasalRate: Double = 0.0
-    override val batteryLevel: Int? = null
-    override fun canHandleDST(): Boolean = false
-    override val isFakingTempsByExtendedBoluses: Boolean = false
-    override val lastBolusAmount: Double? = null
-    override val lastBolusTime: Long? = null
-    override val lastDataTime: Long = 0L
-    override val reservoirLevel: Double = 0.0
-    override val pumpDescription: PumpDescription
-        get() = PumpDescription() 
-        
+    override fun isConnected(): Boolean = driverStateFlow.value == DriverState.Connected
+
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
     private var pumpCoroutineScopeJob = SupervisorJob()
@@ -855,7 +846,7 @@ override fun connect(reason: String) {
         */
     }
 
-override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactResult {
+    override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactResult {
         // Insulin value must be greater than 0
         require(detailedBolusInfo.carbs == 0.0) { detailedBolusInfo.toString() }
         require(detailedBolusInfo.insulin > 0) { detailedBolusInfo.toString() }
