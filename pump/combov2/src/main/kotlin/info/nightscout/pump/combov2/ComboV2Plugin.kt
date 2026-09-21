@@ -1419,12 +1419,12 @@ val DriverState.isConnected: Boolean
                     acquiredPump.stateFlow
                         .onEach { state ->
                             val statusText = when (state) {
-                                Pump.State.CONNECTING -> rh.gs(R.string.combov2_establishing_bt_connection, 1)
-                                Pump.State.EXECUTING_COMMAND -> rh.gs(R.string.combov2_setting_current_pump_time)
+                                info.nightscout.comboctl.main.Pump.State.CONNECTING -> rh.gs(R.string.combov2_establishing_bt_connection, 1)
+                                info.nightscout.comboctl.main.Pump.State.EXECUTING_COMMAND -> rh.gs(R.string.combov2_setting_current_pump_time)
                                 else -> ""
                             }
                             if (statusText.isNotEmpty()) {
-                                _currentActivityUIFlow.value = CurrentActivityInfo(statusText, 0)
+                                _currentActivityUIFlow.value = CurrentActivityInfo(statusText, 0.0)
                             }
                         }
                         .launchIn(this)
@@ -1433,8 +1433,8 @@ val DriverState.isConnected: Boolean
                     acquiredPump.bolusProgressFlow
                         .onEach { progress ->
                             val percent = if (progress.totalUnits > 0) {
-                                ((progress.deliveredUnits / progress.totalUnits) * 100).toInt()
-                            } else 0
+                                (progress.deliveredUnits / progress.totalUnits) * 100.0
+                            } else 0.0
                             _currentActivityUIFlow.value = CurrentActivityInfo(
                                 "Bolus: ${progress.deliveredUnits} / ${progress.totalUnits} U",
                                 percent
