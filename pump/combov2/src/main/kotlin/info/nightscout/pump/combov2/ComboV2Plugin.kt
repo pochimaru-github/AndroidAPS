@@ -1415,7 +1415,6 @@ val DriverState.isConnected: Boolean
         pumpUIFlowsDeferred = pumpCoroutineScope.async {
             try {
                 coroutineScope {
-                    /* TODO: Re-enable flow collectors once these flows are implemented in Pump/ComboCtlPump
                     acquiredPump.connectProgressFlow
                         .onEach { progressReport ->
                             _currentActivityUIFlow.value = CurrentActivityInfo(
@@ -1459,7 +1458,6 @@ val DriverState.isConnected: Boolean
                             )
                         }
                         .launchIn(this)
-                    */
 
                     launch {
                         while (true) {
