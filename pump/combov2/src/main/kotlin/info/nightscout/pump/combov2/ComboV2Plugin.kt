@@ -251,10 +251,7 @@ sealed class DriverState(val name: String) {
     object Connecting : DriverState("connecting")
     object Connected : DriverState("connected")
 
-    /* TODO: Step 2 - CommandDescriptionの現行構造適合時に元の型を復元
     class ExecutingCommand(val description: ComboCtlPump.CommandDescription) : DriverState("executingCommand")
-    */
-    class ExecutingCommand(val description: String? = null) : DriverState("executingCommand")
 
     object Error : DriverState("error")
 }
