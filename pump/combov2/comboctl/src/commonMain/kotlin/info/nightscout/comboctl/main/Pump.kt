@@ -204,13 +204,12 @@ class Pump(
     /**
      * Sets the basal profile on the pump.
      */
-    suspend fun setBasalProfile(profile: BasalProfile) = mutex.withLock {
+    suspend fun setBasalProfile(profile: BasalProfile): Unit = mutex.withLock {
         checkReadyForCommands()
         _stateFlow.value = State.EXECUTING_COMMAND
         try {
             logger(LogLevel.INFO) { "Setting basal profile: $profile" }
-            delay(500)
-            _stateFlow.value = State.READY_FOR_COMMANDS
+            throw UnsupportedOperationException("Basal profile setting via command mode is not supported by PumpIO")
         } catch (e: Exception) {
             logger(LogLevel.ERROR, e) { "Failed to set basal profile." }
             _stateFlow.value = State.ERROR
