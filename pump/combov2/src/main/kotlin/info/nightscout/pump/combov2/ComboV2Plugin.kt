@@ -1415,7 +1415,7 @@ val DriverState.isConnected: Boolean
         pumpUIFlowsDeferred = pumpCoroutineScope.async {
             try {
                 coroutineScope {
-                    /* 一時コメントアウト: connectProgressFlow と setDateTimeProgressFlow は正確なプロパティ名に修正して再接続
+                    /* TODO: 現行 ComboCtlPump の Flow プロパティ名に合わせて 1 つずつ再接続します
                     acquiredPump.connectProgressFlow
                         .onEach { progressReport ->
                             _currentActivityUIFlow.value = CurrentActivityInfo(
@@ -1433,7 +1433,6 @@ val DriverState.isConnected: Boolean
                             )
                         }
                         .launchIn(this)
-                    */
 
                     acquiredPump.getBasalProfileFlow
                         .onEach { progressReport ->
@@ -1460,6 +1459,7 @@ val DriverState.isConnected: Boolean
                             )
                         }
                         .launchIn(this)
+                    */
 
                     launch {
                         while (true) {
