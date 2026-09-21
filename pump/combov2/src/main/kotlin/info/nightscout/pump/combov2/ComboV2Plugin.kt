@@ -1675,13 +1675,12 @@ override fun connect(reason: String) {
     }
 
     private fun setDriverState(newState: DriverState) {
-        val oldState = _driverStateFlow.value
+        val oldState = _driverStateUIFlow.value
 
         if (oldState == newState)
             return
 
         _driverStateUIFlow.value = newState
-        _driverStateFlow.value = newState
 
         if (newState == DriverState.Disconnected)
             _currentActivityUIFlow.value = noCurrentActivity()
@@ -1691,10 +1690,12 @@ override fun connect(reason: String) {
         when (newState) {
             DriverState.Disconnected -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED))
             DriverState.Connecting   -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTING))
+            DriverState.Connected    -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.CONNECTED))
             DriverState.Error        -> rxBus.send(EventPumpStatusChanged(EventPumpStatusChanged.Status.DISCONNECTED))
+            else                     -> { /* その他のドライバー状態変更時の処理 */ }
         }
     }
-
+    
     private fun executePendingDisconnect() {
         if (!disconnectRequestPending)
             return
