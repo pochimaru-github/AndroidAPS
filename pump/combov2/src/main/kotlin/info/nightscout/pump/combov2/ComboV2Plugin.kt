@@ -210,10 +210,6 @@ class ComboV2Plugin @Inject constructor(
     // private val _pairedStateFlow = MutableStateFlow<Boolean>(false)
     // val pairedStateFlow: StateFlow<Boolean> = _pairedStateFlow.asStateFlow()
 
-        private val _driverStateUIFlow = MutableStateFlow<DriverState>(DriverState.Disconnected)
-        val driverStateUIFlow = _driverStateUIFlow.asStateFlow()
-        val driverStateFlow: StateFlow<DriverState> = driverStateUIFlow
-
         private val _pairedStateFlow = MutableStateFlow<Boolean>(false)
         val pairedStateFlow: StateFlow<Boolean> = _pairedStateFlow.asStateFlow()
 
