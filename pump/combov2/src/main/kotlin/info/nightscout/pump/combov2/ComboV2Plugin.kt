@@ -117,7 +117,10 @@ import info.nightscout.comboctl.main.AlertScreenException
 //import info.nightscout.comboctl.main.CommandDescription
 
 internal const val PUMP_ERROR_TIMEOUT_INTERVAL_MSECS = 1000L * 60 * 5
-
+data class LastBolusInfo(
+    val timestamp: Long,
+    val bolusAmount: Double
+)
 @Singleton
 class ComboV2Plugin @Inject constructor(
     aapsLogger: AAPSLogger,
@@ -1340,10 +1343,6 @@ val DriverState.isConnected: Boolean
         _lastConnectionTimestampUIFlow.value = null
         _batteryStateUIFlow.value = null
         _reservoirLevelUIFlow.value = null
-        data class LastBolusInfo(
-            val timestamp: Long,
-            val bolusAmount: Double
-)        
         _lastBolusUIFlow.value = null
         _baseBasalRateUIFlow.value = null
         _serialNumberUIFlow.value = ""
