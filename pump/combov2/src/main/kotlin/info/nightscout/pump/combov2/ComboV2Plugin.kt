@@ -704,7 +704,8 @@ override fun connect(reason: String) {
         aapsLogger.debug(LTag.PUMP, "Basal profile to set: $requestedBasalProfile")
 
         
-            try {
+        try {
+            runBlocking {
                 executeCommand {
                     acquiredPump.setBasalProfile(requestedBasalProfile)
                     aapsLogger.debug(LTag.PUMP, "Basal profiles are different; new profile set")
@@ -723,7 +724,8 @@ override fun connect(reason: String) {
                         enacted = true
                     }
                 }
-            } catch (e: CancellationException) {
+            }
+        } catch (e: CancellationException) {
                 // Cancellation is not an error, but it also means
                 // that the profile update was not enacted.
                 pumpEnactResult.apply {
