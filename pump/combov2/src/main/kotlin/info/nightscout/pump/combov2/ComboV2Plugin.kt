@@ -467,13 +467,11 @@ val DriverState.isConnected: Boolean
             // DriverState.Connecting is _not_ listed here. Even though the pump
             // is technically busy and unable to execute commands in that state,
             // returning true then causes problems with AAPS' KeepAlive mechanism.
-            // DriverState.CheckingPump, // Step 1: 廃止APIのため無効化
-            // is DriverState.ExecutingCommand -> true // Step 1: 廃止APIのため無効化
-
+            is DriverState.ExecutingCommand -> true
             else                            -> false
         }
 
-override fun connect(reason: String) {
+    override fun connect(reason: String) {
         aapsLogger.debug(LTag.PUMP, "Connecting to Combo; reason: $reason")
 
         if (unpairing) {
@@ -758,8 +756,8 @@ override fun connect(reason: String) {
     override val lastDataTime: Long get() = lastConnectionTimestamp
 
     @OptIn(ExperimentalTime::class)
-    override val lastBolusTime: Long? get() = null // Step 1: 廃止API (lastBolusUIFlow.value?.timestamp) のためスタブ化
-    override val lastBolusAmount: Double? get() = null // Step 1: 廃止API (lastBolusUIFlow.value?.bolusAmount) のためスタブ化
+    override val lastBolusTime: Long? get() = lastBolusUIFlow.value?.timestamp
+    override val lastBolusAmount: Double? get() = lastBolusUIFlow.value?.bolusAmount
     override val baseBasalRate: Double
         get() {
             val currentHour = DateTime().hourOfDay().get()
