@@ -259,13 +259,13 @@ sealed class DriverState(val name: String) {
 /**
  * ComboCtlPump.State から DriverState への変換ロジック
  */
-fun ComboCtlPump.State.toDriverState(commandDescription: String? = null): DriverState = when (this) {
+fun ComboCtlPump.State.toDriverState(commandDescription: ComboCtlPump.CommandDescription? = null): DriverState = when (this) {
     ComboCtlPump.State.DISCONNECTED -> DriverState.Disconnected
     ComboCtlPump.State.CONNECTING,
     ComboCtlPump.State.CHECKING_PUMP -> DriverState.Connecting
     ComboCtlPump.State.READY_FOR_COMMANDS,
     ComboCtlPump.State.SUSPENDED -> DriverState.Connected
-    ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.ExecutingCommand(commandDescription)
+    ComboCtlPump.State.EXECUTING_COMMAND -> DriverState.ExecutingCommand(commandDescription ?: ComboCtlPump.CommandDescription())
     ComboCtlPump.State.ERROR -> DriverState.Error
 }
 
