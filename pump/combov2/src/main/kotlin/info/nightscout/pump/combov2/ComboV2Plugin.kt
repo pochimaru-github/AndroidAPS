@@ -1067,16 +1067,8 @@ val DriverState.isConnected: Boolean
     override fun pumpSpecificShortStatus(veryShort: Boolean): String {
         val lines = mutableListOf<String>()
 
-        // =========================================================================
-        // Step 1: comboctl API変更に伴う一時無効化（AlertScreen 変更・廃止のため）
-        // Step 2で新APIの警告・エラー取得処理に置き換えます。
-        // =========================================================================
-        // val alertCodeString = when (val alert = lastComboAlert) {
-        //     is AlertScreen.Content.Warning -> "W${alert.code}"
-        //     is AlertScreen.Content.Error   -> "E${alert.code}"
-        //     else                           -> null
-        // }
-        val alertCodeString: String? = null
+        // アラートコードが存在する場合に表示
+        val alertCodeString: String? = null // TODO: ポンプから最新エラー/警告コードを受信した際に保持するプロパティがあれば指定
 
         if (alertCodeString != null)
             lines += rh.gs(R.string.combov2_short_status_alert, alertCodeString)
@@ -1730,22 +1722,9 @@ val DriverState.isConnected: Boolean
     }
 
     private fun getAlertDescription(alert: Any): String {
-        /* Step 1: CIビルド導通のため一時無効化（Step 2でAlertScreenException等へ再実装予定）
-    private fun getAlertDescription(alert: AlertScreen.Content) =
-        when (alert) {
-            is AlertScreen.Content.Warning -> {
-                val desc = when (alert.code) {
-                    4    -> rh.gs(R.string.combov2_warning_4)
-                    10   -> rh.gs(R.string.combov2_warning_10)
-                    else -> ""
-                }
-
-                "${rh.gs(R.string.combov2_warning)} W${alert.code}" +
-                    if (desc.isEmpty()) "" else ": $desc"
-            }
-
-            is AlertScreen.Content.Error   -> {
-                val desc = when (alert.code) {
+        return when (alert) {
+            is Int -> { // エラーコード/警告コード数値が直接渡された場合
+                val desc = when (alert) {
                     1    -> rh.gs(R.string.combov2_error_1)
                     2    -> rh.gs(R.string.combov2_error_2)
                     4    -> rh.gs(R.string.combov2_error_4)
@@ -1758,32 +1737,26 @@ val DriverState.isConnected: Boolean
                     11   -> rh.gs(R.string.combov2_error_11)
                     else -> ""
                 }
-
-                "${rh.gs(R.string.combov2_error)} E${alert.code}" +
-                    if (desc.isEmpty()) "" else ": $desc"
+                if (desc.isNotEmpty()) "${rh.gs(R.string.combov2_error)} E$alert: $desc" else ""
             }
-
-            else                           -> rh.gs(R.string.combov2_unrecognized_alert)
+            is String -> alert
+            else -> rh.gs(R.string.combov2_unrecognized_alert)
         }
-        */
-        return ""
     }
 
     private fun notifyAboutComboAlert(alert: Any) {
-        /* Step 1: CIビルド導通のため一時無効化（Step 2でAlertScreenException等へ再実装予定）
-    private fun notifyAboutComboAlert(alert: AlertScreen.Content) {
-        if (alert is AlertScreen.Content.Error) {
-            aapsLogger.info(LTag.PUMP, "Error screen observed - setting pumpErrorObserved flag")
-            pumpErrorObserved = true
-            startPumpErrorTimeout()
-        }
+        aapsLogger.info(LTag.PUMP, "Error screen or alert observed - setting pumpErrorObserved flag")
+        pumpErrorObserved = true
+        startPumpErrorTimeout()
 
-        uiInteraction.addNotification(
-            Notification.COMBO_PUMP_ALARM,
-            text = "${rh.gs(R.string.combov2_combo_alert)}: ${getAlertDescription(alert)}",
-            level = if (alert is AlertScreen.Content.Warning) Notification.NORMAL else Notification.URGENT
-        )
-        */
+        val description = getAlertDescription(alert)
+        if (description.isNotEmpty()) {
+            uiInteraction.addNotification(
+                Notification.COMBO_PUMP_ALARM,
+                text = "${rh.gs(R.string.combov2_combo_alert)}: $description",
+                level = Notification.URGENT
+            )
+        }
     }
 
     private fun reportFinishedBolus(status: String, id: Long, pumpEnactResult: PumpEnactResult, succeeded: Boolean) {
