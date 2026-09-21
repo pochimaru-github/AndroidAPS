@@ -153,6 +153,7 @@ class ComboV2Plugin @Inject constructor(
 
     override fun isConnected(): Boolean = driverStateFlow.value == DriverState.Connected
     override fun isConnecting(): Boolean = driverStateFlow.value == DriverState.Connecting
+    override fun isHandshakeInProgress(): Boolean = false
 
     // Coroutine scope and the associated job. All coroutines
     // that are started in this plugin are part of this scope.
