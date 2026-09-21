@@ -25,11 +25,6 @@ data class PairingData(val address: String = "", val pin: String = "")
 data class TddEntry(val dateString: String = "", val totalUnits: Double = 0.0)
 
 /**
- * Description of a command currently being executed by the Pump.
- */
-data class CommandDescription(val name: String = "")
-
-/**
  * Dummy Cipher interface and production implementation.
  */
 interface Cipher
@@ -58,6 +53,11 @@ class Pump(
     private val cipher: Cipher = ProductionCipher(),
     private val clock: Clock = Clock.System
 ) {
+    /**
+     * Description of a command currently being executed by the Pump.
+     */
+    data class CommandDescription(val name: String = "")
+
     /**
      * Events reported by the Pump during operation.
      */
