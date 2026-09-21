@@ -779,9 +779,8 @@ val DriverState.isConnected: Boolean
     override val batteryLevel: Int?
         get() = _batteryLevel
 
-    private fun updateLevels() {
-        /* Step 1: 廃止API (pumpStatus) のためリザバーおよびバッテリー自動記録処理を一時無効化
-        pumpStatus?.availableUnitsInReservoir?.let { newLevel ->
+    private fun updateLevels(reservoirUnits: Double? = null, batteryLevelPercent: Int? = null) {
+        reservoirUnits?.let { newLevel ->
             _reservoirLevel?.let { currentLevel ->
                 aapsLogger.debug(LTag.PUMP, "Current/new reservoir levels: $currentLevel / $newLevel")
                 if (preferences.get(ComboBooleanKey.AutomaticReservoirEntry) && (newLevel > currentLevel)) {
@@ -795,16 +794,10 @@ val DriverState.isConnected: Boolean
                     )
                 }
             }
-            _reservoirLevel = newLevel.toDouble()
+            _reservoirLevel = newLevel
         }
 
-        pumpStatus?.batteryState?.let { newState ->
-            val newLevel = when (newState) {
-                PumpStatus.BatteryState.NO_BATTERY   -> 5
-                PumpStatus.BatteryState.LOW_BATTERY  -> 25
-                PumpStatus.BatteryState.FULL_BATTERY -> 100
-            }
-
+        batteryLevelPercent?.let { newLevel ->
             _batteryLevel?.let { currentLevel ->
                 aapsLogger.debug(LTag.PUMP, "Current/new battery levels: $currentLevel / $newLevel")
                 if (preferences.get(ComboBooleanKey.AutomaticBatteryEntry) && (newLevel > currentLevel)) {
@@ -818,10 +811,8 @@ val DriverState.isConnected: Boolean
                     )
                 }
             }
-
             _batteryLevel = newLevel
         }
-        */
     }
 
     override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactResult {
@@ -1320,10 +1311,6 @@ val DriverState.isConnected: Boolean
         runBlocking {
             try {
                 val pump = pumpManager?.acquirePump(bluetoothAddress) ?: return@runBlocking
-                // =========================================================================
-                // Step 1: comboctl API変更に伴う一時無効化（unpair 廃止のため）
-                // =========================================================================
-                // pump.unpair()
                 pumpManager?.releasePump(bluetoothAddress)
             } catch (_: ComboException) {
             } catch (_: BluetoothException) {
@@ -1349,9 +1336,6 @@ val DriverState.isConnected: Boolean
         _bluetoothAddressUIFlow.value = ""
 
         clearPumpErrorObservedFlag()
-
-        // The unpairing variable is set to false in
-        // the PumpManager onPumpUnpaired callback.
     }
 
     /*** User interface flows ***/
