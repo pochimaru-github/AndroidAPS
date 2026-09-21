@@ -191,7 +191,7 @@ class Pump(
         _stateFlow.value = State.EXECUTING_COMMAND
         try {
             logger(LogLevel.INFO) { "Setting TBR: $percentage% for $durationMinutes min" }
-            delay(200)
+            pumpIO.setTbr(percentage, durationMinutes)
             _stateFlow.value = State.READY_FOR_COMMANDS
         } catch (e: Exception) {
             logger(LogLevel.ERROR, e) { "Failed to set TBR." }
