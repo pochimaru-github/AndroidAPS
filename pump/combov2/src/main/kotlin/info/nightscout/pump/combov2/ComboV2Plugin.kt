@@ -1097,7 +1097,7 @@ override fun connect(reason: String) {
 
     override val isFakingTempsByExtendedBoluses = false
 
-    @OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class)
     override fun loadTDDs(): PumpEnactResult {
         val pumpEnactResult = pumpEnactResultProvider.get()
 
@@ -1105,17 +1105,18 @@ override fun connect(reason: String) {
 
         runBlocking {
             try {
-                // Map key = timestamp; value = TDD
-                val tddMap = mutableMapOf<Long, Int>()
+                // Map key = timestamp; value = TDD (Double)
+                val tddMap = mutableMapOf<Long, Double>()
 
                 executeCommand {
                     val tddHistory = acquiredPump.fetchTDDHistory()
 
                     tddHistory
-                        .filter { it.totalDailyAmount >= 1 }
+                        .filter { it.totalUnits >= 0.1 }
                         .forEach { tddHistoryEntry ->
-                            val timestamp = tddHistoryEntry.date.toEpochMilliseconds()
-                            tddMap[timestamp] = (tddMap[timestamp] ?: 0) + tddHistoryEntry.totalDailyAmount
+                            val timestamp = tddHistoryEntry.dateString.toLongOrNull()
+                                ?: runCatching { kotlinx.datetime.Instant.parse(tddHistoryEntry.dateString).toEpochMilliseconds() }.getOrDefault(0L)
+                            tddMap[timestamp] = (tddMap[timestamp] ?: 0.0) + tddHistoryEntry.totalUnits
                         }
                 }
 
@@ -1127,7 +1128,7 @@ override fun connect(reason: String) {
                         timestamp,
                         bolusAmount = 0.0,
                         basalAmount = 0.0,
-                        totalAmount = totalDailyAmount.cctlBasalToIU(),
+                        totalAmount = totalDailyAmount,
                         pumpId = null,
                         pumpType = PumpType.ACCU_CHEK_COMBO,
                         pumpSerial = serialNumber()
@@ -1157,13 +1158,8 @@ override fun connect(reason: String) {
         }
 
         return pumpEnactResult
-
-        return pumpEnactResult.apply {
-            success = false
-            enacted = false
-            comment = "Not implemented (Step 1 Stub)"
-        }
     }
+    
     override fun canHandleDST() = true
 
     override fun timezoneOrDSTChanged(timeChangeType: TimeChangeType) {
