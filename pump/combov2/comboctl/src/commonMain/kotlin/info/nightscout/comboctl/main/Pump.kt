@@ -186,7 +186,7 @@ class Pump(
     /**
      * Sets a Temporary Basal Rate (TBR).
      */
-    suspend fun setTbr(percentage: Int, durationMinutes: Int) = mutex.withLock {
+    suspend fun setTbr(percentage: Int, durationMinutes: Int): Unit = mutex.withLock {
         checkReadyForCommands()
         _stateFlow.value = State.EXECUTING_COMMAND
         try {
