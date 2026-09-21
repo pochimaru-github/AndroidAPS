@@ -212,26 +212,6 @@ class ComboV2Plugin @Inject constructor(
 
         private val _pairedStateFlow = MutableStateFlow<Boolean>(false)
         val pairedStateFlow: StateFlow<Boolean> = _pairedStateFlow.asStateFlow()
-
-        data class CurrentActivityInfo(val description: String, val overallProgress: Double)
-
-        private fun noCurrentActivity() = CurrentActivityInfo("", 0.0)
-        private var _currentActivityUIFlow = MutableStateFlow(noCurrentActivity())
-        val currentActivityUIFlow = _currentActivityUIFlow.asStateFlow()
-
-        private var _lastConnectionTimestampUIFlow = MutableStateFlow<Long?>(null)
-        val lastConnectionTimestampUIFlow = _lastConnectionTimestampUIFlow.asStateFlow()
-
-        private var _batteryStateUIFlow = MutableStateFlow<Any?>(null)
-        val batteryStateUIFlow = _batteryStateUIFlow.asStateFlow()
-
-        data class ReservoirLevel(val state: Any?, val availableUnits: Int)
-
-        private var _reservoirLevelUIFlow = MutableStateFlow<ReservoirLevel?>(null)
-        val reservoirLevelUIFlow = _reservoirLevelUIFlow.asStateFlow()
-
-        private var _lastBolusUIFlow = MutableStateFlow<Any?>(null)
-        val lastBolusUIFlow = _lastBolusUIFlow.asStateFlow()
         
     // If true, the pump was found to be suspended during the connect()
     // call. This is separate from driverStateFlow and driverStateUIFlow.
