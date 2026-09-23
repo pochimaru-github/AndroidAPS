@@ -36,7 +36,7 @@ import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.core.ui.extensions.toVisibility
 import app.aaps.pump.dana.activities.DanaHistoryActivity
 import app.aaps.pump.dana.activities.DanaUserOptionsActivity
-import app.aaps.pump.dana.databinding.DanarFragmentBinding
+import app.aaps.pump.dana.databinding.DanaFragmentBinding
 import app.aaps.pump.dana.events.EventDanaRNewStatus
 import dagger.android.support.DaggerFragment
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -66,7 +66,7 @@ class DanaFragment : DaggerFragment() {
     private var pumpStatus = ""
     private var pumpStatusIcon = "{fa-bluetooth-b}"
 
-    private var _binding: DanarFragmentBinding? = null
+    private var _binding: DanaFragmentBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -83,7 +83,7 @@ class DanaFragment : DaggerFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = DanarFragmentBinding.inflate(inflater, container, false)
+        _binding = DanaFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
