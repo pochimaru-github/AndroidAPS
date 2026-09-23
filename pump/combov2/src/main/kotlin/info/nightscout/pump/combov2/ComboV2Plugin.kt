@@ -674,7 +674,7 @@ val DriverState.isConnected: Boolean
         pumpCoroutineScope.launch {
             try {
                 executeCommand {
-                    // ステータス更新は ComboCtlPump.State / Event 経由で自動同調されるため空処理
+                    updateLastConnectionTimestamp()
                 }
 
                 // We send this event here, and not in onStart(), to include
@@ -881,11 +881,7 @@ val DriverState.isConnected: Boolean
             }
         }
 
-        return pumpEnactResult.apply {
-            success = false
-            enacted = false
-            comment = "Not implemented (Step 1 Stub)"
-        }
+        return pumpEnactResult
     }
 
     override fun stopBolusDelivering() {
@@ -1026,12 +1022,6 @@ val DriverState.isConnected: Boolean
                     comment = rh.gs(R.string.combov2_setting_tbr_failed)
                 }
             }
-        }
-
-        pumpEnactResult.apply {
-            success = false
-            enacted = false
-            comment = "Not implemented (Step 1 Stub)"
         }
     }
     // It is currently not known how to program an extended bolus into the Combo.
@@ -1432,13 +1422,17 @@ val DriverState.isConnected: Boolean
                     // ボウラス配信進捗の監視
                     acquiredPump.bolusProgressFlow
                         .onEach { progress ->
-                            val percent = if (progress.totalUnits > 0) {
-                                (progress.deliveredUnits / progress.totalUnits) * 100.0
-                            } else 0.0
-                            _currentActivityUIFlow.value = CurrentActivityInfo(
-                                "Bolus: ${progress.deliveredUnits} / ${progress.totalUnits} U",
-                                percent
-                            )
+                            if (progress.isCompleted) {
+                                _currentActivityUIFlow.value = noCurrentActivity()
+                            } else {
+                                val percent = if (progress.totalUnits > 0) {
+                                    (progress.deliveredUnits / progress.totalUnits) * 100.0
+                                } else 0.0
+                                _currentActivityUIFlow.value = CurrentActivityInfo(
+                                    "Bolus: ${progress.deliveredUnits} / ${progress.totalUnits} U",
+                                    percent
+                                )
+                            }
                         }
                         .launchIn(this)
 
