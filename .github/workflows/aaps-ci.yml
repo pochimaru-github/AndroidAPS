@@ -32,5 +32,5 @@ jobs:
           git commit -am "chore: temporary replace vector drawable attributes for build" || true
 
       - name: Build with Gradle
-        run: ./gradlew clean assembleFullRelease --stacktrace --no-build-cache --no-daemon --no-parallel -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g" -Dkapt.use.worker.api=false -Pkapt.incremental.apt=false
+        run: ./gradlew clean assembleFullRelease --stacktrace --no-build-cache --no-daemon --no-parallel -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g --add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
         # run: ./gradlew clean :pump:combov2:compileReleaseKotlin -x :pump:combov2:kaptGenerateStubsReleaseKotlin -x :pump:combov2:kaptReleaseKotlin
