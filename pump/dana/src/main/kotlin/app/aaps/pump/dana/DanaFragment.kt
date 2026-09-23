@@ -61,7 +61,7 @@ class DanaFragment : DaggerFragment() {
     private var disposable: CompositeDisposable = CompositeDisposable()
 
     private val handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
-    private var refreshLoop: Runnable
+    private lateinit var refreshLoop: Runnable
 
     private var pumpStatus = ""
     private var pumpStatusIcon = "{fa-bluetooth-b}"
