@@ -10,6 +10,11 @@ plugins {
 android {
 
     namespace = "app.aaps.pump.dana"
+
+    buildFeatures {
+        dataBinding = true
+    }
+
     defaultConfig {
         ksp {
             arg("room.incremental", "true")
