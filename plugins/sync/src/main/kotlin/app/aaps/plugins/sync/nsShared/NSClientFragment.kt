@@ -244,10 +244,6 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
         _binding?.recyclerview?.swapAdapter(RecyclerViewAdapter(nsClientPlugin?.listLog ?: arrayListOf()), true)
     }
 
-    private fun updateLog() {
-        _binding?.recyclerview?.recycledViewPool?.clear()
-        _binding?.recyclerview?.swapAdapter(RecyclerViewAdapter(nsClientPlugin?.listLog ?: arrayListOf()), true)
-    }
 } // ← NSClientFragment の閉じカッコ
 
 // ↓ クラスの外側（トップレベル）に配置
