@@ -203,11 +203,11 @@ class DanaFragment : DaggerFragment() {
     @Synchronized
     fun updateGUI() {
         if (_binding == null) return
-        binding.btConnection.text = pumpStatusIcon
-        binding.pumpStatus.text = pumpStatus
-        binding.pumpStatusLayout.visibility = (pumpStatus != "").toVisibility()
-        binding.queue.text = commandQueue.spannedStatus()
-        binding.queueStatusLayout.visibility = (commandQueue.spannedStatus().toString() != "").toVisibility()
+        binding.btConnection.setText(pumpStatusIcon)
+        binding.pumpStatus.setText(pumpStatus)
+        binding.pumpStatusLayout.setVisibility((pumpStatus != "").toVisibility())
+        binding.queue.setText(commandQueue.spannedStatus())
+        binding.queueStatusLayout.setVisibility((commandQueue.spannedStatus().toString() != "").toVisibility())
         val pump = danaPump
         val plugin: Pump = activePlugin.activePump
         if (pump.lastConnection != 0L) {
