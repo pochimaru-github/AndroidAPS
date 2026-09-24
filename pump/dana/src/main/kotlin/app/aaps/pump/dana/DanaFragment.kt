@@ -213,7 +213,7 @@ class DanaFragment : DaggerFragment() {
         if (pump.lastConnection != 0L) {
             val agoMilliseconds = System.currentTimeMillis() - pump.lastConnection
             val agoMin = (agoMilliseconds.toDouble() / 60.0 / 1000.0).toInt()
-            binding.lastConnection.text = dateUtil.timeString(pump.lastConnection) + " (" + rh.gs(app.aaps.core.interfaces.R.string.minago, agoMin) + ")"
+            binding.lastConnection.setText(dateUtil.timeString(pump.lastConnection) + " (" + rh.gs(app.aaps.core.interfaces.R.string.minago, agoMin) + ")")
             warnColors.setColor(binding.lastConnection, agoMin.toDouble(), 16.0, 31.0)
         }
         if (pump.lastBolusTime != 0L) {
@@ -221,32 +221,33 @@ class DanaFragment : DaggerFragment() {
             val agoHours = agoMilliseconds.toDouble() / 60.0 / 60.0 / 1000.0
             if (agoHours < 6)
             // max 6h back
-                binding.lastBolus.text =
+                binding.lastBolus.setText(
                     dateUtil.timeString(pump.lastBolusTime) + " " + dateUtil.sinceString(pump.lastBolusTime, rh) + " " + rh.gs(
                         app.aaps.core.ui.R.string.format_insulin_units,
                         pump.lastBolusAmount
                     )
+                )
             else
-                binding.lastBolus.text = ""
+                binding.lastBolus.setText("")
         }
 
-        binding.dailyUnits.text = rh.gs(app.aaps.core.ui.R.string.reservoir_value, pump.dailyTotalUnits, pump.maxDailyTotalUnits)
+        binding.dailyUnits.setText(rh.gs(app.aaps.core.ui.R.string.reservoir_value, pump.dailyTotalUnits, pump.maxDailyTotalUnits))
         warnColors.setColor(binding.dailyUnits, pump.dailyTotalUnits, pump.maxDailyTotalUnits * 0.75, pump.maxDailyTotalUnits * 0.9)
-        binding.baseBasalRate.text = "( " + (pump.activeProfile + 1) + " )  " + rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, plugin.baseBasalRate)
+        binding.baseBasalRate.setText("( " + (pump.activeProfile + 1) + " )  " + rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, plugin.baseBasalRate))
         // DanaRPlugin, DanaRKoreanPlugin
-        binding.tempbasal.text = danaPump.temporaryBasalToString()
-        binding.extendedbolus.text = danaPump.extendedBolusToString()
-        binding.reservoir.text = rh.gs(app.aaps.core.ui.R.string.reservoir_value, pump.reservoirRemainingUnits, 300)
+        binding.tempbasal.setText(danaPump.temporaryBasalToString())
+        binding.extendedbolus.setText(danaPump.extendedBolusToString())
+        binding.reservoir.setText(rh.gs(app.aaps.core.ui.R.string.reservoir_value, pump.reservoirRemainingUnits, 300))
         warnColors.setColorInverse(binding.reservoir, pump.reservoirRemainingUnits, 50, 20)
-        binding.battery.text = pump.batteryRemaining?.let { "{fa-battery-" + it / 25 + "}" } ?: rh.gs(app.aaps.core.ui.R.string.unknown)
+        binding.battery.setText(pump.batteryRemaining?.let { "{fa-battery-" + it / 25 + "}" } ?: rh.gs(app.aaps.core.ui.R.string.unknown))
         warnColors.setColorInverse(binding.battery, (pump.batteryRemaining?.toDouble() ?: 100.0), 51, 26)
-        binding.firmware.text = rh.gs(R.string.dana_model, pump.modelFriendlyName(), pump.hwModel, pump.protocol, pump.productCode)
-        binding.basalBolusStep.text = pump.basalStep.toString() + "/" + pump.bolusStep.toString()
-        binding.serialNumber.text = pump.serialNumber
+        binding.firmware.setText(rh.gs(R.string.dana_model, pump.modelFriendlyName(), pump.hwModel, pump.protocol, pump.productCode))
+        binding.basalBolusStep.setText(pump.basalStep.toString() + "/" + pump.bolusStep.toString())
+        binding.serialNumber.setText(pump.serialNumber)
         val icon = if (danaPump.pumpType() == PumpType.DANA_I) R.drawable.ic_dana_i else R.drawable.ic_dana_rs
         binding.danaIcon.setImageDrawable(context?.let { ContextCompat.getDrawable(it, icon) })
         //hide user options button if not an RS pump or old firmware
         // also excludes pump with model 03 because of untested error
-        binding.userOptions.visibility = (pump.hwModel != 1 && pump.protocol != 0x00).toVisibility()
+        binding.userOptions.setVisibility((pump.hwModel != 1 && pump.protocol != 0x00).toVisibility())
     }
 }
