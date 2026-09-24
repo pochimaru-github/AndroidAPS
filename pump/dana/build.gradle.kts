@@ -9,7 +9,6 @@ plugins {
 }
 
 android {
-
     namespace = "app.aaps.pump.dana"
 
     buildFeatures {
