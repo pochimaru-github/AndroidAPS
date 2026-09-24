@@ -100,23 +100,23 @@ class DanaUserOptionsActivity : TranslatedDaggerAppCompatActivity() {
         binding.shutdown.setParams(danaPump.shutdownHour.toDouble(), 0.0, 24.0, 1.0, DecimalFormat("1"), true, binding.saveUserOptions)
         binding.lowReservoir.setParams(danaPump.lowReservoirRate.toDouble(), 10.0, 50.0, 10.0, DecimalFormat("10"), false, binding.saveUserOptions)
         when (danaPump.beepAndAlarm) {
-            0b01  -> binding.pumpAlarmSound.isChecked = true
-            0b10  -> binding.pumpAlarmVibrate.isChecked = true
-            0b11  -> binding.pumpAlarmBoth.isChecked = true
+            0b01  -> binding.pumpAlarmSound.setChecked(true)
+            0b10  -> binding.pumpAlarmVibrate.setChecked(true)
+            0b11  -> binding.pumpAlarmBoth.setChecked(true)
 
             0b101 -> {
-                binding.pumpAlarmSound.isChecked = true
-                binding.beep.isChecked = true
+                binding.pumpAlarmSound.setChecked(true)
+                binding.beep.setChecked(true)
             }
 
             0b110 -> {
-                binding.pumpAlarmVibrate.isChecked = true
-                binding.beep.isChecked = true
+                binding.pumpAlarmVibrate.setChecked(true)
+                binding.beep.setChecked(true)
             }
 
             0b111 -> {
-                binding.pumpAlarmBoth.isChecked = true
-                binding.beep.isChecked = true
+                binding.pumpAlarmBoth.setChecked(true)
+                binding.beep.setChecked(true)
             }
         }
         if (danaPump.lastSettingsRead == 0L && danaPump.hwModel < 0x05) // RS+ doesn't use lastSettingsRead
@@ -127,14 +127,14 @@ class DanaUserOptionsActivity : TranslatedDaggerAppCompatActivity() {
 
     private fun setData() {
         // in DanaRS timeDisplay values are reversed
-        binding.timeFormat.isChecked = danaPump.timeDisplayType24
-        binding.buttonScroll.isChecked = danaPump.buttonScrollOnOff
-        binding.beep.isChecked = danaPump.beepAndAlarm > 4
-        binding.screenTimeout.value = danaPump.lcdOnTimeSec.toDouble()
-        binding.backlight.value = danaPump.backlightOnTimeSec.toDouble()
-        binding.units.isChecked = danaPump.getUnits() == GlucoseUnit.MMOL.asText
-        binding.shutdown.value = danaPump.shutdownHour.toDouble()
-        binding.lowReservoir.value = danaPump.lowReservoirRate.toDouble()
+        binding.timeFormat.setChecked(danaPump.timeDisplayType24)
+        binding.buttonScroll.setChecked(danaPump.buttonScrollOnOff)
+        binding.beep.setChecked(danaPump.beepAndAlarm > 4)
+        binding.screenTimeout.setValue(danaPump.lcdOnTimeSec.toDouble())
+        binding.backlight.setValue(danaPump.backlightOnTimeSec.toDouble())
+        binding.units.setChecked(danaPump.getUnits() == GlucoseUnit.MMOL.asText)
+        binding.shutdown.setValue(danaPump.shutdownHour.toDouble())
+        binding.lowReservoir.setValue(danaPump.lowReservoirRate.toDouble())
     }
 
     private fun onSaveClick() {
