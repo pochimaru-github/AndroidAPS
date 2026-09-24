@@ -21,7 +21,7 @@ import javax.inject.Singleton
 
 @Suppress("SpellCheckingInspection")
 @Singleton
-lass NSDeviceStatusHandler @Inject constructor(
+class NSDeviceStatusHandler @Inject constructor(
     private val preferences: Preferences,
     private val config: Config,
     private val dateUtil: DateUtil,
@@ -45,15 +45,13 @@ lass NSDeviceStatusHandler @Inject constructor(
                 updateUploaderData(nsDeviceStatus)
                 calculationWorkflow.runOnReceivedPredictions(overviewData)
             }
-/*
-if (config.AAPSCLIENT && !configurationDetected)
-    nsDeviceStatus.configuration?.let {
-        // copy configuration of Insulin and Sensitivity from main AAPS
-        runningConfiguration.apply(it)
-        configurationDetected = true // pick only newest
-
-    }
-*/
+            if (config.AAPSCLIENT && !configurationDetected) {
+                nsDeviceStatus.configuration?.let {
+                    // copy configuration of Insulin and Sensitivity from main AAPS
+                    // runningConfiguration.apply(it)
+                    configurationDetected = true // pick only newest
+                }
+            }
             if (config.APS) {
                 nsDeviceStatus.pump?.let { preferences.put(BooleanNonKey.ObjectivesPumpStatusIsAvailableInNS, true) }  // Objective 0
             }
