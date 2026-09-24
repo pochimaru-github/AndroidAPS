@@ -94,7 +94,7 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
 
         binding.recyclerview.setHasFixedSize(true)
         binding.recyclerview.layoutManager = LinearLayoutManager(this)
-        binding.status.visibility = View.GONE
+        binding.status.setVisibility(View.GONE)
 
         val pump = activePlugin.activePump
         val isKorean = pump.pumpDescription.pumpType == PumpType.DANA_R_KOREAN
