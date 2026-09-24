@@ -26,7 +26,7 @@ abstract class DanaHistoryDatabase : RoomDatabase() {
                 DanaHistoryDatabase::class.java,
                 "dana_database.db"
             )
-                .fallbackToDestructiveMigration(false)
+                .fallbackToDestructiveMigration()
                 .build()
     }
 }
