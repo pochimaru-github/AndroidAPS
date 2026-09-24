@@ -93,7 +93,7 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
         binding.recyclerview.setHasFixedSize(true)
-        binding.recyclerview.layoutManager = LinearLayoutManager(this)
+        binding.recyclerview.setLayoutManager(LinearLayoutManager(this))
         binding.status.setVisibility(View.GONE)
 
         val pump = activePlugin.activePump
