@@ -67,13 +67,13 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
         disposable += rxBus
             .toObservable(EventPumpStatusChanged::class.java)
             .observeOn(aapsSchedulers.main)
-            .subscribe({ binding.status.text = it.getStatus(this@DanaHistoryActivity) }, fabricPrivacy::logException)
+            .subscribe({ binding.status.setText(it.getStatus(this@DanaHistoryActivity)) }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventDanaRSyncStatus::class.java)
             .observeOn(aapsSchedulers.main)
             .subscribe({
                            aapsLogger.debug(LTag.PUMP, "EventDanaRSyncStatus: " + it.message)
-                           binding.status.text = it.message
+                           binding.status.setText(it.message)
                        }, fabricPrivacy::logException)
         swapAdapter(showingType)
     }
