@@ -154,81 +154,81 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
             holder.binding.duration.setText(record.duration.toString())
             holder.binding.alarm.setText(record.alarm)
             when (showingType) {
-                RecordTypes.RECORD_TYPE_ALARM                                                                                                                                                              -> {
-                    holder.binding.time.visibility = View.VISIBLE
-                    holder.binding.value.visibility = View.VISIBLE
-                    holder.binding.stringValue.visibility = View.GONE
-                    holder.binding.bolusType.visibility = View.GONE
-                    holder.binding.duration.visibility = View.GONE
-                    holder.binding.dailyBasal.visibility = View.GONE
-                    holder.binding.dailyBolus.visibility = View.GONE
-                    holder.binding.dailyTotal.visibility = View.GONE
-                    holder.binding.alarm.visibility = View.VISIBLE
+                RecordTypes.RECORD_TYPE_ALARM -> {
+                    holder.binding.time.setVisibility(View.VISIBLE)
+                    holder.binding.value.setVisibility(View.VISIBLE)
+                    holder.binding.stringValue.setVisibility(View.GONE)
+                    holder.binding.bolusType.setVisibility(View.GONE)
+                    holder.binding.duration.setVisibility(View.GONE)
+                    holder.binding.dailyBasal.setVisibility(View.GONE)
+                    holder.binding.dailyBolus.setVisibility(View.GONE)
+                    holder.binding.dailyTotal.setVisibility(View.GONE)
+                    holder.binding.alarm.setVisibility(View.VISIBLE)
                 }
 
-                RecordTypes.RECORD_TYPE_BOLUS                                                                                                                                                              -> {
-                    holder.binding.time.visibility = View.VISIBLE
-                    holder.binding.value.visibility = View.VISIBLE
-                    holder.binding.stringValue.visibility = View.GONE
-                    holder.binding.bolusType.visibility = View.VISIBLE
-                    holder.binding.duration.visibility = View.VISIBLE
-                    holder.binding.dailyBasal.visibility = View.GONE
-                    holder.binding.dailyBolus.visibility = View.GONE
-                    holder.binding.dailyTotal.visibility = View.GONE
-                    holder.binding.alarm.visibility = View.GONE
+                RecordTypes.RECORD_TYPE_BOLUS -> {
+                    holder.binding.time.setVisibility(View.VISIBLE)
+                    holder.binding.value.setVisibility(View.VISIBLE)
+                    holder.binding.stringValue.setVisibility(View.GONE)
+                    holder.binding.bolusType.setVisibility(View.VISIBLE)
+                    holder.binding.duration.setVisibility(View.VISIBLE)
+                    holder.binding.dailyBasal.setVisibility(View.GONE)
+                    holder.binding.dailyBolus.setVisibility(View.GONE)
+                    holder.binding.dailyTotal.setVisibility(View.GONE)
+                    holder.binding.alarm.setVisibility(View.GONE)
                 }
 
-                RecordTypes.RECORD_TYPE_DAILY                                                                                                                                                              -> {
+                RecordTypes.RECORD_TYPE_DAILY -> {
                     holder.binding.dailyBasal.setText(rh.gs(app.aaps.core.ui.R.string.format_insulin_units, record.dailyBasal))
                     holder.binding.dailyBolus.setText(rh.gs(app.aaps.core.ui.R.string.format_insulin_units, record.dailyBolus))
                     holder.binding.dailyTotal.setText(rh.gs(app.aaps.core.ui.R.string.format_insulin_units, record.dailyBolus + record.dailyBasal))
                     holder.binding.time.setText(dateUtil.dateString(record.timestamp))
-                    holder.binding.time.visibility = View.VISIBLE
-                    holder.binding.value.visibility = View.GONE
-                    holder.binding.stringValue.visibility = View.GONE
-                    holder.binding.bolusType.visibility = View.GONE
-                    holder.binding.duration.visibility = View.GONE
-                    holder.binding.dailyBasal.visibility = View.VISIBLE
-                    holder.binding.dailyBolus.visibility = View.VISIBLE
-                    holder.binding.dailyTotal.visibility = View.VISIBLE
-                    holder.binding.alarm.visibility = View.GONE
+                    holder.binding.time.setVisibility(View.VISIBLE)
+                    holder.binding.value.setVisibility(View.GONE)
+                    holder.binding.stringValue.setVisibility(View.GONE)
+                    holder.binding.bolusType.setVisibility(View.GONE)
+                    holder.binding.duration.setVisibility(View.GONE)
+                    holder.binding.dailyBasal.setVisibility(View.VISIBLE)
+                    holder.binding.dailyBolus.setVisibility(View.VISIBLE)
+                    holder.binding.dailyTotal.setVisibility(View.VISIBLE)
+                    holder.binding.alarm.setVisibility(View.GONE)
                 }
 
-                RecordTypes.RECORD_TYPE_GLUCOSE                                                                                                                                                            -> {
+                RecordTypes.RECORD_TYPE_GLUCOSE -> {
                     holder.binding.value.setText(profileUtil.fromMgdlToStringInUnits(record.value))
-                    holder.binding.time.visibility = View.VISIBLE
-                    holder.binding.value.visibility = View.VISIBLE
-                    holder.binding.stringValue.visibility = View.GONE
-                    holder.binding.bolusType.visibility = View.GONE
-                    holder.binding.duration.visibility = View.GONE
-                    holder.binding.dailyBasal.visibility = View.GONE
-                    holder.binding.dailyBolus.visibility = View.GONE
-                    holder.binding.dailyTotal.visibility = View.GONE
-                    holder.binding.alarm.visibility = View.GONE
+                    holder.binding.time.setVisibility(View.VISIBLE)
+                    holder.binding.value.setVisibility(View.VISIBLE)
+                    holder.binding.stringValue.setVisibility(View.GONE)
+                    holder.binding.bolusType.setVisibility(View.GONE)
+                    holder.binding.duration.setVisibility(View.GONE)
+                    holder.binding.dailyBasal.setVisibility(View.GONE)
+                    holder.binding.dailyBolus.setVisibility(View.GONE)
+                    holder.binding.dailyTotal.setVisibility(View.GONE)
+                    holder.binding.alarm.setVisibility(View.GONE)
                 }
 
                 RecordTypes.RECORD_TYPE_CARBO, RecordTypes.RECORD_TYPE_BASALHOUR, RecordTypes.RECORD_TYPE_ERROR, RecordTypes.RECORD_TYPE_PRIME, RecordTypes.RECORD_TYPE_REFILL, RecordTypes.RECORD_TYPE_TB -> {
-                    holder.binding.time.visibility = View.VISIBLE
-                    holder.binding.value.visibility = View.VISIBLE
-                    holder.binding.stringValue.visibility = View.GONE
-                    holder.binding.bolusType.visibility = View.GONE
-                    holder.binding.duration.visibility = View.GONE
-                    holder.binding.dailyBasal.visibility = View.GONE
-                    holder.binding.dailyBolus.visibility = View.GONE
-                    holder.binding.dailyTotal.visibility = View.GONE
-                    holder.binding.alarm.visibility = View.GONE
+                    holder.binding.time.setVisibility(View.VISIBLE)
+                    holder.binding.value.setVisibility(View.VISIBLE)
+                    holder.binding.stringValue.setVisibility(View.GONE)
+                    holder.binding.bolusType.setVisibility(View.GONE)
+                    holder.binding.duration.setVisibility(View.GONE)
+                    holder.binding.dailyBasal.setVisibility(View.GONE)
+                    holder.binding.dailyBolus.setVisibility(View.GONE)
+                    holder.binding.dailyTotal.setVisibility(View.GONE)
+                    holder.binding.alarm.setVisibility(View.GONE)
                 }
 
-                RecordTypes.RECORD_TYPE_SUSPEND                                                                                                                                                            -> {
-                    holder.binding.time.visibility = View.VISIBLE
-                    holder.binding.value.visibility = View.GONE
-                    holder.binding.stringValue.visibility = View.VISIBLE
-                    holder.binding.bolusType.visibility = View.GONE
-                    holder.binding.duration.visibility = View.GONE
-                    holder.binding.dailyBasal.visibility = View.GONE
-                    holder.binding.dailyBolus.visibility = View.GONE
-                    holder.binding.dailyTotal.visibility = View.GONE
-                    holder.binding.alarm.visibility = View.GONE
+                RecordTypes.RECORD_TYPE_SUSPEND -> {
+                    holder.binding.time.setVisibility(View.VISIBLE)
+                    holder.binding.value.setVisibility(View.GONE)
+                    holder.binding.stringValue.setVisibility(View.VISIBLE)
+                    holder.binding.bolusType.setVisibility(View.GONE)
+                    holder.binding.duration.setVisibility(View.GONE)
+                    holder.binding.dailyBasal.setVisibility(View.GONE)
+                    holder.binding.dailyBolus.setVisibility(View.GONE)
+                    holder.binding.dailyTotal.setVisibility(View.GONE)
+                    holder.binding.alarm.setVisibility(View.GONE)
                 }
             }
         }
