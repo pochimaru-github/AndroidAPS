@@ -11,7 +11,6 @@ import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.core.interfaces.workflow.CalculationWorkflow
 import app.aaps.core.keys.BooleanNonKey
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.core.nssdk.interfaces.RunningConfiguration
 import app.aaps.core.nssdk.localmodel.devicestatus.NSDeviceStatus
 import app.aaps.core.utils.HtmlHelper
 import app.aaps.core.utils.JsonHelper
@@ -22,11 +21,10 @@ import javax.inject.Singleton
 
 @Suppress("SpellCheckingInspection")
 @Singleton
-class NSDeviceStatusHandler @Inject constructor(
+lass NSDeviceStatusHandler @Inject constructor(
     private val preferences: Preferences,
     private val config: Config,
     private val dateUtil: DateUtil,
-    private val runningConfiguration: RunningConfiguration,
     private val processedDeviceStatusData: ProcessedDeviceStatusData,
     private val aapsLogger: AAPSLogger,
     private val persistenceLayer: PersistenceLayer,
@@ -47,13 +45,15 @@ class NSDeviceStatusHandler @Inject constructor(
                 updateUploaderData(nsDeviceStatus)
                 calculationWorkflow.runOnReceivedPredictions(overviewData)
             }
-            if (config.AAPSCLIENT && !configurationDetected)
-                nsDeviceStatus.configuration?.let {
-                    // copy configuration of Insulin and Sensitivity from main AAPS
-                    runningConfiguration.apply(it)
-                    configurationDetected = true // pick only newest
+/*
+if (config.AAPSCLIENT && !configurationDetected)
+    nsDeviceStatus.configuration?.let {
+        // copy configuration of Insulin and Sensitivity from main AAPS
+        runningConfiguration.apply(it)
+        configurationDetected = true // pick only newest
 
-                }
+    }
+*/
             if (config.APS) {
                 nsDeviceStatus.pump?.let { preferences.put(BooleanNonKey.ObjectivesPumpStatusIsAvailableInNS, true) }  // Objective 0
             }
