@@ -12,7 +12,6 @@ import app.aaps.core.interfaces.PersistenceLayer
 import app.aaps.core.interfaces.ProfileFunction
 import app.aaps.core.interfaces.Pump
 import app.aaps.core.interfaces.PumpEnactResult
-import app.aaps.core.interfaces.RxBus
 import app.aaps.core.interfaces.TDD
 import app.aaps.core.interfaces.TherapyEngine
 import app.aaps.core.interfaces.Treatments
@@ -22,6 +21,7 @@ import app.aaps.core.interfaces.logging.L
 import app.aaps.core.interfaces.objectMapper
 import app.aaps.core.interfaces.plugin.PluginBase
 import app.aaps.core.interfaces.plugin.PluginType
+import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.bus.RxBusWearData
 import app.aaps.core.interfaces.wear.WearPath
 import app.aaps.core.units.GlucoseUnit
