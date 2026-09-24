@@ -133,11 +133,11 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
                 }
             })
         }
-        binding.typeList.setOnItemClickListener { _, _, position, _ ->
+        binding.typeList.setOnItemClickListener(AdapterView.OnItemClickListener { _, _, position, _ ->
             val selected = typeList[position]
             showingType = selected.type
             swapAdapter(selected.type)
-        }
+        })
     }
 
     inner class RecyclerViewAdapter internal constructor(private var historyList: List<DanaHistoryRecord>) : RecyclerView.Adapter<RecyclerViewAdapter.HistoryViewHolder>() {
@@ -147,12 +147,12 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
 
         override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
             val record = historyList[position]
-            holder.binding.time.text = dateUtil.dateAndTimeString(record.timestamp)
-            holder.binding.value.text = decimalFormatter.to2Decimal(record.value)
-            holder.binding.stringValue.text = record.stringValue
-            holder.binding.bolusType.text = record.bolusType
-            holder.binding.duration.text = record.duration.toString()
-            holder.binding.alarm.text = record.alarm
+            holder.binding.time.setText(dateUtil.dateAndTimeString(record.timestamp))
+            holder.binding.value.setText(decimalFormatter.to2Decimal(record.value))
+            holder.binding.stringValue.setText(record.stringValue)
+            holder.binding.bolusType.setText(record.bolusType)
+            holder.binding.duration.setText(record.duration.toString())
+            holder.binding.alarm.setText(record.alarm)
             when (showingType) {
                 RecordTypes.RECORD_TYPE_ALARM                                                                                                                                                              -> {
                     holder.binding.time.visibility = View.VISIBLE
@@ -179,10 +179,10 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
                 }
 
                 RecordTypes.RECORD_TYPE_DAILY                                                                                                                                                              -> {
-                    holder.binding.dailyBasal.text = rh.gs(app.aaps.core.ui.R.string.format_insulin_units, record.dailyBasal)
-                    holder.binding.dailyBolus.text = rh.gs(app.aaps.core.ui.R.string.format_insulin_units, record.dailyBolus)
-                    holder.binding.dailyTotal.text = rh.gs(app.aaps.core.ui.R.string.format_insulin_units, record.dailyBolus + record.dailyBasal)
-                    holder.binding.time.text = dateUtil.dateString(record.timestamp)
+                    holder.binding.dailyBasal.setText(rh.gs(app.aaps.core.ui.R.string.format_insulin_units, record.dailyBasal))
+                    holder.binding.dailyBolus.setText(rh.gs(app.aaps.core.ui.R.string.format_insulin_units, record.dailyBolus))
+                    holder.binding.dailyTotal.setText(rh.gs(app.aaps.core.ui.R.string.format_insulin_units, record.dailyBolus + record.dailyBasal))
+                    holder.binding.time.setText(dateUtil.dateString(record.timestamp))
                     holder.binding.time.visibility = View.VISIBLE
                     holder.binding.value.visibility = View.GONE
                     holder.binding.stringValue.visibility = View.GONE
@@ -195,7 +195,7 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
                 }
 
                 RecordTypes.RECORD_TYPE_GLUCOSE                                                                                                                                                            -> {
-                    holder.binding.value.text = profileUtil.fromMgdlToStringInUnits(record.value)
+                    holder.binding.value.setText(profileUtil.fromMgdlToStringInUnits(record.value))
                     holder.binding.time.visibility = View.VISIBLE
                     holder.binding.value.visibility = View.VISIBLE
                     holder.binding.stringValue.visibility = View.GONE
