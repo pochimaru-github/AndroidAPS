@@ -166,10 +166,10 @@ class DanaFragment : DaggerFragment() {
                                else                                       ->
                                    "{fa-bluetooth-b}"
                            }
-                           binding.btConnection.text = pumpStatusIcon
-                           pumpStatus = it.getStatus(requireContext())
-                           binding.pumpStatus.text = pumpStatus
-                           binding.pumpStatusLayout.visibility = (pumpStatus != "").toVisibility()
+                            binding.btConnection.setText(pumpStatusIcon)
+                            pumpStatus = it.getStatus(requireContext())
+                            binding.pumpStatus.setText(pumpStatus)
+                            binding.pumpStatusLayout.setVisibility((pumpStatus != "").toVisibility())
                        }, fabricPrivacy::logException)
 
         pumpStatus = ""
