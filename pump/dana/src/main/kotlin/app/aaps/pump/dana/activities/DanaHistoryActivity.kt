@@ -120,20 +120,20 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
 
         binding.reload.setOnClickListener {
             val selected = typeList.firstOrNull { it.name == binding.typeList.text.toString() } ?: return@setOnClickListener
-            binding.reload.visibility = View.GONE
-            binding.status.visibility = View.VISIBLE
+            binding.reload.setVisibility(View.GONE)
+            binding.status.setVisibility(View.VISIBLE)
             clearCardView()
             commandQueue.loadHistory(selected.type, object : Callback() {
                 override fun run() {
                     swapAdapter(selected.type)
                     runOnUiThread {
-                        binding.reload.visibility = View.VISIBLE
-                        binding.status.visibility = View.GONE
+                        binding.reload.setVisibility(View.VISIBLE)
+                        binding.status.setVisibility(View.GONE)
                     }
                 }
             })
         }
-        binding.typeList.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
+        binding.typeList.setOnItemClickListener { _, _, position, _ ->
             val selected = typeList[position]
             showingType = selected.type
             swapAdapter(selected.type)
@@ -247,8 +247,8 @@ class DanaHistoryActivity : TranslatedDaggerAppCompatActivity() {
         super.onDestroy()
         binding.reload.setOnClickListener(null)
         binding.typeList.setAdapter(null)
-        binding.typeList.onItemClickListener = null
-        binding.recyclerview.adapter = null
+        binding.typeList.setOnItemClickListener(null)
+        binding.recyclerview.setAdapter(null)
     }
 
     private fun swapAdapter(type: Byte) {
