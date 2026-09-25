@@ -6,7 +6,7 @@ import androidx.work.workDataOf
 import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.events.EventNSClientNewLog
-import app.aaps.core.interfaces.sync.DataWorkerStorage
+// import app.aaps.core.interfaces.sync.DataWorkerStorage // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
 import app.aaps.core.interfaces.sync.NsClient
 import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.core.nssdk.interfaces.NSAndroidClient
@@ -24,7 +24,7 @@ class LoadProfileStoreWorker(
     params: WorkerParameters
 ) : LoggingWorker(context, params, Dispatchers.IO) {
 
-    @Inject lateinit var dataWorkerStorage: DataWorkerStorage
+    // @Inject lateinit var dataWorkerStorage: DataWorkerStorage // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
     @Inject lateinit var rxBus: RxBus
     @Inject lateinit var context: Context
     @Inject lateinit var nsClientV3Plugin: NSClientV3Plugin
