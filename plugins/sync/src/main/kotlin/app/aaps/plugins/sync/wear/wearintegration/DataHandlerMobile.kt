@@ -12,7 +12,7 @@ import app.aaps.core.interfaces.Pump
 import app.aaps.core.interfaces.PumpEnactResult
 import app.aaps.core.interfaces.TDD
 import app.aaps.core.interfaces.TherapyEngine
-import app.aaps.core.interfaces.Treatments
+// import app.aaps.core.interfaces.Treatments // TODO: 現行 Treatments インターフェースへ適合・再実装
 import app.aaps.core.interfaces.Wear
 import app.aaps.core.interfaces.logging.L
 import app.aaps.core.interfaces.objectMapper
@@ -52,7 +52,7 @@ class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
     // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
-    private val treatments: Treatments,
+    // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
     private val profileFunction: ProfileFunction,
     private val configBuilder: ConfigBuilder,
     private val nsClient: NSClient,
