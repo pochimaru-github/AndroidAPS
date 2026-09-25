@@ -7,7 +7,7 @@ import app.aaps.core.interfaces.Automation
 import app.aaps.core.interfaces.ConfigBuilder
 import app.aaps.core.interfaces.NSClient
 // import app.aaps.core.interfaces.PersistenceLayer // TODO: 現行 DB/Repository インターフェースへ適合・再実装
-import app.aaps.core.interfaces.ProfileFunction
+// import app.aaps.core.interfaces.ProfileFunction // TODO: 現行 Profile インターフェースへ適合・再実装
 import app.aaps.core.interfaces.Pump
 import app.aaps.core.interfaces.PumpEnactResult
 import app.aaps.core.interfaces.TDD
@@ -53,7 +53,7 @@ class DataHandlerMobile @Inject constructor(
     private val rxBus: RxBus,
     // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
     // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
-    private val profileFunction: ProfileFunction,
+    // private val profileFunction: ProfileFunction, // TODO: 現行 Profile インターフェースに適合・再実装
     private val configBuilder: ConfigBuilder,
     private val nsClient: NSClient,
     private val tdd: TDD,
