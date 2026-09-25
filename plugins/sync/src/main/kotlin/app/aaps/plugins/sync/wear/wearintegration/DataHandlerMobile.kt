@@ -6,7 +6,7 @@ import app.aaps.core.interfaces.ActionData
 import app.aaps.core.interfaces.Automation
 import app.aaps.core.interfaces.ConfigBuilder
 import app.aaps.core.interfaces.NSClient
-import app.aaps.core.interfaces.PersistenceLayer
+// import app.aaps.core.interfaces.PersistenceLayer // TODO: 現行 DB/Repository インターフェースへ適合・再実装
 import app.aaps.core.interfaces.ProfileFunction
 import app.aaps.core.interfaces.Pump
 import app.aaps.core.interfaces.PumpEnactResult
@@ -51,7 +51,7 @@ import javax.inject.Singleton
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    private val persistenceLayer: PersistenceLayer,
+    // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
     private val treatments: Treatments,
     private val profileFunction: ProfileFunction,
     private val configBuilder: ConfigBuilder,
@@ -172,8 +172,9 @@ class DataHandlerMobile @Inject constructor(
         val rate = dataMap.getInt("rate", 0)
         val date = dataMap.getLong("date", System.currentTimeMillis())
         if (rate > 0) {
-            val heartRate = HeartRate(date = date, value = rate)
-            persistenceLayer.insertHeartRate(heartRate)
+            // TODO: 現行 DB/Repository 層へ適合・再実装
+            // val heartRate = HeartRate(date = date, value = rate)
+            // persistenceLayer.insertHeartRate(heartRate)
         }
     }
 
@@ -181,8 +182,9 @@ class DataHandlerMobile @Inject constructor(
         val steps = dataMap.getInt("steps", 0)
         val date = dataMap.getLong("date", System.currentTimeMillis())
         if (steps >= 0) {
-            val stepsRate = StepsRate(date = date, value = steps)
-            persistenceLayer.insertStepsRate(stepsRate)
+            // TODO: 現行 DB/Repository 層へ適合・再実装
+            // val stepsRate = StepsRate(date = date, value = steps)
+            // persistenceLayer.insertStepsRate(stepsRate)
         }
     }
 
