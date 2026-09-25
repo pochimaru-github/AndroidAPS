@@ -2,8 +2,6 @@ package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
 import app.aaps.core.interfaces.AapsLogger
-import app.aaps.core.interfaces.AapsServices
-import app.aaps.core.interfaces.AapsServices.Companion.APS
 import app.aaps.core.interfaces.ActionData
 import app.aaps.core.interfaces.Automation
 import app.aaps.core.interfaces.ConfigBuilder
@@ -53,7 +51,6 @@ import javax.inject.Singleton
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    private val aapsServices: AapsServices,
     private val persistenceLayer: PersistenceLayer,
     private val treatments: Treatments,
     private val profileFunction: ProfileFunction,
