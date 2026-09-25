@@ -16,7 +16,6 @@ import app.aaps.core.interfaces.TDD
 import app.aaps.core.interfaces.TherapyEngine
 import app.aaps.core.interfaces.Treatments
 import app.aaps.core.interfaces.Wear
-import app.aaps.core.interfaces.WearUtils
 import app.aaps.core.interfaces.logging.L
 import app.aaps.core.interfaces.objectMapper
 import app.aaps.core.interfaces.plugin.PluginBase
@@ -24,6 +23,7 @@ import app.aaps.core.interfaces.plugin.PluginType
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.bus.RxBusWearData
 import app.aaps.core.interfaces.wear.WearPath
+import app.aaps.core.interfaces.wear.WearUtils
 import app.aaps.core.units.GlucoseUnit
 import app.aaps.core.utils.DateUtil
 import app.aaps.core.utils.FabricUtils
