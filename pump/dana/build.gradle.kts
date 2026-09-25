@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
     id("kotlin-android")
-    id("kotlin-kapt") // ← 再度追加
+    id("kotlin-kapt")
     id("android-module-dependencies")
     id("test-module-dependencies")
     id("jacoco-module-dependencies")
@@ -13,6 +13,7 @@ android {
 
     buildFeatures {
         dataBinding = true
+        viewBinding = true
     }
 
     defaultConfig {
@@ -21,6 +22,10 @@ android {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
+}
+
+kapt {
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -38,7 +43,6 @@ dependencies {
 
     testImplementation(project(":shared:tests"))
     testImplementation(project(":core:objects"))
-    // create profile from json
 
     ksp(libs.com.google.dagger.compiler)
     ksp(libs.com.google.dagger.android.processor)
