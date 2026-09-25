@@ -130,11 +130,11 @@ class DanaUserOptionsActivity : TranslatedDaggerAppCompatActivity() {
         binding.timeFormat.setChecked(danaPump.timeDisplayType24)
         binding.buttonScroll.setChecked(danaPump.buttonScrollOnOff)
         binding.beep.setChecked(danaPump.beepAndAlarm > 4)
-        binding.screenTimeout.setValue(danaPump.lcdOnTimeSec.toDouble())
-        binding.backlight.setValue(danaPump.backlightOnTimeSec.toDouble())
+        binding.screenTimeout.value = danaPump.lcdOnTimeSec.toDouble()
+        binding.backlight.value = danaPump.backlightOnTimeSec.toDouble()
         binding.units.setChecked(danaPump.getUnits() == GlucoseUnit.MMOL.asText)
-        binding.shutdown.setValue(danaPump.shutdownHour.toDouble())
-        binding.lowReservoir.setValue(danaPump.lowReservoirRate.toDouble())
+        binding.shutdown.value = danaPump.shutdownHour.toDouble()
+        binding.lowReservoir.value = danaPump.lowReservoirRate.toDouble()
     }
 
     private fun onSaveClick() {
