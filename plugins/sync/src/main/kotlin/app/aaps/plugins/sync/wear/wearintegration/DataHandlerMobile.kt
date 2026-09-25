@@ -23,7 +23,6 @@ import app.aaps.core.interfaces.plugin.PluginType
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.bus.RxBusWearData
 import app.aaps.core.interfaces.wear.WearPath
-import app.aaps.core.interfaces.wear.WearUtils
 import app.aaps.core.units.GlucoseUnit
 import app.aaps.core.utils.DateUtil
 import app.aaps.core.utils.FabricUtils
@@ -54,7 +53,6 @@ import javax.inject.Singleton
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    private val wearUtils: WearUtils,
     private val aapsServices: AapsServices,
     private val persistenceLayer: PersistenceLayer,
     private val treatments: Treatments,
