@@ -5,7 +5,7 @@ import app.aaps.core.interfaces.AapsLogger
 import app.aaps.core.interfaces.ActionData
 import app.aaps.core.interfaces.Automation
 // import app.aaps.core.interfaces.ConfigBuilder // TODO: 現行 ConfigBuilder インターフェースへ適合・再実装
-import app.aaps.core.interfaces.NSClient
+// import app.aaps.core.interfaces.NSClient // TODO: 現行 NSClient インターフェースへ適合・再実装
 // import app.aaps.core.interfaces.PersistenceLayer // TODO: 現行 DB/Repository インターフェースへ適合・再実装
 // import app.aaps.core.interfaces.ProfileFunction // TODO: 現行 Profile インターフェースへ適合・再実装
 import app.aaps.core.interfaces.Pump
@@ -55,7 +55,7 @@ class DataHandlerMobile @Inject constructor(
     // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
     // private val profileFunction: ProfileFunction, // TODO: 現行 Profile インターフェースに適合・再実装
     // private val configBuilder: ConfigBuilder, // TODO: 現行 ConfigBuilder インターフェースに適合・再実装
-    private val nsClient: NSClient,
+    // private val nsClient: NSClient, // TODO: 現行 NSClient インターフェースに適合・再実装
     private val tdd: TDD,
     private val automation: Automation
 ) : PluginBase(PluginType.SYNC) {
