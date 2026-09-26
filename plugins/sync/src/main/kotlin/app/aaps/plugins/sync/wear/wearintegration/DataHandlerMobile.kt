@@ -10,7 +10,7 @@ import app.aaps.core.interfaces.Automation
 // import app.aaps.core.interfaces.ProfileFunction // TODO: 現行 Profile インターフェースへ適合・再実装
 import app.aaps.core.interfaces.Pump
 import app.aaps.core.interfaces.PumpEnactResult
-import app.aaps.core.interfaces.TDD
+// import app.aaps.core.interfaces.TDD // TODO: 現行 TDD インターフェースへ適合・再実装
 import app.aaps.core.interfaces.TherapyEngine
 // import app.aaps.core.interfaces.Treatments // TODO: 現行 Treatments インターフェースへ適合・再実装
 import app.aaps.core.interfaces.Wear
@@ -56,7 +56,7 @@ class DataHandlerMobile @Inject constructor(
     // private val profileFunction: ProfileFunction, // TODO: 現行 Profile インターフェースに適合・再実装
     // private val configBuilder: ConfigBuilder, // TODO: 現行 ConfigBuilder インターフェースに適合・再実装
     // private val nsClient: NSClient, // TODO: 現行 NSClient インターフェースに適合・再実装
-    private val tdd: TDD,
+    // private val tdd: TDD, // TODO: 現行 TDD インターフェースに適合・再実装
     private val automation: Automation
 ) : PluginBase(PluginType.SYNC) {
 
