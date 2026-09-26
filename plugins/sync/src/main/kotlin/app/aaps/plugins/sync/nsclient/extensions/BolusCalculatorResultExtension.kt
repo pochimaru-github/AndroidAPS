@@ -37,8 +37,8 @@ fun BCR.Companion.fromJson(jsonObject: JSONObject): BCR? {
     if (timestamp == 0L) return null
 
     return try {
-        Gson().fromJson(bcrString, BCR::class.java)
-            .also {
+        Gson().fromJson(bcrString, BCR::class.java as Class<BCR>)
+            ?.also {
                 it.id = 0
                 it.isValid = isValid
                 it.ids = IDs().apply { nightscoutId = id }
