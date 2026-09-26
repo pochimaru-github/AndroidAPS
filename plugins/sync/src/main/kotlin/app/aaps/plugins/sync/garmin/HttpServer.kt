@@ -4,7 +4,8 @@ import android.os.StrictMode
 import androidx.annotation.VisibleForTesting
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
-import app.aaps.core.utils.pump.ThreadUtil
+// TODO: ThreadUtil 参照不可のため一時的にコメントアウト (要再実装)
+// import app.aaps.core.utils.pump.ThreadUtil
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.Closeable
@@ -166,7 +167,8 @@ class HttpServer internal constructor(private var aapsLogger: AAPSLogger, val po
             val socket = serverSocket!!.accept()
             aapsLogger.info(LTag.GARMIN, "accept " + socket.remoteSocketAddress)
             workerExecutor.execute {
-                Thread.currentThread().name = "worker" + ThreadUtil.threadId()
+                // TODO: ThreadUtil 参照不可のため Thread.currentThread().id を使用 (要再実装)
+                Thread.currentThread().name = "worker" + Thread.currentThread().id
                 try {
                     socket.use { s ->
                         s.soTimeout = 10_000
