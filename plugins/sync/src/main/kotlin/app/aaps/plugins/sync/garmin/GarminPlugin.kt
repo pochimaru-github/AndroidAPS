@@ -17,10 +17,6 @@ import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.events.EventNewBG
 import app.aaps.core.interfaces.rx.events.EventPreferenceChange
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.core.validators.DefaultEditTextValidator
-import app.aaps.core.validators.preferences.AdaptiveIntPreference
-import app.aaps.core.validators.preferences.AdaptiveStringPreference
-import app.aaps.core.validators.preferences.AdaptiveSwitchPreference
 import app.aaps.plugins.sync.R
 import app.aaps.plugins.sync.garmin.keys.GarminBooleanKey
 import app.aaps.plugins.sync.garmin.keys.GarminIntKey
@@ -270,7 +266,7 @@ class GarminPlugin @Inject constructor(
         for (glucose: GV in glucoseValues) {
             val timeSec: Int = (glucose.timestamp / 1000).toInt()
             val glucoseMgDl: Int = glucose.value.roundToInt()
-            encodedGlucose.add(timeSec, glucoseMgDl)
+            encodedGlucose.add(intArrayOf(timeSec, glucoseMgDl))
         }
         return encodedGlucose.encodedBase64()
     }
@@ -484,17 +480,6 @@ class GarminPlugin @Inject constructor(
             key = "garmin_settings"
             title = rh.gs(R.string.garmin)
             initialExpandedChildrenCount = 0
-            addPreference(AdaptiveSwitchPreference(ctx = context, booleanKey = GarminBooleanKey.LocalHttpServer, title = R.string.garmin_local_http_server))
-            addPreference(AdaptiveIntPreference(ctx = context, intKey = GarminIntKey.LocalHttpPort, title = R.string.garmin_local_http_server_port))
-            addPreference(
-                AdaptiveStringPreference(
-                    ctx = context,
-                    stringKey = GarminStringKey.RequestKey,
-                    title = R.string.garmin_request_key,
-                    summary = R.string.garmin_request_key_summary,
-                    validatorParams = DefaultEditTextValidator.Parameters(emptyAllowed = true)
-                )
-            )
         }
     }
 }
