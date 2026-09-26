@@ -25,7 +25,7 @@ import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.objects.workflow.LoggingWorker
 import app.aaps.core.utils.notifyAll
-import app.aaps.core.utils.receivers.DataWorkerStorage
+// import app.aaps.core.utils.receivers.DataWorkerStorage // TODO: 現行 DataWorkerStorage / Repository へ適合・再実装
 import app.aaps.plugins.sync.nsclient.acks.NSAddAck
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
@@ -35,15 +35,22 @@ class NSClientAddAckWorker(
     params: WorkerParameters
 ) : LoggingWorker(context, params, Dispatchers.Default) {
 
-    @Inject lateinit var dataWorkerStorage: DataWorkerStorage
+    // @Inject lateinit var dataWorkerStorage: DataWorkerStorage // TODO: 現行 Worker/Storage 層へ適合・再実装
     @Inject lateinit var rxBus: RxBus
     @Inject lateinit var aapsSchedulers: AapsSchedulers
     @Inject lateinit var preferences: Preferences
     @Inject lateinit var storeDataForDb: StoreDataForDb
 
     override suspend fun doWorkAndLog(): Result {
+        /* TODO: 現行 Worker / Storage 層へ適合・再実装
         val ack = dataWorkerStorage.pickupObject(inputData.getLong(DataWorkerStorage.STORE_KEY, -1)) as NSAddAck?
             ?: return Result.failure(workDataOf("Error" to "missing input data"))
+        */
+        val ack: NSAddAck? = null // スタブ処理
+
+        if (ack == null) {
+            return Result.failure(workDataOf("Error" to "missing input data (DataWorkerStorage disabled)"))
+        }
 
         if (preferences.get(BooleanKey.NsClientSlowSync)) SystemClock.sleep(1000)
         val ret = try {
