@@ -45,11 +45,11 @@ fun EB.Companion.extendedBolusFromJson(jsonObject: JSONObject): EB? {
         JsonHelper.safeGetLongAllowNull(jsonObject, "mills", null)
             ?: JsonHelper.safeGetLongAllowNull(jsonObject, "date", null)
             ?: return null
-    if (JsonHelper.safeGetIntAllowNull(jsonObject, "splitNow") != 0) return null
-    if (JsonHelper.safeGetIntAllowNull(jsonObject, "splitExt") != 100) return null
-    val amount = JsonHelper.safeGetDoubleAllowNull(jsonObject, "enteredinsulin") ?: return null
-    val duration = JsonHelper.safeGetLongAllowNull(jsonObject, "duration") ?: return null
-    val durationInMilliseconds = JsonHelper.safeGetLongAllowNull(jsonObject, "durationInMilliseconds")
+    if (JsonHelper.safeGetIntAllowNull(jsonObject, "splitNow", null) != 0) return null
+    if (JsonHelper.safeGetIntAllowNull(jsonObject, "splitExt", null) != 100) return null
+    val amount = JsonHelper.safeGetDoubleAllowNull(jsonObject, "enteredinsulin", null) ?: return null
+    val duration = JsonHelper.safeGetLongAllowNull(jsonObject, "duration", null) ?: return null
+    val durationInMilliseconds = JsonHelper.safeGetLongAllowNull(jsonObject, "durationInMilliseconds", null)
     val isValid = JsonHelper.safeGetBoolean(jsonObject, "isValid", true)
     val isEmulatingTempBasal = JsonHelper.safeGetBoolean(jsonObject, "isEmulatingTempBasal", false)
     val id = JsonHelper.safeGetStringAllowNull(jsonObject, "identifier", null)
