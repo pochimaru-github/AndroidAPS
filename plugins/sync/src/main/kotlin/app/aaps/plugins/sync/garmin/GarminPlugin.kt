@@ -227,13 +227,13 @@ class GarminPlugin @Inject constructor(
     fun getGlucoseMessage() = mapOf<String, Any>(
         "key" to garminAapsKey,
         "command" to "glucose",
-        "profile" to loopHub.currentProfileName.first().toString(),
+        "profile" to (loopHub.currentProfileName.firstOrNull()?.toString() ?: ""),
         "encodedGlucose" to encodedGlucose(getGlucoseValues()),
         "remainingInsulin" to loopHub.insulinOnboard,
         "remainingBasalInsulin" to loopHub.insulinBasalOnboard,
         "glucoseUnit" to glucoseUnitStr,
         "temporaryBasalRate" to
-            (loopHub.temporaryBasal.takeIf(java.lang.Double::isFinite) ?: 1.0),
+            (loopHub.temporaryBasal.takeIf { it.isFinite() } ?: 1.0),
         "connected" to loopHub.isConnected,
         "timestamp" to clock.instant().epochSecond
     )
@@ -316,7 +316,7 @@ class GarminPlugin @Inject constructor(
         loopHub.temporaryBasal.also {
             if (!it.isNaN()) jo.addProperty("temporaryBasalRate", it)
         }
-        jo.addProperty("profile", profileName.first().toString())
+        jo.addProperty("profile", profileName.firstOrNull()?.toString() ?: "")
         jo.addProperty("connected", loopHub.isConnected)
         return jo.toString()
     }
@@ -355,10 +355,10 @@ class GarminPlugin @Inject constructor(
 
     @VisibleForTesting
     fun receiveHeartRate(msg: Map<String, Any>, test: Boolean) {
-        val avg: Int = msg.getOrDefault("hr", 0) as Int
+        val avg: Int = (msg.getOrDefault("hr", 0) as? Number)?.toInt() ?: 0
         val samplingStartSec: Long = toLong(msg["hrStart"])
         val samplingEndSec: Long = toLong(msg["hrEnd"])
-        val device: String? = msg["device"] as String?
+        val device: String? = msg["device"] as? String
         receiveHeartRate(
             Instant.ofEpochSecond(samplingStartSec), Instant.ofEpochSecond(samplingEndSec),
             avg, device, test
