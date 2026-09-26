@@ -15,7 +15,7 @@ fun EPS.toJson(isAdd: Boolean, dateUtil: DateUtil): JSONObject =
         .put("enteredBy", "openaps://" + "AndroidAPS")
         .put("isValid", isValid)
         .put("eventType", TE.Type.NOTE.text) // move to separate collection when available in NS
-        .put("profileJson", ProfileSealed.EPS(value = this, activePlugin = null).toPureNsJson(dateUtil).toString())
+        .put("profileJson", ProfileSealed.EPS(this, null).toPureNsJson(dateUtil).toString())
         .put("originalProfileName", originalProfileName)
         .put("originalCustomizedName", originalCustomizedName)
         .put("originalTimeshift", originalTimeshift)
@@ -35,9 +35,9 @@ fun EPS.Companion.fromJson(jsonObject: JSONObject, dateUtil: DateUtil): EPS? {
         JsonHelper.safeGetLongAllowNull(jsonObject, "mills", null)
             ?: JsonHelper.safeGetLongAllowNull(jsonObject, "date", null)
             ?: return null
-    val originalTimeshift = JsonHelper.safeGetLong(jsonObject, "originalTimeshift")
-    val originalDuration = JsonHelper.safeGetLong(jsonObject, "originalDuration")
-    val originalEnd = JsonHelper.safeGetLong(jsonObject, "originalEnd")
+    val originalTimeshift = JsonHelper.safeGetLong(jsonObject, "originalTimeshift", 0L)
+    val originalDuration = JsonHelper.safeGetLong(jsonObject, "originalDuration", 0L)
+    val originalEnd = JsonHelper.safeGetLong(jsonObject, "originalEnd", 0L)
     val originalPercentage = JsonHelper.safeGetInt(jsonObject, "originalPercentage", 100)
     val isValid = JsonHelper.safeGetBoolean(jsonObject, "isValid", true)
     val id = JsonHelper.safeGetStringAllowNull(jsonObject, "identifier", null)
@@ -52,7 +52,7 @@ fun EPS.Companion.fromJson(jsonObject: JSONObject, dateUtil: DateUtil): EPS? {
 
     if (timestamp == 0L) return null
     val pureProfile = pureProfileFromJson(JSONObject(profileJson), dateUtil) ?: return null
-    val profileSealed = ProfileSealed.Pure(value = pureProfile, activePlugin = null)
+    val profileSealed = ProfileSealed.Pure(pureProfile, null)
 
     return EPS(
         timestamp = timestamp,
