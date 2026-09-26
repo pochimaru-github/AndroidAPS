@@ -18,7 +18,7 @@ import app.aaps.core.interfaces.sync.DataSyncSelector.PairProfileSwitch
 import app.aaps.core.interfaces.sync.DataSyncSelector.PairTemporaryBasal
 import app.aaps.core.interfaces.sync.DataSyncSelector.PairTemporaryTarget
 import app.aaps.core.interfaces.sync.DataSyncSelector.PairTherapyEvent
-import app.aaps.core.interfaces.sync.DataWorkerStorage
+// import app.aaps.core.interfaces.sync.DataWorkerStorage // TODO: 現行 DataWorkerStorage / Repository へ適合・再実装
 import app.aaps.core.objects.workflow.LoggingWorker
 import app.aaps.core.utils.notifyAll
 import app.aaps.plugins.sync.nsclient.acks.NSUpdateAck
@@ -30,15 +30,22 @@ class NSClientUpdateRemoveAckWorker(
     params: WorkerParameters
 ) : LoggingWorker(context, params, Dispatchers.Default) {
 
-    @Inject lateinit var dataWorkerStorage: DataWorkerStorage
+    // @Inject lateinit var dataWorkerStorage: DataWorkerStorage // TODO: 現行 Worker/Storage 層へ適合・再実装
     @Inject lateinit var rxBus: RxBus
     @Inject lateinit var aapsSchedulers: AapsSchedulers
 
     override suspend fun doWorkAndLog(): Result {
         var ret = Result.success()
 
+        /* TODO: 現行 Worker / Storage 層へ適合・再実装
         val ack = dataWorkerStorage.pickupObject(inputData.getLong(DataWorkerStorage.STORE_KEY, -1)) as NSUpdateAck?
             ?: return Result.failure(workDataOf("Error" to "missing input data"))
+        */
+        val ack: NSUpdateAck? = null // スタブ処理
+
+        if (ack == null) {
+            return Result.failure(workDataOf("Error" to "missing input data (DataWorkerStorage disabled)"))
+        }
 
         // new room way
         when (ack.originalObject) {
