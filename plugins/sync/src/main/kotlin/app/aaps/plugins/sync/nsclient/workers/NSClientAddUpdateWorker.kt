@@ -20,7 +20,7 @@ import app.aaps.core.interfaces.plugin.ActivePlugin
 import app.aaps.core.interfaces.profile.ProfileUtil
 import app.aaps.core.interfaces.pump.VirtualPump
 import app.aaps.core.interfaces.rx.bus.RxBus
-import app.aaps.core.interfaces.utils.DataWorkerStorage
+// import app.aaps.core.interfaces.utils.DataWorkerStorage // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
 import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.interfaces.Preferences
@@ -38,7 +38,7 @@ class NSClientAddUpdateWorker(
     params: WorkerParameters
 ) : LoggingWorker(context, params, Dispatchers.Default) {
 
-    @Inject lateinit var dataWorkerStorage: DataWorkerStorage
+    // @Inject lateinit var dataWorkerStorage: DataWorkerStorage // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
     @Inject lateinit var config: Config
     @Inject lateinit var preferences: Preferences
     @Inject lateinit var dateUtil: DateUtil
@@ -48,8 +48,13 @@ class NSClientAddUpdateWorker(
     @Inject lateinit var profileUtil: ProfileUtil
 
     override suspend fun doWorkAndLog(): Result {
-        val treatments = dataWorkerStorage.pickupJSONArray(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
-            ?: return Result.failure(workDataOf("Error" to "missing input data"))
+        // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
+        // val treatments = dataWorkerStorage.pickupJSONArray(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
+        //     ?: return Result.failure(workDataOf("Error" to "missing input data"))
+        val treatments: org.json.JSONArray? = null
+        if (treatments == null) {
+            return Result.failure(workDataOf("Error" to "missing input data"))
+        }
 
         val ret = Result.success()
         var latestDateInReceivedData = 0L
