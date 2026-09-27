@@ -6,7 +6,8 @@ import app.aaps.core.data.pump.defs.PumpType
 import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.core.objects.extensions.pureProfileFromJson
 import app.aaps.core.objects.profile.ProfileSealed
-import app.aaps.core.utils.JsonHelper
+// TODO: utils (JsonHelper) 未解決参照につきコメントアウト (要再実装)
+// import app.aaps.core.utils.JsonHelper
 import org.json.JSONObject
 
 fun EPS.toJson(isAdd: Boolean, dateUtil: DateUtil): JSONObject =
@@ -32,23 +33,24 @@ fun EPS.toJson(isAdd: Boolean, dateUtil: DateUtil): JSONObject =
 
 fun EPS.Companion.fromJson(jsonObject: JSONObject, dateUtil: DateUtil): EPS? {
     val timestamp =
-        JsonHelper.safeGetLongAllowNull(jsonObject, "mills", null)
-            ?: JsonHelper.safeGetLongAllowNull(jsonObject, "date", null)
+        (if (jsonObject.has("mills") && !jsonObject.isNull("mills")) jsonObject.optLong("mills") else null)
+            ?: (if (jsonObject.has("date") && !jsonObject.isNull("date")) jsonObject.optLong("date") else null)
             ?: return null
-    val originalTimeshift = JsonHelper.safeGetLong(jsonObject, "originalTimeshift", 0L)
-    val originalDuration = JsonHelper.safeGetLong(jsonObject, "originalDuration", 0L)
-    val originalEnd = JsonHelper.safeGetLong(jsonObject, "originalEnd", 0L)
-    val originalPercentage = JsonHelper.safeGetInt(jsonObject, "originalPercentage", 100)
-    val isValid = JsonHelper.safeGetBoolean(jsonObject, "isValid", true)
-    val id = JsonHelper.safeGetStringAllowNull(jsonObject, "identifier", null)
-        ?: JsonHelper.safeGetStringAllowNull(jsonObject, "_id", null)
+    val originalTimeshift = jsonObject.optLong("originalTimeshift", 0L)
+    val originalDuration = jsonObject.optLong("originalDuration", 0L)
+    val originalEnd = jsonObject.optLong("originalEnd", 0L)
+    val originalPercentage = jsonObject.optInt("originalPercentage", 100)
+    val isValid = if (jsonObject.has("isValid")) jsonObject.optBoolean("isValid", true) else true
+    val id = (if (jsonObject.has("identifier") && !jsonObject.isNull("identifier")) jsonObject.optString("identifier") else null)
+        ?: (if (jsonObject.has("_id") && !jsonObject.isNull("_id")) jsonObject.optString("_id") else null)
         ?: return null
-    val originalProfileName = JsonHelper.safeGetStringAllowNull(jsonObject, "originalProfileName", null) ?: return null
-    val originalCustomizedName = JsonHelper.safeGetStringAllowNull(jsonObject, "originalCustomizedName", null) ?: return null
-    val profileJson = JsonHelper.safeGetStringAllowNull(jsonObject, "profileJson", null) ?: return null
-    val pumpId = JsonHelper.safeGetLongAllowNull(jsonObject, "pumpId", null)
-    val pumpType = PumpType.fromString(JsonHelper.safeGetStringAllowNull(jsonObject, "pumpType", null))
-    val pumpSerial = JsonHelper.safeGetStringAllowNull(jsonObject, "pumpSerial", null)
+    val originalProfileName = if (jsonObject.has("originalProfileName") && !jsonObject.isNull("originalProfileName")) jsonObject.optString("originalProfileName") else null ?: return null
+    val originalCustomizedName = if (jsonObject.has("originalCustomizedName") && !jsonObject.isNull("originalCustomizedName")) jsonObject.optString("originalCustomizedName") else null ?: return null
+    val profileJson = if (jsonObject.has("profileJson") && !jsonObject.isNull("profileJson")) jsonObject.optString("profileJson") else null ?: return null
+    val pumpId = if (jsonObject.has("pumpId") && !jsonObject.isNull("pumpId")) jsonObject.optLong("pumpId") else null
+    val pumpTypeStr = if (jsonObject.has("pumpType") && !jsonObject.isNull("pumpType")) jsonObject.optString("pumpType") else null
+    val pumpType = PumpType.fromString(pumpTypeStr)
+    val pumpSerial = if (jsonObject.has("pumpSerial") && !jsonObject.isNull("pumpSerial")) jsonObject.optString("pumpSerial") else null
 
     if (timestamp == 0L) return null
     val pureProfile = pureProfileFromJson(JSONObject(profileJson), dateUtil) ?: return null
