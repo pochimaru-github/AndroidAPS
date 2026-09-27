@@ -12,8 +12,9 @@ import app.aaps.core.interfaces.workflow.CalculationWorkflow
 import app.aaps.core.keys.BooleanNonKey
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.nssdk.localmodel.devicestatus.NSDeviceStatus
-import app.aaps.core.utils.HtmlHelper
-import app.aaps.core.utils.JsonHelper
+// TODO: utils (HtmlHelper, JsonHelper) 未解決参照につきコメントアウト (要再実装)
+// import app.aaps.core.utils.HtmlHelper
+// import app.aaps.core.utils.JsonHelper
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
@@ -60,7 +61,7 @@ class NSDeviceStatusHandler @Inject constructor(
 
     private fun updateDeviceData(deviceStatus: NSDeviceStatus) {
         val createdAt = deviceStatus.createdAt?.let { dateUtil.fromISODateString(it) } ?: return
-        processedDeviceStatusData.device?.let { if (createdAt < it.createdAt) return } // take only newer record
+        processedDeviceStatusData.device?.let { if (createdAt.compareTo(it.createdAt) < 0) return } // take only newer record
         deviceStatus.device?.let {
             if (it.startsWith("openaps://")) processedDeviceStatusData.device = ProcessedDeviceStatusData.Device(createdAt, it.substring(10))
         }
@@ -69,7 +70,7 @@ class NSDeviceStatusHandler @Inject constructor(
     private fun updatePumpData(nsDeviceStatus: NSDeviceStatus) {
         val pump = nsDeviceStatus.pump ?: return
         val clock = pump.clock?.let { dateUtil.fromISODateString(it) } ?: return
-        processedDeviceStatusData.pumpData?.let { if (clock < it.clock) return } // take only newer record
+        processedDeviceStatusData.pumpData?.let { if (clock.compareTo(it.clock) < 0) return } // take only newer record
 
         // create new status and process data
         processedDeviceStatusData.pumpData = ProcessedDeviceStatusData.PumpData().also { deviceStatusPumpData ->
@@ -90,21 +91,23 @@ class NSDeviceStatusHandler @Inject constructor(
                 val keys: Iterator<*> = it.keys()
                 while (keys.hasNext()) {
                     val key = keys.next() as String
-                    val value = it.getString(key)
-                    extended.append("<b>").append(key).append(":</b> ").append(value).append("<br>")
+                    val value = it.optString(key)
+                    extended.append("<b>$key:</b> $value<br>")
                 }
-                deviceStatusPumpData.extended = HtmlHelper.fromHtml(extended.toString())
-                deviceStatusPumpData.activeProfileName = JsonHelper.safeGetStringAllowNull(it, "ActiveProfile", null)
+                @Suppress("DEPRECATION")
+                deviceStatusPumpData.extended = android.text.Html.fromHtml(extended.toString())
+                deviceStatusPumpData.activeProfileName = if (it.has("ActiveProfile") && !it.isNull("ActiveProfile")) it.optString("ActiveProfile") else null
             }
         }
     }
 
     private fun updateOpenApsData(nsDeviceStatus: NSDeviceStatus) {
         nsDeviceStatus.openaps?.suggested?.let {
-            JsonHelper.safeGetString(it, "timestamp")?.let { timestamp ->
-                val clock = dateUtil.fromISODateString(timestamp)
+            val timestamp = if (it.has("timestamp") && !it.isNull("timestamp")) it.optString("timestamp") else null
+            timestamp?.let { ts ->
+                val clock = dateUtil.fromISODateString(ts)
                 // check if this is new data
-                if (clock > processedDeviceStatusData.openAPSData.clockSuggested) {
+                if (clock.compareTo(processedDeviceStatusData.openAPSData.clockSuggested) > 0) {
                     try {
                         processedDeviceStatusData.openAPSData.suggested = RT.deserialize(it.toString()).apply { this.timestamp = clock }
                     } catch (e: Exception) {
@@ -118,10 +121,11 @@ class NSDeviceStatusHandler @Inject constructor(
             }
         }
         nsDeviceStatus.openaps?.enacted?.let {
-            JsonHelper.safeGetString(it, "timestamp")?.let { timestamp ->
-                val clock = dateUtil.fromISODateString(timestamp)
+            val timestamp = if (it.has("timestamp") && !it.isNull("timestamp")) it.optString("timestamp") else null
+            timestamp?.let { ts ->
+                val clock = dateUtil.fromISODateString(ts)
                 // check if this is new data
-                if (clock > processedDeviceStatusData.openAPSData.clockEnacted) {
+                if (clock.compareTo(processedDeviceStatusData.openAPSData.clockEnacted) > 0) {
                     try {
                         processedDeviceStatusData.openAPSData.enacted = RT.deserialize(it.toString()).apply { this.timestamp = clock }
                     } catch (e: Exception) {
@@ -141,7 +145,7 @@ class NSDeviceStatusHandler @Inject constructor(
 
         var uploader = processedDeviceStatusData.uploaderMap[device]
         // check if this is new data
-        if (uploader == null || clock > uploader.clock) {
+        if (uploader == null || clock.compareTo(uploader.clock) > 0) {
             if (uploader == null) uploader = ProcessedDeviceStatusData.Uploader()
             uploader.battery = battery
             uploader.clock = clock
