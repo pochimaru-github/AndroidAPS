@@ -34,6 +34,6 @@ jobs:
       - name: Build with Gradle
         run: |
           ./gradlew clean --no-daemon
-          ./gradlew :core:compileReleaseKotlin :core:nssdk:compileReleaseKotlin --no-daemon
+          ./gradlew :core:nssdk:compileReleaseKotlin --no-daemon
           ./gradlew assembleFullRelease --stacktrace --info --no-build-cache --no-daemon --no-parallel -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=2g"
         # run: ./gradlew clean :pump:combov2:compileReleaseKotlin -x :pump:combov2:kaptGenerateStubsReleaseKotlin -x :pump:combov2:kaptReleaseKotlin
