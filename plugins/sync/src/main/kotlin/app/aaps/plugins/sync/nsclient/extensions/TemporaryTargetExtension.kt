@@ -7,39 +7,43 @@ import app.aaps.core.data.model.TT
 import app.aaps.core.data.time.T
 import app.aaps.core.interfaces.profile.ProfileUtil
 import app.aaps.core.interfaces.utils.DateUtil
-import app.aaps.core.utils.JsonHelper
 import org.json.JSONObject
 
 fun TT.Companion.fromJson(jsonObject: JSONObject, profileUtil: ProfileUtil): TT? {
-    val units = GlucoseUnit.fromText(JsonHelper.safeGetString(jsonObject, "units", GlucoseUnit.MGDL.asText))
+    val units = GlucoseUnit.fromText(
+        if (!jsonObject.isNull("units")) jsonObject.optString("units", GlucoseUnit.MGDL.asText) else GlucoseUnit.MGDL.asText
+    )
     val timestamp =
-        JsonHelper.safeGetLongAllowNull(jsonObject, "mills", null)
-            ?: JsonHelper.safeGetLongAllowNull(jsonObject, "date", null)
-            ?: return null
-    val duration = JsonHelper.safeGetLongAllowNull(jsonObject, "duration", null) ?: return null
-    val durationInMilliseconds = JsonHelper.safeGetLongAllowNull(jsonObject, "durationInMilliseconds")
-    var low = JsonHelper.safeGetDouble(jsonObject, "targetBottom")
+        if (!jsonObject.isNull("mills")) jsonObject.optLong("mills")
+        else if (!jsonObject.isNull("date")) jsonObject.optLong("date")
+        else return null
+    val duration = if (!jsonObject.isNull("duration")) jsonObject.optLong("duration") else return null
+    val durationInMilliseconds = if (!jsonObject.isNull("durationInMilliseconds")) jsonObject.optLong("durationInMilliseconds") else null
+    var low = jsonObject.optDouble("targetBottom", 0.0)
     low = profileUtil.convertToMgdl(low, units)
-    var high = JsonHelper.safeGetDouble(jsonObject, "targetTop")
+    var high = jsonObject.optDouble("targetTop", 0.0)
     high = profileUtil.convertToMgdl(high, units)
-    val reasonString = if (duration != 0L) JsonHelper.safeGetStringAllowNull(jsonObject, "reason", null)
-        ?: return null else ""
+    val reasonString = if (duration != 0L) {
+        if (!jsonObject.isNull("reason")) jsonObject.optString("reason") else return null
+    } else ""
     // this string can be localized from NS, it will not work in this case CUSTOM will be used
     val reason = TT.Reason.fromString(reasonString)
-    val id = JsonHelper.safeGetStringAllowNull(jsonObject, "identifier", null)
-        ?: JsonHelper.safeGetStringAllowNull(jsonObject, "_id", null)
-        ?: return null
-    val isValid = JsonHelper.safeGetBoolean(jsonObject, "isValid", true)
+    val nsId =
+        if (!jsonObject.isNull("identifier")) jsonObject.optString("identifier")
+        else if (!jsonObject.isNull("_id")) jsonObject.optString("_id")
+        else return null
+    val isValid = jsonObject.optBoolean("isValid", true)
 
     if (timestamp == 0L) return null
 
     if (duration > 0L) {
         // not ending event
-        if (low < Constants.MIN_TT_MGDL) return null
-        if (low > Constants.MAX_TT_MGDL) return null
-        if (high < Constants.MIN_TT_MGDL) return null
-        if (high > Constants.MAX_TT_MGDL) return null
-        if (low > high) return null
+        // TODO: Replaced operator comparison with explicit compareTo calls for CI build pass
+        if (low.compareTo(Constants.MIN_TT_MGDL) < 0) return null
+        if (low.compareTo(Constants.MAX_TT_MGDL) > 0) return null
+        if (high.compareTo(Constants.MIN_TT_MGDL) < 0) return null
+        if (high.compareTo(Constants.MAX_TT_MGDL) > 0) return null
+        if (low.compareTo(high) > 0) return null
     }
     val tt = TT(
         timestamp = timestamp,
@@ -49,7 +53,7 @@ fun TT.Companion.fromJson(jsonObject: JSONObject, profileUtil: ProfileUtil): TT?
         highTarget = high,
         isValid = isValid
     )
-    tt.ids.nightscoutId = id
+    tt.ids.nightscoutId = nsId
     return tt
 }
 
