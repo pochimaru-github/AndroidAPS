@@ -512,7 +512,12 @@ class NSClientV3Plugin @Inject constructor(
         return false
     }
 
-private suspend fun dbOperationEntries(collection: String = "entries", dataPair: DataSyncSelector.PairGlucoseValue, progress: String, operation: Operation): Boolean {
+private suspend fun dbOperationEntries(
+    collection: String = "entries",
+    dataPair: DataSyncSelector.PairGlucoseValue,
+    progress: String,
+    operation: Operation
+): Boolean {
     val client = nsAndroidClient ?: return false
     try {
         val data = dataPair.value.toNSSvgV3()
@@ -538,7 +543,6 @@ private suspend fun dbOperationEntries(collection: String = "entries", dataPair:
             201  -> rxBus.send(EventNSClientNewLog("◄ ADDED", "OK ${dataPair.value.javaClass.simpleName}"))
             400  -> rxBus.send(EventNSClientNewLog("◄ FAIL", "${dataPair.value.javaClass.simpleName} ${result.errorResponse}"))
             404  -> rxBus.send(EventNSClientNewLog("◄ NOT_FOUND", "${dataPair.value.javaClass.simpleName} ${result.errorResponse}"))
-
             else -> {
                 rxBus.send(EventNSClientNewLog("◄ ERROR", "${result.errorResponse} "))
                 return config.ignoreNightscoutV3Errors()
@@ -556,7 +560,12 @@ private suspend fun dbOperationEntries(collection: String = "entries", dataPair:
     }
 }
 
-private suspend fun dbOperationFood(collection: String = "food", dataPair: DataSyncSelector.PairFood, progress: String, operation: Operation): Boolean {
+private suspend fun dbOperationFood(
+    collection: String = "food",
+    dataPair: DataSyncSelector.PairFood,
+    progress: String,
+    operation: Operation
+): Boolean {
     val client = nsAndroidClient ?: return false
     try {
         val data = dataPair.value.toNSFood()
@@ -582,7 +591,6 @@ private suspend fun dbOperationFood(collection: String = "food", dataPair: DataS
             201  -> rxBus.send(EventNSClientNewLog("◄ ADDED", "OK ${dataPair.value.javaClass.simpleName}"))
             400  -> rxBus.send(EventNSClientNewLog("◄ FAIL", "${dataPair.value.javaClass.simpleName} ${result.errorResponse}"))
             404  -> rxBus.send(EventNSClientNewLog("◄ NOT_FOUND", "${dataPair.value.javaClass.simpleName} ${result.errorResponse}"))
-
             else -> {
                 rxBus.send(EventNSClientNewLog("◄ ERROR", "${result.errorResponse} "))
                 return config.ignoreNightscoutV3Errors()
@@ -609,7 +617,6 @@ private suspend fun dbOperationTreatments(
 ): Boolean {
     val client = nsAndroidClient ?: return false
 
-    // 1. when 式の内部で return せず、データオブジェクトを取得（型安全な制御フロー）
     val data = when (dataPair) {
         is DataSyncSelector.PairBolus                  -> dataPair.value.toNSBolus()
         is DataSyncSelector.PairCarbs                  -> dataPair.value.toNSCarbs()
@@ -626,8 +633,6 @@ private suspend fun dbOperationTreatments(
 
     try {
         val id = if (dataPair.value is HasIDs) (dataPair.value as HasIDs).ids.nightscoutId else ""
-        
-        // 元のログ送信処理
         rxBus.send(
             EventNSClientNewLog(
                 when (operation) {
@@ -641,13 +646,11 @@ private suspend fun dbOperationTreatments(
             )
         )
 
-        // 2. メソッド参照（it::createTreatment 等）を使わず直接 API を呼ぶ
         val result = when (operation) {
             Operation.CREATE -> client.createTreatment(data)
             Operation.UPDATE -> client.updateTreatment(data)
         }
 
-        // 元のレスポンスログ判定
         when (result.response) {
             200  -> rxBus.send(EventNSClientNewLog("◄ UPDATED", "OK ${dataPair.value.javaClass.simpleName}"))
             201  -> rxBus.send(EventNSClientNewLog("◄ ADDED", "OK ${dataPair.value.javaClass.simpleName}"))
@@ -659,7 +662,6 @@ private suspend fun dbOperationTreatments(
             }
         }
 
-        // 元の Nightscout ID 保存処理
         result.identifier?.let {
             when (dataPair) {
                 is DataSyncSelector.PairBolus                  -> {
