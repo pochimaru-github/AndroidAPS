@@ -48,6 +48,12 @@ kapt {
 }
 
 dependencies {
+    // 不足しているモジュール依存を追加
+    implementation(project(":nssdk"))
+    implementation(project(":core:utils"))
+    implementation(project(":core:validators"))
+
+    // 既存のモジュール依存
     implementation(project(":core:interfaces"))
     implementation(project(":core:data"))
     implementation(project(":core:objects"))
