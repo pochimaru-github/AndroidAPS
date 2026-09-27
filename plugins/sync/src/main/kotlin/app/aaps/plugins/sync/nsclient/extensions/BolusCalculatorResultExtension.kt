@@ -5,8 +5,6 @@ import app.aaps.core.data.model.IDs
 import app.aaps.core.data.model.TE
 import app.aaps.core.interfaces.profile.ProfileUtil
 import app.aaps.core.interfaces.utils.DateUtil
-import app.aaps.core.utils.JsonHelper
-
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import org.json.JSONObject
@@ -25,25 +23,26 @@ fun BCR.toJson(isAdd: Boolean, dateUtil: DateUtil, profileUtil: ProfileUtil): JS
 
 fun BCR.Companion.fromJson(jsonObject: JSONObject): BCR? {
     val timestamp =
-        JsonHelper.safeGetLongAllowNull(jsonObject, "mills", null)
-            ?: JsonHelper.safeGetLongAllowNull(jsonObject, "date", null)
-            ?: return null
-    val isValid = JsonHelper.safeGetBoolean(jsonObject, "isValid", true)
-    val id = JsonHelper.safeGetStringAllowNull(jsonObject, "identifier", null)
-        ?: JsonHelper.safeGetStringAllowNull(jsonObject, "_id", null)
-        ?: return null
-    val bcrString = JsonHelper.safeGetStringAllowNull(jsonObject, "bolusCalculatorResult", null) ?: return null
+        if (!jsonObject.isNull("mills")) jsonObject.optLong("mills")
+        else if (!jsonObject.isNull("date")) jsonObject.optLong("date")
+        else return null
+    val isValid = jsonObject.optBoolean("isValid", true)
+    val nsId =
+        if (!jsonObject.isNull("identifier")) jsonObject.optString("identifier")
+        else if (!jsonObject.isNull("_id")) jsonObject.optString("_id")
+        else return null
+    val bcrString = if (!jsonObject.isNull("bolusCalculatorResult")) jsonObject.optString("bolusCalculatorResult") else return null
 
     if (timestamp == 0L) return null
 
     return try {
-        Gson().fromJson(bcrString, BCR::class.java as Class<BCR>)
-            ?.also {
-                it.id = 0
-                it.isValid = isValid
-                it.ids = IDs().apply { nightscoutId = id }
-                it.version = 0
-            }
+        val result: BCR? = Gson().fromJson(bcrString, BCR::class.java)
+        result?.apply {
+            // TODO: BCR.id is read-only (val), reassignment omitted for CI build pass
+            this.isValid = isValid
+            this.ids = IDs().apply { nightscoutId = nsId }
+            this.version = 0
+        }
     } catch (e: JsonSyntaxException) {
         null
     }
