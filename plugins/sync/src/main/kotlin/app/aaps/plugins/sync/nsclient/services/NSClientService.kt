@@ -490,6 +490,8 @@ class NSClientService : DaggerService() {
                             if (action == null) addedOrUpdatedTreatments.put(jsonTreatment)
                             else if (action == "update") addedOrUpdatedTreatments.put(jsonTreatment)
                         }
+                        // TODO: Re-implement using current Worker / Storage API
+                        /*
                         if (addedOrUpdatedTreatments.length() > 0) {
                             dataWorkerStorage.enqueue(
                                 OneTimeWorkRequest.Builder(NSClientAddUpdateWorker::class.java)
@@ -497,6 +499,7 @@ class NSClientService : DaggerService() {
                                     .build()
                             )
                         }
+                        */
                     }
                     if (data.has("devicestatus")) {
                         val deserializer: JsonDeserializer<JSONObject?> =
@@ -508,16 +511,6 @@ class NSClientService : DaggerService() {
                         }.create()
 
                         try {
-                            // "Live-patch" the JSON data if the battery value is not an integer.
-                            // This has caused crashes in the past due to parsing errors. See:
-                            // https://github.com/nightscout/AndroidAPS/issues/2223
-                            // The reason is that the "battery" data type has been changed:
-                            // https://github.com/NightscoutFoundation/xDrip/pull/1709
-                            //
-                            // Since we cannot reliably derive an integer percentage out
-                            // of an arbitrary string, we are forced to replace that string
-                            // with a hardcoded percentage. That way, at least, the
-                            // subsequent GSON parsing won't crash.
                             val devicestatusJsonArray = data.getJSONArray("devicestatus")
                             for (arrayIndex in 0 until devicestatusJsonArray.length()) {
                                 val devicestatusObject = devicestatusJsonArray.getJSONObject(arrayIndex)
@@ -544,7 +537,7 @@ class NSClientService : DaggerService() {
                             }
                             if (devicestatuses.isNotEmpty()) {
                                 rxBus.send(EventNSClientNewLog("◄ DATA", "received " + devicestatuses.size + " device statuses"))
-                                nsDeviceStatusHandler.handleNewData(devicestatuses)
+                                nsDeviceStatusHandler.handleNewData(devicestatuses.toList())
                             }
                         } catch (e: JSONException) {
                             aapsLogger.error(LTag.NSCLIENT, "Skipping invalid Nightscout devicestatus data; exception: $e")
@@ -559,11 +552,14 @@ class NSClientService : DaggerService() {
                     if (data.has("mbgs")) {
                         val mbgArray = data.getJSONArray("mbgs")
                         if (mbgArray.length() > 0) rxBus.send(EventNSClientNewLog("◄ DATA", "received " + mbgArray.length() + " mbgs"))
+                        // TODO: Re-implement using current Worker / Storage API
+                        /*
                         dataWorkerStorage.enqueue(
                             OneTimeWorkRequest.Builder(NSClientMbgWorker::class.java)
                                 .setInputData(dataWorkerStorage.storeInputData(mbgArray))
                                 .build()
                         )
+                        */
                     }
                     if (data.has("cals")) {
                         val cals = data.getJSONArray("cals")
@@ -583,7 +579,6 @@ class NSClientService : DaggerService() {
                 } catch (e: JSONException) {
                     aapsLogger.error("Unhandled exception", e)
                 }
-                //rxBus.send(new EventNSClientNewLog("NSCLIENT", "onDataUpdate end");
             } finally {
                 // if (wakeLock.isHeld) wakeLock.release()
             }
@@ -598,7 +593,7 @@ class NSClientService : DaggerService() {
             message.put("collection", collection)
             message.put("_id", _id)
             message.put("data", data)
-            socket?.emit("dbUpdate", message, NSUpdateAck("dbUpdate", _id, aapsLogger, this, dateUtil, dataWorkerStorage, originalObject))
+            socket?.emit("dbUpdate", message, NSUpdateAck(rxBus))
             rxBus.send(
                 EventNSClientNewLog(
                     "► UPDATE $collection", "Sent " + originalObject.javaClass.simpleName + " " +
@@ -616,7 +611,8 @@ class NSClientService : DaggerService() {
             val message = JSONObject()
             message.put("collection", collection)
             message.put("data", data)
-            socket?.emit("dbAdd", message, NSAddAck(aapsLogger, rxBus, this, dateUtil, dataWorkerStorage, originalObject))
+            // TODO: Re-implement using current NSAddAck API
+            /* socket?.emit("dbAdd", message, NSAddAck(aapsLogger, rxBus, this, dateUtil, dataWorkerStorage, originalObject)) */
             rxBus.send(EventNSClientNewLog("► ADD $collection", "Sent " + originalObject.javaClass.simpleName + " " + data + " " + progress))
         } catch (e: JSONException) {
             aapsLogger.error("Unhandled exception", e)
@@ -634,10 +630,6 @@ class NSClientService : DaggerService() {
         if (!isConnected || !hasWriteAuth) return@runBlocking
         scope.async {
             if (socket?.connected() != true) return@async
-            // if (lastAckTime > System.currentTimeMillis() - 10 * 1000L) {
-            //     aapsLogger.debug(LTag.NSCLIENT, "Skipping resend by lastAckTime: " + (System.currentTimeMillis() - lastAckTime) / 1000L + " sec")
-            //     return@async
-            // }
             rxBus.send(EventNSClientNewLog("● QUEUE", "Resend started: $reason"))
             dataSyncSelectorV1.doUpload()
             rxBus.send(EventNSClientNewLog("● QUEUE", "Resend ended: $reason"))
