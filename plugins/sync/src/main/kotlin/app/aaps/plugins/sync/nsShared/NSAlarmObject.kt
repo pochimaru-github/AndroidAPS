@@ -1,7 +1,8 @@
 package app.aaps.plugins.sync.nsShared
 
 import app.aaps.core.interfaces.nsclient.NSAlarm
-import app.aaps.core.utils.JsonHelper
+// TODO: JsonHelper 参照不可のため一時的にコメントアウト (要再実装)
+// import app.aaps.core.utils.JsonHelper
 import org.json.JSONObject
 
 class NSAlarmObject(private var data: JSONObject) : NSAlarm {
@@ -21,29 +22,29 @@ class NSAlarmObject(private var data: JSONObject) : NSAlarm {
 
     override val level: Int
         get() =
-        JsonHelper.safeGetInt(data, "level", 0)
+        data.optInt("level", 0)
 
     override val group: String
         get() =
-        JsonHelper.safeGetString(data, "group", "N/A")
+        data.optString("group", "N/A")
 
     override val title: String
         get() =
-        JsonHelper.safeGetString(data, "title", "N/A")
+        data.optString("title", "N/A")
 
     override val message: String
         get() =
-        JsonHelper.safeGetString(data, "message", "N/A")
+        data.optString("message", "N/A")
 
     override val low: Boolean
         get() =
-        JsonHelper.safeGetString(data, "eventName", "") == "low"
+        data.optString("eventName", "") == "low"
 
     override val high: Boolean
         get() =
-        JsonHelper.safeGetString(data, "eventName", "") == "high"
+        data.optString("eventName", "") == "high"
 
     override val timeAgo: Boolean
         get() =
-        JsonHelper.safeGetString(data, "eventName", "") == "timeago"
+        data.optString("eventName", "") == "timeago"
 }
