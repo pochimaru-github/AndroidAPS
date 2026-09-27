@@ -1,6 +1,7 @@
 package app.aaps.plugins.sync.nsclient.data
 
-import app.aaps.core.utils.JsonHelper
+// TODO: JsonHelper 参照不可のため一時的にコメントアウト (要再実装)
+// import app.aaps.core.utils.JsonHelper
 import org.json.JSONObject
 
 class NSMbg(val json: JSONObject) {
@@ -9,10 +10,10 @@ class NSMbg(val json: JSONObject) {
     var mbg: Double = 0.0
 
     init {
-        date = JsonHelper.safeGetLong(json, "mills")
-        mbg = JsonHelper.safeGetDouble(json, "mgdl")
+        date = json.optLong("mills", 0L)
+        mbg = json.optDouble("mgdl", 0.0)
     }
 
-    fun id(): String? = JsonHelper.safeGetStringAllowNull(json, "_id", null)
+    fun id(): String? = if (json.has("_id") && !json.isNull("_id")) json.optString("_id") else null
     fun isValid(): Boolean = date != 0L && mbg != 0.0
 }
