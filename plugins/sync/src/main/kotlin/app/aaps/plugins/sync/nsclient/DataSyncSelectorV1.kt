@@ -13,8 +13,6 @@ import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.LongNonKey
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.core.utils.JsonHelper
-import app.aaps.core.utils.waitMillis
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiQueue
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiStatus
 import app.aaps.plugins.sync.nsShared.extensions.onlyNsIdAdded
@@ -26,6 +24,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private fun Any.waitMillis(millis: Long) {
+    try {
+        (this as java.lang.Object).wait(millis)
+    } catch (_: InterruptedException) {
+    }
+}
 
 @Singleton
 class DataSyncSelectorV1 @Inject constructor(
@@ -792,8 +797,8 @@ class DataSyncSelectorV1 @Inject constructor(
             if (activePlugin.activeProfileSource.profile?.allProfilesValid != true) return
             val profileStore = activePlugin.activeProfileSource.profile
             val profileJson = profileStore?.getData() ?: return
-            // add for v3
-            if (JsonHelper.safeGetLongAllowNull(profileJson, "date") == null)
+            // TODO: Replaced JsonHelper with JSONObject opt check for CI build pass
+            if (!profileJson.has("date") || profileJson.isNull("date"))
                 profileJson.put("date", profileStore.getStartDate())
             val dataPair = DataSyncSelector.PairProfileStore(profileJson, dateUtil.now())
             activePlugin.activeNsClient?.nsAdd("profile", dataPair, "")
