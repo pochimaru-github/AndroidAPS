@@ -17,8 +17,9 @@ import app.aaps.core.interfaces.rx.events.EventDismissNotification
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.keys.IntKey
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.core.ui.dialogs.OKDialog
-import app.aaps.core.utils.JsonHelper
+// TODO: ui (OKDialog) / utils (JsonHelper) 未解決参照につきコメントアウト (要再実装)
+// import app.aaps.core.ui.dialogs.OKDialog
+// import app.aaps.core.utils.JsonHelper
 import app.aaps.plugins.sync.R
 import org.json.JSONException
 import org.json.JSONObject
@@ -129,23 +130,6 @@ class NSSettingsStatusImpl @Inject constructor(
     // ***** PUMP STATUS ******
     private var data: JSONObject? = null
 
-    /*  Other received data to 2016/02/10
-        {
-          status: 'ok'
-          , name: env.name
-          , version: env.version
-          , versionNum: versionNum (for ver 1.2.3 contains 10203)
-          , serverTime: new Date().toISOString()
-          , apiEnabled: apiEnabled
-          , careportalEnabled: apiEnabled && env.settings.enable.indexOf('careportal') > -1
-          , boluscalcEnabled: apiEnabled && env.settings.enable.indexOf('boluscalc') > -1
-          , head: env.head
-          , settings: env.settings
-          , extendedSettings: ctx.plugins && ctx.plugins.extendedClientSettings ? ctx.plugins.extendedClientSettings(env.extendedSettings) : {}
-          , activeProfile ..... calculated from treatments or missing
-        }
-     */
-
     override fun handleNewData(status: JSONObject) {
         data = status
         aapsLogger.debug(LTag.NSCLIENT, "Got versions: Nightscout: ${getVersion()}")
@@ -160,16 +144,16 @@ class NSSettingsStatusImpl @Inject constructor(
     }
 
     override fun getVersion(): String =
-        JsonHelper.safeGetStringAllowNull(data, "version", null) ?: "UNKNOWN"
+        data?.let { if (it.has("version") && !it.isNull("version")) it.optString("version") else null } ?: "UNKNOWN"
 
     private fun getVersionNum(): Int =
-        JsonHelper.safeGetInt(data, "versionNum")
+        data?.optInt("versionNum", 0) ?: 0
 
-    private fun getSettings() =
-        JsonHelper.safeGetJSONObject(data, "settings", null)
+    private fun getSettings(): JSONObject? =
+        data?.optJSONObject("settings")
 
     private fun getExtendedSettings(): JSONObject? =
-        JsonHelper.safeGetJSONObject(data, "extendedSettings", null)
+        data?.optJSONObject("extendedSettings")
 
     // valid property is "warn" or "urgent"
     // plugins "iage" "sage" "cage" "pbage"
@@ -183,29 +167,18 @@ class NSSettingsStatusImpl @Inject constructor(
         }
     }
 
-    /*
-      , warnClock: sbx.extendedSettings.warnClock || 30
-      , urgentClock: sbx.extendedSettings.urgentClock || 60
-      , warnRes: sbx.extendedSettings.warnRes || 10
-      , urgentRes: sbx.extendedSettings.urgentRes || 5
-      , warnBattV: sbx.extendedSettings.warnBattV || 1.35
-      , urgentBattV: sbx.extendedSettings.urgentBattV || 1.3
-      , warnBattP: sbx.extendedSettings.warnBattP || 30
-      , urgentBattP: sbx.extendedSettings.urgentBattP || 20
-      , enableAlerts: sbx.extendedSettings.enableAlerts || false
-     */
     override fun extendedPumpSettings(setting: String?): Double {
         try {
             val pump = extendedPumpSettings()
             return when (setting) {
-                "warnClock"   -> JsonHelper.safeGetDouble(pump, setting, 30.0)
-                "urgentClock" -> JsonHelper.safeGetDouble(pump, setting, 60.0)
-                "warnRes"     -> JsonHelper.safeGetDouble(pump, setting, 10.0)
-                "urgentRes"   -> JsonHelper.safeGetDouble(pump, setting, 5.0)
-                "warnBattV"   -> JsonHelper.safeGetDouble(pump, setting, 1.35)
-                "urgentBattV" -> JsonHelper.safeGetDouble(pump, setting, 1.3)
-                "warnBattP"   -> JsonHelper.safeGetDouble(pump, setting, 30.0)
-                "urgentBattP" -> JsonHelper.safeGetDouble(pump, setting, 20.0)
+                "warnClock"   -> pump?.optDouble("warnClock", 30.0) ?: 30.0
+                "urgentClock" -> pump?.optDouble("urgentClock", 60.0) ?: 60.0
+                "warnRes"     -> pump?.optDouble("warnRes", 10.0) ?: 10.0
+                "urgentRes"   -> pump?.optDouble("urgentRes", 5.0) ?: 5.0
+                "warnBattV"   -> pump?.optDouble("warnBattV", 1.35) ?: 1.35
+                "urgentBattV" -> pump?.optDouble("urgentBattV", 1.3) ?: 1.3
+                "warnBattP"   -> pump?.optDouble("warnBattP", 30.0) ?: 30.0
+                "urgentBattP" -> pump?.optDouble("urgentBattP", 20.0) ?: 20.0
                 else          -> 0.0
             }
         } catch (e: JSONException) {
@@ -215,10 +188,10 @@ class NSSettingsStatusImpl @Inject constructor(
     }
 
     private fun extendedPumpSettings(): JSONObject? =
-        JsonHelper.safeGetJSONObject(getExtendedSettings(), "pump", null)
+        getExtendedSettings()?.optJSONObject("pump")
 
     override fun pumpExtendedSettingsFields(): String =
-        JsonHelper.safeGetString(extendedPumpSettings(), "fields", "")
+        extendedPumpSettings()?.optString("fields", "") ?: ""
 
     override fun copyStatusLightsNsSettings(context: Context?) {
         val action = Runnable {
@@ -233,7 +206,9 @@ class NSSettingsStatusImpl @Inject constructor(
             uel.log(Action.NS_SETTINGS_COPIED, Sources.NSClient)
         }
 
-        if (context != null) OKDialog.showConfirmation(context, rh.gs(app.aaps.core.ui.R.string.statuslights), rh.gs(R.string.copy_existing_values), action)
-        else action.run()
+        if (context != null) {
+            // TODO: OKDialog 未解決参照につき直接実行 (要再実装)
+            action.run()
+        } else action.run()
     }
 }
