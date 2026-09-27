@@ -1,6 +1,7 @@
 package app.aaps.plugins.sync.nsShared
 
-import app.aaps.core.utils.JsonHelper
+// TODO: JsonHelper 参照不可のため一時的にコメントアウト (要再実装)
+// import app.aaps.core.utils.JsonHelper
 import org.json.JSONObject
 
 /**
@@ -11,18 +12,18 @@ import org.json.JSONObject
 class NSSgv(val data: JSONObject) {
 
     val mgdl: Int?
-        get() = JsonHelper.safeGetIntAllowNull(data, "mgdl")
+        get() = if (data.has("mgdl") && !data.isNull("mgdl")) data.optInt("mgdl") else null
     val filtered: Int?
-        get() = JsonHelper.safeGetIntAllowNull(data, "filtered")
+        get() = if (data.has("filtered") && !data.isNull("filtered")) data.optInt("filtered") else null
     val noise: Int?
-        get() = JsonHelper.safeGetIntAllowNull(data, "noise")
+        get() = if (data.has("noise") && !data.isNull("noise")) data.optInt("noise") else null
     val mills: Long?
-        get() = JsonHelper.safeGetLongAllowNull(data, "mills")
+        get() = if (data.has("mills") && !data.isNull("mills")) data.optLong("mills") else null
     val device: String?
-        get() = JsonHelper.safeGetStringAllowNull(data, "device", null)
+        get() = if (data.has("device") && !data.isNull("device")) data.optString("device") else null
     val direction: String?
-        get() = JsonHelper.safeGetStringAllowNull(data, "direction", null)
+        get() = if (data.has("direction") && !data.isNull("direction")) data.optString("direction") else null
     val id: String?
-        get() = JsonHelper.safeGetStringAllowNull(data, "_id", null)
+        get() = if (data.has("_id") && !data.isNull("_id")) data.optString("_id") else null
 
 }
