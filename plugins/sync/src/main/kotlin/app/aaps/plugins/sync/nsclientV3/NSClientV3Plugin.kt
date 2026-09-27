@@ -104,6 +104,7 @@ import kotlinx.serialization.json.Json
 import java.security.InvalidParameterException
 import javax.inject.Inject
 import javax.inject.Singleton
+import app.aaps.plugins.sync.nsclientV3.models.LastModified
 
 @Singleton
 class NSClientV3Plugin @Inject constructor(
@@ -210,7 +211,6 @@ class NSClientV3Plugin @Inject constructor(
 
         // 型引数 <LastModified> を明示します
         lastLoadedSrvModified = Json.decodeFromString<LastModified>(preferences.get(NsclientStringKey.V3LastModified))
-
         setClient()
 
         receiverDelegate.grabReceiversState()
