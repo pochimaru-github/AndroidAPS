@@ -1,6 +1,8 @@
 package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
+import app.aaps.core.interfaces.logging.AapsLogger
+import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.ActionData
 // import app.aaps.core.interfaces.Automation // TODO: 現行 Automation インターフェースへ適合・再実装
 // import app.aaps.core.interfaces.ConfigBuilder // TODO: 現行 ConfigBuilder インターフェースへ適合・再実装
