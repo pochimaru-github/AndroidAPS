@@ -87,6 +87,9 @@ dependencies {
     implementation(libs.com.google.dagger.android)
     implementation(libs.com.google.dagger.android.support)
 
+    implementation(project(":core:logging")) // ★ AapsLogger を参照するために追加
+    implementation(project(":core:interfaces")) // ★ 追加されていない場合は併せて追加
+
     // Annotation Processors (KAPT)
     kapt(libs.com.google.dagger.compiler)
     kapt(libs.com.google.dagger.android.processor)
