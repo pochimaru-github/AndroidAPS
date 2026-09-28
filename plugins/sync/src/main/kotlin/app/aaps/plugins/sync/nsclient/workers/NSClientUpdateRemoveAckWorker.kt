@@ -47,7 +47,7 @@ class NSClientUpdateRemoveAckWorker(
             return Result.failure(workDataOf("Error" to "missing input data (DataWorkerStorage disabled)"))
         }
 
-        // new room way
+        /* TODO: 現行 Ack / DataSyncSelector 型へ適合・再実装
         when (ack.originalObject) {
             is PairTemporaryTarget        -> {
                 val pair = ack.originalObject
@@ -134,6 +134,7 @@ class NSClientUpdateRemoveAckWorker(
             }
         }
         ack.originalObject?.let { synchronized(it) { it.notifyAll() } }
+        */
         return ret
     }
 }
