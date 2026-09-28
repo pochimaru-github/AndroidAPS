@@ -107,10 +107,11 @@ class TidepoolFragment : DaggerFragment(), MenuProvider {
 
     private fun updateGui() {
         tidepoolPlugin.updateLog()
-        _binding?.log?.text = tidepoolPlugin.textLog
-        _binding?.status?.text = authFlowOut.connectionStatus.name
-        _binding?.log?.text = tidepoolPlugin.textLog
-        _binding?.logScrollview?.fullScroll(ScrollView.FOCUS_DOWN)
+        _binding?.let { binding ->
+            binding.log.text = tidepoolPlugin.textLog
+            binding.status.text = authFlowOut.connectionStatus.name
+            binding.logScrollview.fullScroll(ScrollView.FOCUS_DOWN)
+        }
     }
 
     @Synchronized
