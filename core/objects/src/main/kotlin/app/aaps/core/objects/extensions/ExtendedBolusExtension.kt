@@ -57,10 +57,12 @@ fun EB.iobCalc(time: Long, profile: Profile, insulinInterface: Insulin): IobTota
             val calcDate = (timestamp + j * spacing * 60 * 1000 + 0.5 * spacing * 60 * 1000).toLong()
             if (calcDate > diaAgo && calcDate <= time) {
                 val tempBolusSize: Double = rate * spacing / 60.0
+                // 修正後（62〜66行目 および 112〜116行目の両方を変更）
                 val tempBolusPart = BS(
                     timestamp = calcDate,
                     amount = tempBolusSize,
-                    type = BS.Type.NORMAL
+                    type = BS.Type.NORMAL,
+                    isValid = isValid // ★ 引数を追加（モデル定義に合わせて適合）
                 )
                 val aIOB = insulinInterface.iobCalcForTreatment(tempBolusPart, time, dia)
                 result.iob += aIOB.iobContrib
@@ -106,10 +108,12 @@ fun EB.iobCalc(
             netBasalRate = rate - basalRateCorrection
             if (calcDate > diaAgo && calcDate <= time) {
                 val tempBolusSize = netBasalRate * spacing / 60.0
+                // 修正後（62〜66行目 および 112〜116行目の両方を変更）
                 val tempBolusPart = BS(
                     timestamp = calcDate,
                     amount = tempBolusSize,
-                    type = BS.Type.NORMAL
+                    type = BS.Type.NORMAL,
+                    isValid = isValid // ★ 引数を追加（モデル定義に合わせて適合）
                 )
                 val aIOB = insulinInterface.iobCalcForTreatment(tempBolusPart, time, dia)
                 result.iob += aIOB.iobContrib
