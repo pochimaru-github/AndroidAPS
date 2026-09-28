@@ -42,6 +42,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
 import javax.inject.Singleton
+import app.aaps.core.shared.utils.safeQueryBroadcastReceivers
 
 @Singleton
 class WearPlugin @Inject constructor(
