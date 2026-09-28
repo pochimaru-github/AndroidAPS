@@ -98,17 +98,17 @@ class WearPlugin @Inject constructor(
             .toObservable(EventPreferenceChange::class.java)
             .observeOn(aapsSchedulers.io)
             .subscribe({
-                           dataHandlerMobile.resendData("EventPreferenceChange")
+                           dataHandlerMobile.resendData() // ★ 引数 "EventPreferenceChange" を削除
                            checkCustomWatchfacePreferences()
                        }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventAutosensCalculationFinished::class.java)
             .observeOn(aapsSchedulers.io)
-            .subscribe({ dataHandlerMobile.resendData("EventAutosensCalculationFinished") }, fabricPrivacy::logException)
+            .subscribe({ dataHandlerMobile.resendData() }, fabricPrivacy::logException) // ★ 引数 "EventAutosensCalculationFinished" を削除
         disposable += rxBus
             .toObservable(EventLoopUpdateGui::class.java)
             .observeOn(aapsSchedulers.io)
-            .subscribe({ dataHandlerMobile.resendData("EventLoopUpdateGui") }, fabricPrivacy::logException)
+            .subscribe({ dataHandlerMobile.resendData() }, fabricPrivacy::logException) // ★ 引数 "EventLoopUpdateGui" を削除
         disposable += rxBus
             .toObservable(EventWearUpdateTiles::class.java)
             .observeOn(aapsSchedulers.io)
