@@ -228,7 +228,7 @@ class NSClientV3Service : DaggerService() {
             nsClientV3Plugin.storeLastLoadedSrvModified()
         }
         when (collection) {
-            "devicestatus" -> docString.toNSDeviceStatus().let { nsDeviceStatusHandler.handleNewData(arrayOf(it)) }
+            "devicestatus" -> docString.toNSDeviceStatus()?.let { nsDeviceStatusHandler.handleNewData(listOf(it)) }
             "entries"      -> docString.toNSSgvV3()?.let {
                 nsIncomingDataProcessor.processSgvs(listOf(it), doFullSync = false)
                 storeDataForDb.storeGlucoseValuesToDb()
