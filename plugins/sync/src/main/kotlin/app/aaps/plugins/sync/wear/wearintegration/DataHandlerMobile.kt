@@ -2,6 +2,7 @@ package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
 import app.aaps.core.interfaces.AapsLogger
+import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.ActionData
 // import app.aaps.core.interfaces.Automation // TODO: 現行 Automation インターフェースへ適合・再実装
 // import app.aaps.core.interfaces.ConfigBuilder // TODO: 現行 ConfigBuilder インターフェースへ適合・再実装
@@ -50,7 +51,9 @@ import javax.inject.Singleton
 @Singleton
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
-    private val rxBus: RxBus
+    private val rxBus: RxBus,
+    private val aapsLogger: AapsLogger,
+    private val rh: ResourceHelper
     // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
     // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
     // private val profileFunction: ProfileFunction, // TODO: 現行 Profile インターフェースに適合・再実装
@@ -58,7 +61,7 @@ class DataHandlerMobile @Inject constructor(
     // private val nsClient: NSClient, // TODO: 現行 NSClient インターフェースに適合・再実装
     // private val tdd: TDD, // TODO: 現行 TDD インターフェースに適合・再実装
     // private val automation: Automation // TODO: 現行 Automation インターフェースに適合・再実装
-) : PluginBase(PluginType.SYNC) {
+) : PluginBase(PluginType.SYNC, aapsLogger = aapsLogger, rh = rh) {
 
     private val disposable = CompositeDisposable()
     private var lastSendTime = 0L
