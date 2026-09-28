@@ -75,6 +75,7 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import app.aaps.core.shared.utils.safeQueryBroadcastReceivers
 
 @Singleton
 class XdripPlugin @Inject constructor(
