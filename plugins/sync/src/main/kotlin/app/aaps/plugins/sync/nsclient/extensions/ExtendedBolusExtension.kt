@@ -42,23 +42,23 @@ fun EB.toRealJson(isAdd: Boolean, dateUtil: DateUtil): JSONObject =
 
 fun EB.Companion.extendedBolusFromJson(jsonObject: JSONObject): EB? {
     val timestamp =
-        JsonHelper.safeGetLongAllowNull(jsonObject, "mills")
-            ?: JsonHelper.safeGetLongAllowNull(jsonObject, "date")
+        JsonHelper.safeGetLongAllowNull(jsonObject, "mills", null)
+            ?: JsonHelper.safeGetLongAllowNull(jsonObject, "date", null)
             ?: return null
-    if (JsonHelper.safeGetIntAllowNull(jsonObject, "splitNow") != 0) return null
-    if (JsonHelper.safeGetIntAllowNull(jsonObject, "splitExt") != 100) return null
-    val amount = JsonHelper.safeGetDoubleAllowNull(jsonObject, "enteredinsulin") ?: return null
-    val duration = JsonHelper.safeGetLongAllowNull(jsonObject, "duration") ?: return null
-    val durationInMilliseconds = JsonHelper.safeGetLongAllowNull(jsonObject, "durationInMilliseconds")
+    if (JsonHelper.safeGetIntAllowNull(jsonObject, "splitNow", null) != 0) return null
+    if (JsonHelper.safeGetIntAllowNull(jsonObject, "splitExt", null) != 100) return null
+    val amount = JsonHelper.safeGetDoubleAllowNull(jsonObject, "enteredinsulin", null) ?: return null
+    val duration = JsonHelper.safeGetLongAllowNull(jsonObject, "duration", null) ?: return null
+    val durationInMilliseconds = JsonHelper.safeGetLongAllowNull(jsonObject, "durationInMilliseconds", null)
     val isValid = JsonHelper.safeGetBoolean(jsonObject, "isValid", true)
     val isEmulatingTempBasal = JsonHelper.safeGetBoolean(jsonObject, "isEmulatingTempBasal", false)
-    val id = JsonHelper.safeGetStringAllowNull(jsonObject, "identifier")
-        ?: JsonHelper.safeGetStringAllowNull(jsonObject, "_id")
+    val id = JsonHelper.safeGetStringAllowNull(jsonObject, "identifier", null)
+        ?: JsonHelper.safeGetStringAllowNull(jsonObject, "_id", null)
         ?: return null
-    val pumpId = JsonHelper.safeGetLongAllowNull(jsonObject, "pumpId")
-    val endPumpId = JsonHelper.safeGetLongAllowNull(jsonObject, "endId")
-    val pumpType = PumpType.fromString(JsonHelper.safeGetStringAllowNull(jsonObject, "pumpType"))
-    val pumpSerial = JsonHelper.safeGetStringAllowNull(jsonObject, "pumpSerial")
+    val pumpId = JsonHelper.safeGetLongAllowNull(jsonObject, "pumpId", null)
+    val endPumpId = JsonHelper.safeGetLongAllowNull(jsonObject, "endId", null)
+    val pumpType = PumpType.fromString(JsonHelper.safeGetStringAllowNull(jsonObject, "pumpType", null))
+    val pumpSerial = JsonHelper.safeGetStringAllowNull(jsonObject, "pumpSerial", null)
 
     if (timestamp == 0L) return null
     if (duration == 0L && durationInMilliseconds == 0L) return null
