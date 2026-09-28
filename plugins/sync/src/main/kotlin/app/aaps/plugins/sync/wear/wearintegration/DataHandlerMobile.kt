@@ -52,8 +52,8 @@ import javax.inject.Singleton
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    private val aapsLogger: AapsLogger,
-    private val rh: ResourceHelper
+    private val aapsLogger: app.aaps.core.interfaces.logging.AapsLogger, // ★ フルパッケージ指定
+    private val rh: app.aaps.core.interfaces.resources.ResourceHelper
     // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
     // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
     // private val profileFunction: ProfileFunction, // TODO: 現行 Profile インターフェースに適合・再実装
