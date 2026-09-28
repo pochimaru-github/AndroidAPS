@@ -48,6 +48,12 @@ kapt {
 }
 
 dependencies {
+    // AndroidX Browser (OHLoginActivity 用)
+    implementation("androidx.browser:browser:1.8.0")
+    
+    // AppAuth (AuthFlowIn / Tidepool 用)
+    implementation("net.openid:appauth:0.11.1")
+
     // 追加：不足していた core 配下のモジュール依存
     implementation(project(":core:nssdk"))
     implementation(project(":core:utils"))
