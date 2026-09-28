@@ -38,7 +38,7 @@ class LoadDeviceStatusWorker(
             aapsLogger.debug("DEVICESTATUSES: $deviceStatuses")
             if (deviceStatuses.isNotEmpty()) {
                 rxBus.send(EventNSClientNewLog("◄ RCV", "${deviceStatuses.size} DSs from ${dateUtil.dateAndTimeAndSecondsString(from)}"))
-                nsDeviceStatusHandler.handleNewData(deviceStatuses.toTypedArray())
+                nsDeviceStatusHandler.handleNewData(deviceStatuses.toList())
                 rxBus.send(EventNSClientNewLog("● DONE PROCESSING DS", ""))
             } else {
                 rxBus.send(EventNSClientNewLog("◄ RCV DS END", "No data from ${dateUtil.dateAndTimeAndSecondsString(from)}"))
