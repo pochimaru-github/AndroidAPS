@@ -2,23 +2,23 @@ package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
 import app.aaps.core.interfaces.resources.ResourceHelper
+import app.aaps.core.plugins.PluginBase
+import app.aaps.core.data.model.PluginType
+import app.aaps.core.interfaces.rx.bus.RxBus
+import app.aaps.core.utils.AapsLogger
+import com.google.android.gms.wearable.DataMap
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/* TODO: 現行型定義および依存パッケージ復旧時に再有効化
 import app.aaps.core.interfaces.ActionData
-// import app.aaps.core.interfaces.Automation // TODO: 現行 Automation インターフェースへ適合・再実装
-// import app.aaps.core.interfaces.ConfigBuilder // TODO: 現行 ConfigBuilder インターフェースへ適合・再実装
-// import app.aaps.core.interfaces.NSClient // TODO: 現行 NSClient インターフェースへ適合・再実装
-// import app.aaps.core.interfaces.PersistenceLayer // TODO: 現行 DB/Repository インターフェースへ適合・再実装
-// import app.aaps.core.interfaces.ProfileFunction // TODO: 現行 Profile インターフェースへ適合・再実装
 import app.aaps.core.interfaces.Pump
 import app.aaps.core.interfaces.PumpEnactResult
-// import app.aaps.core.interfaces.TDD // TODO: 現行 TDD インターフェースへ適合・再実装
 import app.aaps.core.interfaces.TherapyEngine
-// import app.aaps.core.interfaces.Treatments // TODO: 現行 Treatments インターフェースへ適合・再実装
 import app.aaps.core.interfaces.Wear
 import app.aaps.core.interfaces.logging.L
 import app.aaps.core.interfaces.objectMapper
-import app.aaps.core.interfaces.plugin.PluginBase
-import app.aaps.core.interfaces.plugin.PluginType
-import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.bus.RxBusWearData
 import app.aaps.core.interfaces.wear.WearPath
 import app.aaps.core.units.GlucoseUnit
@@ -30,28 +30,14 @@ import app.aaps.core.utils.SafeParse
 import app.aaps.database.entities.HeartRate
 import app.aaps.database.entities.StepsRate
 import app.aaps.plugins.sync.wear.wearintegration.WearDataService.Companion.SYNC_KEY
-import com.google.android.gms.wearable.DataMap
-import com.google.android.gms.wearable.Node
-import com.google.android.gms.wearable.PutDataMapRequest
-import com.google.android.gms.wearable.Wearable
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.plusAssign
-import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.schedulers.Schedulers
-import java.io.File
-import java.io.FileOutputStream
-import java.lang.reflect.Type
-import java.util.Date
-import javax.inject.Inject
-import javax.inject.Singleton
+*/
 
 @Singleton
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    private val rh: ResourceHelper
+    override val rh: ResourceHelper,
+    aapsLogger: AapsLogger
     // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
     // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
     // private val profileFunction: ProfileFunction, // TODO: 現行 Profile インターフェースに適合・再実装
@@ -59,17 +45,20 @@ class DataHandlerMobile @Inject constructor(
     // private val nsClient: NSClient, // TODO: 現行 NSClient インターフェースに適合・再実装
     // private val tdd: TDD, // TODO: 現行 TDD インターフェースに適合・再実装
     // private val automation: Automation // TODO: 現行 Automation インターフェースに適合・再実装
-) : PluginBase(PluginType.SYNC, rh = rh) {
+) : PluginBase(PluginType.SYNC, aapsLogger) {
 
     private val disposable = CompositeDisposable()
     private var lastSendTime = 0L
 
     init {
+        /* TODO: RxBusWearData および WearPath の型適合完了後に再有効化
         disposable += rxBus.register(RxBusWearData::class.java) { event ->
             handleWearData(event)
         }
+        */
     }
 
+    /* TODO: WearPath および L (ロガー) 適合後に再有効化
     private fun handleWearData(event: RxBusWearData) {
         val path = event.path
         val dataMap = event.dataMap
@@ -100,6 +89,7 @@ class DataHandlerMobile @Inject constructor(
             else -> L.w(L.WEAR, "Unknown path: $path")
         }
     }
+    */
 
     private fun handleBolusPreCheck(dataMap: DataMap) {
         // Implementation for Bolus PreCheck
@@ -210,7 +200,7 @@ class DataHandlerMobile @Inject constructor(
         // Core treatments sync logic
     }
 
-    override fun onCleanUp() {
+    fun onCleanUp() {
         disposable.clear()
     }
 }
