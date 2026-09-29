@@ -2,6 +2,7 @@ package app.aaps.plugins.sync.tizen
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.os.Bundle
 import app.aaps.core.data.plugin.PluginType
@@ -36,7 +37,6 @@ import app.aaps.core.objects.extensions.durationInMinutes
 import app.aaps.core.objects.extensions.round
 import app.aaps.core.objects.extensions.toStringFull
 import app.aaps.plugins.sync.R
-import app.aaps.shared.impl.extensions.safeQueryBroadcastReceivers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
@@ -201,5 +201,14 @@ class TizenPlugin @Inject constructor(
                 context.sendBroadcast(intent)
                 aapsLogger.debug(LTag.CORE, "Sending broadcast " + intent.action + " to: " + it)
             }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun PackageManager.safeQueryBroadcastReceivers(intent: Intent, flags: Int): List<ResolveInfo> {
+        return try {
+            queryBroadcastReceivers(intent, flags)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 }
