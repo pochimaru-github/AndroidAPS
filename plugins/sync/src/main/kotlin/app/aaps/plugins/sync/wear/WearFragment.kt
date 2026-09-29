@@ -18,7 +18,7 @@ import app.aaps.core.interfaces.rx.events.EventWearUpdateGui
 import app.aaps.core.interfaces.rx.weardata.CwfMetadataKey
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.core.ui.fragments.TranslatedDaggerFragment
+import app.aaps.core.ui.fragments.TranslatedFragment
 import app.aaps.plugins.sync.R
 import app.aaps.plugins.sync.databinding.WearFragmentBinding
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -35,7 +35,7 @@ class WearFragment @Inject constructor(
     private val aapsSchedulers: AapsSchedulers,
     private val fabricPrivacy: FabricPrivacy,
     private val wearPlugin: WearPlugin
-) : TranslatedDaggerFragment(
+) : TranslatedFragment(
     PluginDescription()
         .mainType(PluginType.SYNC)
         .fragmentClass(WearFragment::class.java.name)
