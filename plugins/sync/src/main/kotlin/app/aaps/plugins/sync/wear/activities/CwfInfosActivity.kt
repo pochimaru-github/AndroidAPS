@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import app.aaps.core.interfaces.logging.AAPSLogger
-import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.AapsSchedulers
 import app.aaps.core.interfaces.rx.bus.RxBus
@@ -19,10 +18,6 @@ import app.aaps.core.interfaces.rx.events.EventWearUpdateGui
 import app.aaps.core.interfaces.rx.weardata.CUSTOM_VERSION
 import app.aaps.core.interfaces.rx.weardata.CwfMetadataKey
 import app.aaps.core.interfaces.rx.weardata.CwfMetadataMap
-import app.aaps.core.interfaces.rx.weardata.JsonKeyValues
-import app.aaps.core.interfaces.rx.weardata.JsonKeys
-import app.aaps.core.interfaces.rx.weardata.ViewKeys
-import app.aaps.core.interfaces.rx.weardata.ZipWatchfaceFormat
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.interfaces.versionChecker.VersionCheckerUtils
 import app.aaps.core.keys.BooleanKey
@@ -35,7 +30,6 @@ import app.aaps.plugins.sync.databinding.CwfInfosActivityViewItemBinding
 import app.aaps.plugins.sync.wear.WearPlugin
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
-import org.json.JSONObject
 import javax.inject.Inject
 
 class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
@@ -97,13 +91,14 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
         wearPlugin.savedCustomWatchface?.let {
             val cwfAuthorization = preferences.get(BooleanKey.WearCustomWatchfaceAuthorization)
             val metadata = it.metadata
-            val drawable = it.resData["custom_watchface.png"]?.toDrawable(resources)
+            val drawable = (it.resData["custom_watchface.png"] as? ByteArray)?.toDrawable(resources)
             binding.customWatchface.setImageDrawable(drawable)
             title = rh.gs(CwfMetadataKey.CWF_NAME.label, metadata[CwfMetadataKey.CWF_NAME])
             metadata[CwfMetadataKey.CWF_AUTHOR_VERSION]?.let { authorVersion ->
                 title = "${metadata[CwfMetadataKey.CWF_NAME]} ($authorVersion)"
             }
-            val fileName = metadata[CwfMetadataKey.CWF_FILENAME]?.let { "$it${ZipWatchfaceFormat.CWF_EXTENSION}" } ?: ""
+            // TODO: Re-implement ZipWatchfaceFormat when available
+            val fileName = metadata[CwfMetadataKey.CWF_FILENAME] ?: ""
             binding.filelistName.text = rh.gs(CwfMetadataKey.CWF_FILENAME.label, fileName)
             binding.author.text = rh.gs(CwfMetadataKey.CWF_AUTHOR.label, metadata[CwfMetadataKey.CWF_AUTHOR] ?: "")
             binding.createdAt.text = rh.gs(CwfMetadataKey.CWF_CREATED_AT.label, metadata[CwfMetadataKey.CWF_CREATED_AT] ?: "")
@@ -135,23 +130,10 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
         return false
     }
 
-    private fun listVisibleView(jsonString: String, allViews: Boolean = false): List<Pair<ViewKeys, Boolean>> {
-        val json = JSONObject(jsonString)
-        val visibleKeyPairs = mutableListOf<Pair<ViewKeys, Boolean>>()
-
-        for (viewKey in ViewKeys.entries) {
-            try {
-                val jsonValue = json.optJSONObject(viewKey.key)
-                if (jsonValue != null) {
-                    val visibility = jsonValue.optString(JsonKeys.VISIBILITY.key) == JsonKeyValues.VISIBLE.key
-                    if (visibility || allViews)
-                        visibleKeyPairs.add(Pair(viewKey, visibility))
-                }
-            } catch (_: Exception) {
-                aapsLogger.debug(LTag.WEAR, "Wrong key in json file: ${viewKey.key}")
-            }
-        }
-        return visibleKeyPairs
+    // TODO: Re-implement listVisibleView using updated Wear data classes
+    @Suppress("UNUSED_PARAMETER")
+    private fun listVisibleView(jsonString: String, allViews: Boolean = false): List<Pair<String, Boolean>> {
+        return emptyList()
     }
 }
 
@@ -187,7 +169,7 @@ class PrefRecyclerViewAdapter(
 }
 
 class ViewRecyclerViewAdapter(
-    private var viewList: List<Pair<ViewKeys, Boolean>>,
+    private var viewList: List<Pair<String, Boolean>>,
     private val rh: ResourceHelper
 ) : RecyclerView.Adapter<ViewRecyclerViewAdapter.CwfViewHolder>() {
 
@@ -204,13 +186,7 @@ class ViewRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: CwfViewHolder, position: Int) {
         holder.itemView.isClickable = false
-        val cwfView = viewList[position]
-        val viewKeyObj: ViewKeys = cwfView.first
-        val keyName: String = viewKeyObj.key
-        val commentResId: Int = viewKeyObj.comment
-
-        holder.binding.viewKey.text = "\"$keyName\":"
-        holder.binding.viewComment.text = rh.gs(commentResId)
+        // TODO: Re-implement ViewKeys binding when Wear data classes are restored
     }
 }
 
