@@ -388,7 +388,7 @@ class XdripPlugin @Inject constructor(
                     dataPair.value.toJson(true, profile, dateUtil)
                 }
 
-                is DataSyncSelector.PairProfileSwitch          -> dataPair.value.toJson(true, decimalFormatter)
+                is DataSyncSelector.PairProfileSwitch          -> dataPair.value.toJson(true, dateUtil, decimalFormatter)
                 is DataSyncSelector.PairEffectiveProfileSwitch -> dataPair.value.toJson(true, dateUtil)
                 is DataSyncSelector.PairRunningMode            -> dataPair.value.toJson(true, dateUtil)
                 else                                           -> null
