@@ -1,11 +1,12 @@
 package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
+import app.aaps.core.data.plugin.PluginType
+import app.aaps.core.interfaces.logging.AAPSLogger
+import app.aaps.core.interfaces.plugin.PluginBase
+import app.aaps.core.interfaces.plugin.PluginDescription
 import app.aaps.core.interfaces.resources.ResourceHelper
-import app.aaps.core.plugins.PluginBase
-import app.aaps.core.data.model.PluginType
 import app.aaps.core.interfaces.rx.bus.RxBus
-import app.aaps.core.utils.AapsLogger
 import com.google.android.gms.wearable.DataMap
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import javax.inject.Inject
@@ -36,8 +37,8 @@ import app.aaps.plugins.sync.wear.wearintegration.WearDataService.Companion.SYNC
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    override val rh: ResourceHelper,
-    aapsLogger: AapsLogger
+    val rh: ResourceHelper,
+    aapsLogger: AAPSLogger
     // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
     // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
     // private val profileFunction: ProfileFunction, // TODO: 現行 Profile インターフェースに適合・再実装
@@ -45,7 +46,7 @@ class DataHandlerMobile @Inject constructor(
     // private val nsClient: NSClient, // TODO: 現行 NSClient インターフェースに適合・再実装
     // private val tdd: TDD, // TODO: 現行 TDD インターフェースに適合・再実装
     // private val automation: Automation // TODO: 現行 Automation インターフェースに適合・再実装
-) : PluginBase(PluginType.SYNC, aapsLogger) {
+) : PluginBase(PluginDescription().mainType(PluginType.SYNC), aapsLogger) {
 
     private val disposable = CompositeDisposable()
     private var lastSendTime = 0L
