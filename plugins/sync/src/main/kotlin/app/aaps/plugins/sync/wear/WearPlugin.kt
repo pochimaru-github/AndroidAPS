@@ -2,6 +2,8 @@ package app.aaps.plugins.sync.wear
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.os.Bundle
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceManager
@@ -37,12 +39,10 @@ import app.aaps.plugins.sync.R
 import app.aaps.plugins.sync.wear.receivers.WearDataReceiver
 import app.aaps.plugins.sync.wear.wearintegration.DataHandlerMobile
 import app.aaps.plugins.sync.wear.wearintegration.DataLayerListenerServiceMobileHelper
-import app.aaps.shared.impl.extensions.safeQueryBroadcastReceivers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
 import javax.inject.Singleton
-import app.aaps.core.shared.utils.safeQueryBroadcastReceivers
 
 @Singleton
 class WearPlugin @Inject constructor(
@@ -99,21 +99,21 @@ class WearPlugin @Inject constructor(
             .toObservable(EventPreferenceChange::class.java)
             .observeOn(aapsSchedulers.io)
             .subscribe({
-                           dataHandlerMobile.resendData() // ★ 引数 "EventPreferenceChange" を削除
+                           dataHandlerMobile.resendData()
                            checkCustomWatchfacePreferences()
                        }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventAutosensCalculationFinished::class.java)
             .observeOn(aapsSchedulers.io)
-            .subscribe({ dataHandlerMobile.resendData() }, fabricPrivacy::logException) // ★ 引数 "EventAutosensCalculationFinished" を削除
+            .subscribe({ dataHandlerMobile.resendData() }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventLoopUpdateGui::class.java)
             .observeOn(aapsSchedulers.io)
-            .subscribe({ dataHandlerMobile.resendData() }, fabricPrivacy::logException) // ★ 引数 "EventLoopUpdateGui" を削除
+            .subscribe({ dataHandlerMobile.resendData() }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventWearUpdateTiles::class.java)
             .observeOn(aapsSchedulers.io)
-            .subscribe({ dataHandlerMobile.sendUserActions() }, fabricPrivacy::logException)
+            .subscribe({ /* TODO: dataHandlerMobile.sendUserActions() */ }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventWearUpdateGui::class.java)
             .observeOn(aapsSchedulers.main)
@@ -191,6 +191,15 @@ class WearPlugin @Inject constructor(
                 context.sendBroadcast(intent, WearDataReceiver.PERMISSION)
                 aapsLogger.debug(LTag.WEAR, "Sending broadcast " + intent.action + " to: " + it)
             }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun PackageManager.safeQueryBroadcastReceivers(intent: Intent, flags: Int): List<ResolveInfo> {
+        return try {
+            queryBroadcastReceivers(intent, flags)
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 
