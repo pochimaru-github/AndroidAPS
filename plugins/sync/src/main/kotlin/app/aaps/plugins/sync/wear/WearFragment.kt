@@ -20,7 +20,6 @@ import app.aaps.core.interfaces.rx.events.EventWearUpdateGui
 import app.aaps.core.interfaces.rx.weardata.CwfData
 import app.aaps.core.interfaces.rx.weardata.CwfMetadataKey
 import app.aaps.core.interfaces.rx.weardata.EventData
-import app.aaps.core.interfaces.rx.weardata.ResFileMap
 import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.ui.extensions.toVisibility
@@ -115,7 +114,7 @@ class WearFragment : DaggerFragment() {
         wearPlugin.savedCustomWatchface?.let {
             wearPlugin.checkCustomWatchfacePreferences()
             binding.customName.text = rh.gs(R.string.wear_custom_watchface, it.metadata[CwfMetadataKey.CWF_NAME])
-            binding.coverChart.setImageDrawable(it.resData[ResFileMap.CUSTOM_WATCHFACE.fileName]?.toDrawable(resources))
+            binding.coverChart.setImageDrawable(it.resData["custom_watchface"]?.toDrawable(resources))
             binding.infosCustom.visibility = View.VISIBLE
         } ?: apply {
             binding.customName.text = rh.gs(R.string.wear_custom_watchface, "")
@@ -130,7 +129,8 @@ class WearFragment : DaggerFragment() {
         wearPlugin.savedCustomWatchface = cwf
     }
 
-    private fun ByteArray.toDrawable(res: Resources): Drawable? {
+    private fun ByteArray?.toDrawable(res: Resources): Drawable? {
+        if (this == null) return null
         return try {
             val bitmap = BitmapFactory.decodeByteArray(this, 0, size)
             BitmapDrawable(res, bitmap)
