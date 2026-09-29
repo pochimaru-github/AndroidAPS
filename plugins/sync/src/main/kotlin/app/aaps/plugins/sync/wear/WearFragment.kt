@@ -17,7 +17,6 @@ import app.aaps.core.interfaces.rx.events.EventWearUpdateGui
 import app.aaps.core.interfaces.rx.weardata.CwfMetadataKey
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.plugins.sync.R
 import app.aaps.plugins.sync.databinding.WearFragmentBinding
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -80,6 +79,8 @@ class WearFragment @Inject constructor(
         wearPlugin.savedCustomWatchface?.let {
             val metadata = it.metadata
             val drawable = (it.resData["custom_watchface.png"] as? ByteArray)?.toDrawable(resources)
+            // TODO: Re-bind layout views when WearFragmentBinding XML IDs are verified
+            /*
             binding.customWatchface.setImageDrawable(drawable)
             var titleText = rh.gs(CwfMetadataKey.CWF_NAME.label, metadata[CwfMetadataKey.CWF_NAME])
             metadata[CwfMetadataKey.CWF_AUTHOR_VERSION]?.let { authorVersion ->
@@ -87,6 +88,7 @@ class WearFragment @Inject constructor(
             }
             binding.cwfTitle.text = titleText
             binding.author.text = rh.gs(CwfMetadataKey.CWF_AUTHOR.label, metadata[CwfMetadataKey.CWF_AUTHOR] ?: "")
+            */
         }
     }
 }
