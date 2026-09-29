@@ -37,7 +37,7 @@ import app.aaps.plugins.sync.wear.wearintegration.WearDataService.Companion.SYNC
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    val rh: ResourceHelper,
+    override val rh: ResourceHelper,
     aapsLogger: AAPSLogger
     // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
     // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
@@ -46,7 +46,7 @@ class DataHandlerMobile @Inject constructor(
     // private val nsClient: NSClient, // TODO: 現行 NSClient インターフェースに適合・再実装
     // private val tdd: TDD, // TODO: 現行 TDD インターフェースに適合・再実装
     // private val automation: Automation // TODO: 現行 Automation インターフェースに適合・再実装
-) : PluginBase(PluginDescription().mainType(PluginType.SYNC), aapsLogger) {
+) : PluginBase(PluginDescription().mainType(PluginType.SYNC), aapsLogger, rh) {
 
     private val disposable = CompositeDisposable()
     private var lastSendTime = 0L
