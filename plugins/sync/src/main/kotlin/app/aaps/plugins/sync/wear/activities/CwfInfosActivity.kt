@@ -1,5 +1,9 @@
 package app.aaps.plugins.sync.wear.activities
 
+import android.content.res.Resources
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +19,10 @@ import app.aaps.core.interfaces.rx.events.EventWearUpdateGui
 import app.aaps.core.interfaces.rx.weardata.CUSTOM_VERSION
 import app.aaps.core.interfaces.rx.weardata.CwfMetadataKey
 import app.aaps.core.interfaces.rx.weardata.CwfMetadataMap
+import app.aaps.core.interfaces.rx.weardata.JsonKeyValues
+import app.aaps.core.interfaces.rx.weardata.JsonKeys
+import app.aaps.core.interfaces.rx.weardata.ViewKeys
+import app.aaps.core.interfaces.rx.weardata.ZipWatchfaceFormat
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.interfaces.versionChecker.VersionCheckerUtils
 import app.aaps.core.keys.BooleanKey
@@ -25,12 +33,6 @@ import app.aaps.plugins.sync.databinding.CwfInfosActivityBinding
 import app.aaps.plugins.sync.databinding.CwfInfosActivityPrefItemBinding
 import app.aaps.plugins.sync.databinding.CwfInfosActivityViewItemBinding
 import app.aaps.plugins.sync.wear.WearPlugin
-import app.aaps.shared.impl.weardata.JsonKeyValues
-import app.aaps.shared.impl.weardata.JsonKeys
-import app.aaps.shared.impl.weardata.ResFileMap
-import app.aaps.shared.impl.weardata.ViewKeys
-import app.aaps.shared.impl.weardata.ZipWatchfaceFormat
-import app.aaps.shared.impl.weardata.toDrawable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import org.json.JSONObject
@@ -95,7 +97,7 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
         wearPlugin.savedCustomWatchface?.let {
             val cwfAuthorization = preferences.get(BooleanKey.WearCustomWatchfaceAuthorization)
             val metadata = it.metadata
-            val drawable = it.resData[ResFileMap.CUSTOM_WATCHFACE.fileName]?.toDrawable(resources)
+            val drawable = it.resData["custom_watchface.png"]?.toDrawable(resources)
             binding.customWatchface.setImageDrawable(drawable)
             title = rh.gs(CwfMetadataKey.CWF_NAME.label, metadata[CwfMetadataKey.CWF_NAME])
             metadata[CwfMetadataKey.CWF_AUTHOR_VERSION]?.let { authorVersion ->
@@ -209,5 +211,15 @@ class ViewRecyclerViewAdapter(
 
         holder.binding.viewKey.text = "\"$keyName\":"
         holder.binding.viewComment.text = rh.gs(commentResId)
+    }
+}
+
+private fun ByteArray?.toDrawable(resources: Resources): Drawable? {
+    if (this == null || isEmpty()) return null
+    return try {
+        val bitmap = BitmapFactory.decodeByteArray(this, 0, size)
+        BitmapDrawable(resources, bitmap)
+    } catch (_: Exception) {
+        null
     }
 }
