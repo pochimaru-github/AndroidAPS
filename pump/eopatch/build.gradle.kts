@@ -10,11 +10,15 @@ plugins {
 android {
     namespace = "app.aaps.pump.eopatch"
     buildFeatures {
+        viewBinding = true
         dataBinding = true
     }
 }
 
 dependencies {
+    // ローカル libs ディレクトリ内の AAR / JAR ライブラリを読み込む設定を追加
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
+
     implementation(project(":core:data"))
     implementation(project(":core:interfaces"))
     implementation(project(":core:keys"))
