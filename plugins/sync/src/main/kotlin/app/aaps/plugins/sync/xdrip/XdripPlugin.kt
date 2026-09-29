@@ -2,6 +2,8 @@ package app.aaps.plugins.sync.xdrip
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -61,7 +63,6 @@ import app.aaps.plugins.sync.xdrip.events.EventXdripUpdateGUI
 import app.aaps.plugins.sync.xdrip.extensions.toXdripJson
 import app.aaps.plugins.sync.xdrip.keys.XdripLongKey
 import app.aaps.plugins.sync.xdrip.workers.XdripDataSyncWorker
-import app.aaps.shared.impl.extensions.safeQueryBroadcastReceivers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.coroutines.CoroutineScope
@@ -75,7 +76,6 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
-import app.aaps.core.shared.utils.safeQueryBroadcastReceivers
 
 @Singleton
 class XdripPlugin @Inject constructor(
@@ -388,7 +388,7 @@ class XdripPlugin @Inject constructor(
                     dataPair.value.toJson(true, profile, dateUtil)
                 }
 
-                is DataSyncSelector.PairProfileSwitch          -> dataPair.value.toJson(true, dateUtil, decimalFormatter)
+                is DataSyncSelector.PairProfileSwitch          -> dataPair.value.toJson(true, decimalFormatter)
                 is DataSyncSelector.PairEffectiveProfileSwitch -> dataPair.value.toJson(true, dateUtil)
                 is DataSyncSelector.PairRunningMode            -> dataPair.value.toJson(true, dateUtil)
                 else                                           -> null
@@ -414,6 +414,15 @@ class XdripPlugin @Inject constructor(
                 rxBus.send(EventXdripUpdateGUI())
                 Thread.sleep(100)
             }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun PackageManager.safeQueryBroadcastReceivers(intent: Intent, flags: Int): List<ResolveInfo> {
+        return try {
+            queryBroadcastReceivers(intent, flags)
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 
