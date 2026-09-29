@@ -8,9 +8,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import app.aaps.core.data.plugin.PluginType
+import androidx.fragment.app.Fragment
 import app.aaps.core.interfaces.logging.AAPSLogger
-import app.aaps.core.interfaces.plugin.PluginDescription
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.AapsSchedulers
 import app.aaps.core.interfaces.rx.bus.RxBus
@@ -18,7 +17,6 @@ import app.aaps.core.interfaces.rx.events.EventWearUpdateGui
 import app.aaps.core.interfaces.rx.weardata.CwfMetadataKey
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.core.ui.fragments.TranslatedFragment
 import app.aaps.plugins.sync.R
 import app.aaps.plugins.sync.databinding.WearFragmentBinding
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -26,26 +24,17 @@ import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// TODO: Re-inherit from proper AAPS base fragment class when core UI classes are updated
 @Singleton
 class WearFragment @Inject constructor(
-    aapsLogger: AAPSLogger,
-    rh: ResourceHelper,
+    private val aapsLogger: AAPSLogger,
+    private val rh: ResourceHelper,
     private val preferences: Preferences,
     private val rxBus: RxBus,
     private val aapsSchedulers: AapsSchedulers,
     private val fabricPrivacy: FabricPrivacy,
     private val wearPlugin: WearPlugin
-) : TranslatedFragment(
-    PluginDescription()
-        .mainType(PluginType.SYNC)
-        .fragmentClass(WearFragment::class.java.name)
-        .pluginIcon(app.aaps.core.objects.R.drawable.ic_watch)
-        .pluginName(R.string.wear)
-        .shortName(R.string.wear_short)
-        .preferencesId(PluginDescription.PREFERENCE_SCREEN)
-        .description(R.string.wear_description),
-    aapsLogger, rh
-) {
+) : Fragment() {
 
     private var _binding: WearFragmentBinding? = null
     private val binding get() = _binding!!
