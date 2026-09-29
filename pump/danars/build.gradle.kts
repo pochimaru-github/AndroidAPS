@@ -9,6 +9,10 @@ plugins {
 
 android {
     namespace = "app.aaps.pump.danars"
+    buildFeatures {
+        viewBinding = true
+        dataBinding = true
+    }
 }
 
 dependencies {
