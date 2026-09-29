@@ -37,7 +37,7 @@ import app.aaps.plugins.sync.wear.wearintegration.WearDataService.Companion.SYNC
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    override val rh: ResourceHelper,
+    rh: ResourceHelper,
     aapsLogger: AAPSLogger
     // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
     // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
