@@ -77,7 +77,7 @@ open class TaskBase @Inject constructor(val func: TaskFunc) {
 
         var maps: HashMap<TaskFunc, TaskBase> = HashMap<TaskFunc, TaskBase>()
 
-        protected const val TASK_ENQUEUE_TIME_OUT: Long = 60 // SECONDS
+        const val TASK_ENQUEUE_TIME_OUT: Long = 60 // SECONDS
 
         fun enqueue(func: TaskFunc) {
             maps[func]?.enqueue()
