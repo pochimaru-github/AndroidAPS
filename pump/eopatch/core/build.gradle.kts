@@ -17,5 +17,7 @@ android {
 }
 
 dependencies {
-    implementation(files("libs/eopatch_core.aar"))
+    // fileTree を使用して api 宣言することで、上位モジュール (:pump:eopatch) へ
+    // パス崩れを起こすことなく AAR 内のクラスパスを正しく伝播・公開します
+    api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
 }
