@@ -229,7 +229,7 @@ class EopatchPumpPlugin @Inject constructor(
 
             disposable.dispose()
             aapsLogger.info(LTag.PUMP, "Basal Profile was set: $isSuccess")
-            return if (isSuccess) {
+            return if (isSuccess == true) {
                 uiInteraction.addNotificationValidFor(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)
                 pumpEnactResultProvider.get().success(true).enacted(true)
             } else {
@@ -308,9 +308,12 @@ class EopatchPumpPlugin @Inject constructor(
             patchManagerExecutor.stopNowBolus()
                 .subscribeOn(aapsSchedulers.io)
                 .observeOn(aapsSchedulers.main)
-                .subscribe {
-                    rxBus.send(EventOverviewBolusProgress(status = rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, (it.injectedBolusAmount * 0.05f)), id = BolusProgressData.id))
-                }
+                .subscribe(
+                    { res ->
+                        rxBus.send(EventOverviewBolusProgress(status = rh.gs(app.aaps.core.interfaces.R.string.bolus_delivered_successfully, (res.injectedBolusAmount * 0.05f)), id = BolusProgressData.id))
+                    },
+                    fabricPrivacy::logException
+                )
         )
     }
 
