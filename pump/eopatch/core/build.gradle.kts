@@ -17,6 +17,5 @@ android {
 }
 
 dependencies {
-    // implementation から api に変更し、上位モジュールへ AAR の型を公開
-    api(files("libs/eopatch_core.aar"))
+    implementation(files("libs/eopatch_core.aar"))
 }
