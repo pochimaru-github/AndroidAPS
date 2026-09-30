@@ -33,8 +33,8 @@ subprojects {
             compileSdk = 34
 
             compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_21
-                targetCompatibility = JavaVersion.VERSION_21
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
             }
         }
     }
@@ -44,8 +44,8 @@ subprojects {
             compileSdkVersion(34)
 
             compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_21
-                targetCompatibility = JavaVersion.VERSION_21
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
             }
         }
     }
@@ -132,7 +132,7 @@ allprojects {
             freeCompilerArgs.add("-Xjvm-default=all")
             freeCompilerArgs.add("-Xskip-prerelease-check")
             freeCompilerArgs.add("-Xsuppress-version-warnings")
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 
