@@ -132,7 +132,7 @@ allprojects {
             freeCompilerArgs.add("-Xjvm-default=all")
             freeCompilerArgs.add("-Xskip-prerelease-check")
             freeCompilerArgs.add("-Xsuppress-version-warnings")
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
         }
     }
 
