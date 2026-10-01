@@ -1,6 +1,7 @@
 package app.aaps.pump.omnipod.dash
 
 import android.content.Context
+import app.aaps.core.plugin.PluginBase
 import app.aaps.pump.omnipod.dash.history.database.DashHistoryDatabase
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -8,7 +9,7 @@ import javax.inject.Singleton
 @Singleton
 class OmnipodDashPumpPlugin @Inject constructor(
     private val context: Context
-) {
+) : PluginBase() {
 
     private val database: DashHistoryDatabase by lazy {
         DashHistoryDatabase.getInstance(context)
