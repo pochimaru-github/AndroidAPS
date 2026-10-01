@@ -8,7 +8,6 @@ plugins {
     id("jacoco-module-dependencies")
 }
 
-
 android {
 
     namespace = "app.aaps.pump.equil"
@@ -21,6 +20,7 @@ android {
 
     buildFeatures {
         dataBinding = true
+        viewBinding = true
     }
 }
 
