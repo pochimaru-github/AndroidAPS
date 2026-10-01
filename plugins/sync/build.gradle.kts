@@ -78,7 +78,8 @@ dependencies {
 
     // Gson & Network & Socket.io
     implementation(libs.com.google.code.gson)
-    implementation("com.google.android.gms:play-services-wearable:18.1.0")
+    // WearableListenerService の型情報を他モジュール(KSP/Dagger)へ伝播させるため api に変更
+    api("com.google.android.gms:play-services-wearable:18.1.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("io.socket:socket.io-client:2.0.1")
