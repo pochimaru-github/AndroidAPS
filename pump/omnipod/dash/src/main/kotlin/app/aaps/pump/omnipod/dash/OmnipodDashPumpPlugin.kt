@@ -36,8 +36,8 @@ class OmnipodDashPumpPlugin @Inject constructor(
 ) : PumpPluginBase(
     pluginDescription = PluginDescription()
         .mainType(PluginType.PUMP)
-        .pluginName(R.string.omnipod_dash)
-        .shortName(R.string.omnipod_dash_shortname)
+        .pluginName(app.aaps.core.ui.R.string.app_name)
+        .shortName(app.aaps.core.ui.R.string.app_name)
         .preferencesId(PluginDescription.PREFERENCE_SCREEN),
     ownPreferences = emptyList(),
     aapsLogger, rh, preferences, commandQueue
