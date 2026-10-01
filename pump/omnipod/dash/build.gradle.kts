@@ -35,6 +35,7 @@ dependencies {
     implementation(project(":core:interfaces"))
     implementation(project(":core:keys"))
     implementation(project(":core:libraries"))
+    implementation(project(":core:plugins")) // 追加: PluginBase 等の定義を参照可能にする
     implementation(project(":core:utils"))
     implementation(project(":core:ui"))
     implementation(project(":core:validators"))
