@@ -45,8 +45,10 @@ class EquilUnPairActivity : TranslatedDaggerAppCompatActivity() {
         binding.btnFinish.setOnClickListener {
             val name = equilManager.equilState?.serialNumber ?: throw IllegalStateException()
             OKDialog.showConfirmation(
-                this, rh.gs(app.aaps.core.ui.R.string.confirmation), rh.gs(R.string.equil_unpair_alert, name),
-                { unpair(name) }
+                this,
+                rh.gs(app.aaps.core.ui.R.string.confirmation),
+                rh.gs(R.string.equil_unpair_alert, name),
+                ok = Runnable { unpair(name) }
             )
         }
     }
