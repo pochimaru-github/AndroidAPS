@@ -47,7 +47,7 @@ class OmnipodDashPumpPlugin @Inject constructor(
         DashHistoryDatabase.getInstance(context)
     }
 
-    override fun getName(): String = "Omnipod DASH"
+    override val name: String get() = "Omnipod DASH"
 
     override fun isInitialized(): Boolean = true
     override fun isSuspended(): Boolean = false
