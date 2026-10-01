@@ -65,8 +65,10 @@ class EquilUnPairDetachActivity : TranslatedDaggerAppCompatActivity() {
             .into(binding.imv)
         binding.btnNext.setOnClickListener {
             OKDialog.showConfirmation(
-                this, rh.gs(app.aaps.core.ui.R.string.confirmation), rh.gs(R.string.equil_hint_dressing),
-                ok = {
+                this,
+                rh.gs(app.aaps.core.ui.R.string.confirmation),
+                rh.gs(R.string.equil_hint_dressing),
+                ok = Runnable {
                     showLoading()
                     commandQueue.customCommand(CmdInsulinChange(aapsLogger, preferences, equilManager), object : Callback() {
                         override fun run() {
@@ -78,7 +80,8 @@ class EquilUnPairDetachActivity : TranslatedDaggerAppCompatActivity() {
                             startActivity(Intent(this@EquilUnPairDetachActivity, EquilUnPairActivity::class.java))
                         }
                     })
-                })
+                }
+            )
         }
     }
 
