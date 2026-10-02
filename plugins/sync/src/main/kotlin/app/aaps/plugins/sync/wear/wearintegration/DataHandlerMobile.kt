@@ -2,9 +2,9 @@ package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
 import app.aaps.core.data.model.PluginType
+import app.aaps.core.interfaces.plugin.PluginBase
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.bus.RxBus
-import app.aaps.core.interfaces.plugin.PluginBase
 import app.aaps.core.utils.AapsLogger
 import com.google.android.gms.wearable.DataMap
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -23,16 +23,13 @@ class DataHandlerMobile @Inject constructor(
     private var lastSendTime = 0L
 
     init {
-        /* TODO: RxBusWearData 型定義の参照整合性が確認でき次第解除
         disposable.add(
             rxBus.register(RxBusWearData::class.java) { event ->
                 handleWearData(event)
             }
         )
-        */
     }
 
-    /* TODO: WearPath および DataMap の受け渡し定義確定後に解除
     private fun handleWearData(event: RxBusWearData) {
         val path = event.path
         val dataMap = event.dataMap
@@ -63,7 +60,6 @@ class DataHandlerMobile @Inject constructor(
             else -> aapsLogger.w(TAG, "Unknown path: $path")
         }
     }
-    */
 
     private fun handleBolusPreCheck(dataMap: DataMap) {
         // Implementation for Bolus PreCheck
