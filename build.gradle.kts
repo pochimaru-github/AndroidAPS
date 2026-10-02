@@ -141,23 +141,6 @@ allprojects {
     apply(plugin = "jacoco")
 }
 
-    tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions {
-            freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
-            freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
-            freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi")
-            freeCompilerArgs.add("-language-version=1.9")
-            freeCompilerArgs.add("-Xjvm-default=all")
-            freeCompilerArgs.add("-Xskip-prerelease-check")
-            freeCompilerArgs.add("-Xsuppress-version-warnings")
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
-    }
-
-    apply(plugin = "org.jlleitschuh.gradle.ktlint")
-    apply(plugin = "jacoco")
-}
-
 // Setup all reports aggregation
 apply(from = "jacoco_aggregation.gradle.kts")
 
