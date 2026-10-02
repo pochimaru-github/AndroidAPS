@@ -2,7 +2,7 @@ package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
 import app.aaps.core.data.model.PluginType
-import app.aaps.core.interfaces.logger.AapsLogger
+import app.aaps.core.interfaces.logging.AapsLogger
 import app.aaps.core.interfaces.plugin.PluginBase
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.bus.RxBus
