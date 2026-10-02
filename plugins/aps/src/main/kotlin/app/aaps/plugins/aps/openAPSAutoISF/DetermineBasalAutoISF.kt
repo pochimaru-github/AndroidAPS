@@ -6,10 +6,11 @@ import app.aaps.core.interfaces.aps.GlucoseStatus
 import app.aaps.core.interfaces.aps.MealData
 import app.aaps.core.interfaces.profile.Profile
 import org.slf4j.LoggerFactory
+import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 
-class DetermineBasalAutoISF {
+class DetermineBasalAutoISF @Inject constructor() {
 
     private val log = LoggerFactory.getLogger(DetermineBasalAutoISF::class.java)
 
