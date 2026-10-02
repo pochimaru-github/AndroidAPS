@@ -1,12 +1,13 @@
 package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
-import app.aaps.core.data.model.PluginType
+import app.aaps.core.data.plugin.PluginType
 import app.aaps.core.interfaces.logging.AAPSLogger
+import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.plugin.PluginBase
+import app.aaps.core.interfaces.plugin.PluginDescription
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.bus.RxBus
-import com.google.android.gms.wearable.DataMap
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,87 +16,17 @@ import javax.inject.Singleton
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    override val rh: ResourceHelper,
-    private val aapsLogger: AAPSLogger
-) : PluginBase(PluginType.SYNC, aapsLogger, rh) {
+    rh: ResourceHelper,
+    aapsLogger: AAPSLogger
+) : PluginBase(
+    PluginDescription()
+        .mainType(PluginType.SYNC),
+    aapsLogger,
+    rh
+) {
 
     private val disposable = CompositeDisposable()
     private var lastSendTime = 0L
-
-    init {
-        disposable.add(
-            rxBus.register(RxBusWearData::class.java) { event ->
-                handleWearData(event)
-            }
-        )
-    }
-
-    private fun handleWearData(event: RxBusWearData) {
-        val path = event.path
-        val dataMap = event.dataMap
-
-        aapsLogger.d(TAG, "Received wear path: $path")
-
-        when (path) {
-            WearPath.ActionBolusPreCheck.path -> handleBolusPreCheck(dataMap)
-            WearPath.ActionBolusConfirmed.path -> handleBolusConfirmed(dataMap)
-            WearPath.ActionWizardPreCheck.path -> handleWizardPreCheck(dataMap)
-            WearPath.ActionWizardConfirmed.path -> handleWizardConfirmed(dataMap)
-            WearPath.ActionQuickWizardPreCheck.path -> handleQuickWizardPreCheck(dataMap)
-            WearPath.ActionFillPreCheck.path -> handleFillPreCheck(dataMap)
-            WearPath.ActionFillConfirmed.path -> handleFillConfirmed(dataMap)
-            WearPath.CancelBolus.path -> handleCancelBolus()
-            WearPath.ActionECarbsPreCheck.path -> handleECarbsPreCheck(dataMap)
-            WearPath.ActionECarbsConfirmed.path -> handleECarbsConfirmed(dataMap)
-            WearPath.ActionTempTargetPreCheck.path -> handleTempTargetPreCheck(dataMap)
-            WearPath.ActionTempTargetConfirmed.path -> handleTempTargetConfirmed(dataMap)
-            WearPath.LoopStatesRequest.path -> sendLoopStates()
-            WearPath.LoopStateSelected.path -> handleLoopStateSelected(dataMap)
-            WearPath.LoopStateConfirmed.path -> handleLoopStateConfirmed(dataMap)
-            WearPath.ActionProfileSwitchPreCheck.path -> handleProfileSwitchPreCheck(dataMap)
-            WearPath.ActionProfileSwitchConfirmed.path -> handleProfileSwitchConfirmed(dataMap)
-            WearPath.ActionHeartRate.path -> handleHeartRate(dataMap)
-            WearPath.ActionStepsRate.path -> handleStepsRate(dataMap)
-            WearPath.ActionGetCustomWatchface.path -> handleGetCustomWatchface()
-            else -> aapsLogger.w(TAG, "Unknown path: $path")
-        }
-    }
-
-    private fun handleBolusPreCheck(dataMap: DataMap) {}
-    private fun handleBolusConfirmed(dataMap: DataMap) {}
-    private fun handleWizardPreCheck(dataMap: DataMap) {}
-    private fun handleWizardConfirmed(dataMap: DataMap) {}
-    private fun handleQuickWizardPreCheck(dataMap: DataMap) {}
-    private fun handleFillPreCheck(dataMap: DataMap) {}
-    private fun handleFillConfirmed(dataMap: DataMap) {}
-    private fun handleCancelBolus() {}
-    private fun handleECarbsPreCheck(dataMap: DataMap) {}
-    private fun handleECarbsConfirmed(dataMap: DataMap) {}
-    private fun handleTempTargetPreCheck(dataMap: DataMap) {}
-    private fun handleTempTargetConfirmed(dataMap: DataMap) {}
-    private fun sendLoopStates() {}
-    private fun handleLoopStateSelected(dataMap: DataMap) {}
-    private fun handleLoopStateConfirmed(dataMap: DataMap) {}
-    private fun handleProfileSwitchPreCheck(dataMap: DataMap) {}
-    private fun handleProfileSwitchConfirmed(dataMap: DataMap) {}
-
-    private fun handleHeartRate(dataMap: DataMap) {
-        val rate = dataMap.getInt("rate", 0)
-        val date = dataMap.getLong("date", System.currentTimeMillis())
-        if (rate > 0) {
-            aapsLogger.d(TAG, "HeartRate received: rate=$rate, date=$date")
-        }
-    }
-
-    private fun handleStepsRate(dataMap: DataMap) {
-        val steps = dataMap.getInt("steps", 0)
-        val date = dataMap.getLong("date", System.currentTimeMillis())
-        if (steps >= 0) {
-            aapsLogger.d(TAG, "StepsRate received: steps=$steps, date=$date")
-        }
-    }
-
-    private fun handleGetCustomWatchface() {}
 
     fun resendData() {
         val now = System.currentTimeMillis()
@@ -104,14 +35,15 @@ class DataHandlerMobile @Inject constructor(
         sendStatus()
     }
 
-    fun sendStatus() {}
-    fun sendTreatments() {}
+    fun sendStatus() {
+        aapsLogger.debug(LTag.WEAR, "DataHandlerMobile: sendStatus called")
+    }
+
+    fun sendTreatments() {
+        aapsLogger.debug(LTag.WEAR, "DataHandlerMobile: sendTreatments called")
+    }
 
     fun onCleanUp() {
         disposable.clear()
-    }
-
-    companion object {
-        private const val TAG = "DataHandlerMobile"
     }
 }
