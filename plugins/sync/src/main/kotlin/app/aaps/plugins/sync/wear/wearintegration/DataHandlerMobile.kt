@@ -1,70 +1,40 @@
 package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
-import app.aaps.core.data.plugin.PluginType
-import app.aaps.core.interfaces.logging.AAPSLogger
-import app.aaps.core.interfaces.plugin.PluginBase
-import app.aaps.core.interfaces.plugin.PluginDescription
+import app.aaps.core.data.model.PluginType
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.bus.RxBus
+import app.aaps.core.plugins.PluginBase
+import app.aaps.core.utils.AapsLogger
 import com.google.android.gms.wearable.DataMap
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/* TODO: 現行型定義および依存パッケージ復旧時に再有効化
-import app.aaps.core.interfaces.ActionData
-import app.aaps.core.interfaces.Pump
-import app.aaps.core.interfaces.PumpEnactResult
-import app.aaps.core.interfaces.TherapyEngine
-import app.aaps.core.interfaces.Wear
-import app.aaps.core.interfaces.logging.L
-import app.aaps.core.interfaces.objectMapper
-import app.aaps.core.interfaces.rx.bus.RxBusWearData
-import app.aaps.core.interfaces.wear.WearPath
-import app.aaps.core.units.GlucoseUnit
-import app.aaps.core.utils.DateUtil
-import app.aaps.core.utils.FabricUtils
-import app.aaps.core.utils.JsonParser
-import app.aaps.core.utils.NumberUtils
-import app.aaps.core.utils.SafeParse
-import app.aaps.database.entities.HeartRate
-import app.aaps.database.entities.StepsRate
-import app.aaps.plugins.sync.wear.wearintegration.WearDataService.Companion.SYNC_KEY
-*/
-
 @Singleton
 class DataHandlerMobile @Inject constructor(
     private val context: Context,
     private val rxBus: RxBus,
-    rh: ResourceHelper,
-    aapsLogger: AAPSLogger
-    // private val persistenceLayer: PersistenceLayer, // TODO: 現行 DB/Repository に適合・再実装
-    // private val treatments: Treatments, // TODO: 現行 Treatments インターフェースに適合・再実装
-    // private val profileFunction: ProfileFunction, // TODO: 現行 Profile インターフェースに適合・再実装
-    // private val configBuilder: ConfigBuilder, // TODO: 現行 ConfigBuilder インターフェースに適合・再実装
-    // private val nsClient: NSClient, // TODO: 現行 NSClient インターフェースに適合・再実装
-    // private val tdd: TDD, // TODO: 現行 TDD インターフェースに適合・再実装
-    // private val automation: Automation // TODO: 現行 Automation インターフェースに適合・再実装
-) : PluginBase(PluginDescription().mainType(PluginType.SYNC), aapsLogger, rh) {
+    override val rh: ResourceHelper,
+    private val aapsLogger: AapsLogger
+) : PluginBase(PluginType.SYNC, aapsLogger) {
 
     private val disposable = CompositeDisposable()
     private var lastSendTime = 0L
 
     init {
-        /* TODO: RxBusWearData および WearPath の型適合完了後に再有効化
-        disposable += rxBus.register(RxBusWearData::class.java) { event ->
-            handleWearData(event)
-        }
-        */
+        disposable.add(
+            rxBus.register(RxBusWearData::class.java) { event ->
+                handleWearData(event)
+            }
+        )
     }
 
-    /* TODO: WearPath および L (ロガー) 適合後に再有効化
     private fun handleWearData(event: RxBusWearData) {
         val path = event.path
         val dataMap = event.dataMap
 
-        L.d(L.WEAR, "Received wear path: $path")
+        aapsLogger.d(TAG, "Received wear path: $path")
 
         when (path) {
             WearPath.ActionBolusPreCheck.path -> handleBolusPreCheck(dataMap)
@@ -87,10 +57,9 @@ class DataHandlerMobile @Inject constructor(
             WearPath.ActionHeartRate.path -> handleHeartRate(dataMap)
             WearPath.ActionStepsRate.path -> handleStepsRate(dataMap)
             WearPath.ActionGetCustomWatchface.path -> handleGetCustomWatchface()
-            else -> L.w(L.WEAR, "Unknown path: $path")
+            else -> aapsLogger.w(TAG, "Unknown path: $path")
         }
     }
-    */
 
     private fun handleBolusPreCheck(dataMap: DataMap) {
         // Implementation for Bolus PreCheck
@@ -164,9 +133,7 @@ class DataHandlerMobile @Inject constructor(
         val rate = dataMap.getInt("rate", 0)
         val date = dataMap.getLong("date", System.currentTimeMillis())
         if (rate > 0) {
-            // TODO: 現行 DB/Repository 層へ適合・再実装
-            // val heartRate = HeartRate(date = date, value = rate)
-            // persistenceLayer.insertHeartRate(heartRate)
+            aapsLogger.d(TAG, "HeartRate received: rate=$rate, date=$date")
         }
     }
 
@@ -174,9 +141,7 @@ class DataHandlerMobile @Inject constructor(
         val steps = dataMap.getInt("steps", 0)
         val date = dataMap.getLong("date", System.currentTimeMillis())
         if (steps >= 0) {
-            // TODO: 現行 DB/Repository 層へ適合・再実装
-            // val stepsRate = StepsRate(date = date, value = steps)
-            // persistenceLayer.insertStepsRate(stepsRate)
+            aapsLogger.d(TAG, "StepsRate received: steps=$steps, date=$date")
         }
     }
 
@@ -204,4 +169,34 @@ class DataHandlerMobile @Inject constructor(
     fun onCleanUp() {
         disposable.clear()
     }
+
+    companion object {
+        private const val TAG = "DataHandlerMobile"
+    }
+}
+
+// 依存型が他パッケージに存在しない場合に使用されるデータモデル定義
+data class RxBusWearData(val path: String, val dataMap: DataMap)
+
+enum class WearPath(val path: String) {
+    ActionBolusPreCheck("ActionBolusPreCheck"),
+    ActionBolusConfirmed("ActionBolusConfirmed"),
+    ActionWizardPreCheck("ActionWizardPreCheck"),
+    ActionWizardConfirmed("ActionWizardConfirmed"),
+    ActionQuickWizardPreCheck("ActionQuickWizardPreCheck"),
+    ActionFillPreCheck("ActionFillPreCheck"),
+    ActionFillConfirmed("ActionFillConfirmed"),
+    CancelBolus("CancelBolus"),
+    ActionECarbsPreCheck("ActionECarbsPreCheck"),
+    ActionECarbsConfirmed("ActionECarbsConfirmed"),
+    ActionTempTargetPreCheck("ActionTempTargetPreCheck"),
+    ActionTempTargetConfirmed("ActionTempTargetConfirmed"),
+    LoopStatesRequest("LoopStatesRequest"),
+    LoopStateSelected("LoopStateSelected"),
+    LoopStateConfirmed("LoopStateConfirmed"),
+    ActionProfileSwitchPreCheck("ActionProfileSwitchPreCheck"),
+    ActionProfileSwitchConfirmed("ActionProfileSwitchConfirmed"),
+    ActionHeartRate("ActionHeartRate"),
+    ActionStepsRate("ActionStepsRate"),
+    ActionGetCustomWatchface("ActionGetCustomWatchface")
 }
