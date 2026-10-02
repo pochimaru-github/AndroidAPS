@@ -5,7 +5,11 @@ import app.aaps.core.interfaces.rx.events.Event
 import io.socket.client.Ack
 import org.json.JSONObject
 
-class NSUpdateAck(private val rxBus: RxBus) : Event(), Ack {
+class NSUpdateAck(
+    private val rxBus: RxBus,
+    var originalObject: Any? = null,
+    var _id: String = ""
+) : Event(), Ack {
 
     var success = false
 
