@@ -1,6 +1,6 @@
 package app.aaps.plugins.sync.garmin
 
-// import com.garmin.android.connectiq.IQDevice // TODO: Garmin Connect IQ SDK 依存の適合・再実装
+import com.garmin.android.connectiq.IQDevice
 
 data class GarminDevice(
     val client: GarminClient,
@@ -8,17 +8,15 @@ data class GarminDevice(
     var name: String
 ) {
 
-    /* TODO: Garmin Connect IQ SDK 依存の適合・再実装
     constructor(client: GarminClient, iqDevice: IQDevice) : this(
         client,
         iqDevice.deviceIdentifier,
         iqDevice.friendlyName
     )
-    */
 
     override fun toString(): String = "D[$name/$id]"
 
-    // fun toIQDevice() = IQDevice(id, name) // TODO: Garmin Connect IQ SDK 依存の適合・再実装
+    fun toIQDevice() = IQDevice(id, name)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
