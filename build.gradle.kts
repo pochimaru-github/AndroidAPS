@@ -76,9 +76,6 @@ allprojects {
             force("androidx.activity:activity:1.8.2")
             force("androidx.activity:activity-ktx:1.8.2")
             force("androidx.appcompat:appcompat:1.6.1")
-            force("com.google.android.gms:play-services-measurement-api:21.5.0")
-            force("com.google.android.gms:play-services-measurement-impl:21.5.0")
-            force("com.google.android.gms:play-services-measurement-sdk-api:21.5.0")
 
             // Lifecycle 関連のバージョンを 2.8.7 へ強制固定
             force("androidx.lifecycle:lifecycle-runtime:2.8.7")
@@ -119,9 +116,30 @@ allprojects {
                         useVersion("2.8.7")
                     }
                 }
+                // play-services-measurement 関連の重複（23.0.0 と 21.5.0）を防ぐため一律固定
+                if (requested.group == "com.google.android.gms" && requested.name.startsWith("play-services-measurement")) {
+                    useVersion("21.5.0")
+                }
             }
         }
     }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
+            freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
+            freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi")
+            freeCompilerArgs.add("-language-version=1.9")
+            freeCompilerArgs.add("-Xjvm-default=all")
+            freeCompilerArgs.add("-Xskip-prerelease-check")
+            freeCompilerArgs.add("-Xsuppress-version-warnings")
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
+
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    apply(plugin = "jacoco")
+}
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
