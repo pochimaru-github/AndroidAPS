@@ -8,10 +8,10 @@ import app.aaps.core.interfaces.nsclient.StoreDataForDb
 import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.objects.workflow.LoggingWorker
-// import app.aaps.core.utils.receivers.DataWorkerStorage // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
 import app.aaps.plugins.sync.nsclient.data.NSMbg
 import app.aaps.plugins.sync.nsclient.extensions.therapyEventFromNsMbg
 import kotlinx.coroutines.Dispatchers
+import org.json.JSONArray
 import javax.inject.Inject
 
 class NSClientMbgWorker(
@@ -19,24 +19,18 @@ class NSClientMbgWorker(
     params: WorkerParameters
 ) : LoggingWorker(context, params, Dispatchers.IO) {
 
-    // @Inject lateinit var dataWorkerStorage: DataWorkerStorage // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
     @Inject lateinit var preferences: Preferences
     @Inject lateinit var config: Config
     @Inject lateinit var storeDataForDb: StoreDataForDb
 
     override suspend fun doWorkAndLog(): Result {
-        val ret = Result.success()
-
         val acceptNSData = preferences.get(BooleanKey.NsClientAcceptTherapyEvent) || config.AAPSCLIENT
         if (!acceptNSData) return Result.success(workDataOf("Result" to "Sync not enabled"))
 
-        // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
-        // val mbgArray = dataWorkerStorage.pickupJSONArray(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
-        //     ?: return Result.failure(workDataOf("Error" to "missing input data"))
-        val mbgArray: org.json.JSONArray? = null
-        if (mbgArray == null) {
-            return Result.failure(workDataOf("Error" to "missing input data"))
-        }
+        val mbgJsonString = inputData.getString("data") ?: inputData.getString("mbg")
+        val mbgArray: JSONArray = mbgJsonString?.let {
+            runCatching { JSONArray(it) }.getOrNull()
+        } ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
         for (i in 0 until mbgArray.length()) {
             val nsMbg = NSMbg(mbgArray.getJSONObject(i))
@@ -44,6 +38,6 @@ class NSClientMbgWorker(
             storeDataForDb.addToTherapyEvents(therapyEventFromNsMbg(nsMbg))
         }
         // storeDataForDb.storeTreatmentsToDb() don't do this. It will be stored along with other treatments
-        return ret
+        return Result.success()
     }
 }
