@@ -40,89 +40,77 @@ class NSClientUpdateRemoveAckWorker(
         val ack = storage.remove(key) as? NSUpdateAck
             ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
-        when (ack.originalObject) {
+        when (val orig = ack.originalObject) {
             is PairTemporaryTarget        -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked TemporaryTarget " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairGlucoseValue           -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked GlucoseValue " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairFood                   -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked Food " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairTherapyEvent           -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked TherapyEvent " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairBolus                  -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked Bolus " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairCarbs                  -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked Carbs " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairBolusCalculatorResult  -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked BolusCalculatorResult " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairTemporaryBasal         -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked TemporaryBasal " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairExtendedBolus          -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked ExtendedBolus " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairProfileSwitch          -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked ProfileSwitch " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is PairEffectiveProfileSwitch -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked EffectiveProfileSwitch " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
 
             is DataSyncSelector.PairRunningMode           -> {
-                val pair = ack.originalObject
-                pair.confirmed = true
+                orig.confirmed = true
                 rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked RunningMode " + ack._id))
-                ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
+                ret = Result.success(workDataOf("ProcessedData" to orig.toString()))
             }
         }
         ack.originalObject?.let { synchronized(it) { it.notifyAll() } }
