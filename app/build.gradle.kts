@@ -151,6 +151,7 @@ android {
 
     buildFeatures {
         dataBinding = true
+        viewBinding = true
         buildConfig = true
     }
 }
