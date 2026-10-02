@@ -18,11 +18,11 @@ import app.aaps.core.interfaces.sync.DataSyncSelector.PairProfileSwitch
 import app.aaps.core.interfaces.sync.DataSyncSelector.PairTemporaryBasal
 import app.aaps.core.interfaces.sync.DataSyncSelector.PairTemporaryTarget
 import app.aaps.core.interfaces.sync.DataSyncSelector.PairTherapyEvent
-// import app.aaps.core.interfaces.sync.DataWorkerStorage // TODO: 現行 DataWorkerStorage / Repository へ適合・再実装
 import app.aaps.core.objects.workflow.LoggingWorker
 import app.aaps.core.utils.notifyAll
 import app.aaps.plugins.sync.nsclient.acks.NSUpdateAck
 import kotlinx.coroutines.Dispatchers
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 class NSClientUpdateRemoveAckWorker(
@@ -30,29 +30,21 @@ class NSClientUpdateRemoveAckWorker(
     params: WorkerParameters
 ) : LoggingWorker(context, params, Dispatchers.Default) {
 
-    // @Inject lateinit var dataWorkerStorage: DataWorkerStorage // TODO: 現行 Worker/Storage 層へ適合・再実装
     @Inject lateinit var rxBus: RxBus
     @Inject lateinit var aapsSchedulers: AapsSchedulers
 
     override suspend fun doWorkAndLog(): Result {
         var ret = Result.success()
 
-        /* TODO: 現行 Worker / Storage 層へ適合・再実装
-        val ack = dataWorkerStorage.pickupObject(inputData.getLong(DataWorkerStorage.STORE_KEY, -1)) as NSUpdateAck?
+        val key = inputData.getLong(KEY_STORE_ID, -1L)
+        val ack = storage.remove(key) as? NSUpdateAck
             ?: return Result.failure(workDataOf("Error" to "missing input data"))
-        */
-        val ack: NSUpdateAck? = null // スタブ処理
 
-        if (ack == null) {
-            return Result.failure(workDataOf("Error" to "missing input data (DataWorkerStorage disabled)"))
-        }
-
-        /* TODO: 現行 Ack / DataSyncSelector 型へ適合・再実装
         when (ack.originalObject) {
             is PairTemporaryTarget        -> {
                 val pair = ack.originalObject
                 pair.confirmed = true
-                rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked TemporaryTarget" + ack._id))
+                rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked TemporaryTarget " + ack._id))
                 ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
             }
 
@@ -129,12 +121,20 @@ class NSClientUpdateRemoveAckWorker(
             is DataSyncSelector.PairRunningMode           -> {
                 val pair = ack.originalObject
                 pair.confirmed = true
-                rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked RunningMode" + ack._id))
+                rxBus.send(EventNSClientNewLog("◄ DBUPDATE", "Acked RunningMode " + ack._id))
                 ret = Result.success(workDataOf("ProcessedData" to pair.toString()))
             }
         }
         ack.originalObject?.let { synchronized(it) { it.notifyAll() } }
-        */
         return ret
+    }
+
+    companion object {
+        const val KEY_STORE_ID = "STORE_KEY"
+        private val storage = ConcurrentHashMap<Long, Any>()
+
+        fun store(ack: NSUpdateAck, id: Long) {
+            storage[id] = ack
+        }
     }
 }
