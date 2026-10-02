@@ -20,7 +20,6 @@ import app.aaps.core.interfaces.plugin.ActivePlugin
 import app.aaps.core.interfaces.profile.ProfileUtil
 import app.aaps.core.interfaces.pump.VirtualPump
 import app.aaps.core.interfaces.rx.bus.RxBus
-// import app.aaps.core.interfaces.utils.DataWorkerStorage // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
 import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.interfaces.Preferences
@@ -31,6 +30,7 @@ import app.aaps.plugins.sync.nsclient.extensions.fromJson
 import app.aaps.plugins.sync.nsclient.extensions.isEffectiveProfileSwitch
 import app.aaps.plugins.sync.nsclient.extensions.temporaryBasalFromJson
 import kotlinx.coroutines.Dispatchers
+import org.json.JSONArray
 import javax.inject.Inject
 
 class NSClientAddUpdateWorker(
@@ -38,7 +38,6 @@ class NSClientAddUpdateWorker(
     params: WorkerParameters
 ) : LoggingWorker(context, params, Dispatchers.Default) {
 
-    // @Inject lateinit var dataWorkerStorage: DataWorkerStorage // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
     @Inject lateinit var config: Config
     @Inject lateinit var preferences: Preferences
     @Inject lateinit var dateUtil: DateUtil
@@ -48,13 +47,10 @@ class NSClientAddUpdateWorker(
     @Inject lateinit var profileUtil: ProfileUtil
 
     override suspend fun doWorkAndLog(): Result {
-        // TODO: 現行 Storage / Repository インターフェースへ適合・再実装
-        // val treatments = dataWorkerStorage.pickupJSONArray(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
-        //     ?: return Result.failure(workDataOf("Error" to "missing input data"))
-        val treatments: org.json.JSONArray? = null
-        if (treatments == null) {
-            return Result.failure(workDataOf("Error" to "missing input data"))
-        }
+        val treatmentsJsonString = inputData.getString("data") ?: inputData.getString("treatments")
+        val treatments: JSONArray = treatmentsJsonString?.let {
+            runCatching { JSONArray(it) }.getOrNull()
+        } ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
         val ret = Result.success()
         var latestDateInReceivedData = 0L
@@ -71,7 +67,7 @@ class NSClientAddUpdateWorker(
                 continue
             }
 
-            //Find latest date in treatment
+            // Find latest date in treatment
             val mills = JsonHelper.safeGetLong(json, "mills")
             if (mills != 0L && mills < dateUtil.now() && mills > latestDateInReceivedData)
                 latestDateInReceivedData = mills
