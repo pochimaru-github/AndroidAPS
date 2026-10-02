@@ -2,10 +2,10 @@ package app.aaps.plugins.sync.wear.wearintegration
 
 import android.content.Context
 import app.aaps.core.data.model.PluginType
+import app.aaps.core.interfaces.logger.AapsLogger
 import app.aaps.core.interfaces.plugin.PluginBase
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.bus.RxBus
-import app.aaps.core.utils.AapsLogger
 import com.google.android.gms.wearable.DataMap
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import javax.inject.Inject
