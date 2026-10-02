@@ -11,6 +11,10 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        // 全モジュールから eopatch_core.aar を参照可能にするための設定
+        flatDir {
+            dirs file("${rootDir}/pump/eopatch/core/libs")
+        }
     }
 }
 
