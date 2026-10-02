@@ -4,7 +4,7 @@ import android.content.Context
 import app.aaps.core.data.model.PluginType
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.bus.RxBus
-import app.aaps.core.plugins.PluginBase
+import app.aaps.core.interfaces.plugin.PluginBase
 import app.aaps.core.utils.AapsLogger
 import com.google.android.gms.wearable.DataMap
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -23,13 +23,16 @@ class DataHandlerMobile @Inject constructor(
     private var lastSendTime = 0L
 
     init {
+        /* TODO: RxBusWearData 型定義の参照整合性が確認でき次第解除
         disposable.add(
             rxBus.register(RxBusWearData::class.java) { event ->
                 handleWearData(event)
             }
         )
+        */
     }
 
+    /* TODO: WearPath および DataMap の受け渡し定義確定後に解除
     private fun handleWearData(event: RxBusWearData) {
         val path = event.path
         val dataMap = event.dataMap
@@ -60,6 +63,7 @@ class DataHandlerMobile @Inject constructor(
             else -> aapsLogger.w(TAG, "Unknown path: $path")
         }
     }
+    */
 
     private fun handleBolusPreCheck(dataMap: DataMap) {
         // Implementation for Bolus PreCheck
@@ -173,30 +177,4 @@ class DataHandlerMobile @Inject constructor(
     companion object {
         private const val TAG = "DataHandlerMobile"
     }
-}
-
-// 依存型が他パッケージに存在しない場合に使用されるデータモデル定義
-data class RxBusWearData(val path: String, val dataMap: DataMap)
-
-enum class WearPath(val path: String) {
-    ActionBolusPreCheck("ActionBolusPreCheck"),
-    ActionBolusConfirmed("ActionBolusConfirmed"),
-    ActionWizardPreCheck("ActionWizardPreCheck"),
-    ActionWizardConfirmed("ActionWizardConfirmed"),
-    ActionQuickWizardPreCheck("ActionQuickWizardPreCheck"),
-    ActionFillPreCheck("ActionFillPreCheck"),
-    ActionFillConfirmed("ActionFillConfirmed"),
-    CancelBolus("CancelBolus"),
-    ActionECarbsPreCheck("ActionECarbsPreCheck"),
-    ActionECarbsConfirmed("ActionECarbsConfirmed"),
-    ActionTempTargetPreCheck("ActionTempTargetPreCheck"),
-    ActionTempTargetConfirmed("ActionTempTargetConfirmed"),
-    LoopStatesRequest("LoopStatesRequest"),
-    LoopStateSelected("LoopStateSelected"),
-    LoopStateConfirmed("LoopStateConfirmed"),
-    ActionProfileSwitchPreCheck("ActionProfileSwitchPreCheck"),
-    ActionProfileSwitchConfirmed("ActionProfileSwitchConfirmed"),
-    ActionHeartRate("ActionHeartRate"),
-    ActionStepsRate("ActionStepsRate"),
-    ActionGetCustomWatchface("ActionGetCustomWatchface")
 }
