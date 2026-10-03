@@ -7,14 +7,14 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.os.IBinder
+import androidx.core.content.ContextCompat
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
-// import app.aaps.core.utils.waitMillis // TODO: Garmin SDK 依存の適合・再実装
-// import com.garmin.android.apps.connectmobile.connectiq.IConnectIQService // TODO: Garmin SDK 依存の適合・再実装
-// import com.garmin.android.connectiq.ConnectIQ.IQMessageStatus // TODO: Garmin SDK 依存の適合・再実装
-// import com.garmin.android.connectiq.IQApp // TODO: Garmin SDK 依存の適合・再実装
-// import com.garmin.android.connectiq.IQDevice // TODO: Garmin SDK 依存の適合・再実装
-// import com.garmin.android.connectiq.IQMessage // TODO: Garmin SDK 依存の適合・再実装
+import com.garmin.android.apps.connectmobile.connectiq.IConnectIQService
+import com.garmin.android.connectiq.ConnectIQ.IQMessageStatus
+import com.garmin.android.connectiq.IQApp
+import com.garmin.android.connectiq.IQDevice
+import com.garmin.android.connectiq.IQMessage
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.jetbrains.annotations.VisibleForTesting
@@ -45,7 +45,6 @@ class GarminDeviceClient(
     }
     private var bindLock = Object()
 
-    /* TODO: Garmin Connect IQ SDK 依存の適合・再実装
     private var ciqService: IConnectIQService? = null
         get() {
             synchronized(bindLock) {
@@ -64,7 +63,6 @@ class GarminDeviceClient(
                 return field
             }
         }
-    */
 
     private val registeredActions = mutableSetOf<String>()
     private val broadcastReceiver = mutableListOf<BroadcastReceiver>()
@@ -87,22 +85,22 @@ class GarminDeviceClient(
 
     private val ciqServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            /* TODO: Garmin Connect IQ SDK 依存の適合・再実装
             var notifyReceiver: Boolean
             synchronized(bindLock) {
                 aapsLogger.info(LTag.GARMIN, "ConnectIQ App connected")
+                ciqService = IConnectIQService.Stub.asInterface(service)
                 notifyReceiver = state != State.RECONNECTING
                 state = State.CONNECTED
                 bindLock.notifyAll()
             }
             if (notifyReceiver) receiver.onConnect(this@GarminDeviceClient)
-            */
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             synchronized(bindLock) {
                 aapsLogger.info(LTag.GARMIN, "ConnectIQ App disconnected")
                 if (state != State.DISPOSED) state = State.DISCONNECTED
+                ciqService = null
             }
             broadcastReceiver.forEach { br -> context.unregisterReceiver(br) }
             broadcastReceiver.clear()
@@ -123,7 +121,16 @@ class GarminDeviceClient(
     }
 
     override val connectedDevices: List<GarminDevice>
-        get() = emptyList() // TODO: Garmin Connect IQ SDK 依存の適合・再実装
+        get() {
+            val service = ciqService ?: return emptyList()
+            return try {
+                val devices = service.knownDevices
+                devices?.map { GarminDevice(it) } ?: emptyList()
+            } catch (e: Exception) {
+                aapsLogger.error(LTag.GARMIN, "failed to get connected devices", e)
+                emptyList()
+            }
+        }
 
     override fun isDisposed() = state == State.DISPOSED
     override fun dispose() {
@@ -151,7 +158,7 @@ class GarminDeviceClient(
             }
         }
         broadcastReceiver.add(recv)
-        context.registerReceiver(recv, IntentFilter(action))
+        ContextCompat.registerReceiver(context, recv, IntentFilter(action), ContextCompat.RECEIVER_EXPORTED)
     }
 
     override fun registerForMessages(app: GarminApplication) {
@@ -169,16 +176,50 @@ class GarminDeviceClient(
 
     @Suppress("Deprecation")
     private fun onReceiveMessage(app: GarminApplication, intent: Intent) {
-        /* TODO: Garmin Connect IQ SDK 依存の適合・再実装 */
+        val statusName = intent.getStringExtra(EXTRA_STATUS)
+        val status = statusName?.let { runCatching { IQMessageStatus.valueOf(it) }.getOrNull() } ?: IQMessageStatus.FAILURE_UNKNOWN
+        val payload = intent.getSerializableExtra(EXTRA_PAYLOAD)
+        aapsLogger.info(LTag.GARMIN, "onReceiveMessage ${app.device.id}${app.id} status=$status payload=$payload")
+        if (status == IQMessageStatus.SUCCESS && payload != null) {
+            val message = IQMessage(app.device.device, IQApp(app.id), payload)
+            receiver.onMessage(app, message)
+        }
     }
 
     /** Receives callback from ConnectIQ about message transfers. */
     private fun onSendMessage(intent: Intent) {
-        /* TODO: Garmin Connect IQ SDK 依存の適合・再実装 */
+        val deviceId = getDevice(intent) ?: return
+        val appId = intent.getStringExtra(EXTRA_APPLICATION_ID) ?: return
+        val statusName = intent.getStringExtra(EXTRA_STATUS)
+        val status = statusName?.let { runCatching { IQMessageStatus.valueOf(it) }.getOrNull() } ?: IQMessageStatus.FAILURE_UNKNOWN
+
+        aapsLogger.info(LTag.GARMIN, "onSendMessage status=$status $deviceId$appId")
+        val queue = messageQueues[Pair(deviceId, appId)] ?: return
+        synchronized(queue) {
+            val msg = queue.poll()
+            if (status != IQMessageStatus.SUCCESS) {
+                if (msg != null && msg.attempt < MAX_RETRIES) {
+                    aapsLogger.warn(LTag.GARMIN, "send message failed, retrying (${msg.attempt}) $deviceId$appId")
+                    queue.add(msg)
+                    retryMessage(deviceId, appId)
+                } else {
+                    aapsLogger.error(LTag.GARMIN, "send message failed definitively $deviceId$appId")
+                }
+            } else {
+                aapsLogger.info(LTag.GARMIN, "send message successful $deviceId$appId")
+                if (queue.isNotEmpty()) {
+                    sendMessage(queue.peek()!!)
+                }
+            }
+        }
     }
 
     private fun getDevice(intent: Intent): Long? {
-        return null // TODO: Garmin Connect IQ SDK 依存の適合・再実装
+        return if (intent.hasExtra(EXTRA_REMOTE_DEVICE)) {
+            intent.getLongExtra(EXTRA_REMOTE_DEVICE, 0L)
+        } else {
+            null
+        }
     }
 
     private class Message(
@@ -193,15 +234,47 @@ class GarminDeviceClient(
     private val messageQueues = mutableMapOf<Pair<Long, String>, Queue<Message>>()
 
     override fun sendMessage(app: GarminApplication, data: ByteArray) {
-        /* TODO: Garmin Connect IQ SDK 依存の適合・再実装 */
+        val queue = messageQueues.getOrPut(Pair(app.device.id, app.id)) { LinkedList() }
+        val msg = Message(app, data)
+        synchronized(queue) {
+            queue.add(msg)
+            if (queue.size == 1) {
+                sendMessage(msg)
+            }
+        }
     }
 
     private fun retryMessage(deviceId: Long, appId: String) {
-        /* TODO: Garmin Connect IQ SDK 依存の適合・再実装 */
+        val queue = messageQueues[Pair(deviceId, appId)] ?: return
+        val msg = synchronized(queue) { queue.peek() } ?: return
+        val delay = retryWaitFactor * (1L shl msg.attempt.coerceAtMost(6))
+
+        Schedulers.io().scheduleDirect({
+            synchronized(queue) {
+                if (queue.peek() == msg) {
+                    sendMessage(msg)
+                }
+            }
+        }, delay, TimeUnit.SECONDS)
     }
 
     private fun sendMessage(msg: Message) {
-        /* TODO: Garmin Connect IQ SDK 依存の適合・再実装 */
+        val service = ciqService
+        if (service == null) {
+            aapsLogger.warn(LTag.GARMIN, "sendMessage failed: no service $msg")
+            return
+        }
+        msg.attempt++
+        msg.lastAttempt = Instant.now()
+        val device = msg.app.device.device
+        val app = IQApp(msg.app.id)
+
+        try {
+            aapsLogger.info(LTag.GARMIN, "sending message to ${device.friendlyName} ${app.appId} attempt=${msg.attempt}")
+            service.sendMessage(device, app, msg.data, sendMessageAction)
+        } catch (e: Exception) {
+            aapsLogger.error(LTag.GARMIN, "sendMessage exception", e)
+        }
     }
 
     override fun toString() = "$name[$state]"
