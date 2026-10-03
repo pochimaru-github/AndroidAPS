@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.os.IBinder
+import android.os.Parcel
 import androidx.core.content.ContextCompat
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
@@ -181,8 +182,17 @@ class GarminDeviceClient(
         val payload = intent.getSerializableExtra(EXTRA_PAYLOAD)
         aapsLogger.info(LTag.GARMIN, "onReceiveMessage ${app.device.id}${app.id} status=$status payload=$payload")
         if (status == IQMessageStatus.SUCCESS && payload != null) {
-            val message = IQMessage(payload)
-            receiver.onMessage(app, message)
+            val parcel = Parcel.obtain()
+            try {
+                parcel.writeValue(payload)
+                parcel.setDataPosition(0)
+                val message = IQMessage(parcel)
+                receiver.onMessageReceived(app, message)
+            } catch (e: Exception) {
+                aapsLogger.error(LTag.GARMIN, "failed to parse received IQMessage", e)
+            } finally {
+                parcel.recycle()
+            }
         }
     }
 
@@ -264,15 +274,19 @@ class GarminDeviceClient(
             aapsLogger.warn(LTag.GARMIN, "sendMessage failed: no service $msg")
             return
         }
-        val device = msg.app.device.iqDevice
-        if (device == null) {
-            aapsLogger.warn(LTag.GARMIN, "sendMessage failed: no IQDevice $msg")
-            return
-        }
+        val device = IQDevice(msg.app.device.id, msg.app.device.name)
         msg.attempt++
         msg.lastAttempt = Instant.now()
         val app = IQApp(msg.app.id)
-        val iqMessage = IQMessage(msg.data)
+
+        val parcel = Parcel.obtain()
+        val iqMessage = try {
+            parcel.writeByteArray(msg.data)
+            parcel.setDataPosition(0)
+            IQMessage(parcel)
+        } finally {
+            parcel.recycle()
+        }
 
         try {
             aapsLogger.info(LTag.GARMIN, "sending message to ${device.friendlyName} ${msg.app.id} attempt=${msg.attempt}")
