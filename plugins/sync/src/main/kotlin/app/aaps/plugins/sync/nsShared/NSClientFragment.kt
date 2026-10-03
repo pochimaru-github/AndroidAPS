@@ -31,6 +31,7 @@ import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.core.utils.HtmlHelper
+import app.aaps.plugins.sync.R
 import app.aaps.plugins.sync.databinding.NsClientFragmentBinding
 import app.aaps.plugins.sync.databinding.NsClientLogItemBinding
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiData
@@ -92,10 +93,10 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
     }
 
     override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
-        menu.add(Menu.FIRST, ID_MENU_CLEAR_LOG, 0, rh.gs(app.aaps.core.R.string.clear_log)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-        menu.add(Menu.FIRST, ID_MENU_RESTART, 0, rh.gs(app.aaps.core.R.string.restart)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-        menu.add(Menu.FIRST, ID_MENU_SEND_NOW, 0, rh.gs(app.aaps.core.R.string.deliver_now)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-        menu.add(Menu.FIRST, ID_MENU_FULL_SYNC, 0, rh.gs(app.aaps.core.R.string.full_sync)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu.add(Menu.FIRST, ID_MENU_CLEAR_LOG, 0, rh.gs(R.string.clear_log)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu.add(Menu.FIRST, ID_MENU_RESTART, 0, rh.gs(R.string.restart)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu.add(Menu.FIRST, ID_MENU_SEND_NOW, 0, rh.gs(R.string.deliver_now)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu.add(Menu.FIRST, ID_MENU_FULL_SYNC, 0, rh.gs(R.string.full_sync)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         MenuCompat.setGroupDividerEnabled(menu, true)
     }
 
@@ -124,8 +125,8 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
             ID_MENU_FULL_SYNC -> {
                 OKDialog.show(
                     context = requireContext(),
-                    title = rh.gs(app.aaps.core.R.string.full_sync),
-                    message = rh.gs(app.aaps.core.R.string.full_sync_confirm),
+                    title = rh.gs(R.string.full_sync),
+                    message = rh.gs(R.string.full_sync_confirm),
                     runOnDismiss = true,
                     runnable = Runnable {
                         handler.post {
@@ -184,7 +185,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
     private fun updateQueue() {
         _binding?.let { b ->
             nsClientPlugin?.let { plugin ->
-                b.queue.text = plugin.queueText()
+                b.queue.text = plugin.queueText
             }
         }
     }
@@ -192,7 +193,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
     private fun updateStatus() {
         _binding?.let { b ->
             nsClientPlugin?.let { plugin ->
-                b.status.text = plugin.statusText()
+                b.status.text = plugin.statusText
             }
         }
     }
@@ -222,7 +223,7 @@ class RecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: NsClientLogViewHolder, position: Int) {
         val item = logList[position]
-        holder.binding.logText.text = HtmlHelper.fromHtml(item.log)
+        holder.binding.logText.text = HtmlHelper.fromHtml(item.toPreparedHtml().toString())
     }
 
     override fun getItemCount(): Int = logList.size
