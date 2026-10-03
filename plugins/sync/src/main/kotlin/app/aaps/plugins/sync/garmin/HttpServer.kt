@@ -4,8 +4,6 @@ import android.os.StrictMode
 import androidx.annotation.VisibleForTesting
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
-// TODO: ThreadUtil 参照不可のため一時的にコメントアウト (要再実装)
-// import app.aaps.core.utils.pump.ThreadUtil
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.Closeable
@@ -83,7 +81,6 @@ class HttpServer internal constructor(private var aapsLogger: AAPSLogger, val po
         endpoints[path] = endpoint
     }
 
-    // @Suppress("all")
     private fun respond(
         @Suppress("SameParameterValue") code: Int,
         body: CharSequence,
@@ -167,7 +164,6 @@ class HttpServer internal constructor(private var aapsLogger: AAPSLogger, val po
             val socket = serverSocket!!.accept()
             aapsLogger.info(LTag.GARMIN, "accept " + socket.remoteSocketAddress)
             workerExecutor.execute {
-                // TODO: ThreadUtil 参照不可のため Thread.currentThread().id を使用 (要再実装)
                 Thread.currentThread().name = "worker" + Thread.currentThread().id
                 try {
                     socket.use { s ->
@@ -253,7 +249,6 @@ class HttpServer internal constructor(private var aapsLogger: AAPSLogger, val po
                 body = readBody(input, contentLength)
                 if (("application/x-www-form-urlencoded" == contentType)) {
                     uri = URI(uri.scheme, uri.userInfo, uri.host, uri.port, uri.path, body, null)
-                    // uri.encodedQuery(body)
                     body = null
                 } else if ("application/json" != contentType && body.isNotBlank()) {
                     body = null
