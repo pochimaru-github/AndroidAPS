@@ -182,17 +182,7 @@ class GarminDeviceClient(
         val payload = intent.getSerializableExtra(EXTRA_PAYLOAD)
         aapsLogger.info(LTag.GARMIN, "onReceiveMessage ${app.device.id}${app.id} status=$status payload=$payload")
         if (status == IQMessageStatus.SUCCESS && payload != null) {
-            val parcel = Parcel.obtain()
-            try {
-                parcel.writeValue(payload)
-                parcel.setDataPosition(0)
-                val message = IQMessage(parcel)
-                receiver.onMessageReceived(app, message)
-            } catch (e: Exception) {
-                aapsLogger.error(LTag.GARMIN, "failed to parse received IQMessage", e)
-            } finally {
-                parcel.recycle()
-            }
+            receiver.onMessage(app, payload)
         }
     }
 
