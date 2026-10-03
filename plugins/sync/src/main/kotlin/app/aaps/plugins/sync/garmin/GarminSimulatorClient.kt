@@ -2,9 +2,8 @@ package app.aaps.plugins.sync.garmin
 
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
-// TODO: Connect IQ SDK 参照不可のため一時的にコメントアウト (要再実装)
-// import com.garmin.android.connectiq.IQApp
-// import com.garmin.android.connectiq.IQApp.IQAppStatus
+import com.garmin.android.connectiq.IQApp
+import com.garmin.android.connectiq.IQApp.IQAppStatus
 import io.reactivex.rxjava3.disposables.Disposable
 import org.jetbrains.annotations.VisibleForTesting
 import java.io.InputStream
@@ -37,9 +36,9 @@ class GarminSimulatorClient(
     private val serverSocket = ServerSocket()
     private val connections: MutableList<Connection> = Collections.synchronizedList(mutableListOf())
     private var nextDeviceId = AtomicLong(1)
-    // TODO: Connect IQ SDK (IQApp) 参照不可のため一時的にコメントアウト (要再実装)
-    // @VisibleForTesting
-    // val iqApp = IQApp("SimApp", IQAppStatus.INSTALLED, "Simulator", 1)
+
+    @VisibleForTesting
+    val iqApp = IQApp("SimApp", IQAppStatus.INSTALLED, "Simulator", 1)
     private val readyLock = ReentrantLock()
     private val readyCond = readyLock.newCondition()
     override val connectedDevices: List<GarminDevice> get() = connections.map { c -> c.device }
@@ -81,8 +80,7 @@ class GarminSimulatorClient(
                     val data = readAvailable(socket.inputStream) ?: break
                     if (data.isNotEmpty()) {
                         kotlin.runCatching {
-                            // TODO: Connect IQ SDK 参照不可のため一時的にコメントアウト (要再実装)
-                            // receiver.onReceiveMessage(this@GarminSimulatorClient, device.id, iqApp.applicationId, data)
+                            receiver.onReceiveMessage(this@GarminSimulatorClient, device.id, iqApp.applicationId, data)
                         }
                     }
                 } catch (e: SocketException) {
