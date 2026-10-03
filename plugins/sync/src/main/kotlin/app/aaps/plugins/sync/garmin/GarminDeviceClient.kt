@@ -125,7 +125,7 @@ class GarminDeviceClient(
             val service = ciqService ?: return emptyList()
             return try {
                 val devices = service.knownDevices
-                devices?.map { GarminDevice(it) } ?: emptyList()
+                devices?.map { GarminDevice(this@GarminDeviceClient, it) } ?: emptyList()
             } catch (e: Exception) {
                 aapsLogger.error(LTag.GARMIN, "failed to get connected devices", e)
                 emptyList()
@@ -181,7 +181,7 @@ class GarminDeviceClient(
         val payload = intent.getSerializableExtra(EXTRA_PAYLOAD)
         aapsLogger.info(LTag.GARMIN, "onReceiveMessage ${app.device.id}${app.id} status=$status payload=$payload")
         if (status == IQMessageStatus.SUCCESS && payload != null) {
-            val message = IQMessage(app.device.device, IQApp(app.id), payload)
+            val message = IQMessage(payload)
             receiver.onMessage(app, message)
         }
     }
@@ -264,14 +264,19 @@ class GarminDeviceClient(
             aapsLogger.warn(LTag.GARMIN, "sendMessage failed: no service $msg")
             return
         }
+        val device = msg.app.device.iqDevice
+        if (device == null) {
+            aapsLogger.warn(LTag.GARMIN, "sendMessage failed: no IQDevice $msg")
+            return
+        }
         msg.attempt++
         msg.lastAttempt = Instant.now()
-        val device = msg.app.device.device
         val app = IQApp(msg.app.id)
+        val iqMessage = IQMessage(msg.data)
 
         try {
-            aapsLogger.info(LTag.GARMIN, "sending message to ${device.friendlyName} ${app.appId} attempt=${msg.attempt}")
-            service.sendMessage(device, app, msg.data, sendMessageAction)
+            aapsLogger.info(LTag.GARMIN, "sending message to ${device.friendlyName} ${msg.app.id} attempt=${msg.attempt}")
+            service.sendMessage(iqMessage, device, app)
         } catch (e: Exception) {
             aapsLogger.error(LTag.GARMIN, "sendMessage exception", e)
         }
