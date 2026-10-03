@@ -31,7 +31,6 @@ import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.core.utils.HtmlHelper
-import app.aaps.plugins.sync.R
 import app.aaps.plugins.sync.databinding.NsClientFragmentBinding
 import app.aaps.plugins.sync.databinding.NsClientLogItemBinding
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiData
@@ -88,14 +87,14 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.recyclerView.layoutManager = FixedLinearLayoutManager(requireContext())
-        binding.recyclerView.adapter = RecyclerViewAdapter(nsClientPlugin?.listLog ?: emptyList())
+        binding.recyclerview.layoutManager = FixedLinearLayoutManager(requireContext())
+        binding.recyclerview.adapter = RecyclerViewAdapter(nsClientPlugin?.listLog ?: emptyList())
     }
 
     override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
-        menu.add(Menu.FIRST, ID_MENU_CLEAR_LOG, 0, rh.gs(R.string.clear_log)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-        menu.add(Menu.FIRST, ID_MENU_RESTART, 0, rh.gs(R.string.restart)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-        menu.add(Menu.FIRST, ID_MENU_SEND_NOW, 0, rh.gs(R.string.deliver_now)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu.add(Menu.FIRST, ID_MENU_CLEAR_LOG, 0, rh.gs(app.aaps.core.R.string.clear_log)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu.add(Menu.FIRST, ID_MENU_RESTART, 0, rh.gs(app.aaps.core.R.string.restart)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu.add(Menu.FIRST, ID_MENU_SEND_NOW, 0, rh.gs(app.aaps.core.R.string.deliver_now)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         menu.add(Menu.FIRST, ID_MENU_FULL_SYNC, 0, rh.gs(app.aaps.core.R.string.full_sync)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         MenuCompat.setGroupDividerEnabled(menu, true)
     }
@@ -202,7 +201,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
         _binding?.let { b ->
             nsClientPlugin?.let { plugin ->
                 synchronized(plugin.listLog) {
-                    b.recyclerView.adapter = RecyclerViewAdapter(ArrayList(plugin.listLog))
+                    b.recyclerview.adapter = RecyclerViewAdapter(ArrayList(plugin.listLog))
                 }
             }
         }
