@@ -179,10 +179,10 @@ class GarminDeviceClient(
     private fun onReceiveMessage(app: GarminApplication, intent: Intent) {
         val statusName = intent.getStringExtra(EXTRA_STATUS)
         val status = statusName?.let { runCatching { IQMessageStatus.valueOf(it) }.getOrNull() } ?: IQMessageStatus.FAILURE_UNKNOWN
-        val payload = intent.getSerializableExtra(EXTRA_PAYLOAD)
+        val payload = intent.getByteArrayExtra(EXTRA_PAYLOAD) ?: (intent.getSerializableExtra(EXTRA_PAYLOAD) as? ByteArray)
         aapsLogger.info(LTag.GARMIN, "onReceiveMessage ${app.device.id}${app.id} status=$status payload=$payload")
         if (status == IQMessageStatus.SUCCESS && payload != null) {
-            receiver.onMessage(app, payload)
+            receiver.onReceiveMessage(this, app.device.id, app.id, payload)
         }
     }
 
@@ -204,9 +204,11 @@ class GarminDeviceClient(
                     retryMessage(deviceId, appId)
                 } else {
                     aapsLogger.error(LTag.GARMIN, "send message failed definitively $deviceId$appId")
+                    receiver.onSendMessage(this, deviceId, appId, status.name)
                 }
             } else {
                 aapsLogger.info(LTag.GARMIN, "send message successful $deviceId$appId")
+                receiver.onSendMessage(this, deviceId, appId, null)
                 if (queue.isNotEmpty()) {
                     sendMessage(queue.peek()!!)
                 }
