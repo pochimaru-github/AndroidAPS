@@ -126,7 +126,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
                 OKDialog.show(
                     context = requireContext(),
                     title = rh.gs(R.string.full_sync),
-                    message = rh.gs(R.string.full_sync_confirm),
+                    message = rh.gs(R.string.full_sync),
                     runOnDismiss = true,
                     runnable = Runnable {
                         handler.post {
@@ -185,7 +185,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
     private fun updateQueue() {
         _binding?.let { b ->
             nsClientPlugin?.let { plugin ->
-                b.queue.text = plugin.queueText
+                b.queue.text = plugin.name
             }
         }
     }
@@ -193,7 +193,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
     private fun updateStatus() {
         _binding?.let { b ->
             nsClientPlugin?.let { plugin ->
-                b.status.text = plugin.statusText
+                b.status.text = plugin.name
             }
         }
     }
