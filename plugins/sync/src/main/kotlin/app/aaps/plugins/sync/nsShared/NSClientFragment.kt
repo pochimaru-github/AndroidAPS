@@ -32,13 +32,11 @@ import app.aaps.core.interfaces.rx.events.EventNSClientNewLog
 import app.aaps.core.interfaces.rx.events.EventNSClientRestart
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.interfaces.Preferences
-// TODO: 未解決参照につきコメントアウト (要再実装)
-// import app.aaps.core.ui.dialogs.OKDialog
-// import app.aaps.core.utils.HtmlHelper
+import app.aaps.core.ui.dialogs.OKDialog
+import app.aaps.core.utils.HtmlHelper
 import app.aaps.plugins.sync.R
-// TODO: databinding 未解決参照につきコメントアウト (要再実装)
-// import app.aaps.plugins.sync.databinding.NsClientFragmentBinding
-// import app.aaps.plugins.sync.databinding.NsClientLogItemBinding
+import app.aaps.plugins.sync.databinding.NsClientFragmentBinding
+import app.aaps.plugins.sync.databinding.NsClientLogItemBinding
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiData
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiQueue
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiStatus
@@ -77,6 +75,9 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
     private val disposable = CompositeDisposable()
     private var handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
 
+    private var _binding: NsClientFragmentBinding? = null
+    private val binding get() = _binding!!
+
     class FixedLinearLayoutManager(context: Context?, @RecyclerView.Orientation orientation: Int = RecyclerView.VERTICAL, reverseLayout: Boolean = false) :
         LinearLayoutManager(context, orientation, reverseLayout) {
 
@@ -85,12 +86,14 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-        return inflater.inflate(R.layout.ns_client_fragment, container, false)
+        _binding = NsClientFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // TODO: ViewBinding 復旧時にUIバインディング処理を適用 (要再実装)
+        binding.recyclerView.layoutManager = FixedLinearLayoutManager(requireContext())
+        binding.recyclerView.adapter = RecyclerViewAdapter(nsClientPlugin?.listLog ?: emptyList())
     }
 
     override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
@@ -124,11 +127,17 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
             }
 
             ID_MENU_FULL_SYNC -> {
-                // TODO: OKDialog オーバーロードおよびフル同期のダイアログ表示を再実装
-                handler.post {
-                    nsClientPlugin?.resetToFullSync()
-                    nsClientPlugin?.resend("FULL_SYNC")
-                }
+                OKDialog.show(
+                    requireContext(),
+                    rh.gs(R.string.full_sync),
+                    rh.gs(R.string.full_sync_confirm),
+                    Runnable {
+                        handler.post {
+                            nsClientPlugin?.resetToFullSync()
+                            nsClientPlugin?.resend("FULL_SYNC")
+                        }
+                    }
+                )
                 true
             }
 
@@ -137,6 +146,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        _binding = null
     }
 
     override fun onResume() {
@@ -176,15 +186,29 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
     }
 
     private fun updateQueue() {
-        // TODO: ViewBinding 復旧時にキュー数の表示処理を再実装
+        _binding?.let { b ->
+            nsClientPlugin?.let { plugin ->
+                b.queue.text = plugin.queueText()
+            }
+        }
     }
 
     private fun updateStatus() {
-        // TODO: ViewBinding 復旧時にステータス表示処理を再実装
+        _binding?.let { b ->
+            nsClientPlugin?.let { plugin ->
+                b.status.text = plugin.statusText()
+            }
+        }
     }
 
     private fun updateLog() {
-        // TODO: ViewBinding 復旧時にログ表示処理を再実装
+        _binding?.let { b ->
+            nsClientPlugin?.let { plugin ->
+                synchronized(plugin.listLog) {
+                    b.recyclerView.adapter = RecyclerViewAdapter(ArrayList(plugin.listLog))
+                }
+            }
+        }
     }
 
 }
@@ -193,17 +217,16 @@ class RecyclerViewAdapter(
     private var logList: List<EventNSClientNewLog>
 ) : RecyclerView.Adapter<RecyclerViewAdapter.NsClientLogViewHolder>() {
 
-    class NsClientLogViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        // TODO: NsClientLogItemBinding 復旧時にバインディングプロパティを再実装
-    }
+    class NsClientLogViewHolder(val binding: NsClientLogItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): NsClientLogViewHolder {
-        val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.ns_client_log_item, viewGroup, false)
-        return NsClientLogViewHolder(view)
+        val binding = NsClientLogItemBinding.inflate(LayoutInflater.from(viewGroup.context), viewGroup, false)
+        return NsClientLogViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: NsClientLogViewHolder, position: Int) {
-        // TODO: logText の HTML 描画処理を再実装
+        val log = logList[position]
+        holder.binding.logText.text = HtmlHelper.fromHtml(log.log)
     }
 
     override fun getItemCount(): Int = logList.size
