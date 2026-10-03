@@ -76,6 +76,9 @@ dependencies {
     implementation(libs.androidx.room)
     implementation(libs.androidx.work.runtime)
 
+    // Garmin Connect IQ SDK 依存の追加
+    implementation(libs.com.garmin.connectiq)
+
     // Gson & Network & Socket.io
     implementation(libs.com.google.code.gson)
     // WearableListenerService の型情報を他モジュール(KSP/Dagger)へ伝播させるため api に変更
