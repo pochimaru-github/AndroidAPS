@@ -15,12 +15,9 @@ import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import app.aaps.core.data.ue.Action
-import app.aaps.core.data.ue.Sources
 import app.aaps.core.interfaces.configuration.Config
 import app.aaps.core.interfaces.db.PersistenceLayer
 import app.aaps.core.interfaces.logging.AAPSLogger
-import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.logging.UserEntryLogger
 import app.aaps.core.interfaces.plugin.ActivePlugin
 import app.aaps.core.interfaces.plugin.PluginBase
@@ -40,7 +37,6 @@ import app.aaps.plugins.sync.databinding.NsClientLogItemBinding
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiData
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiQueue
 import app.aaps.plugins.sync.nsShared.events.EventNSClientUpdateGuiStatus
-import app.aaps.plugins.sync.nsclientV3.keys.NsclientBooleanKey
 import dagger.android.support.DaggerFragment
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -100,7 +96,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
         menu.add(Menu.FIRST, ID_MENU_CLEAR_LOG, 0, rh.gs(R.string.clear_log)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         menu.add(Menu.FIRST, ID_MENU_RESTART, 0, rh.gs(R.string.restart)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         menu.add(Menu.FIRST, ID_MENU_SEND_NOW, 0, rh.gs(R.string.deliver_now)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-        menu.add(Menu.FIRST, ID_MENU_FULL_SYNC, 0, rh.gs(R.string.full_sync)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu.add(Menu.FIRST, ID_MENU_FULL_SYNC, 0, rh.gs(app.aaps.core.R.string.full_sync)).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         MenuCompat.setGroupDividerEnabled(menu, true)
     }
 
@@ -128,10 +124,11 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
 
             ID_MENU_FULL_SYNC -> {
                 OKDialog.show(
-                    requireContext(),
-                    rh.gs(R.string.full_sync),
-                    rh.gs(R.string.full_sync_confirm),
-                    Runnable {
+                    context = requireContext(),
+                    title = rh.gs(app.aaps.core.R.string.full_sync),
+                    message = rh.gs(app.aaps.core.R.string.full_sync_confirm),
+                    runOnDismiss = true,
+                    runnable = Runnable {
                         handler.post {
                             nsClientPlugin?.resetToFullSync()
                             nsClientPlugin?.resend("FULL_SYNC")
@@ -225,8 +222,8 @@ class RecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: NsClientLogViewHolder, position: Int) {
-        val log = logList[position]
-        holder.binding.logText.text = HtmlHelper.fromHtml(log.log)
+        val item = logList[position]
+        holder.binding.logText.text = HtmlHelper.fromHtml(item.log)
     }
 
     override fun getItemCount(): Int = logList.size
