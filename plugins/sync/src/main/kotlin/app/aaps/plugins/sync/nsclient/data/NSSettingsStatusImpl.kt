@@ -117,7 +117,7 @@ class NSSettingsStatusImpl @Inject constructor(
         if (context != null) {
             OKDialog.show(
                 context = context,
-                title = rh.gs(app.aaps.core.R.string.ok),
+                title = rh.gs(android.R.string.ok),
                 message = "",
                 runnable = action
             )
