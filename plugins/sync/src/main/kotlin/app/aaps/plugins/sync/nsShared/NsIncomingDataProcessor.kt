@@ -26,35 +26,32 @@ import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.BooleanNonKey
 import app.aaps.core.keys.LongNonKey
 import app.aaps.core.keys.interfaces.Preferences
-// TODO: nssdk / utils 未解決参照につきコメントアウト (要再実装)
-// import app.aaps.core.nssdk.localmodel.entry.NSSgvV3
-// import app.aaps.core.nssdk.localmodel.food.NSFood
-// import app.aaps.core.nssdk.localmodel.treatment.NSBolus
-// import app.aaps.core.nssdk.localmodel.treatment.NSBolusWizard
-// import app.aaps.core.nssdk.localmodel.treatment.NSCarbs
-// import app.aaps.core.nssdk.localmodel.treatment.NSEffectiveProfileSwitch
-// import app.aaps.core.nssdk.localmodel.treatment.NSExtendedBolus
-// import app.aaps.core.nssdk.localmodel.treatment.NSOfflineEvent
-// import app.aaps.core.nssdk.localmodel.treatment.NSProfileSwitch
-// import app.aaps.core.nssdk.localmodel.treatment.NSTemporaryBasal
-// import app.aaps.core.nssdk.localmodel.treatment.NSTemporaryTarget
-// import app.aaps.core.nssdk.localmodel.treatment.NSTherapyEvent
-// import app.aaps.core.nssdk.localmodel.treatment.NSTreatment
-// import app.aaps.core.utils.JsonHelper
+import app.aaps.core.nssdk.localmodel.entry.NSSgvV3
+import app.aaps.core.nssdk.localmodel.food.NSFood
+import app.aaps.core.nssdk.localmodel.treatment.NSBolus
+import app.aaps.core.nssdk.localmodel.treatment.NSBolusWizard
+import app.aaps.core.nssdk.localmodel.treatment.NSCarbs
+import app.aaps.core.nssdk.localmodel.treatment.NSEffectiveProfileSwitch
+import app.aaps.core.nssdk.localmodel.treatment.NSExtendedBolus
+import app.aaps.core.nssdk.localmodel.treatment.NSOfflineEvent
+import app.aaps.core.nssdk.localmodel.treatment.NSProfileSwitch
+import app.aaps.core.nssdk.localmodel.treatment.NSTemporaryBasal
+import app.aaps.core.nssdk.localmodel.treatment.NSTemporaryTarget
+import app.aaps.core.nssdk.localmodel.treatment.NSTherapyEvent
+import app.aaps.core.nssdk.localmodel.treatment.NSTreatment
 import app.aaps.plugins.sync.nsclient.extensions.fromJson
-// TODO: nssdk 依存拡張機能につきコメントアウト (要再実装)
-// import app.aaps.plugins.sync.nsclientV3.extensions.toBolus
-// import app.aaps.plugins.sync.nsclientV3.extensions.toBolusCalculatorResult
-// import app.aaps.plugins.sync.nsclientV3.extensions.toCarbs
-// import app.aaps.plugins.sync.nsclientV3.extensions.toEffectiveProfileSwitch
-// import app.aaps.plugins.sync.nsclientV3.extensions.toExtendedBolus
-// import app.aaps.plugins.sync.nsclientV3.extensions.toFood
-// import app.aaps.plugins.sync.nsclientV3.extensions.toGV
-// import app.aaps.plugins.sync.nsclientV3.extensions.toProfileSwitch
-// import app.aaps.plugins.sync.nsclientV3.extensions.toRunningMode
-// import app.aaps.plugins.sync.nsclientV3.extensions.toTemporaryBasal
-// import app.aaps.plugins.sync.nsclientV3.extensions.toTemporaryTarget
-// import app.aaps.plugins.sync.nsclientV3.extensions.toTherapyEvent
+import app.aaps.plugins.sync.nsclientV3.extensions.toBolus
+import app.aaps.plugins.sync.nsclientV3.extensions.toBolusCalculatorResult
+import app.aaps.plugins.sync.nsclientV3.extensions.toCarbs
+import app.aaps.plugins.sync.nsclientV3.extensions.toEffectiveProfileSwitch
+import app.aaps.plugins.sync.nsclientV3.extensions.toExtendedBolus
+import app.aaps.plugins.sync.nsclientV3.extensions.toFood
+import app.aaps.plugins.sync.nsclientV3.extensions.toGV
+import app.aaps.plugins.sync.nsclientV3.extensions.toProfileSwitch
+import app.aaps.plugins.sync.nsclientV3.extensions.toRunningMode
+import app.aaps.plugins.sync.nsclientV3.extensions.toTemporaryBasal
+import app.aaps.plugins.sync.nsclientV3.extensions.toTemporaryTarget
+import app.aaps.plugins.sync.nsclientV3.extensions.toTherapyEvent
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
@@ -115,7 +112,17 @@ class NsIncomingDataProcessor @Inject constructor(
                     aapsLogger.debug(LTag.NSCLIENT, "Ignoring record with wrong timestamp: $sgv")
             }
         } else if (sgvs is List<*>) { // V3 client
-            // TODO: NSSgvV3 未解決参照につき再実装
+            sgvs.filterIsInstance<NSSgvV3>().forEach { sgv ->
+                val gv = sgv.toGV()
+                if (gv != null) {
+                    if (gv.timestamp < dateUtil.now() + T.mins(1).msecs() && gv.timestamp > latestDateInReceivedData) {
+                        latestDateInReceivedData = gv.timestamp
+                        glucoseValues += gv
+                    } else {
+                        aapsLogger.debug(LTag.NSCLIENT, "Ignoring record with wrong timestamp: $gv")
+                    }
+                }
+            }
         }
         if (glucoseValues.isNotEmpty()) {
             activePlugin.activeNsClient?.updateLatestBgReceivedIfNewer(latestDateInReceivedData)
@@ -135,8 +142,82 @@ class NsIncomingDataProcessor @Inject constructor(
      * @return true if there was an accepted treatment
      */
     fun processTreatments(treatments: List<*>, doFullSync: Boolean): Boolean {
-        // TODO: nssdk (NSTreatment 他) 未解決参照につき再実装
-        return false
+        var acceptedTreatment = false
+        treatments.filterIsInstance<NSTreatment>().forEach { treatment ->
+            when (treatment) {
+                is NSBolus -> {
+                    val bolus = treatment.toBolus()
+                    if (bolus != null) {
+                        storeDataForDb.addToBoluses(listOf(bolus))
+                        acceptedTreatment = true
+                    }
+                }
+                is NSBolusWizard -> {
+                    val bcr = treatment.toBolusCalculatorResult()
+                    if (bcr != null) {
+                        storeDataForDb.addToBolusCalculatorResults(listOf(bcr))
+                        acceptedTreatment = true
+                    }
+                }
+                is NSCarbs -> {
+                    val carbs = treatment.toCarbs()
+                    if (carbs != null) {
+                        storeDataForDb.addToCarbs(listOf(carbs))
+                        acceptedTreatment = true
+                    }
+                }
+                is NSEffectiveProfileSwitch -> {
+                    val eps = treatment.toEffectiveProfileSwitch()
+                    if (eps != null) {
+                        storeDataForDb.addToEffectiveProfileSwitches(listOf(eps))
+                        acceptedTreatment = true
+                    }
+                }
+                is NSExtendedBolus -> {
+                    val eb = treatment.toExtendedBolus()
+                    if (eb != null) {
+                        storeDataForDb.addToExtendedBoluses(listOf(eb))
+                        acceptedTreatment = true
+                    }
+                }
+                is NSOfflineEvent -> {
+                    val rm = treatment.toRunningMode()
+                    if (rm != null) {
+                        storeDataForDb.addToRunningModes(listOf(rm))
+                        acceptedTreatment = true
+                    }
+                }
+                is NSProfileSwitch -> {
+                    val ps = treatment.toProfileSwitch()
+                    if (ps != null) {
+                        storeDataForDb.addToProfileSwitches(listOf(ps))
+                        acceptedTreatment = true
+                    }
+                }
+                is NSTemporaryBasal -> {
+                    val tb = treatment.toTemporaryBasal()
+                    if (tb != null) {
+                        storeDataForDb.addToTemporaryBasals(listOf(tb))
+                        acceptedTreatment = true
+                    }
+                }
+                is NSTemporaryTarget -> {
+                    val tt = treatment.toTemporaryTarget()
+                    if (tt != null) {
+                        storeDataForDb.addToTemporaryTargets(listOf(tt))
+                        acceptedTreatment = true
+                    }
+                }
+                is NSTherapyEvent -> {
+                    val te = treatment.toTherapyEvent()
+                    if (te != null) {
+                        storeDataForDb.addToTherapyEvents(listOf(te))
+                        acceptedTreatment = true
+                    }
+                }
+            }
+        }
+        return acceptedTreatment
     }
 
     fun processFood(data: Any) {
@@ -172,7 +253,10 @@ class NsIncomingDataProcessor @Inject constructor(
                     }
                 }
             } else if (data is List<*>) {
-                // TODO: NSFood 未解決参照につき再実装
+                data.filterIsInstance<NSFood>().forEach { food ->
+                    val fd = food.toFood()
+                    if (fd != null) foods += fd
+                }
             }
             storeDataForDb.addToFoods(foods)
         } catch (error: Exception) {
