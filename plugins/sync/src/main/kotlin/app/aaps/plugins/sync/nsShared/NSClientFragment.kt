@@ -86,7 +86,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: View?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.recyclerview.layoutManager = FixedLinearLayoutManager(requireContext())
         binding.recyclerview.adapter = RecyclerViewAdapter(nsClientPlugin?.listLog ?: emptyList())
