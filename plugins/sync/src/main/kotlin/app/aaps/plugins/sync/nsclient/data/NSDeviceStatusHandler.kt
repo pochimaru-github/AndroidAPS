@@ -12,9 +12,6 @@ import app.aaps.core.interfaces.workflow.CalculationWorkflow
 import app.aaps.core.keys.BooleanNonKey
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.nssdk.localmodel.devicestatus.NSDeviceStatus
-// TODO: utils (HtmlHelper, JsonHelper) 未解決参照につきコメントアウト (要再実装)
-// import app.aaps.core.utils.HtmlHelper
-// import app.aaps.core.utils.JsonHelper
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
@@ -48,8 +45,6 @@ class NSDeviceStatusHandler @Inject constructor(
             }
             if (config.AAPSCLIENT && !configurationDetected) {
                 nsDeviceStatus.configuration?.let {
-                    // copy configuration of Insulin and Sensitivity from main AAPS
-                    // runningConfiguration.apply(it)
                     configurationDetected = true // pick only newest
                 }
             }
