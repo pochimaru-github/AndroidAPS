@@ -23,7 +23,6 @@ import io.reactivex.rxjava3.kotlin.plusAssign
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// TODO: Re-inherit from proper AAPS base fragment class when core UI classes are updated
 @Singleton
 class WearFragment @Inject constructor(
     private val aapsLogger: AAPSLogger,
@@ -79,8 +78,6 @@ class WearFragment @Inject constructor(
         wearPlugin.savedCustomWatchface?.let {
             val metadata = it.metadata
             val drawable = (it.resData["custom_watchface.png"] as? ByteArray)?.toDrawable(resources)
-            // TODO: Re-bind layout views when WearFragmentBinding XML IDs are verified
-            /*
             binding.customWatchface.setImageDrawable(drawable)
             var titleText = rh.gs(CwfMetadataKey.CWF_NAME.label, metadata[CwfMetadataKey.CWF_NAME])
             metadata[CwfMetadataKey.CWF_AUTHOR_VERSION]?.let { authorVersion ->
@@ -88,7 +85,6 @@ class WearFragment @Inject constructor(
             }
             binding.cwfTitle.text = titleText
             binding.author.text = rh.gs(CwfMetadataKey.CWF_AUTHOR.label, metadata[CwfMetadataKey.CWF_AUTHOR] ?: "")
-            */
         }
     }
 }
