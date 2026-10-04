@@ -148,70 +148,70 @@ class NsIncomingDataProcessor @Inject constructor(
                 is NSBolus -> {
                     val bolus = treatment.toBolus()
                     if (bolus != null) {
-                        storeDataForDb.addToBoluses(listOf(bolus))
+                        storeDataForDb.addToBoluses(bolus)
                         acceptedTreatment = true
                     }
                 }
                 is NSBolusWizard -> {
                     val bcr = treatment.toBolusCalculatorResult()
                     if (bcr != null) {
-                        storeDataForDb.addToBolusCalculatorResults(listOf(bcr))
+                        storeDataForDb.addToBolusCalculatorResults(bcr)
                         acceptedTreatment = true
                     }
                 }
                 is NSCarbs -> {
                     val carbs = treatment.toCarbs()
                     if (carbs != null) {
-                        storeDataForDb.addToCarbs(listOf(carbs))
+                        storeDataForDb.addToCarbs(carbs)
                         acceptedTreatment = true
                     }
                 }
                 is NSEffectiveProfileSwitch -> {
-                    val eps = treatment.toEffectiveProfileSwitch()
+                    val eps = treatment.toEffectiveProfileSwitch(dateUtil = dateUtil)
                     if (eps != null) {
-                        storeDataForDb.addToEffectiveProfileSwitches(listOf(eps))
+                        storeDataForDb.addToEffectiveProfileSwitches(eps)
                         acceptedTreatment = true
                     }
                 }
                 is NSExtendedBolus -> {
                     val eb = treatment.toExtendedBolus()
                     if (eb != null) {
-                        storeDataForDb.addToExtendedBoluses(listOf(eb))
+                        storeDataForDb.addToExtendedBoluses(eb)
                         acceptedTreatment = true
                     }
                 }
                 is NSOfflineEvent -> {
                     val rm = treatment.toRunningMode()
                     if (rm != null) {
-                        storeDataForDb.addToRunningModes(listOf(rm))
+                        storeDataForDb.addToRunningModes(rm)
                         acceptedTreatment = true
                     }
                 }
                 is NSProfileSwitch -> {
-                    val ps = treatment.toProfileSwitch()
+                    val ps = treatment.toProfileSwitch(activePlugin = activePlugin, dateUtil = dateUtil)
                     if (ps != null) {
-                        storeDataForDb.addToProfileSwitches(listOf(ps))
+                        storeDataForDb.addToProfileSwitches(ps)
                         acceptedTreatment = true
                     }
                 }
                 is NSTemporaryBasal -> {
                     val tb = treatment.toTemporaryBasal()
                     if (tb != null) {
-                        storeDataForDb.addToTemporaryBasals(listOf(tb))
+                        storeDataForDb.addToTemporaryBasals(tb)
                         acceptedTreatment = true
                     }
                 }
                 is NSTemporaryTarget -> {
                     val tt = treatment.toTemporaryTarget()
                     if (tt != null) {
-                        storeDataForDb.addToTemporaryTargets(listOf(tt))
+                        storeDataForDb.addToTemporaryTargets(tt)
                         acceptedTreatment = true
                     }
                 }
                 is NSTherapyEvent -> {
                     val te = treatment.toTherapyEvent()
                     if (te != null) {
-                        storeDataForDb.addToTherapyEvents(listOf(te))
+                        storeDataForDb.addToTherapyEvents(te)
                         acceptedTreatment = true
                     }
                 }
