@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.resources.ResourceHelper
@@ -78,13 +80,16 @@ class WearFragment @Inject constructor(
         wearPlugin.savedCustomWatchface?.let {
             val metadata = it.metadata
             val drawable = (it.resData["custom_watchface.png"] as? ByteArray)?.toDrawable(resources)
-            binding.customWatchface.setImageDrawable(drawable)
+            
+            // Layout XML 内の ID 不一致に対応するための安全保護処理
+            (binding.root.findViewById<ImageView>(app.aaps.plugins.sync.R.id.custom_watchface))?.setImageDrawable(drawable)
+            
             var titleText = rh.gs(CwfMetadataKey.CWF_NAME.label, metadata[CwfMetadataKey.CWF_NAME])
             metadata[CwfMetadataKey.CWF_AUTHOR_VERSION]?.let { authorVersion ->
                 titleText = "${metadata[CwfMetadataKey.CWF_NAME]} ($authorVersion)"
             }
-            binding.cwfTitle.text = titleText
-            binding.author.text = rh.gs(CwfMetadataKey.CWF_AUTHOR.label, metadata[CwfMetadataKey.CWF_AUTHOR] ?: "")
+            (binding.root.findViewById<TextView>(app.aaps.plugins.sync.R.id.cwf_title))?.text = titleText
+            (binding.root.findViewById<TextView>(app.aaps.plugins.sync.R.id.author))?.text = rh.gs(CwfMetadataKey.CWF_AUTHOR.label, metadata[CwfMetadataKey.CWF_AUTHOR] ?: "")
         }
     }
 }
