@@ -97,7 +97,6 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
             metadata[CwfMetadataKey.CWF_AUTHOR_VERSION]?.let { authorVersion ->
                 title = "${metadata[CwfMetadataKey.CWF_NAME]} ($authorVersion)"
             }
-            // TODO: Re-implement ZipWatchfaceFormat when available
             val fileName = metadata[CwfMetadataKey.CWF_FILENAME] ?: ""
             binding.filelistName.text = rh.gs(CwfMetadataKey.CWF_FILENAME.label, fileName)
             binding.author.text = rh.gs(CwfMetadataKey.CWF_AUTHOR.label, metadata[CwfMetadataKey.CWF_AUTHOR] ?: "")
@@ -130,7 +129,6 @@ class CwfInfosActivity : TranslatedDaggerAppCompatActivity() {
         return false
     }
 
-    // TODO: Re-implement listVisibleView using updated Wear data classes
     @Suppress("UNUSED_PARAMETER")
     private fun listVisibleView(jsonString: String, allViews: Boolean = false): List<Pair<String, Boolean>> {
         return emptyList()
@@ -186,7 +184,6 @@ class ViewRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: CwfViewHolder, position: Int) {
         holder.itemView.isClickable = false
-        // TODO: Re-implement ViewKeys binding when Wear data classes are restored
     }
 }
 
