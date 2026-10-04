@@ -115,7 +115,12 @@ class NSSettingsStatusImpl @Inject constructor(
         }
 
         if (context != null) {
-            OKDialog.show(context, rh.gs(R.string.ns_settings_copied), action)
+            OKDialog.show(
+                context = context,
+                title = rh.gs(app.aaps.core.R.string.ok),
+                message = "",
+                runnable = action
+            )
         } else action.run()
     }
 }
