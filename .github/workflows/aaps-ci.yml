@@ -10,7 +10,7 @@ on:
       build_variant:
         description: 'Select Build Variant'
         required: true
-        default: 'FullRelease'
+        default: 'FullDebug'
 
 jobs:
   build:
@@ -34,12 +34,11 @@ jobs:
       - name: Build with Gradle
         run: |
           ./gradlew clean --no-daemon
-          ./gradlew :core:nssdk:compileReleaseKotlin --no-daemon
-          ./gradlew assembleFullRelease --stacktrace --info --no-build-cache --no-daemon --no-parallel -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=2g"
-        # run: ./gradlew clean :pump:combov2:compileReleaseKotlin -x :pump:combov2:kaptGenerateStubsReleaseKotlin -x :pump:combov2:kaptReleaseKotlin
+          ./gradlew :core:nssdk:compileDebugKotlin --no-daemon
+          ./gradlew assembleFullDebug --stacktrace --info --no-build-cache --no-daemon --no-parallel -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=2g"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AAPS-FullRelease-APK
+          name: AAPS-FullDebug-APK
           path: app/build/outputs/apk/**/*.apk
