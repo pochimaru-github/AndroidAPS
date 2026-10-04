@@ -86,7 +86,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: View?) {
         super.onViewCreated(view, savedInstanceState)
         binding.recyclerview.layoutManager = FixedLinearLayoutManager(requireContext())
         binding.recyclerview.adapter = RecyclerViewAdapter(nsClientPlugin?.listLog ?: emptyList())
@@ -185,7 +185,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
     private fun updateQueue() {
         _binding?.let { b ->
             nsClientPlugin?.let { plugin ->
-                b.queue.text = plugin.name
+                b.queue.text = plugin.status
             }
         }
     }
@@ -193,7 +193,7 @@ class NSClientFragment : DaggerFragment(), MenuProvider, PluginFragment {
     private fun updateStatus() {
         _binding?.let { b ->
             nsClientPlugin?.let { plugin ->
-                b.status.text = plugin.name
+                b.status.text = plugin.status
             }
         }
     }
