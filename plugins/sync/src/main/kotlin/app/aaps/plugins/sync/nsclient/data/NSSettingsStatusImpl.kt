@@ -17,105 +17,13 @@ import app.aaps.core.interfaces.rx.events.EventDismissNotification
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.keys.IntKey
 import app.aaps.core.keys.interfaces.Preferences
-// TODO: ui (OKDialog) / utils (JsonHelper) 未解決参照につきコメントアウト (要再実装)
-// import app.aaps.core.ui.dialogs.OKDialog
-// import app.aaps.core.utils.JsonHelper
+import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.plugins.sync.R
 import org.json.JSONException
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/*
- {
- "status": "ok",
- "name": "Nightscout",
- "version": "0.10.0-dev-20170423",
- "versionNum": 1000,
- "serverTime": "2017-06-12T07:46:56.006Z",
- "apiEnabled": true,
- "careportalEnabled": true,
- "boluscalcEnabled": true,
- "head": "96ee154",
- "settings": {
-     "units": "mmol",
-     "timeFormat": 24,
-     "nightMode": false,
-     "editMode": true,
-     "showRawbg": "always",
-     "customTitle": "Bara's CGM",
-     "theme": "colors",
-     "alarmUrgentHigh": true,
-     "alarmUrgentHighMins": [30, 60, 90, 120],
-     "alarmHigh": true,
-     "alarmHighMins": [30, 60, 90, 120],
-     "alarmLow": true,
-     "alarmLowMins": [15, 30, 45, 60],
-     "alarmUrgentLow": true,
-     "alarmUrgentLowMins": [15, 30, 45],
-     "alarmUrgentMins": [30, 60, 90, 120],
-     "alarmWarnMins": [30, 60, 90, 120],
-     "alarmTimeagoWarn": true,
-     "alarmTimeagoWarnMins": 15,
-     "alarmTimeagoUrgent": true,
-     "alarmTimeagoUrgentMins": 30,
-     "language": "cs",
-     "scaleY": "linear",
-     "showPlugins": "careportal boluscalc food bwp cage sage iage iob cob basal ar2 delta direction upbat rawbg",
-     "showForecast": "ar2",
-     "focusHours": 3,
-     "heartbeat": 60,
-     "baseURL": "http:\/\/xxxxxxxxxxxx",
-     "authDefaultRoles": "readable",
-     "thresholds": {
-         "bgHigh": 252,
-         "bgTargetTop": 180,
-         "bgTargetBottom": 72,
-         "bgLow": 71
-     },
-     "DEFAULT_FEATURES": ["bgnow", "delta", "direction", "timeago", "devicestatus", "upbat", "errorcodes", "profile"],
-     "alarmTypes": ["predict"],
-     "enable": ["careportal", "boluscalc", "food", "bwp", "cage", "sage", "iage", "iob", "cob", "basal", "ar2", "rawbg", "pushover", "bgi", "pump", "openaps", "pushover", "treatmentnotify", "bgnow", "delta", "direction", "timeago", "devicestatus", "upbat", "profile", "ar2"]
- },
- "extendedSettings": {
-     "pump": {
-         "fields": "reservoir battery clock",
-         "urgentBattP": 26,
-         "warnBattP": 51
-     },
-     "openaps": {
-         "enableAlerts": true
-     },
-     "cage": {
-         "alerts": true,
-         "display": "days",
-         "urgent": 96,
-         "warn": 72
-     },
-     "sage": {
-         "alerts": true,
-         "urgent": 336,
-         "warn": 168
-     },
-     "iage": {
-         "alerts": true,
-         "urgent": 150,
-         "warn": 120
-     },
-     "basal": {
-         "render": "default"
-     },
-     "profile": {
-         "history": true,
-         "multiple": true
-     },
-     "devicestatus": {
-         "advanced": true
-     }
- },
- "activeProfile": "2016 +30%"
- }
- */
 @Singleton
 class NSSettingsStatusImpl @Inject constructor(
     private val aapsLogger: AAPSLogger,
@@ -207,8 +115,7 @@ class NSSettingsStatusImpl @Inject constructor(
         }
 
         if (context != null) {
-            // TODO: OKDialog 未解決参照につき直接実行 (要再実装)
-            action.run()
+            OKDialog.show(context, rh.gs(R.string.ns_settings_copied), action)
         } else action.run()
     }
 }
