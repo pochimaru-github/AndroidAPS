@@ -28,7 +28,7 @@ class FabricPrivacyImpl @Inject constructor(
     private val sharedPreferences: SharedPreferences // Injecting Preferences is causing circular dependencies
 ) : FabricPrivacy {
 
-    private val firebaseAnalytics: FirebaseAnalytics = Firebase.analytics
+    private val firebaseAnalytics: FirebaseAnalytics by lazy { Firebase.analytics }
 
     init {
         firebaseAnalytics.setAnalyticsCollectionEnabled(!java.lang.Boolean.getBoolean("disableFirebase") && fabricEnabled())
