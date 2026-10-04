@@ -5,8 +5,7 @@ import app.aaps.core.data.model.TE
 import app.aaps.core.data.pump.defs.PumpType
 import app.aaps.core.data.time.T
 import app.aaps.core.interfaces.utils.DateUtil
-// TODO: utils (JsonHelper) 未解決参照につきコメントアウト (要再実装)
-// import app.aaps.core.utils.JsonHelper
+import app.aaps.core.utils.JsonHelper
 import org.json.JSONObject
 
 fun RM.toJson(isAdd: Boolean, dateUtil: DateUtil): JSONObject {
@@ -43,21 +42,21 @@ fun RM.toJson(isAdd: Boolean, dateUtil: DateUtil): JSONObject {
 
 fun RM.Companion.fromJson(jsonObject: JSONObject): RM? {
     val timestamp =
-        (if (jsonObject.has("mills") && !jsonObject.isNull("mills")) jsonObject.optLong("mills") else null)
-            ?: (if (jsonObject.has("date") && !jsonObject.isNull("date")) jsonObject.optLong("date") else null)
+        JsonHelper.safeGetLongAllowNull(jsonObject, "mills", null)
+            ?: JsonHelper.safeGetLongAllowNull(jsonObject, "date", null)
             ?: return null
     val duration = jsonObject.optLong("duration", 0L)
-    val durationInMilliseconds = if (jsonObject.has("durationInMilliseconds") && !jsonObject.isNull("durationInMilliseconds")) jsonObject.optLong("durationInMilliseconds") else null
-    val originalDuration = if (jsonObject.has("originalDuration") && !jsonObject.isNull("originalDuration")) jsonObject.optLong("originalDuration") else null
-    val isValid = if (jsonObject.has("isValid")) jsonObject.optBoolean("isValid", true) else true
-    val id = (if (jsonObject.has("identifier") && !jsonObject.isNull("identifier")) jsonObject.optString("identifier") else null)
-        ?: (if (jsonObject.has("_id") && !jsonObject.isNull("_id")) jsonObject.optString("_id") else null)
+    val durationInMilliseconds = JsonHelper.safeGetLongAllowNull(jsonObject, "durationInMilliseconds", null)
+    val originalDuration = JsonHelper.safeGetLongAllowNull(jsonObject, "originalDuration", null)
+    val isValid = JsonHelper.safeGetBoolean(jsonObject, "isValid", true)
+    val id = JsonHelper.safeGetStringAllowNull(jsonObject, "identifier", null)
+        ?: JsonHelper.safeGetStringAllowNull(jsonObject, "_id", null)
         ?: return null
-    val pumpId = if (jsonObject.has("pumpId") && !jsonObject.isNull("pumpId")) jsonObject.optLong("pumpId") else null
-    val pumpTypeStr = if (jsonObject.has("pumpType") && !jsonObject.isNull("pumpType")) jsonObject.optString("pumpType") else null
+    val pumpId = JsonHelper.safeGetLongAllowNull(jsonObject, "pumpId", null)
+    val pumpTypeStr = JsonHelper.safeGetStringAllowNull(jsonObject, "pumpType", null)
     val pumpType = PumpType.fromString(pumpTypeStr)
-    val pumpSerial = if (jsonObject.has("pumpSerial") && !jsonObject.isNull("pumpSerial")) jsonObject.optString("pumpSerial") else null
-    val modeStr = if (jsonObject.has("mode") && !jsonObject.isNull("mode")) jsonObject.optString("mode") else DEFAULT_MODE.name
+    val pumpSerial = JsonHelper.safeGetStringAllowNull(jsonObject, "pumpSerial", null)
+    val modeStr = JsonHelper.safeGetStringAllowNull(jsonObject, "mode", DEFAULT_MODE.name) ?: DEFAULT_MODE.name
     val mode = RM.Mode.fromString(modeStr)
 
     return RM(
