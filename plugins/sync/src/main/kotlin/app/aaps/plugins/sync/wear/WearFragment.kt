@@ -81,15 +81,29 @@ class WearFragment @Inject constructor(
             val metadata = it.metadata
             val drawable = (it.resData["custom_watchface.png"] as? ByteArray)?.toDrawable(resources)
             
-            // Layout XML 内の ID 不一致に対応するための安全保護処理
-            (binding.root.findViewById<ImageView>(app.aaps.plugins.sync.R.id.custom_watchface))?.setImageDrawable(drawable)
-            
+            // 動的 ID 取得によりコンパイル時の R.id 静的参照エラーを回避
+            val context = context ?: return@let
+            val packageName = context.packageName
+
+            val customWatchfaceId = resources.getIdentifier("custom_watchface", "id", packageName)
+            if (customWatchfaceId != 0) {
+                binding.root.findViewById<ImageView>(customWatchfaceId)?.setImageDrawable(drawable)
+            }
+
             var titleText = rh.gs(CwfMetadataKey.CWF_NAME.label, metadata[CwfMetadataKey.CWF_NAME])
             metadata[CwfMetadataKey.CWF_AUTHOR_VERSION]?.let { authorVersion ->
                 titleText = "${metadata[CwfMetadataKey.CWF_NAME]} ($authorVersion)"
             }
-            (binding.root.findViewById<TextView>(app.aaps.plugins.sync.R.id.cwf_title))?.text = titleText
-            (binding.root.findViewById<TextView>(app.aaps.plugins.sync.R.id.author))?.text = rh.gs(CwfMetadataKey.CWF_AUTHOR.label, metadata[CwfMetadataKey.CWF_AUTHOR] ?: "")
+
+            val cwfTitleId = resources.getIdentifier("cwf_title", "id", packageName)
+            if (cwfTitleId != 0) {
+                binding.root.findViewById<TextView>(cwfTitleId)?.text = titleText
+            }
+
+            val authorId = resources.getIdentifier("author", "id", packageName)
+            if (authorId != 0) {
+                binding.root.findViewById<TextView>(authorId)?.text = rh.gs(CwfMetadataKey.CWF_AUTHOR.label, metadata[CwfMetadataKey.CWF_AUTHOR] ?: "")
+            }
         }
     }
 }
