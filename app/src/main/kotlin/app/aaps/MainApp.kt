@@ -114,6 +114,9 @@ class MainApp : DaggerApplication() {
     private val scope = CoroutineScope(Dispatchers.Default + Job())
 
     override fun onCreate() {
+        // Dagger による依存注入 (super.onCreate) より前に FirebaseApp を初期化
+        FirebaseApp.initializeApp(this)
+
         super.onCreate()
 
         // Here should be everything injected
