@@ -115,15 +115,16 @@ class MainApp : DaggerApplication() {
     private val scope = CoroutineScope(Dispatchers.Default + Job())
 
     override fun onCreate() {
-        // Dagger による依存注入 (super.onCreate) より前に FirebaseApp を確実に初期化
+        // Dagger による依存注入 (super.onCreate) より前に FirebaseApp を初期化
         if (FirebaseApp.getApps(this).isEmpty()) {
             try {
                 FirebaseApp.initializeApp(this)
             } catch (_: Exception) {
-                // リソースが定義されていない場合のフォールバック初期化
+                // リソースが定義されていない場合のフォールバック処理へ
             }
         }
-        // それでも初期化されていない場合はダミーの FirebaseOptions を用いて初期化
+    
+        // リソースが存在せず未初期化のままである場合、ダミーの FirebaseOptions で初期化
         if (FirebaseApp.getApps(this).isEmpty()) {
             val dummyOptions = FirebaseOptions.Builder()
                 .setApplicationId("1:100000000000:android:0000000000000000000000")
@@ -132,7 +133,7 @@ class MainApp : DaggerApplication() {
                 .build()
             FirebaseApp.initializeApp(this, dummyOptions)
         }
-
+    
         super.onCreate()
 
         // Here should be everything injected
