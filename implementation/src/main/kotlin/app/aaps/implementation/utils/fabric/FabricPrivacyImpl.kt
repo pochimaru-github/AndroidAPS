@@ -31,8 +31,16 @@ class FabricPrivacyImpl @Inject constructor(
     private val firebaseAnalytics: FirebaseAnalytics by lazy { Firebase.analytics }
 
     init {
-        firebaseAnalytics.setAnalyticsCollectionEnabled(!java.lang.Boolean.getBoolean("disableFirebase") && fabricEnabled())
-        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = !java.lang.Boolean.getBoolean("disableFirebase") && fabricEnabled()
+        try {
+            firebaseAnalytics.setAnalyticsCollectionEnabled(!java.lang.Boolean.getBoolean("disableFirebase") && fabricEnabled())
+        } catch (e: Exception) {
+            aapsLogger.debug(LTag.CORE, "Firebase Analytics not available: ${e.message}")
+        }
+        try {
+            FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = !java.lang.Boolean.getBoolean("disableFirebase") && fabricEnabled()
+        } catch (e: Exception) {
+            aapsLogger.debug(LTag.CORE, "Firebase Crashlytics not available: ${e.message}")
+        }
     }
 
     override fun setUserProperty(key: String, value: String) {
@@ -89,30 +97,35 @@ class FabricPrivacyImpl @Inject constructor(
     // Crashlytics log message
     override fun logMessage(message: String) {
         aapsLogger.info(LTag.CORE, "Crashlytics log message: $message")
-        FirebaseCrashlytics.getInstance().log(message)
+        try {
+            FirebaseCrashlytics.getInstance().log(message)
+        } catch (_: Exception) { }
     }
 
     // Crashlytics logException
     override fun logException(throwable: Throwable) {
         aapsLogger.error("Crashlytics log exception: ", throwable)
-        FirebaseCrashlytics.getInstance().recordException(throwable)
+        try {
+            FirebaseCrashlytics.getInstance().recordException(throwable)
+        } catch (_: Exception) { }
     }
-
     override fun fabricEnabled(): Boolean {
         return sharedPreferences.getBoolean(BooleanKey.MaintenanceEnableFabric.key, true)
     }
 
     override fun logWearException(wearException: EventData.WearException) {
         aapsLogger.debug(LTag.WEAR, "logWearException")
-        FirebaseCrashlytics.getInstance().apply {
-            setCustomKey("wear_exception", true)
-            setCustomKey("wear_board", wearException.board)
-            setCustomKey("wear_fingerprint", wearException.fingerprint)
-            setCustomKey("wear_sdk", wearException.sdk)
-            setCustomKey("wear_model", wearException.model)
-            setCustomKey("wear_manufacturer", wearException.manufacturer)
-            setCustomKey("wear_product", wearException.product)
-        }
+        try {
+            FirebaseCrashlytics.getInstance().apply {
+                setCustomKey("wear_exception", true)
+                setCustomKey("wear_board", wearException.board)
+                setCustomKey("wear_fingerprint", wearException.fingerprint)
+                setCustomKey("wear_sdk", wearException.sdk)
+                setCustomKey("wear_model", wearException.model)
+                setCustomKey("wear_manufacturer", wearException.manufacturer)
+                setCustomKey("wear_product", wearException.product)
+            }
+        } catch (_: Exception) { }
         logException(byteArrayToThrowable(wearException.exception))
     }
 
