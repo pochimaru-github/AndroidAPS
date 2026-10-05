@@ -381,7 +381,7 @@ class MainApp : DaggerApplication() {
             sp.remove("tidepool_subscription_id")
         }
 
-// Migrate loop mode
+        // Migrate loop mode
         if (config.APS && sp.contains("aps_mode")) {
             val mode = when (sp.getString("aps_mode", "CLOSED")) {
                 "OPEN"   -> RM.Mode.OPEN_LOOP
