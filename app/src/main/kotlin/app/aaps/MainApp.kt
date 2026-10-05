@@ -115,23 +115,19 @@ class MainApp : DaggerApplication() {
     private val scope = CoroutineScope(Dispatchers.Default + Job())
 
     override fun onCreate() {
-        // Dagger による依存注入 (super.onCreate) より前に FirebaseApp を初期化
+        // Dagger による依存注入 (super.onCreate) より前に FirebaseApp を直接ダミーオプションで確定初期化
         if (FirebaseApp.getApps(this).isEmpty()) {
             try {
-                FirebaseApp.initializeApp(this)
+                val dummyOptions = FirebaseOptions.Builder()
+                    .setApplicationId("1:100000000000:android:0000000000000000000000")
+                    .setApiKey("AIzaSyDummyApiKeyForAAPSInitialization00")
+                    .setProjectId("aaps-dummy-project")
+                    .setGcmSenderId("100000000000")
+                    .build()
+                FirebaseApp.initializeApp(this, dummyOptions)
             } catch (_: Exception) {
-                // リソースが定義されていない場合のフォールバック処理へ
+                // すでに初期化済み等の例外保護
             }
-        }
-    
-        // リソースが存在せず未初期化のままである場合、ダミーの FirebaseOptions で初期化
-        if (FirebaseApp.getApps(this).isEmpty()) {
-            val dummyOptions = FirebaseOptions.Builder()
-                .setApplicationId("1:100000000000:android:0000000000000000000000")
-                .setApiKey("AIzaSyDummyApiKeyForAAPSInitialization00")
-                .setProjectId("aaps-dummy-project")
-                .build()
-            FirebaseApp.initializeApp(this, dummyOptions)
         }
     
         super.onCreate()
