@@ -35,11 +35,10 @@
             </intent-filter>
         </activity>
 
-        <!-- PreferencesActivity の宣言を追加 -->
+        <!-- PreferencesActivity の宣言（android:label を削除） -->
         <activity
             android:name="app.aaps.activities.PreferencesActivity"
-            android:exported="false"
-            android:label="@string/preferences" />
+            android:exported="false" />
 
         <service
             android:name="app.aaps.MainService"
