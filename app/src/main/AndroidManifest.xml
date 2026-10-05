@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Android 14 用のフォアグラウンドサービス権限を追加 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -35,7 +37,7 @@
             </intent-filter>
         </activity>
 
-        <!-- PreferencesActivity の宣言（android:label を削除） -->
+        <!-- PreferencesActivity の宣言 -->
         <activity
             android:name="app.aaps.activities.PreferencesActivity"
             android:exported="false" />
@@ -44,6 +46,13 @@
             android:name="app.aaps.MainService"
             android:enabled="true"
             android:exported="false" />
+
+        <!-- DummyService に foregroundServiceType を追加して宣言 -->
+        <service
+            android:name="app.aaps.plugins.main.general.persistentNotification.DummyService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <receiver
             android:name="app.aaps.OnBootReceiver"
