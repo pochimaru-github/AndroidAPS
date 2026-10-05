@@ -35,6 +35,12 @@
             </intent-filter>
         </activity>
 
+        <!-- PreferencesActivity の宣言を追加 -->
+        <activity
+            android:name="app.aaps.activities.PreferencesActivity"
+            android:exported="false"
+            android:label="@string/preferences" />
+
         <service
             android:name="app.aaps.MainService"
             android:enabled="true"
