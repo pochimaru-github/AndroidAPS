@@ -63,6 +63,7 @@ import app.aaps.ui.widget.Widget
 import app.aaps.utils.configureLeakCanary
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.google.firebase.remoteconfig.remoteConfig
 import dagger.android.AndroidInjector
@@ -114,8 +115,23 @@ class MainApp : DaggerApplication() {
     private val scope = CoroutineScope(Dispatchers.Default + Job())
 
     override fun onCreate() {
-        // Dagger による依存注入 (super.onCreate) より前に FirebaseApp を初期化
-        FirebaseApp.initializeApp(this)
+        // Dagger による依存注入 (super.onCreate) より前に FirebaseApp を確実に初期化
+        if (FirebaseApp.getApps(this).isEmpty()) {
+            try {
+                FirebaseApp.initializeApp(this)
+            } catch (_: Exception) {
+                // リソースが定義されていない場合のフォールバック初期化
+            }
+        }
+        // それでも初期化されていない場合はダミーの FirebaseOptions を用いて初期化
+        if (FirebaseApp.getApps(this).isEmpty()) {
+            val dummyOptions = FirebaseOptions.Builder()
+                .setApplicationId("1:100000000000:android:0000000000000000000000")
+                .setApiKey("AIzaSyDummyApiKeyForAAPSInitialization00")
+                .setProjectId("aaps-dummy-project")
+                .build()
+            FirebaseApp.initializeApp(this, dummyOptions)
+        }
 
         super.onCreate()
 
@@ -449,28 +465,29 @@ class MainApp : DaggerApplication() {
     }
 
     private fun setupRemoteConfig() {
-        FirebaseApp.initializeApp(this)
-        Firebase.remoteConfig.also { firebaseRemoteConfig ->
+        if (FirebaseApp.getApps(this).isNotEmpty()) {
+            Firebase.remoteConfig.also { firebaseRemoteConfig ->
 
-            firebaseRemoteConfig.setConfigSettingsAsync(
-                FirebaseRemoteConfigSettings
-                    .Builder()
-                    .setMinimumFetchIntervalInSeconds(3600)
-                    .build()
-            )
-            firebaseRemoteConfig
-                .fetchAndActivate()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        aapsLogger.debug("RemoteConfig received successfully")
-                        @Suppress("UNCHECKED_CAST")
-                        (versionCheckersUtils::class.declaredMemberProperties.find { it.name == "definition" } as KMutableProperty<Any>?)
-                            ?.let {
-                                val merged = JsonHelper.merge(it.getter.call(versionCheckersUtils) as JSONObject, JSONObject(firebaseRemoteConfig.getString("defs")))
-                                it.setter.call(versionCheckersUtils, merged)
-                            }
-                    } else aapsLogger.error("RemoteConfig fetch failed")
-                }
+                firebaseRemoteConfig.setConfigSettingsAsync(
+                    FirebaseRemoteConfigSettings
+                        .Builder()
+                        .setMinimumFetchIntervalInSeconds(3600)
+                        .build()
+                )
+                firebaseRemoteConfig
+                    .fetchAndActivate()
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            aapsLogger.debug("RemoteConfig received successfully")
+                            @Suppress("UNCHECKED_CAST")
+                            (versionCheckersUtils::class.declaredMemberProperties.find { it.name == "definition" } as KMutableProperty<Any>?)
+                                ?.let {
+                                    val merged = JsonHelper.merge(it.getter.call(versionCheckersUtils) as JSONObject, JSONObject(firebaseRemoteConfig.getString("defs")))
+                                    it.setter.call(versionCheckersUtils, merged)
+                                }
+                        } else aapsLogger.error("RemoteConfig fetch failed")
+                    }
+            }
         }
     }
 
