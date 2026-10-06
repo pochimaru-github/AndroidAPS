@@ -273,7 +273,10 @@ class SWDefinition @Inject constructor(
             .add(swInfoTextProvider.get().label(R.string.storedsettingsfound))
             .add(swBreakProvider.get())
             .add(swButtonProvider.get().text(R.string.import_setting).action { importExportPrefs.importSharedPreferences(requireActivity()) })
-            .visibility { importExportPrefs.prefsFileExists() && !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) }
+            .visibility {
+                importExportPrefs.prefsFileExists() &&
+                    (Build.VERSION.SDK_INT >= 33 || !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE))
+            }
 
     private val screenNsClient
         get() = swScreenProvider.get().with(R.string.configbuilder_sync)
