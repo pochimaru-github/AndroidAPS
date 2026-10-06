@@ -204,17 +204,19 @@ class SWDefinition @Inject constructor(
                      .visibility { androidPermission.permissionNotGranted(context, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) }
                     .action { androidPermission.askForPermission(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) })
             .add(swBreakProvider.get())
-            .apply {
-                if (Build.VERSION.SDK_INT < 33) {
-                    add(swInfoTextProvider.get().label(rh.gs(R.string.need_storage_permission)))
-                    add(
-                        swButtonProvider.get()
-                             .text(R.string.askforpermission)
-                            .visibility { androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) }
-                            .action { androidPermission.askForPermission(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) })
-                    add(swBreakProvider.get())
-                }
-            }
+            .add(swInfoTextProvider.get().label(rh.gs(R.string.need_storage_permission)))
+            .add(
+                swButtonProvider.get()
+                     .text(R.string.askforpermission)
+                    .visibility {
+                        val perm = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
+                        androidPermission.permissionNotGranted(requireActivity(), perm)
+                    }
+                    .action {
+                        val perm = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
+                        androidPermission.askForPermission(requireActivity(), perm)
+                    })
+            .add(swBreakProvider.get())
             .add(swInfoTextProvider.get().label(rh.gs(R.string.select_aaps_directory)))
             .add(
                 swButtonProvider.get()
@@ -225,15 +227,17 @@ class SWDefinition @Inject constructor(
             .add(swEventListenerProvider.get().with(EventAAPSDirectorySelected::class.java, this).label(app.aaps.core.ui.R.string.settings).initialStatus(preferences.get(StringKey.AapsDirectoryUri)))
             .add(swBreakProvider.get())
             .visibility {
+                val perm = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
                 !Settings.canDrawOverlays(requireActivity()) ||
                     androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) ||
-                    (Build.VERSION.SDK_INT < 33 && androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) ||
+                    androidPermission.permissionNotGranted(requireActivity(), perm) ||
                     preferences.getIfExists(StringKey.AapsDirectoryUri) == null
             }
             .validator {
+                val perm = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
                 Settings.canDrawOverlays(requireActivity()) &&
                     !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) &&
-                    (Build.VERSION.SDK_INT >= 33 || !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+                    !androidPermission.permissionNotGranted(requireActivity(), perm) &&
                     preferences.getIfExists(StringKey.AapsDirectoryUri) != null
             }
 
