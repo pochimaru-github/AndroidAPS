@@ -3,6 +3,7 @@ package app.aaps.plugins.configuration.setupwizard
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
