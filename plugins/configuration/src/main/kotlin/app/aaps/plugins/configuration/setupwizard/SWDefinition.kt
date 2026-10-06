@@ -187,54 +187,55 @@ class SWDefinition @Inject constructor(
                     .comment(R.string.high_mark_comment)
             )
 
-// Androidバージョン判定用に import android.os.Build を追加
-
-private val screenPermissionWindow
-    get() = swScreenProvider.get().with(R.string.permission)
-        .skippable(false)
-        .add(swInfoTextProvider.get().label(rh.gs(R.string.need_system_window_permission)))
-        .add(
-            swButtonProvider.get()
-                 .text(R.string.askforpermission)
-                .visibility { !Settings.canDrawOverlays(requireActivity()) }
-                .action { requireActivity().startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, ("package:" + requireActivity().packageName).toUri())) })
-        .add(swBreakProvider.get())
-        .add(swInfoTextProvider.get().label(rh.gs(R.string.need_whitelisting, rh.gs(config.appName))))
-        .add(
-            swButtonProvider.get()
-                 .text(R.string.askforpermission)
-                 .visibility { androidPermission.permissionNotGranted(context, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) }
-                .action { androidPermission.askForPermission(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) })
-        .add(swBreakProvider.get())
-        .add(swInfoTextProvider.get().label(rh.gs(R.string.need_storage_permission)))
-        .add(
-            swButtonProvider.get()
-                 .text(R.string.askforpermission)
-                // Android 13(API 33)以上ではボタン自体を非表示にする
-                .visibility { Build.VERSION.SDK_INT < 33 && androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) }
-                .action { androidPermission.askForPermission(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) })
-        .add(swBreakProvider.get())
-        .add(swInfoTextProvider.get().label(rh.gs(R.string.select_aaps_directory)))
-        .add(
-            swButtonProvider.get()
-                 .text(R.string.aaps_directory)
-                 .visibility { preferences.getIfExists(StringKey.AapsDirectoryUri) == null }
-                .action { maintenancePlugin.selectAapsDirectory(requireActivity() as DaggerAppCompatActivityWithResult) })
-        .add(swBreakProvider.get())
-        .add(swEventListenerProvider.get().with(EventAAPSDirectorySelected::class.java, this).label(app.aaps.core.ui.R.string.settings).initialStatus(preferences.get(StringKey.AapsDirectoryUri)))
-        .add(swBreakProvider.get())
-        .visibility {
-            !Settings.canDrawOverlays(requireActivity()) ||
-                androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) ||
-                (Build.VERSION.SDK_INT < 33 && androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) ||
-                preferences.getIfExists(StringKey.AapsDirectoryUri) == null
-        }
-        .validator {
-            Settings.canDrawOverlays(requireActivity()) &&
-                !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) &&
-                (Build.VERSION.SDK_INT >= 33 || !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) &&
-                preferences.getIfExists(StringKey.AapsDirectoryUri) != null
-        }
+    private val screenPermissionWindow
+        get() = swScreenProvider.get().with(R.string.permission)
+            .skippable(false)
+            .add(swInfoTextProvider.get().label(rh.gs(R.string.need_system_window_permission)))
+            .add(
+                swButtonProvider.get()
+                     .text(R.string.askforpermission)
+                    .visibility { !Settings.canDrawOverlays(requireActivity()) }
+                    .action { requireActivity().startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, ("package:" + requireActivity().packageName).toUri())) })
+            .add(swBreakProvider.get())
+            .add(swInfoTextProvider.get().label(rh.gs(R.string.need_whitelisting, rh.gs(config.appName))))
+            .add(
+                swButtonProvider.get()
+                     .text(R.string.askforpermission)
+                     .visibility { androidPermission.permissionNotGranted(context, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) }
+                    .action { androidPermission.askForPermission(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) })
+            .add(swBreakProvider.get())
+            .apply {
+                if (Build.VERSION.SDK_INT < 33) {
+                    add(swInfoTextProvider.get().label(rh.gs(R.string.need_storage_permission)))
+                    add(
+                        swButtonProvider.get()
+                             .text(R.string.askforpermission)
+                            .visibility { androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) }
+                            .action { androidPermission.askForPermission(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) })
+                    add(swBreakProvider.get())
+                }
+            }
+            .add(swInfoTextProvider.get().label(rh.gs(R.string.select_aaps_directory)))
+            .add(
+                swButtonProvider.get()
+                     .text(R.string.aaps_directory)
+                     .visibility { preferences.getIfExists(StringKey.AapsDirectoryUri) == null }
+                    .action { maintenancePlugin.selectAapsDirectory(requireActivity() as DaggerAppCompatActivityWithResult) })
+            .add(swBreakProvider.get())
+            .add(swEventListenerProvider.get().with(EventAAPSDirectorySelected::class.java, this).label(app.aaps.core.ui.R.string.settings).initialStatus(preferences.get(StringKey.AapsDirectoryUri)))
+            .add(swBreakProvider.get())
+            .visibility {
+                !Settings.canDrawOverlays(requireActivity()) ||
+                    androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) ||
+                    (Build.VERSION.SDK_INT < 33 && androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) ||
+                    preferences.getIfExists(StringKey.AapsDirectoryUri) == null
+            }
+            .validator {
+                Settings.canDrawOverlays(requireActivity()) &&
+                    !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) &&
+                    (Build.VERSION.SDK_INT >= 33 || !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+                    preferences.getIfExists(StringKey.AapsDirectoryUri) != null
+            }
 
     private val screenPermissionBt
         get() = swScreenProvider.get().with(R.string.permission)
