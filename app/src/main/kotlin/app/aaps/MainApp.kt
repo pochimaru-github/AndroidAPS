@@ -462,29 +462,33 @@ class MainApp : DaggerApplication() {
     }
 
     private fun setupRemoteConfig() {
-        if (FirebaseApp.getApps(this).isNotEmpty()) {
-            Firebase.remoteConfig.also { firebaseRemoteConfig ->
+        try {
+            if (FirebaseApp.getApps(this).isNotEmpty()) {
+                Firebase.remoteConfig.also { firebaseRemoteConfig ->
 
-                firebaseRemoteConfig.setConfigSettingsAsync(
-                    FirebaseRemoteConfigSettings
-                        .Builder()
-                        .setMinimumFetchIntervalInSeconds(3600)
-                        .build()
-                )
-                firebaseRemoteConfig
-                    .fetchAndActivate()
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            aapsLogger.debug("RemoteConfig received successfully")
-                            @Suppress("UNCHECKED_CAST")
-                            (versionCheckersUtils::class.declaredMemberProperties.find { it.name == "definition" } as KMutableProperty<Any>?)
-                                ?.let {
-                                    val merged = JsonHelper.merge(it.getter.call(versionCheckersUtils) as JSONObject, JSONObject(firebaseRemoteConfig.getString("defs")))
-                                    it.setter.call(versionCheckersUtils, merged)
-                                }
-                        } else aapsLogger.error("RemoteConfig fetch failed")
-                    }
+                    firebaseRemoteConfig.setConfigSettingsAsync(
+                        FirebaseRemoteConfigSettings
+                            .Builder()
+                            .setMinimumFetchIntervalInSeconds(3600)
+                            .build()
+                    )
+                    firebaseRemoteConfig
+                        .fetchAndActivate()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                aapsLogger.debug("RemoteConfig received successfully")
+                                @Suppress("UNCHECKED_CAST")
+                                (versionCheckersUtils::class.declaredMemberProperties.find { it.name == "definition" } as KMutableProperty<Any>?)
+                                    ?.let {
+                                        val merged = JsonHelper.merge(it.getter.call(versionCheckersUtils) as JSONObject, JSONObject(firebaseRemoteConfig.getString("defs")))
+                                        it.setter.call(versionCheckersUtils, merged)
+                                    }
+                            } else aapsLogger.error("RemoteConfig fetch failed")
+                        }
+                }
             }
+        } catch (e: Exception) {
+            aapsLogger.error("setupRemoteConfig error bypassed", e)
         }
     }
 
