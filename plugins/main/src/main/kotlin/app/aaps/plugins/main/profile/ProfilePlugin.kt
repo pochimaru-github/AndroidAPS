@@ -212,7 +212,11 @@ class ProfilePlugin @Inject constructor(
     fun loadSettings() {
         val numOfProfiles = preferences.get(ProfileIntKey.AmountOfProfiles)
         profiles.clear()
-//        numOfProfiles = max(numOfProfiles, 1) // create at least one default profile if none exists
+
+        if (numOfProfiles == 0) {
+            addNewProfile()
+            return
+        }
 
         for (i in 0 until numOfProfiles) {
             val name = preferences.get(ProfileComposedStringKey.LocalProfileNumberedName, i)
