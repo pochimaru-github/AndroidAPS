@@ -96,7 +96,6 @@ class SWDefinition @Inject constructor(
 ) {
 
     var activity: AppCompatActivity? = null
-    private var storagePermissionBypassed = false
     private val disposable = CompositeDisposable()
     private val screens: MutableList<SWScreen> = ArrayList()
 
@@ -211,14 +210,14 @@ class SWDefinition @Inject constructor(
                      .text(R.string.askforpermission)
                     .visibility {
                         if (Build.VERSION.SDK_INT >= 33) {
-                            !storagePermissionBypassed
+                            !requireActivity().getSharedPreferences("aaps_setup_wizard", Context.MODE_PRIVATE).getBoolean("storage_bypassed", false)
                         } else {
                             androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
                         }
                     }
                     .action {
                         if (Build.VERSION.SDK_INT >= 33) {
-                            storagePermissionBypassed = true
+                            requireActivity().getSharedPreferences("aaps_setup_wizard", Context.MODE_PRIVATE).edit().putBoolean("storage_bypassed", true).apply()
                             rxBus.send(EventSWUpdate(false))
                         } else {
                             androidPermission.askForPermission(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -235,15 +234,25 @@ class SWDefinition @Inject constructor(
             .add(swEventListenerProvider.get().with(EventAAPSDirectorySelected::class.java, this).label(app.aaps.core.ui.R.string.settings).initialStatus(preferences.get(StringKey.AapsDirectoryUri)))
             .add(swBreakProvider.get())
             .visibility {
+                val isStorageOk = if (Build.VERSION.SDK_INT >= 33) {
+                    requireActivity().getSharedPreferences("aaps_setup_wizard", Context.MODE_PRIVATE).getBoolean("storage_bypassed", false)
+                } else {
+                    !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                }
                 !Settings.canDrawOverlays(requireActivity()) ||
                     androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) ||
-                    (if (Build.VERSION.SDK_INT >= 33) !storagePermissionBypassed else androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) ||
+                    !isStorageOk ||
                     preferences.getIfExists(StringKey.AapsDirectoryUri) == null
             }
             .validator {
+                val isStorageOk = if (Build.VERSION.SDK_INT >= 33) {
+                    requireActivity().getSharedPreferences("aaps_setup_wizard", Context.MODE_PRIVATE).getBoolean("storage_bypassed", false)
+                } else {
+                    !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                }
                 Settings.canDrawOverlays(requireActivity()) &&
                     !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) &&
-                    (if (Build.VERSION.SDK_INT >= 33) storagePermissionBypassed else !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+                    isStorageOk &&
                     preferences.getIfExists(StringKey.AapsDirectoryUri) != null
             }
 
