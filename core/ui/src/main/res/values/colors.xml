@@ -53,7 +53,7 @@
     <color name="pumpStatusBackground">#CCCCCC</color>
 
     <!--    Dialogs-->
-    <color name="dialog_title_background">#262626</color>
+    <color name="dialog_title_background">#CCCCCC</color>
     <color name="activity_title_background">#121212</color>
     <color name="dialog_title_color">#FFFFFF</color>
     <color name="dialog_title_icon_tint">#FFFFFF</color>
