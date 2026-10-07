@@ -83,6 +83,10 @@ class ProfilePlugin @Inject constructor(
     companion object {
 
         const val DEFAULT_ARRAY = "[{\"time\":\"00:00\",\"timeAsSeconds\":0,\"value\":0}]"
+        const val DEFAULT_IC_ARRAY = "[{\"time\":\"00:00\",\"timeAsSeconds\":0,\"value\":10}]"
+        const val DEFAULT_ISF_ARRAY = "[{\"time\":\"00:00\",\"timeAsSeconds\":0,\"value\":50}]"
+        const val DEFAULT_BASAL_ARRAY = "[{\"time\":\"00:00\",\"timeAsSeconds\":0,\"value\":0.5}]"
+        const val DEFAULT_TARGET_ARRAY = "[{\"time\":\"00:00\",\"timeAsSeconds\":0,\"value\":100}]"
     }
 
     override fun onStart() {
@@ -222,16 +226,31 @@ class ProfilePlugin @Inject constructor(
             val name = preferences.get(ProfileComposedStringKey.LocalProfileNumberedName, i)
             if (isExistingName(name)) continue
             try {
+                var icJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedIc, i))
+                if (icJson.length() == 1 && icJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) icJson = JSONArray(DEFAULT_IC_ARRAY)
+
+                var isfJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedIsf, i))
+                if (isfJson.length() == 1 && isfJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) isfJson = JSONArray(DEFAULT_ISF_ARRAY)
+
+                var basalJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedBasal, i))
+                if (basalJson.length() == 1 && basalJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) basalJson = JSONArray(DEFAULT_BASAL_ARRAY)
+
+                var targetLowJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedTargetLow, i))
+                if (targetLowJson.length() == 1 && targetLowJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) targetLowJson = JSONArray(DEFAULT_TARGET_ARRAY)
+
+                var targetHighJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedTargetHigh, i))
+                if (targetHighJson.length() == 1 && targetHighJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) targetHighJson = JSONArray(DEFAULT_TARGET_ARRAY)
+
                 profiles.add(
                     ProfileSource.SingleProfile(
                         name = name,
                         mgdl = preferences.get(ProfileComposedBooleanKey.LocalProfileNumberedMgdl, i),
                         dia = preferences.get(ProfileComposedDoubleKey.LocalProfileNumberedDia, i),
-                        ic = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedIc, i)),
-                        isf = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedIsf, i)),
-                        basal = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedBasal, i)),
-                        targetLow = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedTargetLow, i)),
-                        targetHigh = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedTargetHigh, i))
+                        ic = icJson,
+                        isf = isfJson,
+                        basal = basalJson,
+                        targetLow = targetLowJson,
+                        targetHigh = targetHighJson
                     )
                 )
             } catch (e: JSONException) {
@@ -360,11 +379,11 @@ class ProfilePlugin @Inject constructor(
                 name = Constants.LOCAL_PROFILE + free,
                 mgdl = profileFunction.getUnits() == GlucoseUnit.MGDL,
                 dia = Constants.defaultDIA,
-                ic = JSONArray(DEFAULT_ARRAY),
-                isf = JSONArray(DEFAULT_ARRAY),
-                basal = JSONArray(DEFAULT_ARRAY),
-                targetLow = JSONArray(DEFAULT_ARRAY),
-                targetHigh = JSONArray(DEFAULT_ARRAY)
+                ic = JSONArray(DEFAULT_IC_ARRAY),
+                isf = JSONArray(DEFAULT_ISF_ARRAY),
+                basal = JSONArray(DEFAULT_BASAL_ARRAY),
+                targetLow = JSONArray(DEFAULT_TARGET_ARRAY),
+                targetHigh = JSONArray(DEFAULT_TARGET_ARRAY)
             )
         )
         currentProfileIndex = profiles.size - 1
