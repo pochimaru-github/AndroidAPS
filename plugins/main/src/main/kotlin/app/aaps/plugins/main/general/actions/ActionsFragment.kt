@@ -99,32 +99,18 @@ class ActionsFragment : DaggerFragment() {
         skinProvider.activeSkin().preProcessLandscapeActionsLayout(isLandscape, binding)
 
         binding.profileSwitch.setOnClickListener {
-            activity?.let { activity ->
-                protectionCheck.queryProtection(
-                    activity,
-                    ProtectionCheck.Protection.BOLUS,
-                    UIRunnable { uiInteraction.runProfileSwitchDialog(childFragmentManager) })
-            }
+            uiInteraction.runProfileSwitchDialog(childFragmentManager)
         }
         binding.tempTarget.setOnClickListener {
-            activity?.let { activity ->
-                protectionCheck.queryProtection(
-                    activity,
-                    ProtectionCheck.Protection.BOLUS,
-                    UIRunnable { uiInteraction.runTempTargetDialog(childFragmentManager) })
-            }
+            uiInteraction.runTempTargetDialog(childFragmentManager)
         }
         binding.extendedBolus.setOnClickListener {
-            activity?.let { activity ->
-                protectionCheck.queryProtection(activity, ProtectionCheck.Protection.BOLUS, UIRunnable {
-                    OKDialog.showConfirmation(
-                        activity, rh.gs(app.aaps.core.ui.R.string.extended_bolus), rh.gs(R.string.ebstopsloop),
-                        Runnable {
-                            uiInteraction.runExtendedBolusDialog(childFragmentManager)
-                        }, null
-                    )
-                })
-            }
+            OKDialog.showConfirmation(
+                requireActivity(), rh.gs(app.aaps.core.ui.R.string.extended_bolus), rh.gs(R.string.ebstopsloop),
+                Runnable {
+                    uiInteraction.runExtendedBolusDialog(childFragmentManager)
+                }, null
+            )
         }
         binding.extendedBolusCancel.setOnClickListener {
             if (persistenceLayer.getExtendedBolusActiveAt(dateUtil.now()) != null) {
@@ -139,12 +125,7 @@ class ActionsFragment : DaggerFragment() {
             }
         }
         binding.setTempBasal.setOnClickListener {
-            activity?.let { activity ->
-                protectionCheck.queryProtection(
-                    activity,
-                    ProtectionCheck.Protection.BOLUS,
-                    UIRunnable { uiInteraction.runTempBasalDialog(childFragmentManager) })
-            }
+            uiInteraction.runTempBasalDialog(childFragmentManager)
         }
         binding.cancelTempBasal.setOnClickListener {
             if (processedTbrEbData.getTempBasalIncludingConvertedExtended(dateUtil.now()) != null) {
@@ -159,9 +140,7 @@ class ActionsFragment : DaggerFragment() {
             }
         }
         binding.fill.setOnClickListener {
-            activity?.let { activity ->
-                protectionCheck.queryProtection(activity, ProtectionCheck.Protection.BOLUS, UIRunnable { uiInteraction.runFillDialog(childFragmentManager) })
-            }
+            uiInteraction.runFillDialog(childFragmentManager)
         }
         binding.historyBrowser.setOnClickListener { startActivity(Intent(context, uiInteraction.historyBrowseActivity)) }
         binding.tddStats.setOnClickListener { startActivity(Intent(context, uiInteraction.tddStatsActivity)) }
