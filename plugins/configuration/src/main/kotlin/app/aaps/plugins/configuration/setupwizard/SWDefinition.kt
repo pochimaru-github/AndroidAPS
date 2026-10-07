@@ -96,6 +96,7 @@ class SWDefinition @Inject constructor(
 ) {
 
     var activity: AppCompatActivity? = null
+    private var storagePermissionBypassed = false
     private val disposable = CompositeDisposable()
     private val screens: MutableList<SWScreen> = ArrayList()
 
@@ -210,14 +211,14 @@ class SWDefinition @Inject constructor(
                      .text(R.string.askforpermission)
                     .visibility {
                         if (Build.VERSION.SDK_INT >= 33) {
-                            !preferences.get(BooleanNonKey.SetupWizardIUnderstand)
+                            !storagePermissionBypassed
                         } else {
                             androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
                         }
                     }
                     .action {
                         if (Build.VERSION.SDK_INT >= 33) {
-                            preferences.put(BooleanNonKey.SetupWizardIUnderstand, true)
+                            storagePermissionBypassed = true
                             rxBus.send(EventSWUpdate(false))
                         } else {
                             androidPermission.askForPermission(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -236,13 +237,13 @@ class SWDefinition @Inject constructor(
             .visibility {
                 !Settings.canDrawOverlays(requireActivity()) ||
                     androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) ||
-                    (if (Build.VERSION.SDK_INT >= 33) !preferences.get(BooleanNonKey.SetupWizardIUnderstand) else androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) ||
+                    (if (Build.VERSION.SDK_INT >= 33) !storagePermissionBypassed else androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) ||
                     preferences.getIfExists(StringKey.AapsDirectoryUri) == null
             }
             .validator {
                 Settings.canDrawOverlays(requireActivity()) &&
                     !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) &&
-                    (if (Build.VERSION.SDK_INT >= 33) preferences.get(BooleanNonKey.SetupWizardIUnderstand) else !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+                    (if (Build.VERSION.SDK_INT >= 33) storagePermissionBypassed else !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) &&
                     preferences.getIfExists(StringKey.AapsDirectoryUri) != null
             }
 
