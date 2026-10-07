@@ -3,7 +3,7 @@
     <item>
         <shape>
             <padding/>
-            <solid android:color="?dialogTitleBackground" />
+            <solid android:color="@color/background_dark" />
             <corners
                 android:topRightRadius="12dp"
                 android:topLeftRadius="12dp" />
