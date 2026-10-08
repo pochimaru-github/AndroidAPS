@@ -101,17 +101,6 @@ class SWDefinition @Inject constructor(
 
     private fun requireActivity() = activity ?: error("Activity is null")
 
-    private fun ensureAapsDirectoryUri(): String {
-        val currentUri = preferences.getIfExists(StringKey.AapsDirectoryUri)
-        if (currentUri.isNullOrEmpty()) {
-            val defaultUri = "content://com.android.externalstorage.documents/tree/primary%3AAAPS"
-            preferences.put(StringKey.AapsDirectoryUri, defaultUri)
-            rxBus.send(EventAAPSDirectorySelected(defaultUri))
-            return defaultUri
-        }
-        return currentUri
-    }
-
     fun getScreens(): List<SWScreen> {
         if (screens.isEmpty()) {
             when {
@@ -239,15 +228,10 @@ class SWDefinition @Inject constructor(
             .add(
                 swButtonProvider.get()
                      .text(R.string.aaps_directory)
-                     .visibility { preferences.getIfExists(StringKey.AapsDirectoryUri).isNullOrEmpty() }
-                    .action {
-                        ensureAapsDirectoryUri()
-                        try {
-                            maintenancePlugin.selectAapsDirectory(requireActivity() as DaggerAppCompatActivityWithResult)
-                        } catch (_: Exception) {}
-                    })
+                     .visibility { preferences.getIfExists(StringKey.AapsDirectoryUri) == null }
+                    .action { maintenancePlugin.selectAapsDirectory(requireActivity() as DaggerAppCompatActivityWithResult) })
             .add(swBreakProvider.get())
-            .add(swEventListenerProvider.get().with(EventAAPSDirectorySelected::class.java, this).label(app.aaps.core.ui.R.string.settings).initialStatus(ensureAapsDirectoryUri()))
+            .add(swEventListenerProvider.get().with(EventAAPSDirectorySelected::class.java, this).label(app.aaps.core.ui.R.string.settings).initialStatus(preferences.get(StringKey.AapsDirectoryUri)))
             .add(swBreakProvider.get())
             .visibility {
                 val isStorageOk = if (Build.VERSION.SDK_INT >= 33) {
@@ -258,7 +242,7 @@ class SWDefinition @Inject constructor(
                 !Settings.canDrawOverlays(requireActivity()) ||
                     androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) ||
                     !isStorageOk ||
-                    preferences.getIfExists(StringKey.AapsDirectoryUri).isNullOrEmpty()
+                    preferences.getIfExists(StringKey.AapsDirectoryUri) == null
             }
             .validator {
                 val isStorageOk = if (Build.VERSION.SDK_INT >= 33) {
@@ -269,7 +253,7 @@ class SWDefinition @Inject constructor(
                 Settings.canDrawOverlays(requireActivity()) &&
                     !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) &&
                     isStorageOk &&
-                    !ensureAapsDirectoryUri().isNullOrEmpty()
+                    preferences.getIfExists(StringKey.AapsDirectoryUri) != null
             }
 
     private val screenPermissionBt
@@ -297,14 +281,7 @@ class SWDefinition @Inject constructor(
         get() = swScreenProvider.get().with(R.string.import_setting)
             .add(swInfoTextProvider.get().label(R.string.storedsettingsfound))
             .add(swBreakProvider.get())
-            .add(swButtonProvider.get().text(R.string.import_setting).action {
-                val prevUri = preferences.getIfExists(StringKey.AapsDirectoryUri)
-                importExportPrefs.importSharedPreferences(requireActivity())
-                val restoredUri = if (!prevUri.isNullOrEmpty()) prevUri else "content://com.android.externalstorage.documents/tree/primary%3AAAPS"
-                preferences.put(StringKey.AapsDirectoryUri, restoredUri)
-                rxBus.send(EventAAPSDirectorySelected(restoredUri))
-                rxBus.send(EventSWUpdate(false))
-            })
+            .add(swButtonProvider.get().text(R.string.import_setting).action { importExportPrefs.importSharedPreferences(requireActivity()) })
             .visibility {
                 importExportPrefs.prefsFileExists() &&
                     (Build.VERSION.SDK_INT >= 33 || !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE))
