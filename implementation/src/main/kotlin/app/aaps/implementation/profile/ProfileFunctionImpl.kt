@@ -147,6 +147,14 @@ class ProfileFunctionImpl @Inject constructor(
 
     override fun buildProfileSwitch(profileStore: ProfileStore, profileName: String, durationInMinutes: Int, percentage: Int, timeShiftInHours: Int, timestamp: Long): PS? {
         val pureProfile = profileStore.getSpecificProfile(profileName) ?: return null
+        val insulinConfig = try {
+            activePlugin.activeInsulin.iCfg.also {
+                it.insulinEndTime = (pureProfile.dia * 3600 * 1000).toLong()
+            }
+        } catch (e: Exception) {
+            aapsLogger.error("Failed to obtain activeInsulin iCfg", e)
+            return null
+        }
         return PS(
             timestamp = timestamp,
             basalBlocks = pureProfile.basalBlocks,
@@ -158,9 +166,7 @@ class ProfileFunctionImpl @Inject constructor(
             timeshift = T.hours(timeShiftInHours.toLong()).msecs(),
             percentage = percentage,
             duration = T.mins(durationInMinutes.toLong()).msecs(),
-            iCfg = activePlugin.activeInsulin.iCfg.also {
-                it.insulinEndTime = (pureProfile.dia * 3600 * 1000).toLong()
-            }
+            iCfg = insulinConfig
         )
     }
 
@@ -169,7 +175,8 @@ class ProfileFunctionImpl @Inject constructor(
         action: Action, source: Sources, note: String?, listValues: List<ValueWithUnit>
     ): Boolean {
         val ps = buildProfileSwitch(profileStore, profileName, durationInMinutes, percentage, timeShiftInHours, timestamp) ?: return false
-        disposable += persistenceLayer.insertOrUpdateProfileSwitch(ps, action, source, note, listValues).subscribe()
+        disposable += persistenceLayer.insertOrUpdateProfileSwitch(ps, action, source, note, listValues)
+            .subscribe({}, fabricPrivacy::logException)
         return true
     }
 
@@ -190,7 +197,8 @@ class ProfileFunctionImpl @Inject constructor(
             false
         )
         if (validity.isValid) {
-            disposable += persistenceLayer.insertOrUpdateProfileSwitch(ps, action, source, note, listValues).subscribe()
+            disposable += persistenceLayer.insertOrUpdateProfileSwitch(ps, action, source, note, listValues)
+                .subscribe({}, fabricPrivacy::logException)
             return true
         }
         return false
