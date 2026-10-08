@@ -25,6 +25,7 @@ import app.aaps.core.interfaces.protection.ProtectionCheck
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.utils.HardLimits
+import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.BooleanNonKey
 import app.aaps.core.keys.UnitDoubleKey
 import app.aaps.core.objects.profile.ProfileSealed
@@ -55,6 +56,7 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
     @Inject lateinit var rxBus: RxBus
     @Inject lateinit var ctx: Context
     @Inject lateinit var protectionCheck: ProtectionCheck
+    @Inject lateinit var fabricPrivacy: FabricPrivacy
 
     private var queryingProtection = false
     private var profileName: String? = null
@@ -197,46 +199,50 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
             val validity = ProfileSealed.PS(ps, activePlugin).isValid(rh.gs(app.aaps.core.ui.R.string.careportal_profileswitch), activePlugin.activePump, config, rh, rxBus, hardLimits, false)
             if (validity.isValid)
                 OKDialog.showConfirmation(activity, rh.gs(app.aaps.core.ui.R.string.careportal_profileswitch), HtmlHelper.fromHtml(Joiner.on("<br/>").join(actions)), {
-                    if (profileFunction.createProfileSwitch(
-                            profileStore = profileStore,
-                            profileName = profileName,
-                            durationInMinutes = duration,
-                            percentage = percent,
-                            timeShiftInHours = timeShift,
-                            timestamp = eventTime,
-                            action = Action.PROFILE_SWITCH,
-                            source = Sources.ProfileSwitchDialog,
-                            note = notes,
-                            listValues = listOf(
-                                ValueWithUnit.Timestamp(eventTime).takeIf { eventTimeChanged },
-                                ValueWithUnit.SimpleString(profileName),
-                                ValueWithUnit.Percent(percent),
-                                ValueWithUnit.Hour(timeShift).takeIf { timeShift != 0 },
-                                ValueWithUnit.Minute(duration).takeIf { duration != 0 }
-                            ).filterNotNull()
-                        )
-                    ) {
-                        if (percent == 90 && duration == 10) preferences.put(BooleanNonKey.ObjectivesProfileSwitchUsed, true)
-                        if (isTT) {
-                            disposable += persistenceLayer.insertAndCancelCurrentTemporaryTarget(
-                                TT(
-                                    timestamp = eventTime + 10000, // Add ten secs for proper NSCv1 sync
-                                    duration = TimeUnit.MINUTES.toMillis(duration.toLong()),
-                                    reason = TT.Reason.ACTIVITY,
-                                    lowTarget = profileUtil.convertToMgdl(target, profileFunction.getUnits()),
-                                    highTarget = profileUtil.convertToMgdl(target, profileFunction.getUnits())
-                                ),
-                                action = Action.TT,
-                                source = Sources.TTDialog,
-                                note = null,
+                    try {
+                        if (profileFunction.createProfileSwitch(
+                                profileStore = profileStore,
+                                profileName = profileName,
+                                durationInMinutes = duration,
+                                percentage = percent,
+                                timeShiftInHours = timeShift,
+                                timestamp = eventTime,
+                                action = Action.PROFILE_SWITCH,
+                                source = Sources.ProfileSwitchDialog,
+                                note = notes,
                                 listValues = listOf(
                                     ValueWithUnit.Timestamp(eventTime).takeIf { eventTimeChanged },
-                                    ValueWithUnit.TETTReason(TT.Reason.ACTIVITY),
-                                    ValueWithUnit.fromGlucoseUnit(target, units),
-                                    ValueWithUnit.Minute(duration)
+                                    ValueWithUnit.SimpleString(profileName),
+                                    ValueWithUnit.Percent(percent),
+                                    ValueWithUnit.Hour(timeShift).takeIf { timeShift != 0 },
+                                    ValueWithUnit.Minute(duration).takeIf { duration != 0 }
                                 ).filterNotNull()
-                            ).subscribe()
+                            )
+                        ) {
+                            if (percent == 90 && duration == 10) preferences.put(BooleanNonKey.ObjectivesProfileSwitchUsed, true)
+                            if (isTT) {
+                                disposable += persistenceLayer.insertAndCancelCurrentTemporaryTarget(
+                                    TT(
+                                        timestamp = eventTime + 10000,
+                                        duration = TimeUnit.MINUTES.toMillis(duration.toLong()),
+                                        reason = TT.Reason.ACTIVITY,
+                                        lowTarget = profileUtil.convertToMgdl(target, profileFunction.getUnits()),
+                                        highTarget = profileUtil.convertToMgdl(target, profileFunction.getUnits())
+                                    ),
+                                    action = Action.TT,
+                                    source = Sources.TTDialog,
+                                    note = null,
+                                    listValues = listOf(
+                                        ValueWithUnit.Timestamp(eventTime).takeIf { eventTimeChanged },
+                                        ValueWithUnit.TETTReason(TT.Reason.ACTIVITY),
+                                        ValueWithUnit.fromGlucoseUnit(target, units),
+                                        ValueWithUnit.Minute(duration)
+                                    ).filterNotNull()
+                                ).subscribe({}, fabricPrivacy::logException)
+                            }
                         }
+                    } catch (e: Exception) {
+                        fabricPrivacy.logException(e)
                     }
                 })
             else {
