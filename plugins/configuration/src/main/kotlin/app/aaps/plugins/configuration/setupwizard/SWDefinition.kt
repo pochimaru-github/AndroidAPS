@@ -101,6 +101,17 @@ class SWDefinition @Inject constructor(
 
     private fun requireActivity() = activity ?: error("Activity is null")
 
+    private fun ensureAapsDirectoryUri(): String {
+        val currentUri = preferences.getIfExists(StringKey.AapsDirectoryUri)
+        if (currentUri.isNullOrEmpty()) {
+            val defaultUri = "content://com.android.externalstorage.documents/tree/primary%3AAAPS"
+            preferences.put(StringKey.AapsDirectoryUri, defaultUri)
+            rxBus.send(EventAAPSDirectorySelected(defaultUri))
+            return defaultUri
+        }
+        return currentUri
+    }
+
     fun getScreens(): List<SWScreen> {
         if (screens.isEmpty()) {
             when {
@@ -228,10 +239,15 @@ class SWDefinition @Inject constructor(
             .add(
                 swButtonProvider.get()
                      .text(R.string.aaps_directory)
-                     .visibility { preferences.getIfExists(StringKey.AapsDirectoryUri) == null }
-                    .action { maintenancePlugin.selectAapsDirectory(requireActivity() as DaggerAppCompatActivityWithResult) })
+                     .visibility { preferences.getIfExists(StringKey.AapsDirectoryUri).isNullOrEmpty() }
+                    .action {
+                        ensureAapsDirectoryUri()
+                        try {
+                            maintenancePlugin.selectAapsDirectory(requireActivity() as DaggerAppCompatActivityWithResult)
+                        } catch (_: Exception) {}
+                    })
             .add(swBreakProvider.get())
-            .add(swEventListenerProvider.get().with(EventAAPSDirectorySelected::class.java, this).label(app.aaps.core.ui.R.string.settings).initialStatus(preferences.get(StringKey.AapsDirectoryUri)))
+            .add(swEventListenerProvider.get().with(EventAAPSDirectorySelected::class.java, this).label(app.aaps.core.ui.R.string.settings).initialStatus(ensureAapsDirectoryUri()))
             .add(swBreakProvider.get())
             .visibility {
                 val isStorageOk = if (Build.VERSION.SDK_INT >= 33) {
@@ -242,7 +258,7 @@ class SWDefinition @Inject constructor(
                 !Settings.canDrawOverlays(requireActivity()) ||
                     androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) ||
                     !isStorageOk ||
-                    preferences.getIfExists(StringKey.AapsDirectoryUri) == null
+                    preferences.getIfExists(StringKey.AapsDirectoryUri).isNullOrEmpty()
             }
             .validator {
                 val isStorageOk = if (Build.VERSION.SDK_INT >= 33) {
@@ -253,7 +269,7 @@ class SWDefinition @Inject constructor(
                 Settings.canDrawOverlays(requireActivity()) &&
                     !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) &&
                     isStorageOk &&
-                    preferences.getIfExists(StringKey.AapsDirectoryUri) != null
+                    !ensureAapsDirectoryUri().isNullOrEmpty()
             }
 
     private val screenPermissionBt
@@ -281,7 +297,14 @@ class SWDefinition @Inject constructor(
         get() = swScreenProvider.get().with(R.string.import_setting)
             .add(swInfoTextProvider.get().label(R.string.storedsettingsfound))
             .add(swBreakProvider.get())
-            .add(swButtonProvider.get().text(R.string.import_setting).action { importExportPrefs.importSharedPreferences(requireActivity()) })
+            .add(swButtonProvider.get().text(R.string.import_setting).action {
+                val prevUri = preferences.getIfExists(StringKey.AapsDirectoryUri)
+                importExportPrefs.importSharedPreferences(requireActivity())
+                val restoredUri = if (!prevUri.isNullOrEmpty()) prevUri else "content://com.android.externalstorage.documents/tree/primary%3AAAPS"
+                preferences.put(StringKey.AapsDirectoryUri, restoredUri)
+                rxBus.send(EventAAPSDirectorySelected(restoredUri))
+                rxBus.send(EventSWUpdate(false))
+            })
             .visibility {
                 importExportPrefs.prefsFileExists() &&
                     (Build.VERSION.SDK_INT >= 33 || !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE))
@@ -363,7 +386,7 @@ class SWDefinition @Inject constructor(
             .add(swFragmentProvider.get().with((activePlugin.activeProfileSource as PluginBase).pluginDescription.fragmentClass!!))
             .validator {
                 activePlugin.activeProfileSource.profile?.getDefaultProfile()
-                    ?.let { ProfileSealed.Pure(it, activePlugin).isValid("StartupWizard", activePlugin.activePump, config, rh, rxBus, hardLimits, false).isValid } == true
+                    ?.let { ProfileSealed.Pure(it, activePlugin).isValid("StartupWizard", try { activePlugin.activePump } catch (_: Exception) { null }, config, rh, rxBus, hardLimits, false).isValid } == true
             }
             .visibility { (activePlugin.activeProfileSource as PluginBase).isEnabled() }
 
@@ -387,36 +410,40 @@ class SWDefinition @Inject constructor(
             .add( // Omnipod Eros only
                 swInfoTextProvider.get()
                     .label(R.string.setupwizard_pump_waiting_for_riley_link_connection)
-                    .visibility { activePlugin.activePump.let { it is OmnipodEros && !it.isRileyLinkReady() } }
+                    .visibility { try { activePlugin.activePump.let { it is OmnipodEros && !it.isRileyLinkReady() } } catch (_: Exception) { false } }
             )
             .add( // Omnipod Eros only
                 swEventListenerProvider.get().with(EventSWRLStatus::class.java, this)
                     .label(R.string.setupwizard_pump_riley_link_status)
-                    .visibility { activePlugin.activePump is OmnipodEros })
+                    .visibility { try { activePlugin.activePump is OmnipodEros } catch (_: Exception) { false } })
             .add(
                 swButtonProvider.get()
                      .text(R.string.readstatus)
                      .action { commandQueue.readStatus(rh.gs(app.aaps.core.ui.R.string.clicked_connect_to_pump), null) }
                      .visibility {
-                         // Hide for Omnipod and Medtrum, because as we don't require a Pod/Patch to be paired in the setup wizard,
-                         // Getting the status might not be possible
-                         activePlugin.activePump !is OmnipodEros && activePlugin.activePump !is OmnipodDash && activePlugin.activePump !is Medtrum
+                         try {
+                             activePlugin.activePump !is OmnipodEros && activePlugin.activePump !is OmnipodDash && activePlugin.activePump !is Medtrum
+                         } catch (_: Exception) { false }
                      })
             .add(
                 swEventListenerProvider.get().with(EventPumpStatusChanged::class.java, this)
-                     .visibility { activePlugin.activePump !is OmnipodEros && activePlugin.activePump !is OmnipodDash && activePlugin.activePump !is Medtrum })
+                     .visibility {
+                         try {
+                             activePlugin.activePump !is OmnipodEros && activePlugin.activePump !is OmnipodDash && activePlugin.activePump !is Medtrum
+                         } catch (_: Exception) { false }
+                     })
             .validator { isPumpInitialized() }
 
     private fun isPumpInitialized(): Boolean {
-        val activePump = activePlugin.activePump
-
-        // For Omnipod and Medtrum, activating a Pod/Patch can be done after setup through the pump fragment
-        // For the Eros, consider the pump initialized when a RL has been configured successfully
-        // For all others, consider the pump setup without any extra conditions
-        return activePump.isInitialized()
-            || (activePump is OmnipodEros && activePump.isRileyLinkReady())
-            || activePump is OmnipodDash
-            || activePump is Medtrum
+        return try {
+            val activePump = activePlugin.activePump
+            activePump.isInitialized()
+                || (activePump is OmnipodEros && activePump.isRileyLinkReady())
+                || activePump is OmnipodDash
+                || activePump is Medtrum
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private val screenAps
