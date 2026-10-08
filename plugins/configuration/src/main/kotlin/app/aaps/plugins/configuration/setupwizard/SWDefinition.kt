@@ -281,7 +281,15 @@ class SWDefinition @Inject constructor(
         get() = swScreenProvider.get().with(R.string.import_setting)
             .add(swInfoTextProvider.get().label(R.string.storedsettingsfound))
             .add(swBreakProvider.get())
-            .add(swButtonProvider.get().text(R.string.import_setting).action { importExportPrefs.importSharedPreferences(requireActivity()) })
+            .add(swButtonProvider.get().text(R.string.import_setting).action {
+                val savedDirectoryUri = preferences.getIfExists(StringKey.AapsDirectoryUri)
+                importExportPrefs.importSharedPreferences(requireActivity())
+                if (savedDirectoryUri != null && preferences.getIfExists(StringKey.AapsDirectoryUri) == null) {
+                    preferences.put(StringKey.AapsDirectoryUri, savedDirectoryUri)
+                    rxBus.send(EventAAPSDirectorySelected(savedDirectoryUri))
+                }
+                rxBus.send(EventSWUpdate(false))
+            })
             .visibility {
                 importExportPrefs.prefsFileExists() &&
                     (Build.VERSION.SDK_INT >= 33 || !androidPermission.permissionNotGranted(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE))
