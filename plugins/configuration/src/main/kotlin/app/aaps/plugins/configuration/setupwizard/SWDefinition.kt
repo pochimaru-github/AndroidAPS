@@ -386,7 +386,13 @@ class SWDefinition @Inject constructor(
             .add(swFragmentProvider.get().with((activePlugin.activeProfileSource as PluginBase).pluginDescription.fragmentClass!!))
             .validator {
                 activePlugin.activeProfileSource.profile?.getDefaultProfile()
-                    ?.let { ProfileSealed.Pure(it, activePlugin).isValid("StartupWizard", try { activePlugin.activePump } catch (_: Exception) { null }, config, rh, rxBus, hardLimits, false).isValid } == true
+                    ?.let {
+                        try {
+                            ProfileSealed.Pure(it, activePlugin).isValid("StartupWizard", activePlugin.activePump, config, rh, rxBus, hardLimits, false).isValid
+                        } catch (_: Exception) {
+                            true
+                        }
+                    } == true
             }
             .visibility { (activePlugin.activeProfileSource as PluginBase).isEnabled() }
 
