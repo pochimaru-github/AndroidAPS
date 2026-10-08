@@ -22,6 +22,7 @@ import app.aaps.core.interfaces.plugin.ActivePlugin
 import app.aaps.core.interfaces.profile.ProfileFunction
 import app.aaps.core.interfaces.profile.ProfileUtil
 import app.aaps.core.interfaces.protection.ProtectionCheck
+import app.aaps.core.interfaces.pump.Pump
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.utils.HardLimits
@@ -63,8 +64,15 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
     private val disposable = CompositeDisposable()
     private var _binding: DialogProfileswitchBinding? = null
 
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
+
+    private fun getSafeActivePump(): Pump? {
+        return try {
+            activePlugin.activePump
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     private val textWatcher: TextWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable) {
@@ -116,22 +124,21 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
                 ?: 0.0, Constants.CPP_MIN_TIMESHIFT.toDouble(), Constants.CPP_MAX_TIMESHIFT.toDouble(), 1.0, DecimalFormat("0"), false, binding.okcancel.ok
         )
 
-        // profile
         context?.let { context ->
             val profileStore = activePlugin.activeProfileSource.profile ?: return
             val profileListToCheck = profileStore.getProfileList()
             val profileList = ArrayList<CharSequence>()
-            for (profileName in profileListToCheck) {
-                val profileToCheck = activePlugin.activeProfileSource.profile?.getSpecificProfile(profileName.toString())
-                if (profileToCheck != null && ProfileSealed.Pure(profileToCheck, activePlugin).isValid("ProfileSwitch", activePlugin.activePump, config, rh, rxBus, hardLimits, false).isValid)
-                    profileList.add(profileName)
+            val safePump = getSafeActivePump()
+            for (pName in profileListToCheck) {
+                val profileToCheck = activePlugin.activeProfileSource.profile?.getSpecificProfile(pName.toString())
+                if (profileToCheck != null && ProfileSealed.Pure(profileToCheck, activePlugin).isValid("ProfileSwitch", safePump, config, rh, rxBus, hardLimits, false).isValid)
+                    profileList.add(pName)
             }
             if (profileList.isEmpty()) {
                 dismiss()
                 return
             }
             binding.profileList.setAdapter(ArrayAdapter(context, app.aaps.core.ui.R.layout.spinner_centered, profileList))
-            // set selected to actual profile
             if (profileName != null)
                 binding.profileList.setText(profileName, false)
             else {
@@ -196,7 +203,8 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
 
         activity?.let { activity ->
             val ps = profileFunction.buildProfileSwitch(profileStore, profileName, duration, percent, timeShift, eventTime) ?: return@let
-            val validity = ProfileSealed.PS(ps, activePlugin).isValid(rh.gs(app.aaps.core.ui.R.string.careportal_profileswitch), activePlugin.activePump, config, rh, rxBus, hardLimits, false)
+            val safePump = getSafeActivePump()
+            val validity = ProfileSealed.PS(ps, activePlugin).isValid(rh.gs(app.aaps.core.ui.R.string.careportal_profileswitch), safePump, config, rh, rxBus, hardLimits, false)
             if (validity.isValid)
                 OKDialog.showConfirmation(activity, rh.gs(app.aaps.core.ui.R.string.careportal_profileswitch), HtmlHelper.fromHtml(Joiner.on("<br/>").join(actions)), {
                     try {
