@@ -106,6 +106,9 @@ class TempTargetDialog : DialogFragmentWithDate() {
             )
             binding.reasonList.setAdapter(ArrayAdapter(context, app.aaps.core.ui.R.layout.spinner_centered, reasonList))
 
+            binding.okcancel.ok.setOnClickListener { if (submit()) dismiss() }
+            binding.okcancel.cancel.setOnClickListener { dismiss() }
+
             binding.targetCancel.setOnClickListener { binding.duration.value = 0.0; shortClick(it) }
             binding.eatingSoon.setOnClickListener { shortClick(it) }
             binding.activity.setOnClickListener { shortClick(it) }
@@ -136,20 +139,26 @@ class TempTargetDialog : DialogFragmentWithDate() {
     private fun longClick(v: View) {
         when (v.id) {
             R.id.eating_soon -> {
-                binding.temptarget.value = preferences.get(UnitDoubleKey.OverviewEatingSoonTarget)
-                binding.duration.value = preferences.get(IntKey.OverviewEatingSoonDuration).toDouble()
+                val targetPref = preferences.get(UnitDoubleKey.OverviewEatingSoonTarget)
+                if (targetPref > 0.0) binding.temptarget.value = targetPref
+                val durationPref = preferences.get(IntKey.OverviewEatingSoonDuration)
+                if (durationPref > 0) binding.duration.value = durationPref.toDouble()
                 binding.reasonList.setText(rh.gs(app.aaps.core.ui.R.string.eatingsoon), false)
             }
 
             R.id.activity    -> {
-                binding.temptarget.value = preferences.get(UnitDoubleKey.OverviewActivityTarget)
-                binding.duration.value = preferences.get(IntKey.OverviewActivityDuration).toDouble()
+                val targetPref = preferences.get(UnitDoubleKey.OverviewActivityTarget)
+                if (targetPref > 0.0) binding.temptarget.value = targetPref
+                val durationPref = preferences.get(IntKey.OverviewActivityDuration)
+                if (durationPref > 0) binding.duration.value = durationPref.toDouble()
                 binding.reasonList.setText(rh.gs(app.aaps.core.ui.R.string.activity), false)
             }
 
             R.id.hypo        -> {
-                binding.temptarget.value = preferences.get(UnitDoubleKey.OverviewHypoTarget)
-                binding.duration.value = preferences.get(IntKey.OverviewHypoDuration).toDouble()
+                val targetPref = preferences.get(UnitDoubleKey.OverviewHypoTarget)
+                if (targetPref > 0.0) binding.temptarget.value = targetPref
+                val durationPref = preferences.get(IntKey.OverviewHypoDuration)
+                if (durationPref > 0) binding.duration.value = durationPref.toDouble()
                 binding.reasonList.setText(rh.gs(app.aaps.core.ui.R.string.hypo), false)
             }
         }
@@ -163,6 +172,7 @@ class TempTargetDialog : DialogFragmentWithDate() {
 
     override fun submit(): Boolean {
         if (_binding == null) return false
+        binding.root.clearFocus()
         val actions: LinkedList<String> = LinkedList()
         var reason = binding.reasonList.text.toString()
         val unitResId = if (profileFunction.getUnits() == GlucoseUnit.MGDL) app.aaps.core.ui.R.string.mgdl else app.aaps.core.ui.R.string.mmol
