@@ -102,6 +102,28 @@ class ProfilePlugin @Inject constructor(
 
     override fun currentProfile(): ProfileSource.SingleProfile? = if (numOfProfiles > 0 && currentProfileIndex < numOfProfiles) profiles[currentProfileIndex] else null
 
+    private fun parseOrFallbackJsonArray(rawStr: String?, defaultJsonStr: String): JSONArray {
+        if (rawStr.isNullOrBlank()) return JSONArray(defaultJsonStr)
+        return try {
+            val array = JSONArray(rawStr)
+            if (array.length() == 0) {
+                JSONArray(defaultJsonStr)
+            } else {
+                var allZero = true
+                for (i in 0 until array.length()) {
+                    val obj = array.optJSONObject(i)
+                    if (obj != null && obj.optDouble("value", 0.0) != 0.0) {
+                        allZero = false
+                        break
+                    }
+                }
+                if (allZero) JSONArray(defaultJsonStr) else array
+            }
+        } catch (_: Exception) {
+            JSONArray(defaultJsonStr)
+        }
+    }
+
     @Synchronized
     fun isValidEditState(activity: FragmentActivity?): Boolean {
         val pumpDescription = activePlugin.activePump.pumpDescription
@@ -114,53 +136,60 @@ class ProfilePlugin @Inject constructor(
                 ToastUtils.errorToast(activity, rh.gs(R.string.missing_profile_name))
                 return false
             }
-            if (blockFromJsonArray(ic, dateUtil)?.all { it.amount < hardLimits.minIC() || it.amount > hardLimits.maxIC() } != false) {
+            val icBlocks = blockFromJsonArray(ic, dateUtil)
+            if (icBlocks.isNullOrEmpty() || icBlocks.all { it.amount < hardLimits.minIC() || it.amount > hardLimits.maxIC() }) {
                 ToastUtils.errorToast(activity, rh.gs(R.string.error_in_ic_values))
                 return false
             }
             val low = blockFromJsonArray(targetLow, dateUtil)
             val high = blockFromJsonArray(targetHigh, dateUtil)
+            if (low.isNullOrEmpty() || high.isNullOrEmpty()) {
+                ToastUtils.errorToast(activity, rh.gs(R.string.error_in_target_values))
+                return false
+            }
             if (mgdl) {
-                if (blockFromJsonArray(isf, dateUtil)?.all { hardLimits.isInRange(it.amount, HardLimits.MIN_ISF, HardLimits.MAX_ISF) } == false) {
+                val isfBlocks = blockFromJsonArray(isf, dateUtil)
+                if (isfBlocks.isNullOrEmpty() || isfBlocks.all { hardLimits.isInRange(it.amount, HardLimits.MIN_ISF, HardLimits.MAX_ISF) } == false) {
                     ToastUtils.errorToast(activity, rh.gs(R.string.error_in_isf_values))
                     return false
                 }
-                if (blockFromJsonArray(basal, dateUtil)?.all { it.amount < pumpDescription.basalMinimumRate || it.amount > 10.0 } != false) {
+                val basalBlocks = blockFromJsonArray(basal, dateUtil)
+                if (basalBlocks.isNullOrEmpty() || basalBlocks.all { it.amount < pumpDescription.basalMinimumRate || it.amount > 10.0 }) {
                     ToastUtils.errorToast(activity, rh.gs(R.string.error_in_basal_values))
                     return false
                 }
-                if (low?.all { hardLimits.isInRange(it.amount, HardLimits.LIMIT_MIN_BG[0], HardLimits.LIMIT_MIN_BG[1]) } == false) {
+                if (low.all { hardLimits.isInRange(it.amount, HardLimits.LIMIT_MIN_BG[0], HardLimits.LIMIT_MIN_BG[1]) } == false) {
                     ToastUtils.errorToast(activity, rh.gs(R.string.error_in_target_values))
                     return false
                 }
-                if (high?.all { hardLimits.isInRange(it.amount, HardLimits.LIMIT_MAX_BG[0], HardLimits.LIMIT_MAX_BG[1]) } == false) {
+                if (high.all { hardLimits.isInRange(it.amount, HardLimits.LIMIT_MAX_BG[0], HardLimits.LIMIT_MAX_BG[1]) } == false) {
                     ToastUtils.errorToast(activity, rh.gs(R.string.error_in_target_values))
                     return false
                 }
             } else {
-                if (blockFromJsonArray(isf, dateUtil)?.all { hardLimits.isInRange(profileUtil.convertToMgdl(it.amount, GlucoseUnit.MMOL), HardLimits.MIN_ISF, HardLimits.MAX_ISF) } == false) {
+                val isfBlocks = blockFromJsonArray(isf, dateUtil)
+                if (isfBlocks.isNullOrEmpty() || isfBlocks.all { hardLimits.isInRange(profileUtil.convertToMgdl(it.amount, GlucoseUnit.MMOL), HardLimits.MIN_ISF, HardLimits.MAX_ISF) } == false) {
                     ToastUtils.errorToast(activity, rh.gs(R.string.error_in_isf_values))
                     return false
                 }
-                if (blockFromJsonArray(basal, dateUtil)?.all { it.amount < pumpDescription.basalMinimumRate || it.amount > 10.0 } != false) {
+                val basalBlocks = blockFromJsonArray(basal, dateUtil)
+                if (basalBlocks.isNullOrEmpty() || basalBlocks.all { it.amount < pumpDescription.basalMinimumRate || it.amount > 10.0 }) {
                     ToastUtils.errorToast(activity, rh.gs(R.string.error_in_basal_values))
                     return false
                 }
-                if (low?.all { hardLimits.isInRange(profileUtil.convertToMgdl(it.amount, GlucoseUnit.MMOL), HardLimits.LIMIT_MIN_BG[0], HardLimits.LIMIT_MIN_BG[1]) } == false) {
+                if (low.all { hardLimits.isInRange(profileUtil.convertToMgdl(it.amount, GlucoseUnit.MMOL), HardLimits.LIMIT_MIN_BG[0], HardLimits.LIMIT_MIN_BG[1]) } == false) {
                     ToastUtils.errorToast(activity, rh.gs(R.string.error_in_target_values))
                     return false
                 }
-                if (high?.all { hardLimits.isInRange(profileUtil.convertToMgdl(it.amount, GlucoseUnit.MMOL), HardLimits.LIMIT_MAX_BG[0], HardLimits.LIMIT_MAX_BG[1]) } == false) {
+                if (high.all { hardLimits.isInRange(profileUtil.convertToMgdl(it.amount, GlucoseUnit.MMOL), HardLimits.LIMIT_MAX_BG[0], HardLimits.LIMIT_MAX_BG[1]) } == false) {
                     ToastUtils.errorToast(activity, rh.gs(R.string.error_in_target_values))
                     return false
                 }
             }
-            low?.let {
-                high?.let {
-                    for (i in low.indices) if (low[i].amount > high[i].amount) {
-                        ToastUtils.errorToast(activity, rh.gs(R.string.error_in_target_values))
-                        return false
-                    }
+            for (i in low.indices) {
+                if (i < high.size && low[i].amount > high[i].amount) {
+                    ToastUtils.errorToast(activity, rh.gs(R.string.error_in_target_values))
+                    return false
                 }
             }
         }
@@ -188,6 +217,12 @@ class ProfilePlugin @Inject constructor(
     override fun storeSettings(activity: FragmentActivity?, timestamp: Long) {
         for (i in 0 until numOfProfiles) {
             profiles[i].run {
+                if (ic.length() == 0) ic = JSONArray(DEFAULT_IC_ARRAY)
+                if (isf.length() == 0) isf = JSONArray(DEFAULT_ISF_ARRAY)
+                if (basal.length() == 0) basal = JSONArray(DEFAULT_BASAL_ARRAY)
+                if (targetLow.length() == 0) targetLow = JSONArray(DEFAULT_TARGET_ARRAY)
+                if (targetHigh.length() == 0) targetHigh = JSONArray(DEFAULT_TARGET_ARRAY)
+
                 preferences.put(ProfileComposedStringKey.LocalProfileNumberedName, i, value = name)
                 preferences.put(ProfileComposedBooleanKey.LocalProfileNumberedMgdl, i, value = mgdl)
                 preferences.put(ProfileComposedDoubleKey.LocalProfileNumberedDia, i, value = dia)
@@ -225,37 +260,25 @@ class ProfilePlugin @Inject constructor(
         for (i in 0 until numOfProfiles) {
             val name = preferences.get(ProfileComposedStringKey.LocalProfileNumberedName, i)
             if (isExistingName(name)) continue
-            try {
-                var icJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedIc, i))
-                if (icJson.length() == 1 && icJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) icJson = JSONArray(DEFAULT_IC_ARRAY)
 
-                var isfJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedIsf, i))
-                if (isfJson.length() == 1 && isfJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) isfJson = JSONArray(DEFAULT_ISF_ARRAY)
+            val icJson = parseOrFallbackJsonArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedIc, i), DEFAULT_IC_ARRAY)
+            val isfJson = parseOrFallbackJsonArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedIsf, i), DEFAULT_ISF_ARRAY)
+            val basalJson = parseOrFallbackJsonArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedBasal, i), DEFAULT_BASAL_ARRAY)
+            val targetLowJson = parseOrFallbackJsonArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedTargetLow, i), DEFAULT_TARGET_ARRAY)
+            val targetHighJson = parseOrFallbackJsonArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedTargetHigh, i), DEFAULT_TARGET_ARRAY)
 
-                var basalJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedBasal, i))
-                if (basalJson.length() == 1 && basalJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) basalJson = JSONArray(DEFAULT_BASAL_ARRAY)
-
-                var targetLowJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedTargetLow, i))
-                if (targetLowJson.length() == 1 && targetLowJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) targetLowJson = JSONArray(DEFAULT_TARGET_ARRAY)
-
-                var targetHighJson = JSONArray(preferences.get(ProfileComposedStringKey.LocalProfileNumberedTargetHigh, i))
-                if (targetHighJson.length() == 1 && targetHighJson.getJSONObject(0).optDouble("value", 0.0) == 0.0) targetHighJson = JSONArray(DEFAULT_TARGET_ARRAY)
-
-                profiles.add(
-                    ProfileSource.SingleProfile(
-                        name = name,
-                        mgdl = preferences.get(ProfileComposedBooleanKey.LocalProfileNumberedMgdl, i),
-                        dia = preferences.get(ProfileComposedDoubleKey.LocalProfileNumberedDia, i),
-                        ic = icJson,
-                        isf = isfJson,
-                        basal = basalJson,
-                        targetLow = targetLowJson,
-                        targetHigh = targetHighJson
-                    )
+            profiles.add(
+                ProfileSource.SingleProfile(
+                    name = name,
+                    mgdl = preferences.get(ProfileComposedBooleanKey.LocalProfileNumberedMgdl, i),
+                    dia = preferences.get(ProfileComposedDoubleKey.LocalProfileNumberedDia, i),
+                    ic = icJson,
+                    isf = isfJson,
+                    basal = basalJson,
+                    targetLow = targetLowJson,
+                    targetHigh = targetHighJson
                 )
-            } catch (e: JSONException) {
-                aapsLogger.error("Exception", e)
-            }
+            )
         }
         isEdited = false
         createAndStoreConvertedProfile()
@@ -324,44 +347,6 @@ class ProfilePlugin @Inject constructor(
         return false
     }
 
-    /*
-        {
-            "_id": "576264a12771b7500d7ad184",
-            "startDate": "2016-06-16T08:35:00.000Z",
-            "defaultProfile": "Default",
-            "store": {
-                "Default": {
-                    "dia": "3",
-                    "carbratio": [{
-                        "time": "00:00",
-                        "value": "30"
-                    }],
-                    "carbs_hr": "20",
-                    "delay": "20",
-                    "sens": [{
-                        "time": "00:00",
-                        "value": "100"
-                    }],
-                    "timezone": "UTC",
-                    "basal": [{
-                        "time": "00:00",
-                        "value": "0.1"
-                    }],
-                    "target_low": [{
-                        "time": "00:00",
-                        "value": "0"
-                    }],
-                    "target_high": [{
-                        "time": "00:00",
-                        "value": "0"
-                    }],
-                    "startDate": "1970-01-01T00:00:00.000Z",
-                    "units": "mmol"
-                }
-            },
-            "created_at": "2016-06-16T08:34:41.256Z"
-        }
-        */
     private fun createAndStoreConvertedProfile() {
         rawProfile = createProfileStore()
     }
