@@ -27,6 +27,7 @@ import app.aaps.plugins.configuration.databinding.ActivitySetupwizardBinding
 import app.aaps.plugins.configuration.setupwizard.elements.SWItem
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
+import java.util.ArrayDeque
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.math.max
@@ -44,6 +45,7 @@ class SetupWizardActivity : DaggerAppCompatActivityWithResult() {
     private lateinit var screens: List<SWScreen>
     private var currentWizardPage = 0
     private var setupWizardMenuProvider: MenuProvider? = null
+    private val pageHistory = ArrayDeque<Int>()
 
     private val intentMessage = "WIZZARDPAGE"
 
@@ -66,9 +68,14 @@ class SetupWizardActivity : DaggerAppCompatActivityWithResult() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (currentWizardPage == 0)
-                    OKDialog.showConfirmation(this@SetupWizardActivity, rh.gs(R.string.exitwizard)) { finish() } else {
-                    currentWizardPage = previousPage(); prepareLayout()
+                if (pageHistory.isNotEmpty()) {
+                    currentWizardPage = pageHistory.removeLast()
+                    prepareLayout()
+                } else if (currentWizardPage == 0) {
+                    OKDialog.showConfirmation(this@SetupWizardActivity, rh.gs(R.string.exitwizard)) { finish() }
+                } else {
+                    currentWizardPage = previousPage()
+                    prepareLayout()
                 }
             }
         })
@@ -87,8 +94,22 @@ class SetupWizardActivity : DaggerAppCompatActivityWithResult() {
                 }
         }
         setupWizardMenuProvider?.let { addMenuProvider(it) }
-        binding.nextButton.setOnClickListener { currentWizardPage = nextPage(); prepareLayout() }
-        binding.previousButton.setOnClickListener { currentWizardPage = previousPage(); prepareLayout() }
+        binding.nextButton.setOnClickListener {
+            val next = nextPage()
+            if (next != currentWizardPage) {
+                pageHistory.add(currentWizardPage)
+                currentWizardPage = next
+                prepareLayout()
+            }
+        }
+        binding.previousButton.setOnClickListener {
+            if (pageHistory.isNotEmpty()) {
+                currentWizardPage = pageHistory.removeLast()
+            } else {
+                currentWizardPage = previousPage()
+            }
+            prepareLayout()
+        }
         binding.finishButton.setOnClickListener { finishSetupWizard() }
     }
 
@@ -186,7 +207,7 @@ class SetupWizardActivity : DaggerAppCompatActivityWithResult() {
                 findViewById<View>(R.id.finish_button).visibility = View.GONE
                 findViewById<View>(R.id.next_button).visibility = View.GONE
             }
-            if (currentWizardPage == 0) findViewById<View>(R.id.previous_button).visibility = View.GONE else findViewById<View>(R.id.previous_button).visibility = View.VISIBLE
+            if (currentWizardPage == 0 && pageHistory.isEmpty()) findViewById<View>(R.id.previous_button).visibility = View.GONE else findViewById<View>(R.id.previous_button).visibility = View.VISIBLE
             currentScreen.processVisibility(this)
         }
     }
