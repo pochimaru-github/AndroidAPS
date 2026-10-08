@@ -159,13 +159,15 @@ class TimeListEdit(
                 override fun afterTextChanged(s: Editable) {
                     val value1 = stringToDouble(it.text, 0.0)
                     var value2 = value2(position)
-                    if (data2 != null && value1 > value2) {
-                        value2 = value1
-                        numberPickers2[position]?.value = value2
+                    if (value1 in min..max) {
+                        if (data2 != null && value2 >= min2 && value1 > value2) {
+                            value2 = value1
+                            numberPickers2[position]?.value = value2
+                        }
+                        editItem(position, secondFromMidnight(position), value1, value2)
+                        callSave()
+                        log()
                     }
-                    editItem(position, secondFromMidnight(position), value1, value2)
-                    callSave()
-                    log()
                 }
 
                 override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -179,13 +181,15 @@ class TimeListEdit(
                 override fun afterTextChanged(s: Editable) {
                     var value1 = value1(position)
                     val value2 = stringToDouble(it.text, 0.0)
-                    if (data2 != null && value2 < value1) {
-                        value1 = value2
-                        numberPickers1[position]?.value = value1
+                    if (value2 in min2..max2) {
+                        if (data2 != null && value1 >= min && value2 < value1) {
+                            value1 = value2
+                            numberPickers1[position]?.value = value1
+                        }
+                        editItem(position, secondFromMidnight(position), value1, value2)
+                        callSave()
+                        log()
                     }
-                    editItem(position, secondFromMidnight(position), value1, value2)
-                    callSave()
-                    log()
                 }
 
                 override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
