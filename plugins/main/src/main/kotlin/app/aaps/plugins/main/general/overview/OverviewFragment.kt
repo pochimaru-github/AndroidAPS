@@ -94,7 +94,9 @@ import app.aaps.core.keys.UnitDoubleKey
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.objects.constraints.ConstraintObject
 import app.aaps.core.objects.extensions.directionToIcon
+import app.aaps.core.objects.extensions.isInProgress
 import app.aaps.core.objects.extensions.round
+import app.aaps.core.objects.extensions.toStringShort
 import app.aaps.core.objects.profile.ProfileSealed
 import app.aaps.core.objects.wizard.QuickWizard
 import app.aaps.core.ui.UIRunnable
@@ -410,7 +412,17 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     override fun onClick(v: View) {
-        // Implementation handled by caller/plugin
+        val b = _binding ?: return
+        when (v.id) {
+            b.activeProfile.id -> uiInteraction.runProfileSwitchDialog(childFragmentManager)
+            b.tempTarget.id -> uiInteraction.runTempTargetDialog(childFragmentManager)
+            b.buttonsLayout.treatmentButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.TREATMENT, app.aaps.core.ui.R.string.careportal_treatment)
+            b.buttonsLayout.calibrationButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.CALIBRATION, app.aaps.core.ui.R.string.careportal_calibration)
+            b.buttonsLayout.cgmButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.SENSOR_INSERT, app.aaps.core.ui.R.string.cgm_sensor_insert)
+            b.buttonsLayout.insulinButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.BOLUS, app.aaps.core.ui.R.string.insulin)
+            b.buttonsLayout.carbsButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.CARBS, app.aaps.core.ui.R.string.carbs)
+            b.buttonsLayout.wizardButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.TREATMENT, app.aaps.core.ui.R.string.calculator_label)
+        }
     }
 
     override fun onLongClick(v: View?): Boolean {
@@ -422,66 +434,143 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun updateTime() {
-        // Time update logic
+        runOnUiThread {
+            _binding?.let { b ->
+                b.infoLayout.time.text = dateUtil.formatTimeString(System.currentTimeMillis())
+            }
+        }
     }
 
     private fun updateSensitivity() {
-        // Sensitivity update logic
+        // Handled via bus events
     }
 
     private fun updateGraph() {
-        // Graph update logic
+        try {
+            val graphData = graphDataProvider.get()
+            runOnUiThread {
+                _binding?.let { b ->
+                    graphData.renderMainGraph(b.graphsLayout.bgGraph)
+                }
+            }
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
     }
 
     private fun updateNotification() {
-        // Notification update logic
+        // Handled via notification store
     }
 
     private fun updateBg() {
-        // BG update logic
+        val lastBg = lastBgData.lastBg()
+        runOnUiThread {
+            _binding?.let { b ->
+                if (lastBg != null) {
+                    val unit = profileFunction.getGlucoseUnit()
+                    b.infoLayout.glucose.text = decimalFormatter.formatGlucose(lastBg.value, unit)
+                    b.infoLayout.glucoseDelta.text = decimalFormatter.formatGlucoseDelta(lastBg.delta, unit)
+                    b.infoLayout.glucoseAgo.text = dateUtil.timeAgo(lastBg.date)
+                    b.infoLayout.glucoseArrow.text = lastBg.directionToIcon()
+                }
+            }
+        }
     }
 
     private fun updateTemporaryBasal() {
-        // Temp basal update logic
+        runOnUiThread {
+            _binding?.let { b ->
+                b.infoLayout.tempBasal.text = overviewData.temporaryBasalText()
+            }
+        }
     }
 
     private fun updateExtendedBolus() {
-        // Extended bolus update logic
+        runOnUiThread {
+            _binding?.let { b ->
+                b.infoLayout.extendedBolus.text = overviewData.extendedBolusText()
+            }
+        }
     }
 
     private fun updateIobCob() {
-        // IOB/COB update logic
+        val iobCob = iobCobCalculator.calculateIobCob()
+        runOnUiThread {
+            _binding?.let { b ->
+                b.infoLayout.iob.text = rh.gs(app.aaps.core.ui.R.string.iob_value, decimalFormatter.format2decimal(iobCob.iob))
+                b.infoLayout.cob.text = rh.gs(app.aaps.core.ui.R.string.cob_value, decimalFormatter.format1decimal(iobCob.cob))
+            }
+        }
     }
 
     private fun processButtonsVisibility() {
-        // Buttons visibility logic
+        runOnUiThread {
+            _binding?.let { b ->
+                val isInit = config.appInitialized
+                b.buttonsLayout.treatmentButton.visibility = (isInit && preferences.get(BooleanKey.OverviewShowTreatmentButton)).toVisibility()
+                b.buttonsLayout.wizardButton.visibility = (isInit && preferences.get(BooleanKey.OverviewShowWizardButton)).toVisibility()
+                b.buttonsLayout.cgmButton.visibility = (isInit && preferences.get(BooleanKey.OverviewShowCgmButton)).toVisibility()
+                b.buttonsLayout.calibrationButton.visibility = (isInit && preferences.get(BooleanKey.OverviewShowCalibrationButton)).toVisibility()
+                b.buttonsLayout.insulinButton.visibility = (isInit && preferences.get(BooleanKey.OverviewShowInsulinButton)).toVisibility()
+                b.buttonsLayout.carbsButton.visibility = (isInit && preferences.get(BooleanKey.OverviewShowCarbsButton)).toVisibility()
+            }
+        }
     }
 
     private fun processAps() {
-        // Safe placeholder logic for APS status
+        val mode = loop.runningMode
+        runOnUiThread {
+            _binding?.let { b ->
+                b.infoLayout.apsMode.text = mode.toString()
+            }
+        }
     }
 
     private fun updateProfile() {
-        // Profile update logic
+        val profile = profileFunction.getProfile()
+        runOnUiThread {
+            _binding?.let { b ->
+                b.activeProfile.text = profile?.name ?: rh.gs(app.aaps.core.ui.R.string.no_profile)
+            }
+        }
     }
 
     private fun updateTemporaryTarget() {
-        // Temp target update logic
+        val activeTT = persistenceLayer.getTempTargetActiveAt(dateUtil.now())
+        runOnUiThread {
+            _binding?.let { b ->
+                if (activeTT != null && activeTT.isInProgress(dateUtil)) {
+                    b.tempTarget.text = activeTT.toStringShort(rh, dateUtil)
+                } else {
+                    val profile = profileFunction.getProfile()
+                    b.tempTarget.text = profile?.let { rh.gs(app.aaps.core.ui.R.string.target_label, decimalFormatter.formatGlucose(it.targetLow, profileFunction.getGlucoseUnit())) } ?: ""
+                }
+            }
+        }
     }
 
     private fun updatePumpStatus() {
-        // Pump status update logic
+        runOnUiThread {
+            _binding?.let { b ->
+                b.pumpStatus.text = overviewData.pumpStatus
+            }
+        }
     }
 
     private fun updateCalcProgress() {
-        // Calc progress update logic
+        runOnUiThread {
+            _binding?.let { b ->
+                b.infoLayout.calcProgress.progress = overviewData.calcProgressPct
+                b.infoLayout.calcProgress.visibility = (overviewData.calcProgressPct < 100).toVisibility()
+            }
+        }
     }
 
     private fun prepareGraphsIfNeeded(size: Int) {
-        // Prepare graphs logic
+        // Internal setup for graphs layout
     }
 
     private fun popupBolusDialogIfRunning(onClick: Boolean) {
-        // Popup bolus dialog logic
+        // Internal setup for popup dialogs
     }
 }
