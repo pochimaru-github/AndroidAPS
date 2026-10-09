@@ -53,7 +53,6 @@ import app.aaps.core.interfaces.rx.events.EventTempTargetChange
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewCalcProgress
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewGraph
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewIobCob
-import app.aaps.core.interfaces.rx.events.EventUpdateOverviewNotification
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewSensitivity
 import app.aaps.core.interfaces.source.DexcomBoyda
 import app.aaps.core.interfaces.source.XDripSource
@@ -72,6 +71,7 @@ import app.aaps.core.ui.extensions.toVisibility
 import app.aaps.plugins.main.databinding.OverviewFragmentBinding
 import app.aaps.plugins.main.general.overview.graphData.GraphData
 import app.aaps.plugins.main.general.overview.notifications.NotificationStore
+import app.aaps.plugins.main.general.overview.notifications.events.EventUpdateOverviewNotification
 import app.aaps.plugins.main.general.overview.ui.StatusLightHandler
 import app.aaps.plugins.main.skins.SkinProvider
 import com.jjoe64.graphview.GraphView
@@ -405,7 +405,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun updateGraph() {
-        // Graph rendering handled via bus events and graphDataProvider
+        // Internal setup for graph rendering
     }
 
     private fun updateNotification() {
@@ -417,8 +417,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         runOnUiThread {
             _binding?.let { b ->
                 if (lastBg != null) {
-                    val unit = profileFunction.getUnits()
-                    b.infoLayout.time.text = dateUtil.minAgo(rh, lastBg.date)
+                    b.infoLayout.bg.text = decimalFormatter.to1Decimal(lastBg.value)
+                    b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
                 }
             }
         }
@@ -427,7 +427,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     private fun updateTemporaryBasal() {
         runOnUiThread {
             _binding?.let { b ->
-                b.infoLayout.tempBasal.text = overviewData.temporaryBasalText()
+                b.infoLayout.baseBasal.text = overviewData.temporaryBasalText()
             }
         }
     }
@@ -446,7 +446,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         runOnUiThread {
             _binding?.let { b ->
                 b.infoLayout.iob.text = decimalFormatter.to2Decimal(iob.iob)
-                b.infoLayout.cob.text = decimalFormatter.to1Decimal(cobInfo.cob)
+                val cobVal = cobInfo.displayCob ?: 0.0
+                b.infoLayout.cob.text = decimalFormatter.to1Decimal(cobVal)
             }
         }
     }
@@ -469,16 +470,15 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         val mode = loop.runningMode
         runOnUiThread {
             _binding?.let { b ->
-                b.infoLayout.apsMode.text = mode.toString()
+                b.infoLayout.apsModeText.text = mode.toString()
             }
         }
     }
 
     private fun updateProfile() {
-        val profile = profileFunction.getProfile()
         runOnUiThread {
             _binding?.let { b ->
-                b.activeProfile.text = profile?.name ?: rh.gs(app.aaps.core.ui.R.string.value_unavailable_short)
+                b.activeProfile.text = profileFunction.getProfileName()
             }
         }
     }
@@ -488,7 +488,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             _binding?.let { b ->
                 val profile = profileFunction.getProfile()
                 if (profile != null) {
-                    val targetVal = decimalFormatter.to1Decimal(profile.targetLow)
+                    val targetVal = decimalFormatter.to1Decimal(profile.getTargetLowMgdl())
                     val unitStr = profileFunction.getUnits().toString()
                     b.tempTarget.text = "$targetVal $unitStr"
                 } else {
