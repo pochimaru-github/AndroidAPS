@@ -14,12 +14,14 @@ import app.aaps.core.data.ue.Sources
 import app.aaps.core.data.ue.ValueWithUnit
 import app.aaps.core.interfaces.constraints.ConstraintsChecker
 import app.aaps.core.interfaces.db.PersistenceLayer
+import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.logging.UserEntryLogger
 import app.aaps.core.interfaces.profile.ProfileFunction
 import app.aaps.core.interfaces.profile.ProfileUtil
 import app.aaps.core.interfaces.protection.ProtectionCheck
 import app.aaps.core.interfaces.resources.ResourceHelper
+import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.BooleanNonKey
 import app.aaps.core.keys.IntKey
 import app.aaps.core.keys.UnitDoubleKey
@@ -32,7 +34,6 @@ import app.aaps.ui.databinding.DialogTemptargetBinding
 import com.google.common.base.Joiner
 import com.google.common.collect.Lists
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.plusAssign
 import java.text.DecimalFormat
 import java.util.LinkedList
 import java.util.concurrent.TimeUnit
@@ -48,6 +49,8 @@ class TempTargetDialog : DialogFragmentWithDate() {
     @Inject lateinit var persistenceLayer: PersistenceLayer
     @Inject lateinit var ctx: Context
     @Inject lateinit var protectionCheck: ProtectionCheck
+    @Inject lateinit var fabricPrivacy: FabricPrivacy
+    @Inject lateinit var aapsLogger: AAPSLogger
 
     private lateinit var reasonList: List<String>
 
@@ -55,7 +58,6 @@ class TempTargetDialog : DialogFragmentWithDate() {
     private val disposable = CompositeDisposable()
     private var _binding: DialogTemptargetBinding? = null
 
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -94,7 +96,6 @@ class TempTargetDialog : DialogFragmentWithDate() {
         val units = profileUtil.units
         binding.units.text = if (units == GlucoseUnit.MMOL) rh.gs(app.aaps.core.ui.R.string.mmol) else rh.gs(app.aaps.core.ui.R.string.mgdl)
 
-        // temp target
         context?.let { context ->
             binding.targetCancel.visibility = (persistenceLayer.getTemporaryTargetActiveAt(dateUtil.now()) != null).toVisibility()
 
@@ -226,15 +227,15 @@ class TempTargetDialog : DialogFragmentWithDate() {
                     else                                            -> listOf()
                 }
                 if (target == 0.0 || duration == 0) {
-                    disposable += persistenceLayer.cancelCurrentTemporaryTargetIfAny(
+                    persistenceLayer.cancelCurrentTemporaryTargetIfAny(
                         timestamp = eventTime,
                         action = Action.TT,
                         source = Sources.TTDialog,
                         note = null,
                         listValues = listOf()
-                    ).subscribe()
+                    ).subscribe({}, { e -> fabricPrivacy.logException(e) })
                 } else {
-                    disposable += persistenceLayer.insertAndCancelCurrentTemporaryTarget(
+                    persistenceLayer.insertAndCancelCurrentTemporaryTarget(
                         TT(
                             timestamp = eventTime,
                             duration = TimeUnit.MINUTES.toMillis(duration.toLong()),
@@ -251,7 +252,7 @@ class TempTargetDialog : DialogFragmentWithDate() {
                         source = Sources.TTDialog,
                         note = null,
                         listValues = listValues.filterNotNull()
-                    ).subscribe()
+                    ).subscribe({}, { e -> fabricPrivacy.logException(e) })
                 }
 
                 if (duration == 10) preferences.put(BooleanNonKey.ObjectivesTempTargetUsed, true)
