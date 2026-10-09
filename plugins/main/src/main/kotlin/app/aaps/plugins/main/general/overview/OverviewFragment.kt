@@ -415,7 +415,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun updateGraph() {
-        // Internal setup for graph rendering
+        // GraphData.kt 共有後に確定描画ロジックを実装
     }
 
     private fun updateNotification() {
