@@ -53,20 +53,23 @@ class VirtualPumpFragment : DaggerFragment() {
 
     private var rootView: View? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val layoutId = requireContext().resources.getIdentifier("virtual_pump_fragment", "layout", requireContext().packageName)
-        val view = if (layoutId != 0) inflater.inflate(layoutId, container, false) else View(requireContext())
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val ctx = context ?: return null
+        val layoutId = ctx.resources.getIdentifier("virtual_pump_fragment", "layout", ctx.packageName)
+        val view = if (layoutId != 0) inflater.inflate(layoutId, container, false) else View(ctx)
         rootView = view
         return view
     }
 
     private fun <T : View> findViewById(name: String): T? {
-        val id = requireContext().resources.getIdentifier(name, "id", requireContext().packageName)
+        val ctx = context ?: return null
+        val id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
         return if (id != 0) rootView?.findViewById(id) else null
     }
 
     private fun getStringByName(name: String, fallback: String = ""): String {
-        val id = requireContext().resources.getIdentifier(name, "string", requireContext().packageName)
+        val ctx = context ?: return fallback
+        val id = ctx.resources.getIdentifier(name, "string", ctx.packageName)
         return if (id != 0) rh.gs(id) else fallback
     }
 
@@ -86,7 +89,9 @@ class VirtualPumpFragment : DaggerFragment() {
             .observeOn(aapsSchedulers.main)
             .subscribe({ updateGui() }, fabricPrivacy::logException)
         refreshLoop = Runnable {
-            activity?.runOnUiThread { updateGui() }
+            if (isAdded) {
+                activity?.runOnUiThread { updateGui() }
+            }
             handler.postDelayed(refreshLoop, T.mins(1).msecs())
         }
         handler.postDelayed(refreshLoop, T.mins(1).msecs())
@@ -110,18 +115,22 @@ class VirtualPumpFragment : DaggerFragment() {
     @Synchronized
     override fun onDestroyView() {
         super.onDestroyView()
+        disposable.clear()
+        handler.removeCallbacksAndMessages(null)
         rootView = null
     }
 
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
+        try {
+            handler.looper.quitSafely()
+        } catch (ignored: Exception) { }
     }
 
     @Synchronized
     private fun updateGui() {
-        if (rootView == null) return
+        if (!isAdded || rootView == null || context == null) return
         val profile = profileFunction.getProfile() ?: return
 
         val baseBasalRate = findViewById<TextView>("base_basal_rate")
