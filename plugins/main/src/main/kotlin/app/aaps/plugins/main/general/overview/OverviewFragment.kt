@@ -53,6 +53,7 @@ import app.aaps.core.interfaces.rx.events.EventTempTargetChange
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewCalcProgress
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewGraph
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewIobCob
+import app.aaps.core.interfaces.rx.events.EventUpdateOverviewNotification
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewSensitivity
 import app.aaps.core.interfaces.source.DexcomBoyda
 import app.aaps.core.interfaces.source.XDripSource
@@ -65,6 +66,8 @@ import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.BooleanNonKey
 import app.aaps.core.keys.IntNonKey
 import app.aaps.core.keys.interfaces.Preferences
+import app.aaps.core.objects.extensions.isInProgress
+import app.aaps.core.objects.extensions.toStringShort
 import app.aaps.core.objects.wizard.QuickWizard
 import app.aaps.core.ui.extensions.runOnUiThread
 import app.aaps.core.ui.extensions.toVisibility
@@ -286,8 +289,10 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             .observeOn(aapsSchedulers.main)
             .delay(30, TimeUnit.MILLISECONDS, aapsSchedulers.main)
             .subscribe({
-                           overviewData.pumpStatus = it.getStatus(requireContext())
-                           updatePumpStatus()
+                           context?.let { ctx ->
+                               overviewData.pumpStatus = it.getStatus(ctx)
+                               updatePumpStatus()
+                           }
                        }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventInitializationChanged::class.java)
@@ -328,7 +333,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     fun refreshAll() {
-        if (!config.appInitialized) return
+        if (!config.appInitialized || !isAdded || _binding == null) return
         runOnUiThread {
             _binding ?: return@runOnUiThread
             updateTime()
@@ -349,6 +354,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     @Synchronized
     override fun onDestroyView() {
         super.onDestroyView()
+        disposable.clear()
+        handler.removeCallbacksAndMessages(null)
         _binding?.graphsLayout?.bgGraph?.let { graph ->
             graph.setOnLongClickListener(null)
             graph.removeAllSeries()
@@ -367,7 +374,9 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
-        handler.looper.quitSafely()
+        try {
+            handler.looper.quitSafely()
+        } catch (ignored: Exception) { }
     }
 
     override fun onClick(v: View) {
@@ -389,6 +398,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun scheduleUpdateGUI() {
+        if (!isAdded) return
         handler.post { refreshAll() }
     }
 
@@ -418,6 +428,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             _binding?.let { b ->
                 if (lastBg != null) {
                     b.infoLayout.bg.text = decimalFormatter.to1Decimal(lastBg.value)
+                    b.infoLayout.delta.text = decimalFormatter.to1Decimal(lastBg.delta)
                     b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
                 }
             }
@@ -484,15 +495,20 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun updateTemporaryTarget() {
+        val activeTT = persistenceLayer.getTemporaryTargetActiveAt(dateUtil.now())
         runOnUiThread {
             _binding?.let { b ->
-                val profile = profileFunction.getProfile()
-                if (profile != null) {
-                    val targetVal = decimalFormatter.to1Decimal(profile.getTargetLowMgdl())
-                    val unitStr = profileFunction.getUnits().toString()
-                    b.tempTarget.text = "$targetVal $unitStr"
+                if (activeTT != null && activeTT.isInProgress(dateUtil)) {
+                    b.tempTarget.text = activeTT.toStringShort(rh, dateUtil)
                 } else {
-                    b.tempTarget.text = rh.gs(app.aaps.core.ui.R.string.value_unavailable_short)
+                    val profile = profileFunction.getProfile()
+                    if (profile != null) {
+                        val targetVal = decimalFormatter.to1Decimal(profile.getTargetLowMgdl())
+                        val unitStr = profileFunction.getUnits().toString()
+                        b.tempTarget.text = "$targetVal $unitStr"
+                    } else {
+                        b.tempTarget.text = rh.gs(app.aaps.core.ui.R.string.value_unavailable_short)
+                    }
                 }
             }
         }
