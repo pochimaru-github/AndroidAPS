@@ -39,9 +39,11 @@ import app.aaps.core.interfaces.rx.AapsSchedulers
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.events.EventAcceptOpenLoopChange
 import app.aaps.core.interfaces.rx.events.EventBucketedDataCreated
+import app.aaps.core.interfaces.rx.events.EventDismissNotification
 import app.aaps.core.interfaces.rx.events.EventEffectiveProfileSwitchChanged
 import app.aaps.core.interfaces.rx.events.EventExtendedBolusChange
 import app.aaps.core.interfaces.rx.events.EventInitializationChanged
+import app.aaps.core.interfaces.rx.events.EventNewNotification
 import app.aaps.core.interfaces.rx.events.EventNewOpenLoopNotification
 import app.aaps.core.interfaces.rx.events.EventPreferenceChange
 import app.aaps.core.interfaces.rx.events.EventPumpStatusChanged
@@ -53,7 +55,6 @@ import app.aaps.core.interfaces.rx.events.EventTempTargetChange
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewCalcProgress
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewGraph
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewIobCob
-import app.aaps.core.interfaces.rx.events.EventUpdateOverviewNotification
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewSensitivity
 import app.aaps.core.interfaces.source.DexcomBoyda
 import app.aaps.core.interfaces.source.XDripSource
@@ -66,15 +67,12 @@ import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.BooleanNonKey
 import app.aaps.core.keys.IntNonKey
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.core.objects.extensions.isInProgress
-import app.aaps.core.objects.extensions.toStringShort
 import app.aaps.core.objects.wizard.QuickWizard
 import app.aaps.core.ui.extensions.runOnUiThread
 import app.aaps.core.ui.extensions.toVisibility
 import app.aaps.plugins.main.databinding.OverviewFragmentBinding
 import app.aaps.plugins.main.general.overview.graphData.GraphData
 import app.aaps.plugins.main.general.overview.notifications.NotificationStore
-import app.aaps.plugins.main.general.overview.notifications.events.EventUpdateOverviewNotification
 import app.aaps.plugins.main.general.overview.ui.StatusLightHandler
 import app.aaps.plugins.main.skins.SkinProvider
 import com.jjoe64.graphview.GraphView
@@ -247,8 +245,12 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             .debounce(1L, TimeUnit.SECONDS)
             .observeOn(aapsSchedulers.main)
             .subscribe({ updateGraph() }, fabricPrivacy::logException)
-        disposable += activePlugin.activeOverview.overviewBus
-            .toObservable(EventUpdateOverviewNotification::class.java)
+        disposable += rxBus
+            .toObservable(EventNewNotification::class.java)
+            .observeOn(aapsSchedulers.main)
+            .subscribe({ updateNotification() }, fabricPrivacy::logException)
+        disposable += rxBus
+            .toObservable(EventDismissNotification::class.java)
             .observeOn(aapsSchedulers.main)
             .subscribe({ updateNotification() }, fabricPrivacy::logException)
         disposable += rxBus
@@ -415,7 +417,22 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun updateGraph() {
-        // GraphData.kt 共有後に確定描画ロジックを実装
+        if (!isAdded || _binding == null) return
+        try {
+            val graphData = graphDataProvider.get().with(binding.graphsLayout.bgGraph, overviewData)
+            graphData.formatAxis(overviewData.fromTime, overviewData.endTime)
+            graphData.addBgReadings(true, context)
+            graphData.addTargetLine()
+            graphData.addBasals()
+            graphData.addIob(false, 0.3)
+            graphData.addCob(false, 0.3)
+            graphData.addTreatments(context)
+            graphData.addNowLine(dateUtil.now())
+            graphData.setNumVerticalLabels()
+            graphData.performUpdate()
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
     }
 
     private fun updateNotification() {
@@ -428,7 +445,10 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             _binding?.let { b ->
                 if (lastBg != null) {
                     b.infoLayout.bg.text = decimalFormatter.to1Decimal(lastBg.value)
-                    b.infoLayout.delta.text = decimalFormatter.to1Decimal(lastBg.delta)
+                    val deltaVal = if (overviewData.bgReadingsArray.size >= 2) {
+                        overviewData.bgReadingsArray[0].value - overviewData.bgReadingsArray[1].value
+                    } else 0.0
+                    b.infoLayout.delta.text = decimalFormatter.to1Decimal(deltaVal)
                     b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
                 }
             }
@@ -498,8 +518,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         val activeTT = persistenceLayer.getTemporaryTargetActiveAt(dateUtil.now())
         runOnUiThread {
             _binding?.let { b ->
-                if (activeTT != null && activeTT.isInProgress(dateUtil)) {
-                    b.tempTarget.text = activeTT.toStringShort(rh, dateUtil)
+                if (activeTT != null) {
+                    b.tempTarget.text = activeTT.toString()
                 } else {
                     val profile = profileFunction.getProfile()
                     if (profile != null) {
