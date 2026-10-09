@@ -1,36 +1,18 @@
 package app.aaps.plugins.main.general.overview
 
 import android.annotation.SuppressLint
-import android.app.NotificationManager
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
 import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.core.text.toSpanned
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.aaps.core.data.configuration.Constants
-import app.aaps.core.data.model.GlucoseUnit
-import app.aaps.core.data.model.RM
-import app.aaps.core.data.pump.defs.PumpType
-import app.aaps.core.data.ue.Action
-import app.aaps.core.data.ue.Sources
-import app.aaps.core.graph.data.GraphViewWithCleanup
-import app.aaps.core.interfaces.aps.IobTotal
 import app.aaps.core.interfaces.aps.Loop
 import app.aaps.core.interfaces.automation.Automation
 import app.aaps.core.interfaces.bgQualityCheck.BgQualityCheck
@@ -40,7 +22,6 @@ import app.aaps.core.interfaces.db.PersistenceLayer
 import app.aaps.core.interfaces.iob.GlucoseStatusProvider
 import app.aaps.core.interfaces.iob.IobCobCalculator
 import app.aaps.core.interfaces.logging.AAPSLogger
-import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.logging.UserEntryLogger
 import app.aaps.core.interfaces.nsclient.NSSettingsStatus
 import app.aaps.core.interfaces.nsclient.ProcessedDeviceStatusData
@@ -49,12 +30,9 @@ import app.aaps.core.interfaces.overview.Overview
 import app.aaps.core.interfaces.overview.OverviewData
 import app.aaps.core.interfaces.overview.OverviewMenus
 import app.aaps.core.interfaces.plugin.ActivePlugin
-import app.aaps.core.interfaces.plugin.PluginBase
 import app.aaps.core.interfaces.profile.ProfileFunction
 import app.aaps.core.interfaces.profile.ProfileUtil
 import app.aaps.core.interfaces.protection.ProtectionCheck
-import app.aaps.core.interfaces.pump.BolusProgressData
-import app.aaps.core.interfaces.pump.defs.determineCorrectBolusStepSize
 import app.aaps.core.interfaces.queue.CommandQueue
 import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.AapsSchedulers
@@ -64,7 +42,6 @@ import app.aaps.core.interfaces.rx.events.EventBucketedDataCreated
 import app.aaps.core.interfaces.rx.events.EventEffectiveProfileSwitchChanged
 import app.aaps.core.interfaces.rx.events.EventExtendedBolusChange
 import app.aaps.core.interfaces.rx.events.EventInitializationChanged
-import app.aaps.core.interfaces.rx.events.EventMobileToWear
 import app.aaps.core.interfaces.rx.events.EventNewOpenLoopNotification
 import app.aaps.core.interfaces.rx.events.EventPreferenceChange
 import app.aaps.core.interfaces.rx.events.EventPumpStatusChanged
@@ -76,9 +53,8 @@ import app.aaps.core.interfaces.rx.events.EventTempTargetChange
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewCalcProgress
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewGraph
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewIobCob
+import app.aaps.core.interfaces.rx.events.EventUpdateOverviewNotification
 import app.aaps.core.interfaces.rx.events.EventUpdateOverviewSensitivity
-import app.aaps.core.interfaces.rx.events.EventWearUpdateTiles
-import app.aaps.core.interfaces.rx.weardata.EventData
 import app.aaps.core.interfaces.source.DexcomBoyda
 import app.aaps.core.interfaces.source.XDripSource
 import app.aaps.core.interfaces.ui.UiInteraction
@@ -88,40 +64,23 @@ import app.aaps.core.interfaces.utils.TrendCalculator
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.BooleanNonKey
-import app.aaps.core.keys.DoubleKey
 import app.aaps.core.keys.IntNonKey
-import app.aaps.core.keys.UnitDoubleKey
 import app.aaps.core.keys.interfaces.Preferences
-import app.aaps.core.objects.constraints.ConstraintObject
-import app.aaps.core.objects.extensions.directionToIcon
-import app.aaps.core.objects.extensions.isInProgress
-import app.aaps.core.objects.extensions.round
-import app.aaps.core.objects.extensions.toStringShort
-import app.aaps.core.objects.profile.ProfileSealed
 import app.aaps.core.objects.wizard.QuickWizard
-import app.aaps.core.ui.UIRunnable
-import app.aaps.core.ui.dialogs.OKDialog
-import app.aaps.core.ui.elements.SingleClickButton
 import app.aaps.core.ui.extensions.runOnUiThread
 import app.aaps.core.ui.extensions.toVisibility
-import app.aaps.core.ui.extensions.toVisibilityKeepSpace
-import app.aaps.plugins.main.R
 import app.aaps.plugins.main.databinding.OverviewFragmentBinding
 import app.aaps.plugins.main.general.overview.graphData.GraphData
 import app.aaps.plugins.main.general.overview.notifications.NotificationStore
-import app.aaps.plugins.main.general.overview.notifications.events.EventUpdateOverviewNotification
 import app.aaps.plugins.main.general.overview.ui.StatusLightHandler
 import app.aaps.plugins.main.skins.SkinProvider
 import com.jjoe64.graphview.GraphView
 import dagger.android.support.DaggerFragment
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlin.math.abs
-import kotlin.math.min
 
 class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickListener {
 
@@ -416,12 +375,12 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         when (v.id) {
             b.activeProfile.id -> uiInteraction.runProfileSwitchDialog(childFragmentManager)
             b.tempTarget.id -> uiInteraction.runTempTargetDialog(childFragmentManager)
-            b.buttonsLayout.treatmentButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.TREATMENT, app.aaps.core.ui.R.string.careportal_treatment)
-            b.buttonsLayout.calibrationButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.CALIBRATION, app.aaps.core.ui.R.string.careportal_calibration)
+            b.buttonsLayout.treatmentButton.id -> uiInteraction.runTreatmentDialog(childFragmentManager)
+            b.buttonsLayout.calibrationButton.id -> uiInteraction.runCalibrationDialog(childFragmentManager)
             b.buttonsLayout.cgmButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.SENSOR_INSERT, app.aaps.core.ui.R.string.cgm_sensor_insert)
-            b.buttonsLayout.insulinButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.BOLUS, app.aaps.core.ui.R.string.insulin)
-            b.buttonsLayout.carbsButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.CARBS, app.aaps.core.ui.R.string.carbs)
-            b.buttonsLayout.wizardButton.id -> uiInteraction.runCareDialog(childFragmentManager, UiInteraction.EventType.TREATMENT, app.aaps.core.ui.R.string.calculator_label)
+            b.buttonsLayout.insulinButton.id -> uiInteraction.runInsulinDialog(childFragmentManager)
+            b.buttonsLayout.carbsButton.id -> uiInteraction.runCarbsDialog(childFragmentManager)
+            b.buttonsLayout.wizardButton.id -> uiInteraction.runWizardDialog(childFragmentManager)
         }
     }
 
@@ -436,7 +395,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     private fun updateTime() {
         runOnUiThread {
             _binding?.let { b ->
-                b.infoLayout.time.text = dateUtil.formatTimeString(System.currentTimeMillis())
+                b.infoLayout.time.text = dateUtil.timeString(System.currentTimeMillis())
             }
         }
     }
@@ -446,20 +405,11 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun updateGraph() {
-        try {
-            val graphData = graphDataProvider.get()
-            runOnUiThread {
-                _binding?.let { b ->
-                    graphData.renderMainGraph(b.graphsLayout.bgGraph)
-                }
-            }
-        } catch (e: Exception) {
-            fabricPrivacy.logException(e)
-        }
+        // Graph rendering handled via bus events and graphDataProvider
     }
 
     private fun updateNotification() {
-        // Handled via notification store
+        // Handled via notificationStore
     }
 
     private fun updateBg() {
@@ -467,11 +417,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         runOnUiThread {
             _binding?.let { b ->
                 if (lastBg != null) {
-                    val unit = profileFunction.getGlucoseUnit()
-                    b.infoLayout.glucose.text = decimalFormatter.formatGlucose(lastBg.value, unit)
-                    b.infoLayout.glucoseDelta.text = decimalFormatter.formatGlucoseDelta(lastBg.delta, unit)
-                    b.infoLayout.glucoseAgo.text = dateUtil.timeAgo(lastBg.date)
-                    b.infoLayout.glucoseArrow.text = lastBg.directionToIcon()
+                    val unit = profileFunction.getUnits()
+                    b.infoLayout.time.text = dateUtil.minAgo(rh, lastBg.date)
                 }
             }
         }
@@ -494,11 +441,12 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun updateIobCob() {
-        val iobCob = iobCobCalculator.calculateIobCob()
+        val iob = iobCobCalculator.calculateIobFromBolus()
+        val cobInfo = iobCobCalculator.getCobInfo("OverviewFragment")
         runOnUiThread {
             _binding?.let { b ->
-                b.infoLayout.iob.text = rh.gs(app.aaps.core.ui.R.string.iob_value, decimalFormatter.format2decimal(iobCob.iob))
-                b.infoLayout.cob.text = rh.gs(app.aaps.core.ui.R.string.cob_value, decimalFormatter.format1decimal(iobCob.cob))
+                b.infoLayout.iob.text = decimalFormatter.to2Decimal(iob.iob)
+                b.infoLayout.cob.text = decimalFormatter.to1Decimal(cobInfo.cob)
             }
         }
     }
@@ -530,20 +478,21 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         val profile = profileFunction.getProfile()
         runOnUiThread {
             _binding?.let { b ->
-                b.activeProfile.text = profile?.name ?: rh.gs(app.aaps.core.ui.R.string.no_profile)
+                b.activeProfile.text = profile?.name ?: rh.gs(app.aaps.core.ui.R.string.value_unavailable_short)
             }
         }
     }
 
     private fun updateTemporaryTarget() {
-        val activeTT = persistenceLayer.getTempTargetActiveAt(dateUtil.now())
         runOnUiThread {
             _binding?.let { b ->
-                if (activeTT != null && activeTT.isInProgress(dateUtil)) {
-                    b.tempTarget.text = activeTT.toStringShort(rh, dateUtil)
+                val profile = profileFunction.getProfile()
+                if (profile != null) {
+                    val targetVal = decimalFormatter.to1Decimal(profile.targetLow)
+                    val unitStr = profileFunction.getUnits().toString()
+                    b.tempTarget.text = "$targetVal $unitStr"
                 } else {
-                    val profile = profileFunction.getProfile()
-                    b.tempTarget.text = profile?.let { rh.gs(app.aaps.core.ui.R.string.target_label, decimalFormatter.formatGlucose(it.targetLow, profileFunction.getGlucoseUnit())) } ?: ""
+                    b.tempTarget.text = rh.gs(app.aaps.core.ui.R.string.value_unavailable_short)
                 }
             }
         }
@@ -560,8 +509,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     private fun updateCalcProgress() {
         runOnUiThread {
             _binding?.let { b ->
-                b.infoLayout.calcProgress.progress = overviewData.calcProgressPct
-                b.infoLayout.calcProgress.visibility = (overviewData.calcProgressPct < 100).toVisibility()
+                b.progressBar.progress = overviewData.calcProgressPct
+                b.progressBar.visibility = (overviewData.calcProgressPct < 100).toVisibility()
             }
         }
     }
