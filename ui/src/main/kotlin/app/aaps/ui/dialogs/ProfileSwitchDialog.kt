@@ -37,7 +37,6 @@ import app.aaps.ui.R
 import app.aaps.ui.databinding.DialogProfileswitchBinding
 import com.google.common.base.Joiner
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.plusAssign
 import java.text.DecimalFormat
 import java.util.LinkedList
 import java.util.concurrent.TimeUnit
@@ -63,7 +62,6 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
     private val disposable = CompositeDisposable()
     private var _binding: DialogProfileswitchBinding? = null
 
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private val textWatcher: TextWatcher = object : TextWatcher {
@@ -116,7 +114,6 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
                 ?: 0.0, Constants.CPP_MIN_TIMESHIFT.toDouble(), Constants.CPP_MAX_TIMESHIFT.toDouble(), 1.0, DecimalFormat("0"), false, binding.okcancel.ok
         )
 
-        // profile
         context?.let { context ->
             val profileStore = activePlugin.activeProfileSource.profile ?: return
             val profileListToCheck = profileStore.getProfileList()
@@ -137,7 +134,6 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
                 return
             }
             binding.profileList.setAdapter(ArrayAdapter(context, app.aaps.core.ui.R.layout.spinner_centered, profileList))
-            // set selected to actual profile
             if (profileName != null)
                 binding.profileList.setText(profileName, false)
             else {
@@ -232,7 +228,7 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
                         ) {
                             if (percent == 90 && duration == 10) preferences.put(BooleanNonKey.ObjectivesProfileSwitchUsed, true)
                             if (isTT) {
-                                disposable += persistenceLayer.insertAndCancelCurrentTemporaryTarget(
+                                persistenceLayer.insertAndCancelCurrentTemporaryTarget(
                                     TT(
                                         timestamp = eventTime + 10000,
                                         duration = TimeUnit.MINUTES.toMillis(duration.toLong()),
@@ -249,7 +245,7 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
                                         ValueWithUnit.fromGlucoseUnit(target, units),
                                         ValueWithUnit.Minute(duration)
                                     ).filterNotNull()
-                                ).subscribe({}, fabricPrivacy::logException)
+                                ).subscribe({}, { e -> fabricPrivacy.logException(e) })
                             }
                         }
                     } catch (e: Exception) {
