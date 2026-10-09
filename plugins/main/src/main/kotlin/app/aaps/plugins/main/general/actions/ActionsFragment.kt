@@ -35,12 +35,10 @@ import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.interfaces.utils.DateUtil
 import app.aaps.core.interfaces.utils.DecimalFormatter
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
-import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.BooleanNonKey
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.objects.extensions.toStringMedium
 import app.aaps.core.objects.extensions.toStringShort
-import app.aaps.core.ui.UIRunnable
 import app.aaps.core.ui.dialogs.OKDialog
 import app.aaps.core.ui.elements.SingleClickButton
 import app.aaps.core.ui.extensions.toVisibility
@@ -84,7 +82,6 @@ class ActionsFragment : DaggerFragment() {
 
     private var _binding: ActionsFragmentBinding? = null
 
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
@@ -206,16 +203,18 @@ class ActionsFragment : DaggerFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        removePumpCustomActions()
         _binding = null
     }
 
     @Synchronized
     fun updateGui() {
+        val b = _binding ?: return
 
         val profile = profileFunction.getProfile()
         val pump = activePlugin.activePump
 
-        binding.profileSwitch.visibility = (
+        b.profileSwitch.visibility = (
             activePlugin.activeProfileSource.profile != null &&
                 pump.pumpDescription.isSetBasalProfileCapable &&
                 pump.isInitialized() &&
@@ -223,44 +222,44 @@ class ActionsFragment : DaggerFragment() {
                 !pump.isSuspended()).toVisibility()
 
         if (!pump.pumpDescription.isExtendedBolusCapable || !pump.isInitialized()  || pump.isSuspended() || loop.runningMode == RM.Mode.DISCONNECTED_PUMP || pump.isFakingTempsByExtendedBoluses || config.AAPSCLIENT) {
-            binding.extendedBolus.visibility = View.GONE
-            binding.extendedBolusCancel.visibility = View.GONE
+            b.extendedBolus.visibility = View.GONE
+            b.extendedBolusCancel.visibility = View.GONE
         } else {
             val activeExtendedBolus = persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())
             if (activeExtendedBolus != null) {
-                binding.extendedBolus.visibility = View.GONE
-                binding.extendedBolusCancel.visibility = View.VISIBLE
+                b.extendedBolus.visibility = View.GONE
+                b.extendedBolusCancel.visibility = View.VISIBLE
                 @Suppress("SetTextI18n")
-                binding.extendedBolusCancel.text = rh.gs(app.aaps.core.ui.R.string.cancel) + " " + activeExtendedBolus.toStringMedium(dateUtil, rh)
+                b.extendedBolusCancel.text = rh.gs(app.aaps.core.ui.R.string.cancel) + " " + activeExtendedBolus.toStringMedium(dateUtil, rh)
             } else {
-                binding.extendedBolus.visibility = View.VISIBLE
-                binding.extendedBolusCancel.visibility = View.GONE
+                b.extendedBolus.visibility = View.VISIBLE
+                b.extendedBolusCancel.visibility = View.GONE
             }
         }
 
         if (!pump.pumpDescription.isTempBasalCapable || !pump.isInitialized() || pump.isSuspended() || loop.runningMode == RM.Mode.DISCONNECTED_PUMP || config.AAPSCLIENT) {
-            binding.setTempBasal.visibility = View.GONE
-            binding.cancelTempBasal.visibility = View.GONE
+            b.setTempBasal.visibility = View.GONE
+            b.cancelTempBasal.visibility = View.GONE
         } else {
             val activeTemp = processedTbrEbData.getTempBasalIncludingConvertedExtended(System.currentTimeMillis())
             if (activeTemp != null) {
-                binding.setTempBasal.visibility = View.GONE
-                binding.cancelTempBasal.visibility = View.VISIBLE
+                b.setTempBasal.visibility = View.GONE
+                b.cancelTempBasal.visibility = View.VISIBLE
                 @Suppress("SetTextI18n")
-                binding.cancelTempBasal.text = rh.gs(app.aaps.core.ui.R.string.cancel) + " " + activeTemp.toStringShort(rh)
+                b.cancelTempBasal.text = rh.gs(app.aaps.core.ui.R.string.cancel) + " " + activeTemp.toStringShort(rh)
             } else {
-                binding.setTempBasal.visibility = View.VISIBLE
-                binding.cancelTempBasal.visibility = View.GONE
+                b.setTempBasal.visibility = View.VISIBLE
+                b.cancelTempBasal.visibility = View.GONE
             }
         }
         val activeBgSource = activePlugin.activeBgSource
-        binding.historyBrowser.visibility = (profile != null).toVisibility()
-        binding.fill.visibility = (pump.pumpDescription.isRefillingCapable && pump.isInitialized()).toVisibility()
-        binding.pumpBatteryChange.visibility = (pump.pumpDescription.isBatteryReplaceable || pump.isBatteryChangeLoggingEnabled()).toVisibility()
-        binding.tempTarget.visibility = (profile != null && loop.runningMode.isLoopRunning()).toVisibility()
-        binding.tddStats.visibility = pump.pumpDescription.supportsTDDs.toVisibility()
+        b.historyBrowser.visibility = (profile != null).toVisibility()
+        b.fill.visibility = (pump.pumpDescription.isRefillingCapable && pump.isInitialized()).toVisibility()
+        b.pumpBatteryChange.visibility = (pump.pumpDescription.isBatteryReplaceable || pump.isBatteryChangeLoggingEnabled()).toVisibility()
+        b.tempTarget.visibility = (profile != null && loop.runningMode.isLoopRunning()).toVisibility()
+        b.tddStats.visibility = pump.pumpDescription.supportsTDDs.toVisibility()
         val isPatchPump = pump.pumpDescription.isPatchPump
-        binding.status.apply {
+        b.status.apply {
             cannulaOrPatch.text = if (cannulaOrPatch.text.isEmpty()) "" else if (isPatchPump) rh.gs(R.string.patch_pump) else rh.gs(R.string.cannula)
             val imageResource = if (isPatchPump) app.aaps.core.objects.R.drawable.ic_patch_pump_outline else R.drawable.ic_cp_age_cannula
             cannulaOrPatch.setCompoundDrawablesWithIntrinsicBounds(imageResource, 0, 0, 0)
@@ -281,10 +280,10 @@ class ActionsFragment : DaggerFragment() {
             }
         }
         checkPumpCustomActions()
-
     }
 
     private fun checkPumpCustomActions() {
+        val b = _binding ?: return
         val activePump = activePlugin.activePump
         val customActions = activePump.getCustomActions() ?: return
         val currentContext = context ?: return
@@ -299,19 +298,19 @@ class ActionsFragment : DaggerFragment() {
             val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.5f
             )
-            layoutParams.setMargins(20, 8, 20, 8) // 10,3,10,3
+            layoutParams.setMargins(20, 8, 20, 8)
 
             btn.layoutParams = layoutParams
             btn.setOnClickListener { v ->
-                val b = v as SingleClickButton
-                this.pumpCustomActions[b.text.toString()]?.let {
+                val button = v as SingleClickButton
+                this.pumpCustomActions[button.text.toString()]?.let {
                     activePlugin.activePump.executeCustomAction(it.customActionType)
                 }
             }
             val top = activity?.let { ContextCompat.getDrawable(it, customAction.iconResourceId) }
             btn.setCompoundDrawablesWithIntrinsicBounds(null, top, null, null)
 
-            binding.buttonsLayout.addView(btn)
+            b.buttonsLayout.addView(btn)
 
             this.pumpCustomActions[rh.gs(customAction.name)] = customAction
             this.pumpCustomButtons.add(btn)
@@ -319,7 +318,8 @@ class ActionsFragment : DaggerFragment() {
     }
 
     private fun removePumpCustomActions() {
-        for (customButton in pumpCustomButtons) binding.buttonsLayout.removeView(customButton)
+        val b = _binding ?: return
+        for (customButton in pumpCustomButtons) b.buttonsLayout.removeView(customButton)
         pumpCustomButtons.clear()
     }
 }
