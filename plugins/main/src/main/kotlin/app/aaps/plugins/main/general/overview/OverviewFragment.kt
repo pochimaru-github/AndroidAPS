@@ -519,7 +519,13 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         runOnUiThread {
             _binding?.let { b ->
                 if (activeTT != null) {
-                    b.tempTarget.text = activeTT.toString()
+                    val unitStr = profileFunction.getUnits().toString()
+                    val targetText = if (activeTT.lowTarget == activeTT.highTarget) {
+                        "${decimalFormatter.to1Decimal(activeTT.lowTarget)} $unitStr"
+                    } else {
+                        "${decimalFormatter.to1Decimal(activeTT.lowTarget)} - ${decimalFormatter.to1Decimal(activeTT.highTarget)} $unitStr"
+                    }
+                    b.tempTarget.text = targetText
                 } else {
                     val profile = profileFunction.getProfile()
                     if (profile != null) {
