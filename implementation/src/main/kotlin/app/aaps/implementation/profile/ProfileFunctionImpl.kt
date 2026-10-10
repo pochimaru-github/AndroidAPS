@@ -57,8 +57,14 @@ class ProfileFunctionImpl @Inject constructor(
             .toObservable(EventEffectiveProfileSwitchChanged::class.java)
             .observeOn(aapsSchedulers.io)
             .subscribe(
-                {
-                    synchronized(cache) { cache.keys.removeIf { key -> key > it.startDate } }
+                { event ->
+                    try {
+                        synchronized(cache) {
+                            cache.entries.removeIf { entry -> entry.key > event.startDate }
+                        }
+                    } catch (e: Exception) {
+                        fabricPrivacy.logException(e)
+                    }
                 }, fabricPrivacy::logException
             )
     }
