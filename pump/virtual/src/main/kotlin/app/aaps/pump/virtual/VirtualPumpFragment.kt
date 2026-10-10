@@ -151,8 +151,8 @@ class VirtualPumpFragment : DaggerFragment() {
         virtualPumpPlugin.refreshConfiguration()
         val pumpType = virtualPumpPlugin.pumpType
 
-        type?.text = pumpType?.description
-        typeDef?.text = pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh)
+        type?.text = pumpType?.description ?: ""
+        typeDef?.text = pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: ""
         serialNumber?.text = virtualPumpPlugin.serialNumber()
     }
 
@@ -161,17 +161,21 @@ class VirtualPumpFragment : DaggerFragment() {
         else step
 
     private fun PumpType.getFullDescription(i18nTemplate: String, hasExtendedBasals: Boolean, rh: ResourceHelper): String {
-        val unit = if (pumpTempBasalType() == PumpTempBasalType.Percent) "%" else ""
-        val eb = extendedBolusSettings() ?: return "INVALID"
-        val tbr = tbrSettings() ?: return "INVALID"
-        val extendedNote = if (hasExtendedBasals) getStringByName("def_extended_note") else ""
-        return String.format(
-            i18nTemplate,
-            getStep(bolusSize().toString(), specialBolusSize()),
-            eb.step, eb.durationStep, eb.maxDuration / 60,
-            getStep(baseBasalRange(), baseBasalSpecialSteps()),
-            tbr.minDose.toString() + unit + "-" + tbr.maxDose + unit, tbr.step.toString() + unit,
-            tbr.durationStep, tbr.maxDuration / 60, extendedNote
-        )
+        try {
+            val unit = if (pumpTempBasalType() == PumpTempBasalType.Percent) "%" else ""
+            val eb = extendedBolusSettings() ?: return "INVALID"
+            val tbr = tbrSettings() ?: return "INVALID"
+            val extendedNote = if (hasExtendedBasals) getStringByName("def_extended_note") else ""
+            return String.format(
+                i18nTemplate,
+                getStep(bolusSize().toString(), specialBolusSize()),
+                eb.step, eb.durationStep, eb.maxDuration / 60,
+                getStep(baseBasalRange(), baseBasalSpecialSteps()),
+                tbr.minDose.toString() + unit + "-" + tbr.maxDose + unit, tbr.step.toString() + unit,
+                tbr.durationStep, tbr.maxDuration / 60, extendedNote
+            )
+        } catch (e: Exception) {
+            return "INVALID"
+        }
     }
 }
