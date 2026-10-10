@@ -157,8 +157,11 @@ open class VirtualPumpPlugin @Inject constructor(
 
     override fun setNewBasalProfile(profile: Profile): PumpEnactResult {
         lastDataTime = System.currentTimeMillis()
-        rxBus.send(EventNewNotification(Notification(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)))
-        // Do nothing here. we are using database profile
+        try {
+            rxBus.send(EventNewNotification(Notification(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)))
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
         return pumpEnactResultProvider.get().success(true).enacted(true)
     }
 
@@ -208,7 +211,7 @@ open class VirtualPumpPlugin @Inject constructor(
                     bolus = detailedBolusInfo.createBolus(),
                     action = Action.BOLUS,
                     source = Sources.Pump
-                ).subscribe()
+                ).subscribe({}, fabricPrivacy::logException)
             else
                 pumpSync.syncBolusWithPumpId(
                     timestamp = detailedBolusInfo.timestamp,
@@ -342,13 +345,17 @@ open class VirtualPumpPlugin @Inject constructor(
     override fun canHandleDST(): Boolean = true
 
     fun refreshConfiguration() {
-        val pumpType = preferences.get(StringKey.VirtualPumpType)
-        val pumpTypeNew = PumpType.getByDescription(pumpType)
-        aapsLogger.debug(LTag.PUMP, "Pump in configuration: $pumpType, PumpType object: $pumpTypeNew")
-        if (this.pumpType == pumpTypeNew) return
-        aapsLogger.debug(LTag.PUMP, "New pump configuration found ($pumpTypeNew), changing from previous (${this.pumpType})")
-        pumpDescription.fillFor(pumpTypeNew)
-        this.pumpType = pumpTypeNew
+        try {
+            val pumpType = preferences.get(StringKey.VirtualPumpType)
+            val pumpTypeNew = PumpType.getByDescription(pumpType)
+            aapsLogger.debug(LTag.PUMP, "Pump in configuration: $pumpType, PumpType object: $pumpTypeNew")
+            if (this.pumpType == pumpTypeNew) return
+            aapsLogger.debug(LTag.PUMP, "New pump configuration found ($pumpTypeNew), changing from previous (${this.pumpType})")
+            pumpDescription.fillFor(pumpTypeNew)
+            this.pumpType = pumpTypeNew
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
     }
 
     override fun timezoneOrDSTChanged(timeChangeType: TimeChangeType) {}
