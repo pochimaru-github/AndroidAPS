@@ -228,24 +228,26 @@ class ProfileSwitchDialog : DialogFragmentWithDate() {
                         ) {
                             if (percent == 90 && duration == 10) preferences.put(BooleanNonKey.ObjectivesProfileSwitchUsed, true)
                             if (isTT) {
-                                persistenceLayer.insertAndCancelCurrentTemporaryTarget(
-                                    TT(
-                                        timestamp = eventTime + 10000,
-                                        duration = TimeUnit.MINUTES.toMillis(duration.toLong()),
-                                        reason = TT.Reason.ACTIVITY,
-                                        lowTarget = profileUtil.convertToMgdl(target, profileFunction.getUnits()),
-                                        highTarget = profileUtil.convertToMgdl(target, profileFunction.getUnits())
-                                    ),
-                                    action = Action.TT,
-                                    source = Sources.TTDialog,
-                                    note = null,
-                                    listValues = listOf(
-                                        ValueWithUnit.Timestamp(eventTime).takeIf { eventTimeChanged },
-                                        ValueWithUnit.TETTReason(TT.Reason.ACTIVITY),
-                                        ValueWithUnit.fromGlucoseUnit(target, units),
-                                        ValueWithUnit.Minute(duration)
-                                    ).filterNotNull()
-                                ).subscribe({}, { e -> fabricPrivacy.logException(e) })
+                                disposable.add(
+                                    persistenceLayer.insertAndCancelCurrentTemporaryTarget(
+                                        TT(
+                                            timestamp = eventTime + 10000,
+                                            duration = TimeUnit.MINUTES.toMillis(duration.toLong()),
+                                            reason = TT.Reason.ACTIVITY,
+                                            lowTarget = profileUtil.convertToMgdl(target, profileFunction.getUnits()),
+                                            highTarget = profileUtil.convertToMgdl(target, profileFunction.getUnits())
+                                        ),
+                                        action = Action.TT,
+                                        source = Sources.TTDialog,
+                                        note = null,
+                                        listValues = listOf(
+                                            ValueWithUnit.Timestamp(eventTime).takeIf { eventTimeChanged },
+                                            ValueWithUnit.TETTReason(TT.Reason.ACTIVITY),
+                                            ValueWithUnit.fromGlucoseUnit(target, units),
+                                            ValueWithUnit.Minute(duration)
+                                        ).filterNotNull()
+                                    ).subscribe({}, { err -> fabricPrivacy.logException(err) })
+                                )
                             }
                         }
                     } catch (e: Exception) {
