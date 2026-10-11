@@ -386,7 +386,7 @@ class PumpSyncImplementation @Inject constructor(
             )
         )
         return try {
-            persistenceLayer.syncTemporaryBasalWithTempId(temporaryBasal, type?.toDbType())
+            persistenceLayer.syncPumpTemporaryBasalWithTempId(temporaryBasal, type?.toDbType())
                 .map { result -> result.updated.isNotEmpty() }
                 .blockingGet()
         } catch (_: Exception) { false }
