@@ -24,6 +24,7 @@ import app.aaps.core.interfaces.db.PersistenceLayer
 import app.aaps.core.interfaces.iob.IobCobCalculator
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
+import app.aaps.core.interfaces.overview.LastBgData
 import app.aaps.core.interfaces.plugin.ActivePlugin
 import app.aaps.core.interfaces.profile.Profile
 import app.aaps.core.interfaces.profile.ProfileFunction
@@ -80,6 +81,8 @@ class WizardDialog : DaggerDialogFragment() {
     @Inject lateinit var protectionCheck: ProtectionCheck
     @Inject lateinit var decimalFormatter: DecimalFormatter
     @Inject lateinit var bolusWizardProvider: Provider<BolusWizard>
+    @Inject lateinit var lastBgData: LastBgData
+
     private val handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
 
     private var queryingProtection = false
@@ -89,12 +92,11 @@ class WizardDialog : DaggerDialogFragment() {
     private var usePercentage = false
     private var carbsPassedIntoWizard = 0.0
     private var notesPassedIntoWizard = ""
-    private var okClicked: Boolean = false // one shot guards
+    private var okClicked: Boolean = false
     private var disposable: CompositeDisposable = CompositeDisposable()
     private var bolusStep = 0.0
     private var _binding: DialogWizardBinding? = null
 
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private val textWatcher = object : TextWatcher {
@@ -159,15 +161,20 @@ class WizardDialog : DaggerDialogFragment() {
         val maxCorrection = constraintChecker.getMaxBolusAllowed().value()
         bolusStep = activePlugin.activePump.pumpDescription.bolusStep
 
-        if (profileFunction.getUnits() == GlucoseUnit.MGDL) {
+        val units = profileFunction.getUnits()
+        val initialBgVal = try {
+            val bgFromState = savedInstanceState?.getDouble("bg_input") ?: 0.0
+            if (bgFromState > 0.0) bgFromState
+            else (iobCobCalculator.ads.actualBg() ?: lastBgData.lastBg())?.valueToUnits(units) ?: 0.0
+        } catch (_: Exception) { 0.0 }
+
+        if (units == GlucoseUnit.MGDL) {
             binding.bgInput.setParams(
-                savedInstanceState?.getDouble("bg_input")
-                    ?: 0.0, 0.0, 500.0, 1.0, DecimalFormat("0"), false, binding.okcancel.ok, timeTextWatcher
+                initialBgVal, 0.0, 500.0, 1.0, DecimalFormat("0"), false, binding.okcancel.ok, timeTextWatcher
             )
         } else {
             binding.bgInput.setParams(
-                savedInstanceState?.getDouble("bg_input")
-                    ?: 0.0, 0.0, 30.0, 0.1, DecimalFormat("0.0"), false, binding.okcancel.ok, textWatcher
+                initialBgVal, 0.0, 30.0, 0.1, DecimalFormat("0.0"), false, binding.okcancel.ok, textWatcher
             )
         }
         binding.carbsInput.setParams(
@@ -175,12 +182,9 @@ class WizardDialog : DaggerDialogFragment() {
                 ?: 0.0, 0.0, maxCarbs.toDouble(), 1.0, DecimalFormat("0"), false, binding.okcancel.ok, textWatcher
         )
 
-        // If there is no BG using % lower that 100% leads to high BGs
-        // because loop doesn't add missing insulin
         var percentage = preferences.get(IntKey.OverviewBolusPercentage)
         val time = preferences.get(IntKey.OverviewResetBolusPercentageTime).toLong()
         persistenceLayer.getLastGlucoseValue().let {
-            // if last value is older or there is no bg
             if (it != null) {
                 if (it.timestamp < dateUtil.now() - T.mins(time).msecs())
                     percentage = 100
@@ -214,7 +218,7 @@ class WizardDialog : DaggerDialogFragment() {
         calculatedPercentage = preferences.get(IntKey.OverviewBolusPercentage)
         binding.percentUsed.text = rh.gs(app.aaps.core.ui.R.string.format_percent, calculatedPercentage)
         binding.percentUsed.visibility = (calculatedPercentage != 100 || usePercentage).toVisibility()
-        // ok button
+
         binding.okcancel.ok.setOnClickListener {
             if (okClicked) {
                 aapsLogger.debug(LTag.UI, "guarding: ok already clicked")
@@ -233,12 +237,12 @@ class WizardDialog : DaggerDialogFragment() {
         binding.trendCheckboxIcon.setOnClickListener { binding.bgTrendCheckbox.isChecked = !binding.bgTrendCheckbox.isChecked }
         binding.cobCheckboxIcon.setOnClickListener { binding.cobCheckbox.isChecked = !binding.cobCheckbox.isChecked; processCobCheckBox(); }
         binding.iobCheckboxIcon.setOnClickListener { binding.iobCheckbox.isChecked = !binding.iobCheckbox.isChecked; processIobCheckBox(); }
-        // cancel button
+
         binding.okcancel.cancel.setOnClickListener {
             aapsLogger.debug(LTag.APS, "Dialog canceled: ${this.javaClass.simpleName}")
             dismiss()
         }
-        // checkboxes
+
         binding.bgCheckbox.setOnCheckedChangeListener(::onCheckedChanged)
         binding.ttCheckbox.setOnCheckedChangeListener(::onCheckedChanged)
         binding.cobCheckbox.setOnCheckedChangeListener(::onCheckedChanged)
@@ -281,9 +285,9 @@ class WizardDialog : DaggerDialogFragment() {
                 binding.correctionInput.value = if (usePercentage) calculatedPercentage.toDouble() else Round.roundTo(calculatedCorrection, bolusStep)
             }
         }
-        // profile
+
         binding.profileList.onItemClickListener = AdapterView.OnItemClickListener { _, _, _, _ -> calculateInsulin() }
-        // bus
+
         disposable += rxBus
             .toObservable(EventAutosensCalculationFinished::class.java)
             .observeOn(aapsSchedulers.main)
@@ -388,7 +392,6 @@ class WizardDialog : DaggerDialogFragment() {
             return
         }
 
-        // IOB calculation
         val bolusIob = iobCobCalculator.calculateIobFromBolus().round()
         val basalIob = iobCobCalculator.calculateIobFromTempBasalsIncludingConvertedExtended().round()
 
@@ -412,8 +415,10 @@ class WizardDialog : DaggerDialogFragment() {
             binding.bgUnits.text = units.asText
             binding.bgInput.step = if (units == GlucoseUnit.MGDL) 1.0 else 0.1
 
-            // Set BG if not old
-            binding.bgInput.value = iobCobCalculator.ads.actualBg()?.valueToUnits(units) ?: 0.0
+            val currentBgVal = (iobCobCalculator.ads.actualBg() ?: lastBgData.lastBg())?.valueToUnits(units) ?: 0.0
+            if (currentBgVal > 0.0) {
+                binding.bgInput.value = currentBgVal
+            }
 
             binding.ttCheckbox.isEnabled = tempTarget != null
             binding.ttCheckboxIcon.visibility = binding.ttCheckbox.isEnabled.toVisibility()
@@ -425,7 +430,7 @@ class WizardDialog : DaggerDialogFragment() {
 
     @SuppressLint("SetTextI18n")
     private fun calculateInsulin() {
-        val profileStore = activePlugin.activeProfileSource.profile ?: return // not initialized yet
+        val profileStore = activePlugin.activeProfileSource.profile ?: return
         var profileName = binding.profileList.text.toString()
         val specificProfile: Profile?
         if (profileName == rh.gs(app.aaps.core.ui.R.string.active)) {
@@ -436,7 +441,6 @@ class WizardDialog : DaggerDialogFragment() {
 
         if (specificProfile == null) return
 
-        // Entered values
         val usePercentage = binding.correctionPercent.isChecked
         var bg = SafeParse.stringToDouble(binding.bgInput.text)
         val carbs = SafeParse.stringToInt(binding.carbsInput.text)
@@ -464,7 +468,6 @@ class WizardDialog : DaggerDialogFragment() {
         bg = if (binding.bgCheckbox.isChecked) bg else 0.0
         val tempTarget = persistenceLayer.getTemporaryTargetActiveAt(dateUtil.now())
 
-        // COB
         var cob = 0.0
         if (binding.cobCheckbox.isChecked) {
             val cobInfo = iobCobCalculator.getCobInfo("Wizard COB")
@@ -500,11 +503,9 @@ class WizardDialog : DaggerDialogFragment() {
 
             binding.correctionInsulin.text = rh.gs(app.aaps.core.ui.R.string.format_insulin_units, wizard.insulinFromCorrection)
 
-            // Superbolus
             binding.sb.text = if (binding.sbCheckbox.isChecked) rh.gs(R.string.two_hours) else ""
             binding.sbInsulin.text = rh.gs(app.aaps.core.ui.R.string.format_insulin_units, wizard.insulinFromSuperBolus)
 
-            // Trend
             if (binding.bgTrendCheckbox.isChecked && wizard.glucoseStatus != null) {
                 binding.bgTrend.text = ((if (wizard.trend > 0) "+" else "")
                     + profileUtil.fromMgdlToStringInUnits(wizard.trend * 3)
@@ -514,7 +515,6 @@ class WizardDialog : DaggerDialogFragment() {
             }
             binding.bgTrendInsulin.text = rh.gs(app.aaps.core.ui.R.string.format_insulin_units, wizard.insulinFromTrend)
 
-            // COB
             if (binding.cobCheckbox.isChecked) {
                 binding.cob.text = rh.gs(R.string.format_cob_ic, cob, wizard.ic)
                 binding.cobInsulin.text = rh.gs(app.aaps.core.ui.R.string.format_insulin_units, wizard.insulinFromCOB)
@@ -541,7 +541,6 @@ class WizardDialog : DaggerDialogFragment() {
             calculatedPercentage = wizard.calculatedPercentage
             calculatedCorrection = wizard.calculatedCorrection
         }
-
     }
 
     override fun show(manager: FragmentManager, tag: String?) {
