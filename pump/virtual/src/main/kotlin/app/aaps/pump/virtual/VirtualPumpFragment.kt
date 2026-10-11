@@ -48,137 +48,193 @@ class VirtualPumpFragment : DaggerFragment() {
 
     private val disposable = CompositeDisposable()
 
-    private lateinit var refreshLoop: Runnable
-    private var handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
+    private var refreshLoop: Runnable? = null
+    private var handler: Handler? = null
+    private var handlerThread: HandlerThread? = null
 
     private var rootView: View? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val ctx = context ?: return null
-        val layoutId = ctx.resources.getIdentifier("virtual_pump_fragment", "layout", ctx.packageName)
-        val view = if (layoutId != 0) inflater.inflate(layoutId, container, false) else View(ctx)
-        rootView = view
-        return view
+        return try {
+            val ctx = context ?: return null
+            val layoutId = ctx.resources.getIdentifier("virtual_pump_fragment", "layout", ctx.packageName)
+            val view = if (layoutId != 0) inflater.inflate(layoutId, container, false) else View(ctx)
+            rootView = view
+            view
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+            null
+        }
     }
 
     private fun <T : View> findViewById(name: String): T? {
         val ctx = context ?: return null
-        val id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-        return if (id != 0) rootView?.findViewById(id) else null
+        return try {
+            val id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
+            if (id != 0) rootView?.findViewById(id) else null
+        } catch (_: Exception) { null }
     }
 
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
-        val id = ctx.resources.getIdentifier(name, "string", ctx.packageName)
-        return if (id != 0) rh.gs(id) else fallback
+        return try {
+            val id = ctx.resources.getIdentifier(name, "string", ctx.packageName)
+            if (id != 0) rh.gs(id) else fallback
+        } catch (_: Exception) { fallback }
     }
 
     @Synchronized
     override fun onResume() {
         super.onResume()
-        disposable += rxBus
-            .toObservable(EventVirtualPumpUpdateGui::class.java)
-            .observeOn(aapsSchedulers.main)
-            .subscribe({ updateGui() }, fabricPrivacy::logException)
-        disposable += rxBus
-            .toObservable(EventTempBasalChange::class.java)
-            .observeOn(aapsSchedulers.main)
-            .subscribe({ updateGui() }, fabricPrivacy::logException)
-        disposable += rxBus
-            .toObservable(EventExtendedBolusChange::class.java)
-            .observeOn(aapsSchedulers.main)
-            .subscribe({ updateGui() }, fabricPrivacy::logException)
-        refreshLoop = Runnable {
-            if (isAdded) {
-                activity?.runOnUiThread { updateGui() }
+        try {
+            disposable += rxBus
+                .toObservable(EventVirtualPumpUpdateGui::class.java)
+                .observeOn(aapsSchedulers.main)
+                .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+            disposable += rxBus
+                .toObservable(EventTempBasalChange::class.java)
+                .observeOn(aapsSchedulers.main)
+                .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+            disposable += rxBus
+                .toObservable(EventExtendedBolusChange::class.java)
+                .observeOn(aapsSchedulers.main)
+                .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+
+            if (handlerThread == null || handlerThread?.isAlive == false) {
+                handlerThread = HandlerThread(this::class.java.simpleName + "Handler").also { it.start() }
+                handler = Handler(handlerThread!!.looper)
             }
-            handler.postDelayed(refreshLoop, T.mins(1).msecs())
-        }
-        handler.postDelayed(refreshLoop, T.mins(1).msecs())
 
-        val pumpSuspended = findViewById<CheckBox>("pump_suspended")
-        if (pumpSuspended != null) {
-            pumpSuspended.isChecked = preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended)
-            pumpSuspended.setOnClickListener { preferences.put(VirtualBooleanNonPreferenceKey.IsSuspended, pumpSuspended.isChecked) }
-        }
+            refreshLoop = Runnable {
+                if (isAdded && !isDetached && rootView != null) {
+                    activity?.runOnUiThread { safeUpdateGui() }
+                }
+                handler?.postDelayed(refreshLoop!!, T.mins(1).msecs())
+            }
+            handler?.postDelayed(refreshLoop!!, T.mins(1).msecs())
 
-        updateGui()
+            val pumpSuspended = findViewById<CheckBox>("pump_suspended")
+            if (pumpSuspended != null) {
+                pumpSuspended.isChecked = try { preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended) } catch (_: Exception) { false }
+                pumpSuspended.setOnClickListener {
+                    try { preferences.put(VirtualBooleanNonPreferenceKey.IsSuspended, pumpSuspended.isChecked) } catch (_: Exception) {}
+                }
+            }
+
+            safeUpdateGui()
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
     }
 
     @Synchronized
     override fun onPause() {
         super.onPause()
-        disposable.clear()
-        handler.removeCallbacksAndMessages(null)
+        try {
+            disposable.clear()
+            refreshLoop?.let { handler?.removeCallbacks(it) }
+            handler?.removeCallbacksAndMessages(null)
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
     }
 
     @Synchronized
     override fun onDestroyView() {
         super.onDestroyView()
-        disposable.clear()
-        handler.removeCallbacksAndMessages(null)
-        rootView = null
+        try {
+            disposable.clear()
+            refreshLoop?.let { handler?.removeCallbacks(it) }
+            handler?.removeCallbacksAndMessages(null)
+            rootView = null
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
         try {
-            handler.looper.quitSafely()
-        } catch (ignored: Exception) { }
+            handler?.removeCallbacksAndMessages(null)
+            handlerThread?.quitSafely()
+            handlerThread = null
+            handler = null
+        } catch (_: Exception) { }
+    }
+
+    private fun safeUpdateGui() {
+        try {
+            updateGui()
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
     }
 
     @Synchronized
     private fun updateGui() {
-        if (!isAdded || rootView == null || context == null) return
-        try {
-            val profile = profileFunction.getProfile() ?: return
+        if (!isAdded || isDetached || rootView == null || context == null) return
 
-            val baseBasalRate = findViewById<TextView>("base_basal_rate")
-            val tempbasal = findViewById<TextView>("tempbasal")
-            val extendedbolus = findViewById<TextView>("extendedbolus")
-            val battery = findViewById<TextView>("battery")
-            val reservoir = findViewById<TextView>("reservoir")
-            val type = findViewById<TextView>("type")
-            val typeDef = findViewById<TextView>("type_def")
-            val serialNumber = findViewById<TextView>("serial_number")
+        val profile = try { profileFunction.getProfile() } catch (_: Exception) { null } ?: return
 
-            baseBasalRate?.text = try {
+        val baseBasalRate = findViewById<TextView>("base_basal_rate")
+        val tempbasal = findViewById<TextView>("tempbasal")
+        val extendedbolus = findViewById<TextView>("extendedbolus")
+        val battery = findViewById<TextView>("battery")
+        val reservoir = findViewById<TextView>("reservoir")
+        val type = findViewById<TextView>("type")
+        val typeDef = findViewById<TextView>("type_def")
+        val serialNumber = findViewById<TextView>("serial_number")
+
+        if (baseBasalRate != null) {
+            baseBasalRate.text = try {
                 rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, virtualPumpPlugin.baseBasalRate)
             } catch (_: Exception) { "" }
+        }
 
-            tempbasal?.text = try {
+        if (tempbasal != null) {
+            tempbasal.text = try {
                 persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: ""
             } catch (_: Exception) { "" }
+        }
 
-            extendedbolus?.text = try {
+        if (extendedbolus != null) {
+            extendedbolus.text = try {
                 persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())?.toStringFull(dateUtil, rh) ?: ""
             } catch (_: Exception) { "" }
+        }
 
-            battery?.text = try {
+        if (battery != null) {
+            battery.text = try {
                 rh.gs(app.aaps.core.ui.R.string.format_percent, virtualPumpPlugin.batteryPercent)
             } catch (_: Exception) { "" }
+        }
 
-            reservoir?.text = try {
+        if (reservoir != null) {
+            reservoir.text = try {
                 rh.gs(app.aaps.core.ui.R.string.format_insulin_units, virtualPumpPlugin.reservoirInUnits.toDouble())
             } catch (_: Exception) { "" }
+        }
 
-            try {
-                virtualPumpPlugin.refreshConfiguration()
-            } catch (_: Exception) { }
+        try {
+            virtualPumpPlugin.refreshConfiguration()
+        } catch (_: Exception) { }
 
-            val pumpType = virtualPumpPlugin.pumpType
+        val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
 
-            type?.text = pumpType?.description ?: ""
-            typeDef?.text = try {
+        if (type != null) {
+            type.text = pumpType?.description ?: ""
+        }
+
+        if (typeDef != null) {
+            typeDef.text = try {
                 pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: ""
             } catch (_: Exception) { "" }
+        }
 
-            serialNumber?.text = try {
+        if (serialNumber != null) {
+            serialNumber.text = try {
                 virtualPumpPlugin.serialNumber()
             } catch (_: Exception) { "" }
-        } catch (e: Exception) {
-            fabricPrivacy.logException(e)
         }
     }
 
@@ -187,12 +243,12 @@ class VirtualPumpFragment : DaggerFragment() {
         else step
 
     private fun PumpType.getFullDescription(i18nTemplate: String, hasExtendedBasals: Boolean, rh: ResourceHelper): String {
-        try {
+        return try {
             val unit = if (pumpTempBasalType() == PumpTempBasalType.Percent) "%" else ""
             val eb = extendedBolusSettings() ?: return "INVALID"
             val tbr = tbrSettings() ?: return "INVALID"
             val extendedNote = if (hasExtendedBasals) getStringByName("def_extended_note") else ""
-            return String.format(
+            String.format(
                 i18nTemplate,
                 getStep(bolusSize().toString(), specialBolusSize()),
                 eb.step, eb.durationStep, eb.maxDuration / 60,
@@ -201,7 +257,7 @@ class VirtualPumpFragment : DaggerFragment() {
                 tbr.durationStep, tbr.maxDuration / 60, extendedNote
             )
         } catch (e: Exception) {
-            return "INVALID"
+            "INVALID"
         }
     }
 }
