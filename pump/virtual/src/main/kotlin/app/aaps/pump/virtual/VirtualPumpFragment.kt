@@ -131,29 +131,55 @@ class VirtualPumpFragment : DaggerFragment() {
     @Synchronized
     private fun updateGui() {
         if (!isAdded || rootView == null || context == null) return
-        val profile = profileFunction.getProfile() ?: return
+        try {
+            val profile = profileFunction.getProfile() ?: return
 
-        val baseBasalRate = findViewById<TextView>("base_basal_rate")
-        val tempbasal = findViewById<TextView>("tempbasal")
-        val extendedbolus = findViewById<TextView>("extendedbolus")
-        val battery = findViewById<TextView>("battery")
-        val reservoir = findViewById<TextView>("reservoir")
-        val type = findViewById<TextView>("type")
-        val typeDef = findViewById<TextView>("type_def")
-        val serialNumber = findViewById<TextView>("serial_number")
+            val baseBasalRate = findViewById<TextView>("base_basal_rate")
+            val tempbasal = findViewById<TextView>("tempbasal")
+            val extendedbolus = findViewById<TextView>("extendedbolus")
+            val battery = findViewById<TextView>("battery")
+            val reservoir = findViewById<TextView>("reservoir")
+            val type = findViewById<TextView>("type")
+            val typeDef = findViewById<TextView>("type_def")
+            val serialNumber = findViewById<TextView>("serial_number")
 
-        baseBasalRate?.text = rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, virtualPumpPlugin.baseBasalRate)
-        tempbasal?.text = persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: ""
-        extendedbolus?.text = persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())?.toStringFull(dateUtil, rh) ?: ""
-        battery?.text = rh.gs(app.aaps.core.ui.R.string.format_percent, virtualPumpPlugin.batteryPercent)
-        reservoir?.text = rh.gs(app.aaps.core.ui.R.string.format_insulin_units, virtualPumpPlugin.reservoirInUnits.toDouble())
+            baseBasalRate?.text = try {
+                rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, virtualPumpPlugin.baseBasalRate)
+            } catch (_: Exception) { "" }
 
-        virtualPumpPlugin.refreshConfiguration()
-        val pumpType = virtualPumpPlugin.pumpType
+            tempbasal?.text = try {
+                persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: ""
+            } catch (_: Exception) { "" }
 
-        type?.text = pumpType?.description ?: ""
-        typeDef?.text = pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: ""
-        serialNumber?.text = virtualPumpPlugin.serialNumber()
+            extendedbolus?.text = try {
+                persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())?.toStringFull(dateUtil, rh) ?: ""
+            } catch (_: Exception) { "" }
+
+            battery?.text = try {
+                rh.gs(app.aaps.core.ui.R.string.format_percent, virtualPumpPlugin.batteryPercent)
+            } catch (_: Exception) { "" }
+
+            reservoir?.text = try {
+                rh.gs(app.aaps.core.ui.R.string.format_insulin_units, virtualPumpPlugin.reservoirInUnits.toDouble())
+            } catch (_: Exception) { "" }
+
+            try {
+                virtualPumpPlugin.refreshConfiguration()
+            } catch (_: Exception) { }
+
+            val pumpType = virtualPumpPlugin.pumpType
+
+            type?.text = pumpType?.description ?: ""
+            typeDef?.text = try {
+                pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: ""
+            } catch (_: Exception) { "" }
+
+            serialNumber?.text = try {
+                virtualPumpPlugin.serialNumber()
+            } catch (_: Exception) { "" }
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
     }
 
     private fun getStep(step: String, stepSize: DoseStepSize?): String =
