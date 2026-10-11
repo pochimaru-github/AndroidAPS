@@ -9,7 +9,6 @@ import app.aaps.core.data.plugin.PluginType
 import app.aaps.core.data.pump.defs.ManufacturerType
 import app.aaps.core.data.pump.defs.PumpDescription
 import app.aaps.core.data.pump.defs.PumpType
-import app.aaps.core.data.pump.defs.TimeChangeType
 import app.aaps.core.data.time.T
 import app.aaps.core.data.ue.Action
 import app.aaps.core.data.ue.Sources
@@ -111,7 +110,6 @@ open class VirtualPumpPlugin @Inject constructor(
         it.basalStep = 0.01
         it.basalMinimumRate = 0.01
         it.isRefillingCapable = true
-        //it.storesCarbInfo = false
         it.is30minBasalRatesCapable = true
     }
 
@@ -133,7 +131,7 @@ open class VirtualPumpPlugin @Inject constructor(
         get() = config.AAPSCLIENT && fakeDataDetected
     override var fakeDataDetected = false
 
-    override fun loadTDDs(): PumpEnactResult { //no result, could read DB in the future?
+    override fun loadTDDs(): PumpEnactResult {
         return pumpEnactResultProvider.get()
     }
 
@@ -165,11 +163,21 @@ open class VirtualPumpPlugin @Inject constructor(
         return pumpEnactResultProvider.get().success(true).enacted(true)
     }
 
-    override fun isThisProfileSet(profile: Profile): Boolean = pumpSync.expectedPumpState().profile?.isEqual(profile) == true
+    override fun isThisProfileSet(profile: Profile): Boolean =
+        try {
+            pumpSync.expectedPumpState().profile?.isEqual(profile) == true
+        } catch (_: Exception) { false }
 
-    override val lastBolusTime: Long? get() = pumpSync.expectedPumpState().bolus?.timestamp
-    override val lastBolusAmount: Double? get() = pumpSync.expectedPumpState().bolus?.amount
-    override val baseBasalRate: Double get() = profileFunction.getProfile()?.getBasal() ?: 0.0
+    override val lastBolusTime: Long?
+        get() = try { pumpSync.expectedPumpState().bolus?.timestamp } catch (_: Exception) { null }
+
+    override val lastBolusAmount: Double?
+        get() = try { pumpSync.expectedPumpState().bolus?.amount } catch (_: Exception) { null }
+
+    override val baseBasalRate: Double
+        get() = try {
+            profileFunction.getProfile()?.getBasal() ?: 0.0
+        } catch (_: Exception) { 0.0 }
 
     override val reservoirLevel: Double
         get() =
@@ -179,7 +187,6 @@ open class VirtualPumpPlugin @Inject constructor(
     override val batteryLevel: Int? get() = batteryPercent
 
     override fun deliverTreatment(detailedBolusInfo: DetailedBolusInfo): PumpEnactResult {
-        // Insulin value must be greater than 0
         require(detailedBolusInfo.carbs == 0.0) { detailedBolusInfo.toString() }
         require(detailedBolusInfo.insulin > 0) { detailedBolusInfo.toString() }
 
@@ -206,7 +213,7 @@ open class VirtualPumpPlugin @Inject constructor(
         rxBus.send(EventVirtualPumpUpdateGui())
         lastDataTime = System.currentTimeMillis()
         if (detailedBolusInfo.insulin > 0) {
-            if (config.AAPSCLIENT) // do not store pump serial (record will not be marked PH)
+            if (config.AAPSCLIENT)
                 disposable += persistenceLayer.insertOrUpdateBolus(
                     bolus = detailedBolusInfo.createBolus(),
                     action = Action.BOLUS,
@@ -304,16 +311,20 @@ open class VirtualPumpPlugin @Inject constructor(
         result.success = true
         result.isTempCancel = true
         result.comment = rh.gs(app.aaps.core.ui.R.string.virtualpump_resultok)
-        if (pumpSync.expectedPumpState().temporaryBasal != null) {
-            result.enacted = true
-            pumpSync.syncStopTemporaryBasalWithPumpId(
-                timestamp = dateUtil.now(),
-                endPumpId = dateUtil.now(),
-                pumpType = pumpType ?: PumpType.GENERIC_AAPS,
-                pumpSerial = serialNumber()
-            )
-            aapsLogger.debug(LTag.PUMP, "Canceling temp basal: ${result.toText(rh)}")
-            rxBus.send(EventVirtualPumpUpdateGui())
+        try {
+            if (pumpSync.expectedPumpState().temporaryBasal != null) {
+                result.enacted = true
+                pumpSync.syncStopTemporaryBasalWithPumpId(
+                    timestamp = dateUtil.now(),
+                    endPumpId = dateUtil.now(),
+                    pumpType = pumpType ?: PumpType.GENERIC_AAPS,
+                    pumpSerial = serialNumber()
+                )
+                aapsLogger.debug(LTag.PUMP, "Canceling temp basal: ${result.toText(rh)}")
+                rxBus.send(EventVirtualPumpUpdateGui())
+            }
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
         }
         lastDataTime = System.currentTimeMillis()
         return result
@@ -321,13 +332,17 @@ open class VirtualPumpPlugin @Inject constructor(
 
     override fun cancelExtendedBolus(): PumpEnactResult {
         val result = pumpEnactResultProvider.get()
-        if (pumpSync.expectedPumpState().extendedBolus != null) {
-            pumpSync.syncStopExtendedBolusWithPumpId(
-                timestamp = dateUtil.now(),
-                endPumpId = dateUtil.now(),
-                pumpType = pumpType ?: PumpType.GENERIC_AAPS,
-                pumpSerial = serialNumber()
-            )
+        try {
+            if (pumpSync.expectedPumpState().extendedBolus != null) {
+                pumpSync.syncStopExtendedBolusWithPumpId(
+                    timestamp = dateUtil.now(),
+                    endPumpId = dateUtil.now(),
+                    pumpType = pumpType ?: PumpType.GENERIC_AAPS,
+                    pumpSerial = serialNumber()
+                )
+            }
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
         }
         result.success = true
         result.enacted = true
