@@ -99,6 +99,7 @@ class ProfilePlugin @Inject constructor(
 
     val numOfProfiles get() = profiles.size
     override var currentProfileIndex = 0
+        get() = if (field >= profiles.size) (profiles.size - 1).coerceAtLeast(0) else field.coerceAtLeast(0)
 
     override fun currentProfile(): ProfileSource.SingleProfile? = if (numOfProfiles > 0 && currentProfileIndex < numOfProfiles) profiles[currentProfileIndex] else null
 
@@ -126,6 +127,7 @@ class ProfilePlugin @Inject constructor(
 
     @Synchronized
     fun isValidEditState(activity: FragmentActivity?): Boolean {
+        if (profiles.isEmpty() || currentProfileIndex >= profiles.size) return false
         val pumpDescription = activePlugin.activePump.pumpDescription
         with(profiles[currentProfileIndex]) {
             if (dia < hardLimits.minDia() || dia > hardLimits.maxDia()) {
@@ -198,6 +200,7 @@ class ProfilePlugin @Inject constructor(
 
     @Synchronized
     fun getEditedProfile(): PureProfile? {
+        if (profiles.isEmpty() || currentProfileIndex >= profiles.size) return null
         val profile = JSONObject()
         with(profiles[currentProfileIndex]) {
             profile.put("dia", dia)
@@ -377,6 +380,7 @@ class ProfilePlugin @Inject constructor(
     }
 
     fun cloneProfile() {
+        if (profiles.isEmpty() || currentProfileIndex >= profiles.size) return
         val p = profiles[currentProfileIndex].deepClone()
         p.name = p.name + " copy"
         profiles.add(p)
@@ -395,6 +399,7 @@ class ProfilePlugin @Inject constructor(
     }
 
     fun removeCurrentProfile() {
+        if (profiles.isEmpty() || currentProfileIndex >= profiles.size) return
         profiles.removeAt(currentProfileIndex)
         if (profiles.isEmpty()) addNewProfile()
         currentProfileIndex = 0
@@ -439,7 +444,11 @@ class ProfilePlugin @Inject constructor(
         get() = rawProfile
 
     override val profileName: String
-        get() = rawProfile?.getDefaultProfile()?.let {
-            decimalFormatter.to2Decimal(ProfileSealed.Pure(it, activePlugin).percentageBasalSum()) + "U "
-        } ?: "INVALID"
+        get() = try {
+            rawProfile?.getDefaultProfile()?.let {
+                decimalFormatter.to2Decimal(ProfileSealed.Pure(it, activePlugin).percentageBasalSum()) + "U "
+            } ?: "INVALID"
+        } catch (_: Exception) {
+            "INVALID"
+        }
 }
