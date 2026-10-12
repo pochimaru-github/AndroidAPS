@@ -174,7 +174,7 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun updateGui() {
         if (!isAdded || isDetached || rootView == null || context == null) return
 
-        val profile = try { profileFunction.getProfile() } catch (_: Exception) { null } ?: return
+        val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
 
         val baseBasalRate = findViewById<TextView>("base_basal_rate")
         val tempbasal = findViewById<TextView>("tempbasal")
@@ -188,12 +188,14 @@ class VirtualPumpFragment : DaggerFragment() {
         if (baseBasalRate != null) {
             baseBasalRate.text = try {
                 rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, virtualPumpPlugin.baseBasalRate)
-            } catch (_: Exception) { "" }
+            } catch (_: Exception) { decimalFormatter.to2Decimal(virtualPumpPlugin.baseBasalRate) }
         }
 
         if (tempbasal != null) {
             tempbasal.text = try {
-                persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: ""
+                if (profile != null) {
+                    persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: ""
+                } else ""
             } catch (_: Exception) { "" }
         }
 
@@ -206,13 +208,13 @@ class VirtualPumpFragment : DaggerFragment() {
         if (battery != null) {
             battery.text = try {
                 rh.gs(app.aaps.core.ui.R.string.format_percent, virtualPumpPlugin.batteryPercent)
-            } catch (_: Exception) { "" }
+            } catch (_: Exception) { "${virtualPumpPlugin.batteryPercent}%" }
         }
 
         if (reservoir != null) {
             reservoir.text = try {
                 rh.gs(app.aaps.core.ui.R.string.format_insulin_units, virtualPumpPlugin.reservoirInUnits.toDouble())
-            } catch (_: Exception) { "" }
+            } catch (_: Exception) { "${virtualPumpPlugin.reservoirInUnits} U" }
         }
 
         try {
@@ -222,7 +224,7 @@ class VirtualPumpFragment : DaggerFragment() {
         val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
 
         if (type != null) {
-            type.text = pumpType?.description ?: ""
+            type.text = pumpType?.description ?: "Virtual Pump"
         }
 
         if (typeDef != null) {
@@ -234,7 +236,7 @@ class VirtualPumpFragment : DaggerFragment() {
         if (serialNumber != null) {
             serialNumber.text = try {
                 virtualPumpPlugin.serialNumber()
-            } catch (_: Exception) { "" }
+            } catch (_: Exception) { "VPUMP-001" }
         }
     }
 
