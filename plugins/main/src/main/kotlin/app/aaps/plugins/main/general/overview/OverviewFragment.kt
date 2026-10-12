@@ -443,14 +443,32 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             _binding?.let { b ->
                 if (lastBg != null) {
                     b.infoLayout.bg.text = decimalFormatter.to1Decimal(lastBg.value)
-                    val deltaVal = if (overviewData.bgReadingsArray.size >= 2) {
-                        overviewData.bgReadingsArray[0].value - overviewData.bgReadingsArray[1].value
+                    val readings = overviewData.bgReadingsArray
+                    val deltaVal = if (readings.size >= 2) {
+                        readings[0].value - readings[1].value
                     } else 0.0
                     b.infoLayout.delta.text = decimalFormatter.to1Decimal(deltaVal)
                     b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
 
                     b.infoLayout.arrow.text = getTrendSymbol(lastBg)
                     b.infoLayout.arrow.visibility = View.VISIBLE
+
+                    val now = lastBg.timestamp
+                    var delta15Val: Double? = null
+                    var delta40Val: Double? = null
+
+                    for (reading in readings) {
+                        val diffMins = (now - reading.timestamp) / (1000.0 * 60.0)
+                        if (delta15Val == null && diffMins in 12.0..25.0) {
+                            delta15Val = lastBg.value - reading.value
+                        }
+                        if (delta40Val == null && diffMins in 35.0..55.0) {
+                            delta40Val = lastBg.value - reading.value
+                        }
+                    }
+
+                    b.infoLayout.avgDelta.text = delta15Val?.let { decimalFormatter.to1Decimal(it) } ?: ""
+                    b.infoLayout.longAvgDelta.text = delta40Val?.let { decimalFormatter.to1Decimal(it) } ?: ""
                 }
             }
         }
