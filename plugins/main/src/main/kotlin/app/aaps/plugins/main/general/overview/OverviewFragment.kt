@@ -448,6 +448,9 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                     } else 0.0
                     b.infoLayout.delta.text = decimalFormatter.to1Decimal(deltaVal)
                     b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
+
+                    b.infoLayout.arrow.text = getTrendSymbol(lastBg)
+                    b.infoLayout.arrow.visibility = View.VISIBLE
                 }
             }
         }
@@ -559,5 +562,27 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun popupBolusDialogIfRunning(onClick: Boolean) {
+    }
+
+    private fun getTrendSymbol(bgObj: Any): String {
+        return try {
+            val field = bgObj.javaClass.getDeclaredField("direction")
+            field.isAccessible = true
+            val directionStr = field.get(bgObj)?.toString() ?: ""
+            when (directionStr.uppercase()) {
+                "TRIPLEUP" -> "⇈"
+                "DOUBLEUP" -> "⇈"
+                "SINGLEUP" -> "↑"
+                "FORTYFIVEUP" -> "↗"
+                "FLAT" -> "→"
+                "FORTYFIVEDOWN" -> "↘"
+                "SINGLEDOWN" -> "↓"
+                "DOUBLEDOWN" -> "⇊"
+                "TRIPLEDOWN" -> "⇊"
+                else -> "→"
+            }
+        } catch (_: Exception) {
+            "→"
+        }
     }
 }
