@@ -450,7 +450,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                     b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
 
                     try {
-                        val trendIconRes = lastBg.trendDrawableResource()
+                        val trendIconRes = getTrendDrawableResource(lastBg)
                         if (trendIconRes != 0) {
                             b.infoLayout.arrow.setImageResource(trendIconRes)
                             b.infoLayout.arrow.visibility = View.VISIBLE
@@ -569,11 +569,11 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     private fun popupBolusDialogIfRunning(onClick: Boolean) {
     }
 
-    private fun app.aaps.core.interfaces.overview.LastBgData.Bg.trendDrawableResource(): Int {
+    private fun getTrendDrawableResource(bgObj: Any): Int {
         return try {
-            val field = this::class.java.getDeclaredField("direction")
+            val field = bgObj.javaClass.getDeclaredField("direction")
             field.isAccessible = true
-            val directionStr = field.get(this)?.toString() ?: ""
+            val directionStr = field.get(bgObj)?.toString() ?: ""
             when (directionStr.uppercase()) {
                 "TRIPLEUP" -> app.aaps.core.ui.R.drawable.ic_arrow_triple_up
                 "DOUBLEUP" -> app.aaps.core.ui.R.drawable.ic_arrow_double_up
