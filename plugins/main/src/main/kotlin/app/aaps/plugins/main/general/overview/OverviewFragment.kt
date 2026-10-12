@@ -448,14 +448,6 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                     } else 0.0
                     b.infoLayout.delta.text = decimalFormatter.to1Decimal(deltaVal)
                     b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
-
-                    try {
-                        val trendIconRes = getTrendDrawableResource(lastBg)
-                        if (trendIconRes != 0) {
-                            b.infoLayout.arrow.setImageResource(trendIconRes)
-                            b.infoLayout.arrow.visibility = View.VISIBLE
-                        }
-                    } catch (_: Exception) { }
                 }
             }
         }
@@ -567,27 +559,5 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
     }
 
     private fun popupBolusDialogIfRunning(onClick: Boolean) {
-    }
-
-    private fun getTrendDrawableResource(bgObj: Any): Int {
-        return try {
-            val field = bgObj.javaClass.getDeclaredField("direction")
-            field.isAccessible = true
-            val directionStr = field.get(bgObj)?.toString() ?: ""
-            when (directionStr.uppercase()) {
-                "TRIPLEUP" -> app.aaps.core.ui.R.drawable.ic_arrow_triple_up
-                "DOUBLEUP" -> app.aaps.core.ui.R.drawable.ic_arrow_double_up
-                "SINGLEUP" -> app.aaps.core.ui.R.drawable.ic_arrow_single_up
-                "FORTYFIVEUP" -> app.aaps.core.ui.R.drawable.ic_arrow_forty_five_up
-                "FLAT" -> app.aaps.core.ui.R.drawable.ic_arrow_flat
-                "FORTYFIVEDOWN" -> app.aaps.core.ui.R.drawable.ic_arrow_forty_five_down
-                "SINGLEDOWN" -> app.aaps.core.ui.R.drawable.ic_arrow_single_down
-                "DOUBLEDOWN" -> app.aaps.core.ui.R.drawable.ic_arrow_double_down
-                "TRIPLEDOWN" -> app.aaps.core.ui.R.drawable.ic_arrow_triple_down
-                else -> app.aaps.core.ui.R.drawable.ic_arrow_flat
-            }
-        } catch (_: Exception) {
-            app.aaps.core.ui.R.drawable.ic_arrow_flat
-        }
     }
 }
