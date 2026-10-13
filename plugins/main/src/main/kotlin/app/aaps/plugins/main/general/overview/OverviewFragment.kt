@@ -180,9 +180,6 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         binding.graphsLayout.bgGraph.gridLabelRenderer?.gridColor = rh.gac(context, app.aaps.core.ui.R.attr.graphGrid)
         binding.graphsLayout.bgGraph.gridLabelRenderer?.reloadStyles()
         binding.graphsLayout.bgGraph.gridLabelRenderer?.labelVerticalWidth = axisWidth
-        // グラフの高さを 260dp へ動的に拡張して縦幅の視認性を向上
-        // binding.graphsLayout.bgGraph.layoutParams?.height = rh.dpToPx(skinProvider.activeSkin().mainGraphHeight)　修正前
-        binding.graphsLayout.bgGraph.layoutParams?.height = rh.dpToPx(260)
 
         carbAnimation = binding.infoLayout.carbsIcon.background as AnimationDrawable?
         carbAnimation?.setEnterFadeDuration(1200)
@@ -266,9 +263,18 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                        }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventBucketedDataCreated::class.java)
-            .debounce(1L, TimeUnit.SECONDS)
-            .observeOn(aapsSchedulers.io)
-            .subscribe({ updateBg() }, fabricPrivacy::logException)
+            .observeOn(aapsSchedulers.main)
+            .subscribe({ 
+                updateBg()
+                updateGraph()
+            }, fabricPrivacy::logException)
+        disposable += rxBus
+            .toObservable(app.aaps.core.interfaces.rx.events.EventNewBG::class.java)
+            .observeOn(aapsSchedulers.main)
+            .subscribe({ 
+                updateBg()
+                updateGraph()
+            }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventRefreshOverview::class.java)
             .observeOn(aapsSchedulers.io)
@@ -422,6 +428,17 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         try {
             val graphData = graphDataProvider.get().with(binding.graphsLayout.bgGraph, overviewData)
             graphData.formatAxis(overviewData.fromTime, overviewData.endTime)
+            
+            // Profileから血糖値Target範囲を取得して背景のインレンジ領域を描画
+            try {
+                val profile = profileFunction.getProfile()
+                if (profile != null) {
+                    val lowTarget = profile.getTargetLowMgdl()
+                    val highTarget = profile.getTargetHighMgdl()
+                    graphData.addInRangeArea(overviewData.fromTime, overviewData.endTime, lowTarget, highTarget)
+                }
+            } catch (_: Exception) {}
+
             graphData.addBgReadings(true, context)
             graphData.addTargetLine()
             graphData.addBasals()
@@ -430,6 +447,11 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             graphData.addTreatments(context)
             graphData.addNowLine(dateUtil.now())
             graphData.setNumVerticalLabels()
+            
+            // グラフの高さを 320dp へ確実に追従させる
+            binding.graphsLayout.bgGraph.layoutParams?.height = rh.dpToPx(320)
+            binding.graphsLayout.bgGraph.requestLayout()
+
             graphData.performUpdate()
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
