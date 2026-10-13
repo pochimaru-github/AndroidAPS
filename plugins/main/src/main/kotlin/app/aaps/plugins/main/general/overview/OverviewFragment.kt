@@ -608,23 +608,47 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
 
     private fun getTrendSymbol(bgObj: Any): String {
         return try {
-            val field = bgObj.javaClass.getDeclaredField("direction")
-            field.isAccessible = true
-            val directionStr = field.get(bgObj)?.toString() ?: ""
+            val cls = bgObj.javaClass
+            var directionStr = ""
+            for (fieldName in arrayOf("direction", "trend", "slope", "arrow")) {
+                try {
+                    val field = cls.getDeclaredField(fieldName)
+                    field.isAccessible = true
+                    val value = field.get(bgObj)
+                    if (value != null) {
+                        directionStr = value.toString()
+                        break
+                    }
+                } catch (_: Exception) {}
+            }
+            if (directionStr.isEmpty()) {
+                try {
+                    val method = cls.getMethod("getDirection")
+                    directionStr = method.invoke(bgObj)?.toString() ?: ""
+                } catch (_: Exception) {}
+            }
             when (directionStr.uppercase()) {
-                "TRIPLEUP" -> "⇈"
-                "DOUBLEUP" -> "⇈"
-                "SINGLEUP" -> "↑"
-                "FORTYFIVEUP" -> "↗"
-                "FLAT" -> "→"
-                "FORTYFIVEDOWN" -> "↘"
-                "SINGLEDOWN" -> "↓"
-                "DOUBLEDOWN" -> "⇊"
+                "TRIPLEUP", "⇈" -> "⇈"
+                "DOUBLEUP", "UPUP" -> "⇈"
+                "SINGLEUP", "UP" -> "↑"
+                "FORTYFIVEUP", "SINGLEUP45", "45UP" -> "↗"
+                "FLAT", "NONE" -> "→"
+                "FORTYFIVEDOWN", "SINGLEDOWN45", "45DOWN" -> "↘"
+                "SINGLEDOWN", "DOWN" -> "↓"
+                "DOUBLEDOWN", "DOWNDOWN" -> "⇊"
                 "TRIPLEDOWN" -> "⇊"
-                else -> "→"
+                else -> {
+                    when {
+                        directionStr.contains("UPUP") || directionStr.contains("⇈") -> "⇈"
+                        directionStr.contains("UP") || directionStr.contains("↑") -> "↑"
+                        directionStr.contains("45UP") || directionStr.contains("↗") -> "↗"
+                        directionStr.contains("45DOWN") || directionStr.contains("↘") -> "↘"
+                        directionStr.contains("DOWN") || directionStr.contains("↓") -> "↓"
+                        else -> "→"
+                    }
+                }
             }
         } catch (_: Exception) {
             "→"
         }
     }
-}
