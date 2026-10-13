@@ -264,18 +264,9 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                        }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventBucketedDataCreated::class.java)
-            .observeOn(aapsSchedulers.main)
-            .subscribe({
-                updateBg()
-                updateGraph()
-            }, fabricPrivacy::logException)
-        disposable += rxBus
-            .toObservable(EventNewBG::class.java)
-            .observeOn(aapsSchedulers.main)
-            .subscribe({
-                updateBg()
-                updateGraph()
-            }, fabricPrivacy::logException)
+            .debounce(1L, TimeUnit.SECONDS)
+            .observeOn(aapsSchedulers.io)
+            .subscribe({ updateBg() }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventRefreshOverview::class.java)
             .observeOn(aapsSchedulers.io)
