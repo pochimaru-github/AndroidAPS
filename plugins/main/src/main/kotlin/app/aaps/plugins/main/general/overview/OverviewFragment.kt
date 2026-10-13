@@ -644,3 +644,4 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             "→"
         }
     }
+}
