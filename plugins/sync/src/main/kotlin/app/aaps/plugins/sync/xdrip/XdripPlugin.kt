@@ -218,11 +218,16 @@ class XdripPlugin @Inject constructor(
             syncMutex.withLock {
                 try {
                     isExecuting = true
-                    // WorkManagerの低優先度スケジュールをバイパスし、即時バックグラウンド実行
-                    val worker = XdripDataSyncWorker(context, androidx.work.WorkerParameters::class.java.cast(null) ?: return@withLock)
-                    worker.doWork()
+                    // WorkManagerを経由せず、元の安全なOneTimeWorkRequestキュー方式に戻しつつ即時エンキュー
+                    androidx.work.WorkManager.getInstance(context)
+                        .beginUniqueWork(
+                            XDRIP_JOB_NAME,
+                            androidx.work.ExistingWorkPolicy.REPLACE,
+                            androidx.work.OneTimeWorkRequest.Builder(XdripDataSyncWorker::class.java).build()
+                        )
+                        .enqueue()
                 } catch (e: Exception) {
-                    aapsLogger.error(LTag.XDRIP, "Direct sync execution error: ${e.message}", e)
+                    aapsLogger.error(LTag.XDRIP, "Sync execution error: ${e.message}", e)
                 } finally {
                     isExecuting = false
                 }
@@ -233,9 +238,10 @@ class XdripPlugin @Inject constructor(
     private var eventWorker: ScheduledExecutorService? = null
     private var scheduledEventPost: ScheduledFuture<*>? = null
     private fun delayAndScheduleExecution(origin: String) {
-        // バックグラウンド同期遅延防止のため、WorkManager・タイマー遅延を迂回して即時実行
         executeLoop(origin)
     }
+
+    private val XDRIP_JOB_NAME: String = this::class.java.simpleName
 
     private fun buildStatusLine(profile: Profile): String {
         val status = StringBuilder()
