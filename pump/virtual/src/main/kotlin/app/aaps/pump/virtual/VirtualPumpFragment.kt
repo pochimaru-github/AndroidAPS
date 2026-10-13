@@ -56,31 +56,13 @@ class VirtualPumpFragment : DaggerFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return try {
-            val ctx = context ?: return null
-            val layoutId = ctx.resources.getIdentifier("virtual_pump_fragment", "layout", ctx.packageName)
-            val view = if (layoutId != 0) inflater.inflate(layoutId, container, false) else View(ctx)
+            val view = inflater.inflate(R.layout.virtual_pump_fragment, container, false)
             rootView = view
             view
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
             null
         }
-    }
-
-    private fun <T : View> findViewById(name: String): T? {
-        val ctx = context ?: return null
-        return try {
-            val id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-            if (id != 0) rootView?.findViewById(id) else null
-        } catch (_: Exception) { null }
-    }
-
-    private fun getStringByName(name: String, fallback: String = ""): String {
-        val ctx = context ?: return fallback
-        return try {
-            val id = ctx.resources.getIdentifier(name, "string", ctx.packageName)
-            if (id != 0) rh.gs(id) else fallback
-        } catch (_: Exception) { fallback }
     }
 
     @Synchronized
@@ -113,7 +95,7 @@ class VirtualPumpFragment : DaggerFragment() {
             }
             handler?.postDelayed(refreshLoop!!, T.mins(1).msecs())
 
-            val pumpSuspended = findViewById<CheckBox>("pump_suspended")
+            val pumpSuspended = rootView?.findViewById<CheckBox>(R.id.pump_suspended)
             if (pumpSuspended != null) {
                 pumpSuspended.isChecked = try { preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended) } catch (_: Exception) { false }
                 pumpSuspended.setOnClickListener {
@@ -172,23 +154,24 @@ class VirtualPumpFragment : DaggerFragment() {
 
     @Synchronized
     private fun updateGui() {
-        if (!isAdded || isDetached || rootView == null || context == null) return
+        val root = rootView ?: return
+        if (!isAdded || isDetached || context == null) return
 
         val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
 
-        val baseBasalRate = findViewById<TextView>("base_basal_rate")
-        val tempbasal = findViewById<TextView>("tempbasal")
-        val extendedbolus = findViewById<TextView>("extendedbolus")
-        val battery = findViewById<TextView>("battery")
-        val reservoir = findViewById<TextView>("reservoir")
-        val type = findViewById<TextView>("type")
-        val typeDef = findViewById<TextView>("type_def")
-        val serialNumber = findViewById<TextView>("serial_number")
+        val baseBasalRate = root.findViewById<TextView>(R.id.base_basal_rate)
+        val tempbasal = root.findViewById<TextView>(R.id.tempbasal)
+        val extendedbolus = root.findViewById<TextView>(R.id.extendedbolus)
+        val battery = root.findViewById<TextView>(R.id.battery)
+        val reservoir = root.findViewById<TextView>(R.id.reservoir)
+        val type = root.findViewById<TextView>(R.id.type)
+        val typeDef = root.findViewById<TextView>(R.id.type_def)
+        val serialNumber = root.findViewById<TextView>(R.id.serial_number)
 
         if (baseBasalRate != null) {
             baseBasalRate.text = try {
                 rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, virtualPumpPlugin.baseBasalRate)
-            } catch (_: Exception) { decimalFormatter.to2Decimal(virtualPumpPlugin.baseBasalRate) }
+            } catch (_: Exception) { "${decimalFormatter.to2Decimal(virtualPumpPlugin.baseBasalRate)} U/h" }
         }
 
         if (tempbasal != null) {
@@ -229,7 +212,8 @@ class VirtualPumpFragment : DaggerFragment() {
 
         if (typeDef != null) {
             typeDef.text = try {
-                pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: ""
+                val i18nTemplate = try { rh.gs(R.string.virtual_pump_pump_def) } catch (_: Exception) { "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s" }
+                pumpType?.getFullDescription(i18nTemplate, pumpType.hasExtendedBasals(), rh) ?: ""
             } catch (_: Exception) { "" }
         }
 
@@ -249,7 +233,7 @@ class VirtualPumpFragment : DaggerFragment() {
             val unit = if (pumpTempBasalType() == PumpTempBasalType.Percent) "%" else ""
             val eb = extendedBolusSettings() ?: return "INVALID"
             val tbr = tbrSettings() ?: return "INVALID"
-            val extendedNote = if (hasExtendedBasals) getStringByName("def_extended_note") else ""
+            val extendedNote = if (hasExtendedBasals) try { rh.gs(R.string.def_extended_note) } catch (_: Exception) { "" } else ""
             String.format(
                 i18nTemplate,
                 getStep(bolusSize().toString(), specialBolusSize()),
