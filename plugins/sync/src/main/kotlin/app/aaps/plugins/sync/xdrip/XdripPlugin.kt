@@ -141,6 +141,7 @@ class XdripPlugin @Inject constructor(
             .observeOn(aapsSchedulers.io)
             .subscribe({
                            sendStatusLine()
+                           rxBus.send(EventBucketedDataCreated())
                            delayAndScheduleExecution("NEW_BG")
                        }, fabricPrivacy::logException)
         disposable += rxBus.toObservable(EventNewHistoryData::class.java)
