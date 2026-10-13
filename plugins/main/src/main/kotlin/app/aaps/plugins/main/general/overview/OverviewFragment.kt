@@ -1,6 +1,6 @@
 package app.aaps.plugins.main.general.overview
 
-import android.annotatio    n.SuppressLint
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
