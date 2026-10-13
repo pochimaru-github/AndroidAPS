@@ -121,7 +121,8 @@ class VirtualPumpFragment : DaggerFragment() {
                 }
             }
 
-            safeUpdateGui()
+            // 画面復帰時に確実に即時描画を強制
+            activity?.runOnUiThread { safeUpdateGui() }
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
