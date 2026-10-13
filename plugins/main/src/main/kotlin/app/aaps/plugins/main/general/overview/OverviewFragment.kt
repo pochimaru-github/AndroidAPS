@@ -38,6 +38,7 @@ import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.AapsSchedulers
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.events.EventAcceptOpenLoopChange
+import app.aaps.core.interfaces.rx.events.EventNewBG
 import app.aaps.core.interfaces.rx.events.EventBucketedDataCreated
 import app.aaps.core.interfaces.rx.events.EventDismissNotification
 import app.aaps.core.interfaces.rx.events.EventEffectiveProfileSwitchChanged
@@ -264,14 +265,14 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         disposable += rxBus
             .toObservable(EventBucketedDataCreated::class.java)
             .observeOn(aapsSchedulers.main)
-            .subscribe({ 
+            .subscribe({
                 updateBg()
                 updateGraph()
             }, fabricPrivacy::logException)
         disposable += rxBus
-            .toObservable(app.aaps.core.interfaces.rx.events.EventNewBG::class.java)
+            .toObservable(EventNewBG::class.java)
             .observeOn(aapsSchedulers.main)
-            .subscribe({ 
+            .subscribe({
                 updateBg()
                 updateGraph()
             }, fabricPrivacy::logException)
