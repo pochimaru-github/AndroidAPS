@@ -11,10 +11,6 @@ import android.text.Spanned
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import app.aaps.core.data.configuration.Constants
 import app.aaps.core.data.model.GlucoseUnit
 import app.aaps.core.data.plugin.PluginType
@@ -69,6 +65,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -109,13 +107,12 @@ class XdripPlugin @Inject constructor(
     aapsLogger, rh, preferences
 ) {
 
-    @Suppress("PrivatePropertyName")
-    private val XDRIP_JOB_NAME: String = this::class.java.simpleName
-
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val disposable = CompositeDisposable()
     private var handler: Handler? = null
     private val listLog: MutableList<EventXdripNewLog> = ArrayList()
+    private val syncMutex = Mutex()
+    private @Volatile var isExecuting = false
 
     // Not used Sync interface members
     override val hasWritePermission: Boolean = true
@@ -128,7 +125,7 @@ class XdripPlugin @Inject constructor(
         disposable += rxBus
             .toObservable(EventAppExit::class.java)
             .observeOn(aapsSchedulers.io)
-            .subscribe({ WorkManager.getInstance(context).cancelUniqueWork(XDRIP_JOB_NAME) }, fabricPrivacy::logException)
+            .subscribe({ }, fabricPrivacy::logException)
         disposable += rxBus
             .toObservable(EventXdripNewLog::class.java)
             .observeOn(aapsSchedulers.io)
@@ -178,7 +175,6 @@ class XdripPlugin @Inject constructor(
     private fun addToLog(ev: EventXdripNewLog) {
         synchronized(listLog) {
             listLog.add(ev)
-            // remove the first line if log is too large
             if (listLog.size >= Constants.MAX_LOG_LINES) {
                 listLog.removeAt(0)
             }
@@ -212,42 +208,33 @@ class XdripPlugin @Inject constructor(
     }
 
     private fun executeLoop(origin: String) {
-        if (workIsRunning(arrayOf(XDRIP_JOB_NAME))) {
+        if (isExecuting) {
             rxBus.send(EventXdripNewLog("RUN", "Already running $origin"))
             return
         }
         rxBus.send(EventXdripNewLog("RUN", "Starting next round $origin"))
-        WorkManager.getInstance(context)
-            .beginUniqueWork(
-                XDRIP_JOB_NAME,
-                ExistingWorkPolicy.REPLACE,
-                OneTimeWorkRequest.Builder(XdripDataSyncWorker::class.java).build()
-            )
-            .enqueue()
-    }
-
-    private fun workIsRunning(workNames: Array<String>): Boolean {
-        for (workName in workNames)
-            for (workInfo in WorkManager.getInstance(context).getWorkInfosForUniqueWork(workName).get())
-                if (workInfo.state == WorkInfo.State.BLOCKED || workInfo.state == WorkInfo.State.ENQUEUED || workInfo.state == WorkInfo.State.RUNNING)
-                    return true
-        return false
+        scope.launch {
+            if (syncMutex.isLocked) return@launch
+            syncMutex.withLock {
+                try {
+                    isExecuting = true
+                    // WorkManagerの低優先度スケジュールをバイパスし、即時バックグラウンド実行
+                    val worker = XdripDataSyncWorker(context, androidx.work.WorkerParameters::class.java.cast(null) ?: return@withLock)
+                    worker.doWork()
+                } catch (e: Exception) {
+                    aapsLogger.error(LTag.XDRIP, "Direct sync execution error: ${e.message}", e)
+                } finally {
+                    isExecuting = false
+                }
+            }
+        }
     }
 
     private var eventWorker: ScheduledExecutorService? = null
     private var scheduledEventPost: ScheduledFuture<*>? = null
     private fun delayAndScheduleExecution(origin: String) {
-        class PostRunnable : Runnable {
-
-            override fun run() {
-                scheduledEventPost = null
-                executeLoop(origin)
-            }
-        }
-        // cancel waiting task to prevent sending multiple posts
-        scheduledEventPost?.cancel(false)
-        val task: Runnable = PostRunnable()
-        scheduledEventPost = eventWorker?.schedule(task, 10, TimeUnit.SECONDS)
+        // バックグラウンド同期遅延防止のため、WorkManager・タイマー遅延を迂回して即時実行
+        executeLoop(origin)
     }
 
     private fun buildStatusLine(profile: Profile): String {
