@@ -1,6 +1,6 @@
 package app.aaps.plugins.main.general.overview
 
-import android.annotation.SuppressLint
+import android.annotatio    n.SuppressLint
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
@@ -181,7 +181,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         binding.graphsLayout.bgGraph.gridLabelRenderer?.reloadStyles()
         binding.graphsLayout.bgGraph.gridLabelRenderer?.labelVerticalWidth = axisWidth
         // グラフの高さを 260dp へ動的に拡張して縦幅の視認性を向上
-        binding.graphsLayout.bgGraph.layoutParams?.height = rh.dpToPx(260)
+        binding.graphsLayout.bgGraph.layoutParams?.height = rh.dpToPx(320)
+        // binding.graphsLayout.bgGraph.layoutParams?.height = rh.dpToPx(260)
         // binding.graphsLayout.bgGraph.layoutParams?.height = rh.dpToPx(skinProvider.activeSkin().mainGraphHeight)
 
         carbAnimation = binding.infoLayout.carbsIcon.background as AnimationDrawable?
