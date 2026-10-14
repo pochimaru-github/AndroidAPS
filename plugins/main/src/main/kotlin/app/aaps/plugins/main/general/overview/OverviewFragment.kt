@@ -235,6 +235,10 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             .debounce(1L, TimeUnit.SECONDS)
             .observeOn(aapsSchedulers.io)
             .subscribe({ updateIobCob() }, fabricPrivacy::logException)
+        disposable += rxBus
+            .toObservable(EventNewBG::class.java)
+            .observeOn(aapsSchedulers.main)
+            .subscribe({ updateBg() }, fabricPrivacy::logException)
         disposable += activePlugin.activeOverview.overviewBus
             .toObservable(EventUpdateOverviewSensitivity::class.java)
             .debounce(1L, TimeUnit.SECONDS)
