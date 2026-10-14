@@ -426,7 +426,6 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             val graphData = graphDataProvider.get().with(binding.graphsLayout.bgGraph, overviewData)
             graphData.formatAxis(overviewData.fromTime, overviewData.endTime)
             
-            // Profileから血糖値Target範囲を取得して背景のインレンジ領域を描画
             try {
                 val profile = profileFunction.getProfile()
                 if (profile != null) {
@@ -445,7 +444,6 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             graphData.addNowLine(dateUtil.now())
             graphData.setNumVerticalLabels()
             
-            // グラフの高さを 320dp へ確実に追従させる
             binding.graphsLayout.bgGraph.layoutParams?.height = rh.dpToPx(320)
             binding.graphsLayout.bgGraph.requestLayout()
 
@@ -471,7 +469,17 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                     b.infoLayout.delta.text = decimalFormatter.to1Decimal(deltaVal)
                     b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
 
-                    b.infoLayout.arrow.text = getTrendSymbol(lastBg)
+                    var arrowSymbol = getTrendSymbol(lastBg)
+                    if (arrowSymbol == "→" && readings.size >= 2) {
+                        arrowSymbol = when {
+                            deltaVal >= 3.0 -> "↑"
+                            deltaVal >= 1.5 -> "↗"
+                            deltaVal <= -3.0 -> "↓"
+                            deltaVal <= -1.5 -> "↘"
+                            else -> "→"
+                        }
+                    }
+                    b.infoLayout.arrow.text = arrowSymbol
                     b.infoLayout.arrow.visibility = View.VISIBLE
 
                     val now = lastBg.timestamp
@@ -607,32 +615,53 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         return try {
             val cls = bgObj.javaClass
             var directionStr = ""
-            for (fieldName in arrayOf("direction", "trend", "slope", "arrow")) {
+            var directionInt: Int? = null
+            for (fieldName in arrayOf("direction", "trend", "slope", "arrow", "rawTrend")) {
                 try {
                     val field = cls.getDeclaredField(fieldName)
                     field.isAccessible = true
                     val value = field.get(bgObj)
                     if (value != null) {
-                        directionStr = value.toString()
+                        if (value is Number) {
+                            directionInt = value.toInt()
+                        } else {
+                            directionStr = value.toString()
+                        }
                         break
                     }
                 } catch (_: Exception) {}
             }
-            if (directionStr.isEmpty()) {
+            if (directionStr.isEmpty() && directionInt == null) {
                 try {
                     val method = cls.getMethod("getDirection")
-                    directionStr = method.invoke(bgObj)?.toString() ?: ""
+                    val res = method.invoke(bgObj)
+                    if (res is Number) directionInt = res.toInt()
+                    else if (res != null) directionStr = res.toString()
                 } catch (_: Exception) {}
             }
+
+            if (directionInt != null) {
+                return when (directionInt) {
+                    1 -> "⇈"
+                    2 -> "↑"
+                    3 -> "↗"
+                    4 -> "→"
+                    5 -> "↘"
+                    6 -> "↓"
+                    7 -> "⇊"
+                    else -> "→"
+                }
+            }
+
             when (directionStr.uppercase()) {
-                "TRIPLEUP", "⇈" -> "⇈"
-                "DOUBLEUP", "UPUP" -> "⇈"
-                "SINGLEUP", "UP" -> "↑"
-                "FORTYFIVEUP", "SINGLEUP45", "45UP" -> "↗"
-                "FLAT", "NONE" -> "→"
-                "FORTYFIVEDOWN", "SINGLEDOWN45", "45DOWN" -> "↘"
-                "SINGLEDOWN", "DOWN" -> "↓"
-                "DOUBLEDOWN", "DOWNDOWN" -> "⇊"
+                "TRIPLEUP", "⇈", "1" -> "⇈"
+                "DOUBLEUP", "UPUP", "2" -> "⇈"
+                "SINGLEUP", "UP", "3" -> "↑"
+                "FORTYFIVEUP", "SINGLEUP45", "45UP", "4" -> "↗"
+                "FLAT", "NONE", "5", "0" -> "→"
+                "FORTYFIVEDOWN", "SINGLEDOWN45", "45DOWN", "6" -> "↘"
+                "SINGLEDOWN", "DOWN", "7" -> "↓"
+                "DOUBLEDOWN", "DOWNDOWN", "8" -> "⇊"
                 "TRIPLEDOWN" -> "⇊"
                 else -> {
                     when {
