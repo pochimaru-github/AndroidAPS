@@ -365,6 +365,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         _binding?.graphsLayout?.bgGraph?.let { graph ->
             graph.setOnLongClickListener(null)
             graph.removeAllSeries()
+            graph.gridLabelRenderer?.reloadStyles()
         }
         for (graph in secondaryGraphs) {
             graph.setOnLongClickListener(null)
