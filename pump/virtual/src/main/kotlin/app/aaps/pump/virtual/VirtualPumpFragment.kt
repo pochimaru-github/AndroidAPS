@@ -191,7 +191,7 @@ class VirtualPumpFragment : DaggerFragment() {
                 try {
                     rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, rate)
                 } catch (_: Exception) {
-                    decimalFormatter.to2Decimal(rate)
+                    decimalFormatter.to2Decimal(rate) + " U/h"
                 }
             } catch (_: Exception) { "0.00 U/h" }
         }
