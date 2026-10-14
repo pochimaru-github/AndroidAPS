@@ -325,13 +325,17 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             .observeOn(aapsSchedulers.io)
             .subscribe({ processAps() }, fabricPrivacy::logException)
 
+        if (handler.looper.quit) {
+            handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
+        }
+        handler.removeCallbacksAndMessages(null)
         refreshLoop = Runnable {
             refreshAll()
             handler.postDelayed(refreshLoop, 60 * 1000L)
         }
         handler.postDelayed(refreshLoop, 60 * 1000L)
 
-        handler.post { refreshAll() }
+        refreshAll()
         updatePumpStatus()
         updateCalcProgress()
 
