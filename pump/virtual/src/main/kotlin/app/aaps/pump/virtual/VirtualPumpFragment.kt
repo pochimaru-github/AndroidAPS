@@ -70,17 +70,11 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun <T : View> findViewById(name: String): T? {
         val ctx = context ?: return null
         return try {
-            val id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-            if (id != 0 && rootView != null) {
-                rootView?.findViewById(id) as? T
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            fabricPrivacy.logException(e)
-            null
-        }
+            val id = ctx.resources.getIdentifier(name, "id", null)
+            if (id != 0) rootView?.findViewById(id) else null
+        } catch (_: Exception) { null }
     }
+
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
         return try {
