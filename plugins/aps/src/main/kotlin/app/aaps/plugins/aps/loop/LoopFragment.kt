@@ -137,23 +137,24 @@ class LoopFragment : DaggerFragment(), MenuProvider {
     @Synchronized
     fun updateGUI() {
         if (_binding == null) return
-        loop.lastRun?.let {
-            binding.request.text = it.request?.resultAsSpanned() ?: ""
-            binding.constraintsprocessed.text = it.constraintsProcessed?.resultAsSpanned() ?: ""
-            binding.source.text = it.source ?: ""
-            binding.lastrun.text = dateUtil.dateAndTimeString(it.lastAPSRun)
-            binding.smbrequestTime.text = dateUtil.dateAndTimeAndSecondsString(it.lastSMBRequest)
-            binding.smbexecutionTime.text = dateUtil.dateAndTimeAndSecondsString(it.lastSMBEnact)
-            binding.tbrrequestTime.text = dateUtil.dateAndTimeAndSecondsString(it.lastTBRRequest)
-            binding.tbrexecutionTime.text = dateUtil.dateAndTimeAndSecondsString(it.lastTBREnact)
+        val lastRunData = loop.lastRun
+        if (lastRunData != null) {
+            binding.request.text = lastRunData.request?.resultAsSpanned() ?: ""
+            binding.constraintsprocessed.text = lastRunData.constraintsProcessed?.resultAsSpanned() ?: ""
+            binding.source.text = lastRunData.source ?: ""
+            binding.lastrun.text = dateUtil.dateAndTimeString(lastRunData.lastAPSRun)
+            binding.smbrequestTime.text = dateUtil.dateAndTimeAndSecondsString(lastRunData.lastSMBRequest)
+            binding.smbexecutionTime.text = dateUtil.dateAndTimeAndSecondsString(lastRunData.lastSMBEnact)
+            binding.tbrrequestTime.text = dateUtil.dateAndTimeAndSecondsString(lastRunData.lastTBRRequest)
+            binding.tbrexecutionTime.text = dateUtil.dateAndTimeAndSecondsString(lastRunData.lastTBREnact)
 
-            binding.tbrsetbypump.text = it.tbrSetByPump?.let { tbrSetByPump -> HtmlHelper.fromHtml(tbrSetByPump.toHtml(rh, decimalFormatter)) }
+            binding.tbrsetbypump.text = lastRunData.tbrSetByPump?.let { tbrSetByPump -> HtmlHelper.fromHtml(tbrSetByPump.toHtml(rh, decimalFormatter)) }
                 ?: ""
-            binding.smbsetbypump.text = it.smbSetByPump?.let { smbSetByPump -> HtmlHelper.fromHtml(smbSetByPump.toHtml(rh, decimalFormatter)) }
+            binding.smbsetbypump.text = lastRunData.smbSetByPump?.let { smbSetByPump -> HtmlHelper.fromHtml(smbSetByPump.toHtml(rh, decimalFormatter)) }
                 ?: ""
 
             var constraints =
-                it.constraintsProcessed?.let { constraintsProcessed ->
+                lastRunData.constraintsProcessed?.let { constraintsProcessed ->
                     val allConstraints = ConstraintObject(0.0, aapsLogger)
                     constraintsProcessed.rateConstraint?.let { rateConstraint -> allConstraints.copyReasons(rateConstraint) }
                     constraintsProcessed.smbConstraint?.let { smbConstraint -> allConstraints.copyReasons(smbConstraint) }
@@ -161,8 +162,14 @@ class LoopFragment : DaggerFragment(), MenuProvider {
                 } ?: ""
             constraints += loop.closedLoopEnabled?.getReasons() ?: ""
             binding.constraints.text = constraints
-            binding.swipeRefresh.isRefreshing = false
+        } else {
+            binding.request.text = ""
+            binding.constraints.text = ""
+            binding.constraintsprocessed.text = ""
+            binding.source.text = ""
+            binding.lastrun.text = ""
         }
+        binding.swipeRefresh.isRefreshing = false
     }
 
     private fun clearGUI() {
