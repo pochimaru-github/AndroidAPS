@@ -325,7 +325,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
             .observeOn(aapsSchedulers.io)
             .subscribe({ processAps() }, fabricPrivacy::logException)
 
-        if (handler.looper.quit) {
+        if (!handler.looper.thread.isAlive) {
             handler = Handler(HandlerThread(this::class.simpleName + "Handler").also { it.start() }.looper)
         }
         handler.removeCallbacksAndMessages(null)
