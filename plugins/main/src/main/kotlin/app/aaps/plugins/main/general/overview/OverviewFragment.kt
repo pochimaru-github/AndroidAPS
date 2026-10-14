@@ -469,7 +469,8 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                     b.infoLayout.delta.text = decimalFormatter.to1Decimal(deltaVal)
                     b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
 
-                    var arrowSymbol = getTrendSymbol(lastBg)
+                    val rawArrowSymbol = getTrendSymbol(lastBg)
+                    var arrowSymbol = rawArrowSymbol
                     if (arrowSymbol == "→" && readings.size >= 2) {
                         arrowSymbol = when {
                             deltaVal >= 3.0 -> "↑"
