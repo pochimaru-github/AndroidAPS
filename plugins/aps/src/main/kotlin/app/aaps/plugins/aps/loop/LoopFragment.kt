@@ -163,17 +163,17 @@ class LoopFragment : DaggerFragment(), MenuProvider {
             constraints += loop.closedLoopEnabled?.getReasons() ?: ""
             binding.constraints.text = constraints
         } else {
-            binding.request.text = "Waiting for loop result..."
-            binding.constraints.text = loop.closedLoopEnabled?.getReasons() ?: "No constraints processed yet"
+            binding.request.text = ""
             binding.constraintsprocessed.text = ""
-            binding.source.text = "Virtual"
-            binding.lastrun.text = "Not executed yet"
+            binding.source.text = ""
+            binding.lastrun.text = ""
             binding.smbrequestTime.text = ""
             binding.smbexecutionTime.text = ""
             binding.tbrrequestTime.text = ""
             binding.tbrexecutionTime.text = ""
             binding.tbrsetbypump.text = ""
             binding.smbsetbypump.text = ""
+            binding.constraints.text = loop.closedLoopEnabled?.getReasons() ?: ""
         }
         binding.swipeRefresh.isRefreshing = false
     }
