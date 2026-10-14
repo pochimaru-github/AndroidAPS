@@ -187,34 +187,45 @@ class VirtualPumpFragment : DaggerFragment() {
 
         if (baseBasalRate != null) {
             baseBasalRate.text = try {
-                rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, virtualPumpPlugin.baseBasalRate)
-            } catch (_: Exception) { decimalFormatter.to2Decimal(virtualPumpPlugin.baseBasalRate) }
+                val rate = virtualPumpPlugin.baseBasalRate
+                try {
+                    rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, rate)
+                } catch (_: Exception) {
+                    decimalFormatter.to2Decimal(rate)
+                }
+            } catch (_: Exception) { "0.00 U/h" }
         }
 
         if (tempbasal != null) {
             tempbasal.text = try {
                 if (profile != null) {
-                    persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: ""
-                } else ""
-            } catch (_: Exception) { "" }
+                    persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: "None"
+                } else "None"
+            } catch (_: Exception) { "None" }
         }
 
         if (extendedbolus != null) {
             extendedbolus.text = try {
-                persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())?.toStringFull(dateUtil, rh) ?: ""
-            } catch (_: Exception) { "" }
+                persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())?.toStringFull(dateUtil, rh) ?: "None"
+            } catch (_: Exception) { "None" }
         }
 
         if (battery != null) {
             battery.text = try {
-                rh.gs(app.aaps.core.ui.R.string.format_percent, virtualPumpPlugin.batteryPercent)
-            } catch (_: Exception) { "${virtualPumpPlugin.batteryPercent}%" }
+                val bat = virtualPumpPlugin.batteryPercent
+                try {
+                    rh.gs(app.aaps.core.ui.R.string.format_percent, bat)
+                } catch (_: Exception) { "$bat%" }
+            } catch (_: Exception) { "100%" }
         }
 
         if (reservoir != null) {
             reservoir.text = try {
-                rh.gs(app.aaps.core.ui.R.string.format_insulin_units, virtualPumpPlugin.reservoirInUnits.toDouble())
-            } catch (_: Exception) { "${virtualPumpPlugin.reservoirInUnits} U" }
+                val res = virtualPumpPlugin.reservoirInUnits.toDouble()
+                try {
+                    rh.gs(app.aaps.core.ui.R.string.format_insulin_units, res)
+                } catch (_: Exception) { "${decimalFormatter.to1Decimal(res)} U" }
+            } catch (_: Exception) { "100.0 U" }
         }
 
         try {
@@ -229,13 +240,13 @@ class VirtualPumpFragment : DaggerFragment() {
 
         if (typeDef != null) {
             typeDef.text = try {
-                pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: ""
-            } catch (_: Exception) { "" }
+                pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: "Virtual Pump System"
+            } catch (_: Exception) { "Virtual Pump System" }
         }
 
         if (serialNumber != null) {
             serialNumber.text = try {
-                virtualPumpPlugin.serialNumber()
+                virtualPumpPlugin.serialNumber().ifEmpty { "VPUMP-001" }
             } catch (_: Exception) { "VPUMP-001" }
         }
     }
