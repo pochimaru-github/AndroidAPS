@@ -139,8 +139,12 @@ class XdripPlugin @Inject constructor(
         disposable += rxBus
             .toObservable(EventNewBG::class.java)
             .observeOn(aapsSchedulers.io)
-            .subscribe({
+            .subscribe({ event ->
                            sendStatusLine()
+                           // 血糖値データが更新されたことを全体に即時通知し、UIおよびAPS計算を走らせる
+                           try {
+                               rxBus.send(EventBucketedDataCreated())
+                           } catch (_: Exception) {}
                            delayAndScheduleExecution("NEW_BG")
                        }, fabricPrivacy::logException)
         disposable += rxBus.toObservable(EventNewHistoryData::class.java)
