@@ -473,18 +473,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
                     b.infoLayout.delta.text = decimalFormatter.to1Decimal(deltaVal)
                     b.infoLayout.timeAgo.text = dateUtil.minAgo(rh, lastBg.timestamp)
 
-                    val rawArrowSymbol = getTrendSymbol(lastBg)
-                    var arrowSymbol = rawArrowSymbol
-                    if (arrowSymbol == "→" && readings.size >= 2) {
-                        arrowSymbol = when {
-                            deltaVal >= 3.0 -> "↑"
-                            deltaVal >= 1.5 -> "↗"
-                            deltaVal <= -3.0 -> "↓"
-                            deltaVal <= -1.5 -> "↘"
-                            else -> "→"
-                        }
-                    }
-                    b.infoLayout.arrow.text = arrowSymbol
+                    b.infoLayout.arrow.text = getTrendSymbol(lastBg)
                     b.infoLayout.arrow.visibility = View.VISIBLE
 
                     val now = lastBg.timestamp
