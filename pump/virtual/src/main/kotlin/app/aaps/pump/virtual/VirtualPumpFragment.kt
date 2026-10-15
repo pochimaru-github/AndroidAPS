@@ -75,12 +75,10 @@ class VirtualPumpFragment : DaggerFragment() {
         val v = rootView ?: return null
         val ctx = v.context ?: context ?: return null
         return try {
-            var resourceIdentifier = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-            if (resourceIdentifier == 0) {
-                resourceIdentifier = ctx.resources.getIdentifier(name, "id", null)
-            }
-            if (resourceIdentifier != 0) {
-                v.findViewById<View>(resourceIdentifier) as? T
+            val id1 = ctx.resources.getIdentifier(name, "id", ctx.packageName)
+            val finalId = if (id1 != 0) id1 else ctx.resources.getIdentifier(name, "id", null)
+            if (finalId != 0) {
+                v.findViewById<View>(finalId) as? T
             } else {
                 null
             }
@@ -92,11 +90,9 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
         return try {
-            var resourceIdentifier = ctx.resources.getIdentifier(name, "string", ctx.packageName)
-            if (resourceIdentifier == 0) {
-                resourceIdentifier = ctx.resources.getIdentifier(name, "string", null)
-            }
-            if (resourceIdentifier != 0) rh.gs(resourceIdentifier) else fallback
+            val id1 = ctx.resources.getIdentifier(name, "string", ctx.packageName)
+            val finalId = if (id1 != 0) id1 else ctx.resources.getIdentifier(name, "string", null)
+            if (finalId != 0) rh.gs(finalId) else fallback
         } catch (_: Exception) { fallback }
     }
 
