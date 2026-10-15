@@ -240,7 +240,11 @@ class VirtualPumpFragment : DaggerFragment() {
 
         if (typeDef != null) {
             typeDef.text = try {
-                pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: "Virtual Pump System"
+                if (pumpType != null) {
+                    pumpType.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh)
+                } else {
+                    "Virtual Pump System"
+                }
             } catch (_: Exception) { "Virtual Pump System" }
         }
 
