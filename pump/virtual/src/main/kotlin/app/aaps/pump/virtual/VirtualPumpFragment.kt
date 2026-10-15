@@ -57,28 +57,26 @@ class VirtualPumpFragment : DaggerFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return try {
-            val ctx = context ?: return null
+            val ctx = context ?: return TextView(container?.context).apply { text = "Virtual Pump" }
             val view = inflater.inflate(app.aaps.pump.virtual.R.layout.virtual_pump_fragment, container, false)
             rootView = view
             view
         } catch (e: Exception) {
-            fabricPrivacy.logException(e)
-            null
+            try {
+                TextView(container?.context ?: activity).apply {
+                    text = "Virtual Pump"
+                    rootView = this
+                }
+            } catch (_: Exception) {
+                View(container?.context ?: activity)
+            }
         }
-    }
-
-    private fun <T : View> findViewById(name: String): T? {
-        val ctx = context ?: return null
-        return try {
-            val id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-            if (id != 0) rootView?.findViewById(id) else null
-        } catch (_: Exception) { null }
     }
 
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
         return try {
-            val id = ctx.resources.getIdentifier(name, "string", ctx.packageName)
+            val id = ctx.resources.getIdentifier(name, "string", "app.aaps.pump.virtual")
             if (id != 0) rh.gs(id) else fallback
         } catch (_: Exception) { fallback }
     }
@@ -90,15 +88,15 @@ class VirtualPumpFragment : DaggerFragment() {
             disposable += rxBus
                 .toObservable(EventVirtualPumpUpdateGui::class.java)
                 .observeOn(aapsSchedulers.main)
-                .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+                .subscribe({ safeUpdateGui() }, { })
             disposable += rxBus
                 .toObservable(EventTempBasalChange::class.java)
                 .observeOn(aapsSchedulers.main)
-                .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+                .subscribe({ safeUpdateGui() }, { })
             disposable += rxBus
                 .toObservable(EventExtendedBolusChange::class.java)
                 .observeOn(aapsSchedulers.main)
-                .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+                .subscribe({ safeUpdateGui() }, { })
 
             if (handlerThread == null || handlerThread?.isAlive == false) {
                 handlerThread = HandlerThread(this::class.java.simpleName + "Handler").also { it.start() }
@@ -123,7 +121,7 @@ class VirtualPumpFragment : DaggerFragment() {
 
             activity?.runOnUiThread { safeUpdateGui() }
         } catch (e: Exception) {
-            fabricPrivacy.logException(e)
+            try { fabricPrivacy.logException(e) } catch (_: Exception) {}
         }
     }
 
@@ -134,9 +132,7 @@ class VirtualPumpFragment : DaggerFragment() {
             disposable.clear()
             refreshLoop?.let { handler?.removeCallbacks(it) }
             handler?.removeCallbacksAndMessages(null)
-        } catch (e: Exception) {
-            fabricPrivacy.logException(e)
-        }
+        } catch (_: Exception) { }
     }
 
     @Synchronized
@@ -147,9 +143,7 @@ class VirtualPumpFragment : DaggerFragment() {
             refreshLoop?.let { handler?.removeCallbacks(it) }
             handler?.removeCallbacksAndMessages(null)
             rootView = null
-        } catch (e: Exception) {
-            fabricPrivacy.logException(e)
-        }
+        } catch (_: Exception) { }
     }
 
     override fun onDestroy() {
@@ -165,94 +159,96 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun safeUpdateGui() {
         try {
             updateGui()
-        } catch (e: Exception) {
-            fabricPrivacy.logException(e)
-        }
+        } catch (_: Exception) { }
     }
 
     @Synchronized
     private fun updateGui() {
-        if (!isAdded || isDetached || rootView == null || context == null) return
-
-        val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
-
-        val baseBasalRate = rootView?.findViewById<TextView>(R.id.base_basal_rate)
-        val tempbasal = rootView?.findViewById<TextView>(R.id.tempbasal)
-        val extendedbolus = rootView?.findViewById<TextView>(R.id.extendedbolus)
-        val battery = rootView?.findViewById<TextView>(R.id.battery)
-        val reservoir = rootView?.findViewById<TextView>(R.id.reservoir)
-        val type = rootView?.findViewById<TextView>(R.id.type)
-        val typeDef = rootView?.findViewById<TextView>(R.id.type_def)
-        val serialNumber = rootView?.findViewById<TextView>(R.id.serial_number)
-
-        if (baseBasalRate != null) {
-            baseBasalRate.text = try {
-                val rate = virtualPumpPlugin.baseBasalRate
-                try {
-                    rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, rate)
-                } catch (_: Exception) {
-                    decimalFormatter.to2Decimal(rate) + " U/h"
-                }
-            } catch (_: Exception) { "0.00 U/h" }
-        }
-
-        if (tempbasal != null) {
-            tempbasal.text = try {
-                if (profile != null) {
-                    persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: "None"
-                } else "None"
-            } catch (_: Exception) { "None" }
-        }
-
-        if (extendedbolus != null) {
-            extendedbolus.text = try {
-                persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())?.toStringFull(dateUtil, rh) ?: "None"
-            } catch (_: Exception) { "None" }
-        }
-
-        if (battery != null) {
-            battery.text = try {
-                val bat = virtualPumpPlugin.batteryPercent
-                try {
-                    rh.gs(app.aaps.core.ui.R.string.format_percent, bat)
-                } catch (_: Exception) { "$bat%" }
-            } catch (_: Exception) { "100%" }
-        }
-
-        if (reservoir != null) {
-            reservoir.text = try {
-                val res = virtualPumpPlugin.reservoirInUnits.toDouble()
-                try {
-                    rh.gs(app.aaps.core.ui.R.string.format_insulin_units, res)
-                } catch (_: Exception) { "${decimalFormatter.to1Decimal(res)} U" }
-            } catch (_: Exception) { "100.0 U" }
-        }
-
         try {
-            virtualPumpPlugin.refreshConfiguration()
+            if (!isAdded || isDetached || rootView == null || context == null) return
+
+            val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
+
+            val baseBasalRate = rootView?.findViewById<TextView>(R.id.base_basal_rate)
+            val tempbasal = rootView?.findViewById<TextView>(R.id.tempbasal)
+            val extendedbolus = rootView?.findViewById<TextView>(R.id.extendedbolus)
+            val battery = rootView?.findViewById<TextView>(R.id.battery)
+            val reservoir = rootView?.findViewById<TextView>(R.id.reservoir)
+            val type = rootView?.findViewById<TextView>(R.id.type)
+            val typeDef = rootView?.findViewById<TextView>(R.id.type_def)
+            val serialNumber = rootView?.findViewById<TextView>(R.id.serial_number)
+
+            if (baseBasalRate != null) {
+                baseBasalRate.text = try {
+                    val rate = virtualPumpPlugin.baseBasalRate
+                    try {
+                        rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, rate)
+                    } catch (_: Exception) {
+                        decimalFormatter.to2Decimal(rate) + " U/h"
+                    }
+                } catch (_: Exception) { "0.00 U/h" }
+            }
+
+            if (tempbasal != null) {
+                tempbasal.text = try {
+                    if (profile != null) {
+                        persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: "None"
+                    } else "None"
+                } catch (_: Exception) { "None" }
+            }
+
+            if (extendedbolus != null) {
+                extendedbolus.text = try {
+                    persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())?.toStringFull(dateUtil, rh) ?: "None"
+                } catch (_: Exception) { "None" }
+            }
+
+            if (battery != null) {
+                battery.text = try {
+                    val bat = virtualPumpPlugin.batteryPercent
+                    try {
+                        rh.gs(app.aaps.core.ui.R.string.format_percent, bat)
+                    } catch (_: Exception) { "$bat%" }
+                } catch (_: Exception) { "100%" }
+            }
+
+            if (reservoir != null) {
+                reservoir.text = try {
+                    val res = virtualPumpPlugin.reservoirInUnits.toDouble()
+                    try {
+                        rh.gs(app.aaps.core.ui.R.string.format_insulin_units, res)
+                    } catch (_: Exception) { "${decimalFormatter.to1Decimal(res)} U" }
+                } catch (_: Exception) { "100.0 U" }
+            }
+
+            try {
+                virtualPumpPlugin.refreshConfiguration()
+            } catch (_: Exception) { }
+
+            val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
+
+            if (type != null) {
+                type.text = pumpType?.description ?: "Virtual Pump"
+            }
+
+            if (typeDef != null) {
+                typeDef.text = try {
+                    if (pumpType != null) {
+                        val defString = getStringByName("virtual_pump_pump_def")
+                        val desc = pumpType.getFullDescription(defString, pumpType.hasExtendedBasals(), rh)
+                        desc.ifEmpty { "Virtual Pump System" }
+                    } else {
+                        "Virtual Pump System"
+                    }
+                } catch (_: Exception) { "Virtual Pump System" }
+            }
+
+            if (serialNumber != null) {
+                serialNumber.text = try {
+                    virtualPumpPlugin.serialNumber().ifEmpty { "VPUMP-001" }
+                } catch (_: Exception) { "VPUMP-001" }
+            }
         } catch (_: Exception) { }
-
-        val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
-
-        if (type != null) {
-            type.text = pumpType?.description ?: "Virtual Pump"
-        }
-
-        if (typeDef != null) {
-            typeDef.text = try {
-                if (pumpType != null) {
-                    pumpType.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh)
-                } else {
-                    "Virtual Pump System"
-                }
-            } catch (_: Exception) { "Virtual Pump System" }
-        }
-
-        if (serialNumber != null) {
-            serialNumber.text = try {
-                virtualPumpPlugin.serialNumber().ifEmpty { "VPUMP-001" }
-            } catch (_: Exception) { "VPUMP-001" }
-        }
     }
 
     private fun getStep(step: String, stepSize: DoseStepSize?): String =
@@ -273,7 +269,7 @@ class VirtualPumpFragment : DaggerFragment() {
                 tbr.minDose.toString() + unit + "-" + tbr.maxDose + unit, tbr.step.toString() + unit,
                 tbr.durationStep, tbr.maxDuration / 60, extendedNote
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             "INVALID"
         }
     }
