@@ -27,9 +27,16 @@ class LastBgDataImpl @Inject constructor(
     private val iobCobCalculator: IobCobCalculator
 ) : LastBgData {
 
-    override fun lastBg(): InMemoryGlucoseValue? =
-        iobCobCalculator.ads.bucketedData?.firstOrNull()
-            ?: persistenceLayer.getLastGlucoseValue()?.let { InMemoryGlucoseValue.fromGv(it) }
+    override fun lastBg(): InMemoryGlucoseValue? {
+        val dbBg = persistenceLayer.getLastGlucoseValue()?.let { InMemoryGlucoseValue.fromGv(it) }
+        val bucketedBg = iobCobCalculator.ads.bucketedData?.firstOrNull()
+        
+        return if (dbBg != null && bucketedBg != null) {
+            if (dbBg.timestamp >= bucketedBg.timestamp) dbBg else bucketedBg
+        } else {
+            dbBg ?: bucketedBg
+        }
+    }
 
     override fun isLow(): Boolean =
         lastBg()?.let { lastBg ->
