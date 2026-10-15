@@ -57,8 +57,7 @@ class VirtualPumpFragment : DaggerFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return try {
             val ctx = context ?: return null
-            val layoutId = ctx.resources.getIdentifier("virtual_pump_fragment", "layout", ctx.packageName)
-            val view = if (layoutId != 0) inflater.inflate(layoutId, container, false) else View(ctx)
+            val view = inflater.inflate(app.aaps.pump.virtual.R.layout.virtual_pump_fragment, container, false)
             rootView = view
             view
         } catch (e: Exception) {
