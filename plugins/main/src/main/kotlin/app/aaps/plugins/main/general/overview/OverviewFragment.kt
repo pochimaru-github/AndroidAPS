@@ -366,6 +366,7 @@ class OverviewFragment : DaggerFragment(), View.OnClickListener, OnLongClickList
         super.onDestroyView()
         disposable.clear()
         handler.removeCallbacksAndMessages(null)
+        overviewData.reset()
         _binding?.graphsLayout?.bgGraph?.let { graph ->
             graph.setOnLongClickListener(null)
             graph.removeAllSeries()
