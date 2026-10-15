@@ -175,14 +175,14 @@ class VirtualPumpFragment : DaggerFragment() {
 
         val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
 
-        val baseBasalRate = rootView?.findViewById<TextView>(app.aaps.pump.virtual.R.id.base_basal_rate)
-        val tempbasal = rootView?.findViewById<TextView>(app.aaps.pump.virtual.R.id.tempbasal)
-        val extendedbolus = rootView?.findViewById<TextView>(app.aaps.pump.virtual.R.id.extendedbolus)
-        val battery = rootView?.findViewById<TextView>(app.aaps.pump.virtual.R.id.battery)
-        val reservoir = rootView?.findViewById<TextView>(app.aaps.pump.virtual.R.id.reservoir)
-        val type = rootView?.findViewById<TextView>(app.aaps.pump.virtual.R.id.type)
-        val typeDef = rootView?.findViewById<TextView>(app.aaps.pump.virtual.R.id.type_def)
-        val serialNumber = rootView?.findViewById<TextView>(app.aaps.pump.virtual.R.id.serial_number)
+        val baseBasalRate = findViewById<TextView>("base_basal_rate")
+        val tempbasal = findViewById<TextView>("tempbasal")
+        val extendedbolus = findViewById<TextView>("extendedbolus")
+        val battery = findViewById<TextView>("battery")
+        val reservoir = findViewById<TextView>("reservoir")
+        val type = findViewById<TextView>("type")
+        val typeDef = findViewById<TextView>("type_def")
+        val serialNumber = findViewById<TextView>("serial_number")
 
         if (baseBasalRate != null) {
             baseBasalRate.text = try {
@@ -239,7 +239,7 @@ class VirtualPumpFragment : DaggerFragment() {
 
         if (typeDef != null) {
             typeDef.text = try {
-                pumpType?.getFullDescription(getString(app.aaps.pump.virtual.R.string.virtual_pump_pump_def), pumpType.hasExtendedBasals(), rh) ?: "Virtual Pump System"
+                pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: "Virtual Pump System"
             } catch (_: Exception) { "Virtual Pump System" }
         }
 
