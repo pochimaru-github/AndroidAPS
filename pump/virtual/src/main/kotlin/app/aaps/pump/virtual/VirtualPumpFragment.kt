@@ -69,7 +69,7 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun <T : View> findViewById(name: String): T? {
         val ctx = context ?: return null
         return try {
-            val id = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
+            val id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
             if (id != 0) rootView?.findViewById(id) else null
         } catch (_: Exception) { null }
     }
