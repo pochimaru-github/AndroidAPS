@@ -74,22 +74,22 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun <T : View> findViewById(name: String): T? {
         val ctx = context ?: return null
         return try {
-            var resId = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-            if (resId == 0) {
-                resId = ctx.resources.getIdentifier(name, "id", null)
+            var targetResId = ctx.resources.getIdentifier(name, "id", ctx.packageName)
+            if (targetResId == 0) {
+                targetResId = ctx.resources.getIdentifier(name, "id", null)
             }
-            if (resId != 0) rootView?.findViewById(resId) else null
+            if (targetResId != 0) rootView?.findViewById(targetResId) else null
         } catch (_: Exception) { null }
     }
 
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
         return try {
-            var resId = ctx.resources.getIdentifier(name, "string", ctx.packageName)
-            if (resId == 0) {
-                resId = ctx.resources.getIdentifier(name, "string", null)
+            var targetResId = ctx.resources.getIdentifier(name, "string", ctx.packageName)
+            if (targetResId == 0) {
+                targetResId = ctx.resources.getIdentifier(name, "string", null)
             }
-            if (resId != 0) rh.gs(resId) else fallback
+            if (targetResId != 0) rh.gs(targetResId) else fallback
         } catch (_: Exception) { fallback }
     }
 
