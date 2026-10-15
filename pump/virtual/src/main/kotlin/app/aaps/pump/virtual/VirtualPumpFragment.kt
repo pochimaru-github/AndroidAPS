@@ -112,7 +112,7 @@ class VirtualPumpFragment : DaggerFragment() {
             }
             handler?.postDelayed(refreshLoop!!, T.mins(1).msecs())
 
-            val pumpSuspended = findViewById<CheckBox>("pump_suspended")
+            val pumpSuspended = rootView?.findViewById<CheckBox>(R.id.pump_suspended)
             if (pumpSuspended != null) {
                 pumpSuspended.isChecked = try { preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended) } catch (_: Exception) { false }
                 pumpSuspended.setOnClickListener {
