@@ -61,10 +61,10 @@ class VirtualPumpFragment : DaggerFragment() {
             view
         } catch (e: Exception) {
             try {
-                TextView(container?.context ?: activity).apply {
-                    text = "Virtual Pump"
-                    rootView = this
-                }
+                val fallbackTv = TextView(container?.context ?: activity)
+                fallbackTv.text = "Virtual Pump"
+                rootView = fallbackTv
+                fallbackTv
             } catch (_: Exception) {
                 View(container?.context ?: activity)
             }
