@@ -56,7 +56,6 @@ class VirtualPumpFragment : DaggerFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return try {
-            val ctx = context ?: return null
             val view = inflater.inflate(app.aaps.pump.virtual.R.layout.virtual_pump_fragment, container, false)
             rootView = view
             view
@@ -64,6 +63,15 @@ class VirtualPumpFragment : DaggerFragment() {
             fabricPrivacy.logException(e)
             null
         }
+    }
+
+    private fun <T : View> findViewById(name: String): T? {
+        val root = rootView ?: return null
+        val ctx = context ?: return null
+        return try {
+            val id = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
+            if (id != 0) root.findViewById(id) else null
+        } catch (_: Exception) { null }
     }
 
     private fun getStringByName(name: String, fallback: String = ""): String {
@@ -104,7 +112,7 @@ class VirtualPumpFragment : DaggerFragment() {
             }
             handler?.postDelayed(refreshLoop!!, T.mins(1).msecs())
 
-            val pumpSuspended = rootView?.findViewById<CheckBox>(R.id.pump_suspended)
+            val pumpSuspended = findViewById<CheckBox>("pump_suspended")
             if (pumpSuspended != null) {
                 pumpSuspended.isChecked = try { preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended) } catch (_: Exception) { false }
                 pumpSuspended.setOnClickListener {
@@ -167,14 +175,14 @@ class VirtualPumpFragment : DaggerFragment() {
 
         val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
 
-        val baseBasalRate = rootView?.findViewById<TextView>(R.id.base_basal_rate)
-        val tempbasal = rootView?.findViewById<TextView>(R.id.tempbasal)
-        val extendedbolus = rootView?.findViewById<TextView>(R.id.extendedbolus)
-        val battery = rootView?.findViewById<TextView>(R.id.battery)
-        val reservoir = rootView?.findViewById<TextView>(R.id.reservoir)
-        val type = rootView?.findViewById<TextView>(R.id.type)
-        val typeDef = rootView?.findViewById<TextView>(R.id.type_def)
-        val serialNumber = rootView?.findViewById<TextView>(R.id.serial_number)
+        val baseBasalRate = findViewById<TextView>("base_basal_rate")
+        val tempbasal = findViewById<TextView>("tempbasal")
+        val extendedbolus = findViewById<TextView>("extendedbolus")
+        val battery = findViewById<TextView>("battery")
+        val reservoir = findViewById<TextView>("reservoir")
+        val type = findViewById<TextView>("type")
+        val typeDef = findViewById<TextView>("type_def")
+        val serialNumber = findViewById<TextView>("serial_number")
 
         if (baseBasalRate != null) {
             baseBasalRate.text = try {
