@@ -28,7 +28,6 @@ import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.objects.extensions.toStringFull
 import app.aaps.pump.virtual.events.EventVirtualPumpUpdateGui
 import app.aaps.pump.virtual.keys.VirtualBooleanNonPreferenceKey
-import app.aaps.pump.virtual.keys.VirtualBooleanNonPreferenceKey
 import app.aaps.pump.virtual.R
 import dagger.android.support.DaggerFragment
 import io.reactivex.rxjava3.disposables.CompositeDisposable
