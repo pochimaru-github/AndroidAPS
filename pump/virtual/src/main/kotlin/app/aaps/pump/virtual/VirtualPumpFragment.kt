@@ -75,12 +75,10 @@ class VirtualPumpFragment : DaggerFragment() {
         val v = rootView ?: return null
         val ctx = v.context ?: context ?: return null
         return try {
-            var resId = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
-            if (resId == 0) {
-                resId = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-            }
-            if (resId == 0) {
-                resId = ctx.resources.getIdentifier(name, "id", null)
+            val resId = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual").let {
+                if (it != 0) it else ctx.resources.getIdentifier(name, "id", ctx.packageName)
+            }.let {
+                if (it != 0) it else ctx.resources.getIdentifier(name, "id", null)
             }
             if (resId != 0) {
                 v.findViewById<View>(resId) as? T
@@ -95,12 +93,10 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
         return try {
-            var resId = ctx.resources.getIdentifier(name, "string", "app.aaps.pump.virtual")
-            if (resId == 0) {
-                resId = ctx.resources.getIdentifier(name, "string", ctx.packageName)
-            }
-            if (resId == 0) {
-                resId = ctx.resources.getIdentifier(name, "string", null)
+            val resId = ctx.resources.getIdentifier(name, "string", "app.aaps.pump.virtual").let {
+                if (it != 0) it else ctx.resources.getIdentifier(name, "string", ctx.packageName)
+            }.let {
+                if (it != 0) it else ctx.resources.getIdentifier(name, "string", null)
             }
             if (resId != 0) rh.gs(resId) else fallback
         } catch (_: Exception) { fallback }
