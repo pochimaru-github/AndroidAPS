@@ -75,17 +75,23 @@ class VirtualPumpFragment : DaggerFragment() {
         val v = rootView ?: return null
         val ctx = v.context ?: context ?: return null
         return try {
-            val resId = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual").let {
-                if (it != 0) it else ctx.resources.getIdentifier(name, "id", ctx.packageName)
-            }.let {
-                if (it != 0) it else ctx.resources.getIdentifier(name, "id", null)
+            val idPkg = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
+            val targetId = if (idPkg != 0) {
+                idPkg
+            } else {
+                val idApp = ctx.resources.getIdentifier(name, "id", ctx.packageName)
+                if (idApp != 0) {
+                    idApp
+                } else {
+                    ctx.resources.getIdentifier(name, "id", null)
+                }
             }
-            if (resId != 0) {
-                v.findViewById<View>(resId) as? T
+            if (targetId != 0) {
+                v.findViewById<View>(targetId) as? T
             } else {
                 null
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             null
         }
     }
@@ -93,13 +99,21 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
         return try {
-            val resId = ctx.resources.getIdentifier(name, "string", "app.aaps.pump.virtual").let {
-                if (it != 0) it else ctx.resources.getIdentifier(name, "string", ctx.packageName)
-            }.let {
-                if (it != 0) it else ctx.resources.getIdentifier(name, "string", null)
+            val strPkg = ctx.resources.getIdentifier(name, "string", "app.aaps.pump.virtual")
+            val targetStrId = if (strPkg != 0) {
+                strPkg
+            } else {
+                val strApp = ctx.resources.getIdentifier(name, "string", ctx.packageName)
+                if (strApp != 0) {
+                    strApp
+                } else {
+                    ctx.resources.getIdentifier(name, "string", null)
+                }
             }
-            if (resId != 0) rh.gs(resId) else fallback
-        } catch (_: Exception) { fallback }
+            if (targetStrId != 0) rh.gs(targetStrId) else fallback
+        } catch (e: Exception) {
+            fallback
+        }
     }
 
     @Synchronized
