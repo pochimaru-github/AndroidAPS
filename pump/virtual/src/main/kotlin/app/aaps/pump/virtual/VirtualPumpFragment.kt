@@ -61,13 +61,9 @@ class VirtualPumpFragment : DaggerFragment() {
             view
         } catch (e: Exception) {
             try {
-                TextView(container?.context ?: activity).apply {
-                    text = "Virtual Pump"
-                    rootView = this
-                }
-            } catch (_: Exception) {
-                View(container?.context ?: activity)
-            }
+                fabricPrivacy.logException(e)
+            } catch (_: Exception) {}
+            null
         }
     }
 
