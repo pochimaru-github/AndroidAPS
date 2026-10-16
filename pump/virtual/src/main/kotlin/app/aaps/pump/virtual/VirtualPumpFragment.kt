@@ -66,14 +66,6 @@ class VirtualPumpFragment : DaggerFragment() {
         }
     }
 
-    private fun <T : View> findViewById(name: String): T? {
-        val ctx = context ?: return null
-        return try {
-            val id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-            if (id != 0) rootView?.findViewById(id) else null
-        } catch (_: Exception) { null }
-    }
-
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
         return try {
@@ -175,14 +167,14 @@ class VirtualPumpFragment : DaggerFragment() {
 
         val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
 
-        val baseBasalRate = findViewById<TextView>("base_basal_rate")
-        val tempbasal = findViewById<TextView>("tempbasal")
-        val extendedbolus = findViewById<TextView>("extendedbolus")
-        val battery = findViewById<TextView>("battery")
-        val reservoir = findViewById<TextView>("reservoir")
-        val type = findViewById<TextView>("type")
-        val typeDef = findViewById<TextView>("type_def")
-        val serialNumber = findViewById<TextView>("serial_number")
+        val baseBasalRate = rootView?.findViewById<TextView>(R.id.base_basal_rate)
+        val tempbasal = rootView?.findViewById<TextView>(R.id.tempbasal)
+        val extendedbolus = rootView?.findViewById<TextView>(R.id.extendedbolus)
+        val battery = rootView?.findViewById<TextView>(R.id.battery)
+        val reservoir = rootView?.findViewById<TextView>(R.id.reservoir)
+        val type = rootView?.findViewById<TextView>(R.id.type)
+        val typeDef = rootView?.findViewById<TextView>(R.id.type_def)
+        val serialNumber = rootView?.findViewById<TextView>(R.id.serial_number)
 
         if (baseBasalRate != null) {
             baseBasalRate.text = try {
