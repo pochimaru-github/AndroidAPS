@@ -72,46 +72,38 @@ class VirtualPumpFragment : DaggerFragment() {
     }
 
     private fun <T : View> findViewById(name: String): T? {
-        val v = rootView ?: return null
-        val ctx = v.context ?: context ?: return null
+        val root = rootView ?: return null
+        val act = activity ?: context ?: return null
         return try {
-            val resNumPkg = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
-            val resNumFinal = if (resNumPkg != 0) {
-                resNumPkg
-            } else {
-                val resNumApp = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-                if (resNumApp != 0) {
-                    resNumApp
-                } else {
-                    ctx.resources.getIdentifier(name, "id", null)
-                }
+            var resCode = act.resources.getIdentifier(name, "id", act.packageName)
+            if (resCode == 0) {
+                resCode = act.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
             }
-            if (resNumFinal != 0) {
-                v.findViewById<View>(resNumFinal) as? T
+            if (resCode == 0) {
+                resCode = act.resources.getIdentifier(name, "id", null)
+            }
+            if (resCode != 0) {
+                root.findViewById<View>(resCode) as? T
             } else {
                 null
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
 
     private fun getStringByName(name: String, fallback: String = ""): String {
-        val ctx = context ?: return fallback
+        val act = activity ?: context ?: return fallback
         return try {
-            val strNumPkg = ctx.resources.getIdentifier(name, "string", "app.aaps.pump.virtual")
-            val strNumFinal = if (strNumPkg != 0) {
-                strNumPkg
-            } else {
-                val strNumApp = ctx.resources.getIdentifier(name, "string", ctx.packageName)
-                if (strNumApp != 0) {
-                    strNumApp
-                } else {
-                    ctx.resources.getIdentifier(name, "string", null)
-                }
+            var strCode = act.resources.getIdentifier(name, "string", act.packageName)
+            if (strCode == 0) {
+                strCode = act.resources.getIdentifier(name, "string", "app.aaps.pump.virtual")
             }
-            if (strNumFinal != 0) rh.gs(strNumFinal) else fallback
-        } catch (e: Exception) {
+            if (strCode == 0) {
+                strCode = act.resources.getIdentifier(name, "string", null)
+            }
+            if (strCode != 0) rh.gs(strCode) else fallback
+        } catch (_: Exception) {
             fallback
         }
     }
