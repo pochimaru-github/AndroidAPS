@@ -67,25 +67,14 @@ class VirtualPumpFragment : DaggerFragment() {
     }
 
     private fun <T : View> findViewById(name: String): T? {
-        val root = rootView ?: return null
-        return findViewRecursive(root, name) as? T
-    }
-
-    private fun findViewRecursive(view: View, name: String): View? {
-        try {
-            if (view.id != View.NO_ID) {
-                val entryName = view.resources.getResourceEntryName(view.id)
-                if (entryName == name) return view
+        val ctx = context ?: return null
+        return try {
+            var id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
+            if (id == 0) {
+                id = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
             }
-        } catch (_: Exception) {}
-
-        if (view is android.view.ViewGroup) {
-            for (i in 0 until view.childCount) {
-                val found = findViewRecursive(view.getChildAt(i), name)
-                if (found != null) return found
-            }
-        }
-        return null
+            if (id != 0) rootView?.findViewById(id) else null
+        } catch (_: Exception) { null }
     }
     
     private fun getStringByName(name: String, fallback: String = ""): String {
@@ -263,6 +252,7 @@ class VirtualPumpFragment : DaggerFragment() {
             } catch (_: Exception) { "VPUMP-001" }
         }
     }
+
     private fun getStep(step: String, stepSize: DoseStepSize?): String =
         if (stepSize != null) step + " [" + stepSize.description + "] *"
         else step
