@@ -236,38 +236,6 @@ class VirtualPumpFragment : DaggerFragment() {
         }
     }
 
-        if (reservoir != null) {
-            reservoir.text = try {
-                val res = virtualPumpPlugin.reservoirInUnits.toDouble()
-                try {
-                    rh.gs(app.aaps.core.ui.R.string.format_insulin_units, res)
-                } catch (_: Exception) { "${decimalFormatter.to1Decimal(res)} U" }
-            } catch (_: Exception) { "100.0 U" }
-        }
-
-        try {
-            virtualPumpPlugin.refreshConfiguration()
-        } catch (_: Exception) { }
-
-        val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
-
-        if (type != null) {
-            type.text = pumpType?.description ?: "Virtual Pump"
-        }
-
-        if (typeDef != null) {
-            typeDef.text = try {
-                pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: "Virtual Pump System"
-            } catch (_: Exception) { "Virtual Pump System" }
-        }
-
-        if (serialNumber != null) {
-            serialNumber.text = try {
-                virtualPumpPlugin.serialNumber().ifEmpty { "VPUMP-001" }
-            } catch (_: Exception) { "VPUMP-001" }
-        }
-    }
-
     private fun getStep(step: String, stepSize: DoseStepSize?): String =
         if (stepSize != null) step + " [" + stepSize.description + "] *"
         else step
