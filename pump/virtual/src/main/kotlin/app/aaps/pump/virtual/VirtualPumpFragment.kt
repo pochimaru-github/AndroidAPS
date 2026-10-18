@@ -67,8 +67,22 @@ class VirtualPumpFragment : DaggerFragment() {
     }
 
     private fun <T : View> findViewById(name: String): T? {
-        val root = rootView ?: return null
-        return findViewByName(root, name) as? T
+        val ctx = context ?: return null
+        return try {
+            var id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
+            if (id == 0) {
+                id = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
+            }
+            if (id != 0) {
+                rootView?.findViewById(id)
+            } else {
+                fabricPrivacy.logException(RuntimeException("View ID not found: $name"))
+                null
+            }
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+            null
+        }
     }
 
     private fun findViewByName(view: View, name: String): View? {
