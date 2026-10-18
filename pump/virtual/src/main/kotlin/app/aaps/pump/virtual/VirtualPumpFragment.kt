@@ -74,13 +74,14 @@ class VirtualPumpFragment : DaggerFragment() {
                 id = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
             }
             if (id != 0) {
+                android.util.Log.d("VirtualPumpDebug", "Found ID for $name: $id")
                 rootView?.findViewById(id)
             } else {
-                fabricPrivacy.logException(RuntimeException("View ID not found: $name"))
+                android.util.Log.e("VirtualPumpDebug", "ID NOT FOUND for view name: $name")
                 null
             }
         } catch (e: Exception) {
-            fabricPrivacy.logException(e)
+            android.util.Log.e("VirtualPumpDebug", "Exception finding view: $name", e)
             null
         }
     }
