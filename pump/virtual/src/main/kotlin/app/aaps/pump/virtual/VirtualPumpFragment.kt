@@ -67,23 +67,34 @@ class VirtualPumpFragment : DaggerFragment() {
     }
 
     private fun <T : View> findViewById(name: String): T? {
-        val ctx = context ?: return null
-        return try {
-            var id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
-            if (id == 0) {
-                id = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
+        val root = rootView ?: return null
+        return findViewByName(root, name) as? T
+    }
+
+    private fun findViewByName(view: View, name: String): View? {
+        try {
+            val id = view.id
+            if (id != View.NO_ID) {
+                val entryName = view.resources.getResourceEntryName(id)
+                if (entryName == name) {
+                    return view
+                }
             }
-            if (id != 0) rootView?.findViewById(id) else null
-        } catch (_: Exception) { null }
+        } catch (_: Exception) {}
+
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                val found = findViewByName(view.getChildAt(i), name)
+                if (found != null) return found
+            }
+        }
+        return null
     }
     
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
         return try {
-            var id = ctx.resources.getIdentifier(name, "string", ctx.packageName)
-            if (id == 0) {
-                id = ctx.resources.getIdentifier(name, "string", "app.aaps.pump.virtual")
-            }
+            val id = ctx.resources.getIdentifier(name, "string", "app.aaps.pump.virtual")
             if (id != 0) rh.gs(id) else fallback
         } catch (_: Exception) { fallback }
     }
