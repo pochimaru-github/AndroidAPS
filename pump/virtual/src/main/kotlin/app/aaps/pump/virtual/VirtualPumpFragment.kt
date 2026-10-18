@@ -69,19 +69,16 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun <T : View> findViewById(name: String): T? {
         val ctx = context ?: return null
         return try {
-            var id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
+            var id = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
             if (id == 0) {
-                id = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
+                id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
             }
             if (id != 0) {
-                android.util.Log.d("VirtualPumpDebug", "Found ID for $name: $id")
                 rootView?.findViewById(id)
             } else {
-                android.util.Log.e("VirtualPumpDebug", "ID NOT FOUND for view name: $name")
                 null
             }
         } catch (e: Exception) {
-            android.util.Log.e("VirtualPumpDebug", "Exception finding view: $name", e)
             null
         }
     }
