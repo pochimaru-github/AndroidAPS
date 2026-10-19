@@ -74,7 +74,7 @@ class VirtualPumpFragment : DaggerFragment() {
                 @Suppress("UNCHECKED_CAST")
                 return found as? T
             }
-        } catch (_: Exception) {}
+        } catch (_: Throwable) {}
 
         val ctx = context ?: return null
         return try {
@@ -87,7 +87,7 @@ class VirtualPumpFragment : DaggerFragment() {
             } else {
                 null
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             null
         }
     }
@@ -96,13 +96,13 @@ class VirtualPumpFragment : DaggerFragment() {
         if (view == null) return null
         try {
             val id = view.id
-            if (id != View.NO_ID) {
+            if (id != View.NO_ID && (id and 0xff000000.toInt()) == 0x7f000000) {
                 val entryName = view.resources.getResourceEntryName(id)
                 if (entryName == name) {
                     return view
                 }
             }
-        } catch (_: Exception) {}
+        } catch (_: Throwable) {}
 
         if (view is ViewGroup) {
             try {
@@ -110,7 +110,7 @@ class VirtualPumpFragment : DaggerFragment() {
                     val found = findViewByName(view.getChildAt(i), name)
                     if (found != null) return found
                 }
-            } catch (_: Exception) {}
+            } catch (_: Throwable) {}
         }
         return null
     }
