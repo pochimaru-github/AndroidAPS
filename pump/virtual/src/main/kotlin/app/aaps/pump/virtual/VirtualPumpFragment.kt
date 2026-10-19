@@ -137,7 +137,7 @@ class VirtualPumpFragment : DaggerFragment() {
                 }
             }
 
-            rootView?.post { safeUpdateGui() }
+            activity?.runOnUiThread { safeUpdateGui() }
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
