@@ -68,19 +68,14 @@ class VirtualPumpFragment : DaggerFragment() {
 
     private fun <T : View> findViewById(name: String): T? {
         val root = rootView ?: return null
-        try {
-            val found = findViewByName(root, name)
-            if (found != null) {
-                @Suppress("UNCHECKED_CAST")
-                return found as? T
-            }
-        } catch (_: Throwable) {}
-
-        val ctx = context ?: return null
+        val targetContext = root.context ?: context ?: return null
         return try {
-            var id = ctx.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
+            var id = targetContext.resources.getIdentifier(name, "id", "app.aaps.pump.virtual")
             if (id == 0) {
-                id = ctx.resources.getIdentifier(name, "id", ctx.packageName)
+                id = targetContext.resources.getIdentifier(name, "id", targetContext.packageName)
+            }
+            if (id == 0) {
+                id = targetContext.resources.getIdentifier(name, "id", "app.aaps.core")
             }
             if (id != 0) {
                 root.findViewById<View>(id) as? T
@@ -90,29 +85,6 @@ class VirtualPumpFragment : DaggerFragment() {
         } catch (e: Throwable) {
             null
         }
-    }
-
-    private fun findViewByName(view: View?, name: String): View? {
-        if (view == null) return null
-        try {
-            val id = view.id
-            if (id != View.NO_ID && (id and 0xff000000.toInt()) == 0x7f000000) {
-                val entryName = view.resources.getResourceEntryName(id)
-                if (entryName == name) {
-                    return view
-                }
-            }
-        } catch (_: Throwable) {}
-
-        if (view is ViewGroup) {
-            try {
-                for (i in 0 until view.childCount) {
-                    val found = findViewByName(view.getChildAt(i), name)
-                    if (found != null) return found
-                }
-            } catch (_: Throwable) {}
-        }
-        return null
     }
     
     private fun getStringByName(name: String, fallback: String = ""): String {
