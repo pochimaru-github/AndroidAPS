@@ -53,6 +53,7 @@ class VirtualPumpFragment : DaggerFragment() {
     private var handlerThread: HandlerThread? = null
 
     private var rootView: View? = null
+    private var retryCount = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return try {
@@ -197,9 +198,18 @@ class VirtualPumpFragment : DaggerFragment() {
 
     @Synchronized
     private fun updateGui() {
-    if (isDetached || rootView == null || context == null) return
+        if (isDetached || rootView == null || context == null) return
 
         val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
+        val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
+
+        if (profile == null && pumpType == null && retryCount < 3) {
+            retryCount++
+            rootView?.postDelayed({ safeUpdateGui() }, 500L)
+            return
+        } else if (profile != null || pumpType != null) {
+            retryCount = 0
+        }
 
         val baseBasalRate = findViewById<TextView>("base_basal_rate")
         val tempbasal = findViewById<TextView>("tempbasal")
