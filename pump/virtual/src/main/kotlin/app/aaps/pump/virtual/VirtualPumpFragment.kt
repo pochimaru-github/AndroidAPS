@@ -190,7 +190,7 @@ class VirtualPumpFragment : DaggerFragment() {
 
     @Synchronized
     private fun updateGui() {
-        if (!isAdded || isDetached || rootView == null || context == null) return
+    if (isDetached || rootView == null || context == null) return
 
         val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
 
