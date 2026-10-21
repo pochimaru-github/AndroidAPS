@@ -69,7 +69,7 @@ class VirtualPumpFragment : DaggerFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         try {
-            safeUpdateGui()
+            view.postDelayed({ safeUpdateGui() }, 300)
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
