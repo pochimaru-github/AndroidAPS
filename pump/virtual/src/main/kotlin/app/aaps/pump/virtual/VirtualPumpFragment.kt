@@ -69,7 +69,9 @@ class VirtualPumpFragment : DaggerFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         try {
-            view.postDelayed({ safeUpdateGui() }, 300)
+            safeUpdateGui()
+            view.postDelayed({ safeUpdateGui() }, 200)
+            view.postDelayed({ safeUpdateGui() }, 600)
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
@@ -140,6 +142,11 @@ class VirtualPumpFragment : DaggerFragment() {
             }
 
             activity?.runOnUiThread { safeUpdateGui() }
+            view?.postDelayed({
+                if (isAdded && !isDetached && rootView != null) {
+                    safeUpdateGui()
+                }
+            }, 400)
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
@@ -217,14 +224,24 @@ class VirtualPumpFragment : DaggerFragment() {
         if (tempbasal != null) {
             tempbasal.text = try {
                 if (profile != null) {
-                    persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())?.toStringFull(profile, dateUtil, rh) ?: "None"
+                    val activeTemp = persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())
+                    if (activeTemp != null) {
+                        activeTemp.toStringFull(profile, dateUtil, rh)
+                    } else {
+                        "None"
+                    }
                 } else "None"
             } catch (_: Exception) { "None" }
         }
 
         if (extendedbolus != null) {
             extendedbolus.text = try {
-                persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())?.toStringFull(dateUtil, rh) ?: "None"
+                val activeBolus = persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())
+                if (activeBolus != null) {
+                    activeBolus.toStringFull(dateUtil, rh)
+                } else {
+                    "None"
+                }
             } catch (_: Exception) { "None" }
         }
 
