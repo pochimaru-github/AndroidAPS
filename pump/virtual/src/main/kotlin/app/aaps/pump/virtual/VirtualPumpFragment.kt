@@ -66,18 +66,20 @@ class VirtualPumpFragment : DaggerFragment() {
         }
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        try {
+            safeUpdateGui()
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
+    }
+    
     private fun <T : View> findViewById(name: String): T? {
         val root = rootView ?: return null
-        val ctx = context ?: root.context
         return try {
-            val res = root.resources ?: ctx?.resources ?: return null
-            var id = 0
-            if (ctx != null) {
-                id = res.getIdentifier(name, "id", ctx.packageName)
-            }
-            if (id == 0) {
-                id = res.getIdentifier(name, "id", "app.aaps.pump.virtual")
-            }
+            val res = root.resources ?: return null
+            var id = res.getIdentifier(name, "id", "app.aaps.pump.virtual")
             if (id == 0) {
                 id = res.getIdentifier(name, "id", "app.aaps.core")
             }
