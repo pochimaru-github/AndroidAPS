@@ -299,10 +299,6 @@ class VirtualPumpFragment : DaggerFragment() {
             } catch (_: Exception) { "100.0 U" }
         }
 
-        try {
-            virtualPumpPlugin.refreshConfiguration()
-        } catch (_: Exception) { }
-
         if (type != null) {
             type.text = pumpType?.description ?: "Virtual Pump"
         }
