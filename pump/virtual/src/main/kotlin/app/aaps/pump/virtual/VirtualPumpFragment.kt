@@ -277,8 +277,6 @@ class VirtualPumpFragment : DaggerFragment() {
             virtualPumpPlugin.refreshConfiguration()
         } catch (_: Exception) { }
 
-        val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
-
         if (type != null) {
             type.text = pumpType?.description ?: "Virtual Pump"
         }
