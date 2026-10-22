@@ -82,20 +82,24 @@ class VirtualPumpFragment : DaggerFragment() {
     
     private fun <T : View> findViewById(name: String): T? {
         val root = rootView ?: return null
-        return try {
-            val res = root.resources ?: return null
-            var id = res.getIdentifier(name, "id", "app.aaps.pump.virtual")
-            if (id == 0) {
-                id = res.getIdentifier(name, "id", "app.aaps.core")
+        return findViewByName(root, name) as? T
+    }
+
+    private fun findViewByName(view: View, name: String): View? {
+        try {
+            if (view.id != View.NO_ID) {
+                val entryName = view.resources.getResourceEntryName(view.id)
+                if (entryName == name) return view
             }
-            if (id != 0) {
-                root.findViewById<View>(id) as? T
-            } else {
-                null
+        } catch (_: Throwable) {}
+        
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                val found = findViewByName(view.getChildAt(i), name)
+                if (found != null) return found
             }
-        } catch (e: Throwable) {
-            null
         }
+        return null
     }
     
     private fun getStringByName(name: String, fallback: String = ""): String {
@@ -203,14 +207,6 @@ class VirtualPumpFragment : DaggerFragment() {
 
         val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
         val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
-
-        if ((profile == null || pumpType == null) && retryCount < 5) {
-            retryCount++
-            rootView?.postDelayed({ safeUpdateGui() }, 500L)
-            return
-        } else if (profile != null || pumpType != null) {
-            retryCount = 0
-        }
 
         val baseBasalRate = findViewById<TextView>("base_basal_rate")
         val tempbasal = findViewById<TextView>("tempbasal")
