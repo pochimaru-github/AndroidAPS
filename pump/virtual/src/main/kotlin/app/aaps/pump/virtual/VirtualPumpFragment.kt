@@ -84,21 +84,12 @@ class VirtualPumpFragment : DaggerFragment() {
         val root = rootView ?: return null
         return try {
             val res = root.resources ?: return null
-            val pkgs = mutableListOf("app.aaps.pump.virtual", "app.aaps.core")
-            
-            try {
-                val ctxPkg = context?.packageName
-                if (!ctxPkg.isNullOrEmpty() && !pkgs.contains(ctxPkg)) {
-                    pkgs.add(0, ctxPkg)
-                }
-            } catch (_: Throwable) {}
-
-            try {
-                val rootCtxPkg = root.context?.packageName
-                if (!rootCtxPkg.isNullOrEmpty() && !pkgs.contains(rootCtxPkg)) {
-                    pkgs.add(0, rootCtxPkg)
-                }
-            } catch (_: Throwable) {}
+            val pkgs = listOf(
+                "app.aaps.pump.virtual",
+                "app.aaps.core",
+                "app.aaps",
+                "info.nightscout.androidaps"
+            )
 
             var id = 0
             for (pkg in pkgs) {
