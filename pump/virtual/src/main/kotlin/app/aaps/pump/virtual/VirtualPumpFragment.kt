@@ -82,7 +82,11 @@ class VirtualPumpFragment : DaggerFragment() {
         val root = rootView ?: return null
         return try {
             val res = root.resources ?: return null
-            var id = res.getIdentifier(name, "id", "app.aaps.pump.virtual")
+            val pkg = root.context?.packageName ?: "app.aaps.pump.virtual"
+            var id = res.getIdentifier(name, "id", pkg)
+            if (id == 0) {
+                id = res.getIdentifier(name, "id", "app.aaps.pump.virtual")
+            }
             if (id == 0) {
                 id = res.getIdentifier(name, "id", "app.aaps.core")
             }
