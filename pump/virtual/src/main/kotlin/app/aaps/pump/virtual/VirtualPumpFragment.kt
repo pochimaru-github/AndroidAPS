@@ -177,7 +177,7 @@ class VirtualPumpFragment : DaggerFragment() {
             }
             handler?.postDelayed(refreshLoop!!, T.mins(1).msecs())
 
-            val pumpSuspended = findViewById<CheckBox>("pump_suspended")
+            val pumpSuspended = pumpSuspendedView
             if (pumpSuspended != null) {
                 pumpSuspended.isChecked = try { preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended) } catch (_: Exception) { false }
                 pumpSuspended.setOnClickListener {
@@ -245,96 +245,6 @@ class VirtualPumpFragment : DaggerFragment() {
         val type = typeView
         val typeDef = typeDefView
         val serialNumber = serialNumberView
-
-        if (baseBasalRate != null) {
-            baseBasalRate.text = try {
-                val rate = virtualPumpPlugin.baseBasalRate
-                try {
-                    rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, rate)
-                } catch (_: Exception) {
-                    decimalFormatter.to2Decimal(rate) + " U/h"
-                }
-            } catch (_: Exception) { "0.00 U/h" }
-        }
-
-        if (tempbasal != null) {
-            tempbasal.text = try {
-                if (profile != null) {
-                    val activeTemp = persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())
-                    if (activeTemp != null) {
-                        activeTemp.toStringFull(profile, dateUtil, rh)
-                    } else {
-                        "None"
-                    }
-                } else "None"
-            } catch (_: Exception) { "None" }
-        }
-
-        if (extendedbolus != null) {
-            extendedbolus.text = try {
-                val activeBolus = persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())
-                if (activeBolus != null) {
-                    activeBolus.toStringFull(dateUtil, rh)
-                } else {
-                    "None"
-                }
-            } catch (_: Exception) { "None" }
-        }
-
-        if (battery != null) {
-            battery.text = try {
-                val bat = virtualPumpPlugin.batteryPercent
-                try {
-                    rh.gs(app.aaps.core.ui.R.string.format_percent, bat)
-                } catch (_: Exception) { "$bat%" }
-            } catch (_: Exception) { "100%" }
-        }
-
-        if (reservoir != null) {
-            reservoir.text = try {
-                val res = virtualPumpPlugin.reservoirInUnits.toDouble()
-                try {
-                    rh.gs(app.aaps.core.ui.R.string.format_insulin_units, res)
-                } catch (_: Exception) { "${decimalFormatter.to1Decimal(res)} U" }
-            } catch (_: Exception) { "100.0 U" }
-        }
-
-        try {
-            virtualPumpPlugin.refreshConfiguration()
-        } catch (_: Exception) { }
-
-        if (type != null) {
-            type.text = pumpType?.description ?: "Virtual Pump"
-        }
-
-        if (typeDef != null) {
-            typeDef.text = try {
-                pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: "Virtual Pump System"
-            } catch (_: Exception) { "Virtual Pump System" }
-        }
-
-        if (serialNumber != null) {
-            serialNumber.text = try {
-                virtualPumpPlugin.serialNumber().ifEmpty { "VPUMP-001" }
-            } catch (_: Exception) { "VPUMP-001" }
-        }
-    }
-
-    @Synchronized
-    private fun updateGui() {
-        if (isDetached || rootView == null || context == null) return
-
-        val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
-        val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
-
-        val baseBasalRate = findViewById<TextView>("base_basal_rate")
-        val tempbasal = findViewById<TextView>("tempbasal")
-        val extendedbolus = findViewById<TextView>("extendedbolus")
-        val battery = findViewById<TextView>("battery")
-        val reservoir = findViewById<TextView>("reservoir")
-        val type = findViewById<TextView>("type")
-        val typeDef = findViewById<TextView>("type_def")
-        val serialNumber = findViewById<TextView>("serial_number")
 
         if (baseBasalRate != null) {
             baseBasalRate.text = try {
