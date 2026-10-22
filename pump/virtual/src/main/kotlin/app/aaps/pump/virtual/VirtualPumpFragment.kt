@@ -203,7 +203,7 @@ class VirtualPumpFragment : DaggerFragment() {
         val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
         val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
 
-        if (profile == null && pumpType == null && retryCount < 3) {
+        if ((profile == null || pumpType == null) && retryCount < 5) {
             retryCount++
             rootView?.postDelayed({ safeUpdateGui() }, 500L)
             return
