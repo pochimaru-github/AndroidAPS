@@ -48,6 +48,7 @@
 
             <CheckBox
                 android:id="@+id/pump_suspended"
+                android:tag="pump_suspended"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -95,6 +96,7 @@
 
             <TextView
                 android:id="@+id/base_basal_rate"
+                android:tag="base_basal_rate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -144,6 +146,7 @@
 
             <TextView
                 android:id="@+id/tempbasal"
+                android:tag="tempbasal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -192,6 +195,7 @@
 
             <TextView
                 android:id="@+id/extendedbolus"
+                android:tag="extendedbolus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -240,6 +244,7 @@
 
             <TextView
                 android:id="@+id/battery"
+                android:tag="battery"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -290,6 +295,7 @@
 
             <TextView
                 android:id="@+id/reservoir"
+                android:tag="reservoir"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -339,6 +345,7 @@
 
             <TextView
                 android:id="@+id/serial_number"
+                android:tag="serial_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -388,6 +395,7 @@
 
             <TextView
                 android:id="@+id/type"
+                android:tag="type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -437,6 +445,7 @@
 
             <TextView
                 android:id="@+id/type_def"
+                android:tag="type_def"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -448,8 +457,4 @@
         </LinearLayout>
     </LinearLayout>
 
-
-
-
 </ScrollView>
-
