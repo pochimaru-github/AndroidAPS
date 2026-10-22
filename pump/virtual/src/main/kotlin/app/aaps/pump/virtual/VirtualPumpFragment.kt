@@ -82,23 +82,21 @@ class VirtualPumpFragment : DaggerFragment() {
     
     private fun <T : View> findViewById(name: String): T? {
         val root = rootView ?: return null
-        val id = when (name) {
-            "base_basal_rate" -> app.aaps.pump.virtual.R.id.base_basal_rate
-            "tempbasal" -> app.aaps.pump.virtual.R.id.tempbasal
-            "extendedbolus" -> app.aaps.pump.virtual.R.id.extendedbolus
-            "battery" -> app.aaps.pump.virtual.R.id.battery
-            "reservoir" -> app.aaps.pump.virtual.R.id.reservoir
-            "type" -> app.aaps.pump.virtual.R.id.type
-            "type_def" -> app.aaps.pump.virtual.R.id.type_def
-            "serial_number" -> app.aaps.pump.virtual.R.id.serial_number
-            "pump_suspended" -> app.aaps.pump.virtual.R.id.pump_suspended
-            else -> 0
+        return findViewByTag(root, name) as? T
+    }
+
+    private fun findViewByTag(view: View, tag: String): View? {
+        try {
+            if (view.tag == tag) return view
+        } catch (_: Throwable) {}
+
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                val found = findViewByTag(view.getChildAt(i), tag)
+                if (found != null) return found
+            }
         }
-        return if (id != 0) {
-            root.findViewById<View>(id) as? T
-        } else {
-            null
-        }
+        return null
     }
 
     private fun findViewByName(view: View, name: String): View? {
