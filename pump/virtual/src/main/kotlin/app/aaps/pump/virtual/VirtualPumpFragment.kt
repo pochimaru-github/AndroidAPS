@@ -26,6 +26,7 @@ import app.aaps.core.interfaces.utils.DecimalFormatter
 import app.aaps.core.interfaces.utils.fabric.FabricPrivacy
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.objects.extensions.toStringFull
+import app.aaps.core.ui.fragments.AapsFragment
 import app.aaps.pump.virtual.events.EventVirtualPumpUpdateGui
 import app.aaps.pump.virtual.keys.VirtualBooleanNonPreferenceKey
 import dagger.android.support.DaggerFragment
