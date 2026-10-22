@@ -82,27 +82,21 @@ class VirtualPumpFragment : DaggerFragment() {
     
     private fun <T : View> findViewById(name: String): T? {
         val root = rootView ?: return null
-        return try {
-            val res = root.resources ?: return null
-            val pkgs = listOf(
-                "app.aaps.pump.virtual",
-                "app.aaps.core",
-                "app.aaps",
-                "info.nightscout.androidaps"
-            )
-
-            var id = 0
-            for (pkg in pkgs) {
-                id = res.getIdentifier(name, "id", pkg)
-                if (id != 0) break
-            }
-
-            if (id != 0) {
-                root.findViewById<View>(id) as? T
-            } else {
-                null
-            }
-        } catch (e: Throwable) {
+        val id = when (name) {
+            "base_basal_rate" -> app.aaps.pump.virtual.R.id.base_basal_rate
+            "tempbasal" -> app.aaps.pump.virtual.R.id.tempbasal
+            "extendedbolus" -> app.aaps.pump.virtual.R.id.extendedbolus
+            "battery" -> app.aaps.pump.virtual.R.id.battery
+            "reservoir" -> app.aaps.pump.virtual.R.id.reservoir
+            "type" -> app.aaps.pump.virtual.R.id.type
+            "type_def" -> app.aaps.pump.virtual.R.id.type_def
+            "serial_number" -> app.aaps.pump.virtual.R.id.serial_number
+            "pump_suspended" -> app.aaps.pump.virtual.R.id.pump_suspended
+            else -> 0
+        }
+        return if (id != 0) {
+            root.findViewById<View>(id) as? T
+        } else {
             null
         }
     }
