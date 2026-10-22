@@ -70,9 +70,11 @@ class VirtualPumpFragment : DaggerFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         try {
-            safeUpdateGui()
-            view.postDelayed({ safeUpdateGui() }, 200)
-            view.postDelayed({ safeUpdateGui() }, 600)
+            view.post {
+                if (isAdded && !isDetached && rootView != null) {
+                    safeUpdateGui()
+                }
+            }
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
@@ -82,10 +84,12 @@ class VirtualPumpFragment : DaggerFragment() {
         val root = rootView ?: return null
         return try {
             val res = root.resources ?: return null
-            val pkg = root.context?.packageName ?: "app.aaps.pump.virtual"
-            var id = res.getIdentifier(name, "id", pkg)
+            var id = res.getIdentifier(name, "id", "app.aaps.pump.virtual")
             if (id == 0) {
-                id = res.getIdentifier(name, "id", "app.aaps.pump.virtual")
+                val pkg = root.context?.packageName ?: ""
+                if (pkg.isNotEmpty()) {
+                    id = res.getIdentifier(name, "id", pkg)
+                }
             }
             if (id == 0) {
                 id = res.getIdentifier(name, "id", "app.aaps.core")
@@ -146,12 +150,11 @@ class VirtualPumpFragment : DaggerFragment() {
                 }
             }
 
-            activity?.runOnUiThread { safeUpdateGui() }
-            view?.postDelayed({
+            view?.post {
                 if (isAdded && !isDetached && rootView != null) {
                     safeUpdateGui()
                 }
-            }, 400)
+            }
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
