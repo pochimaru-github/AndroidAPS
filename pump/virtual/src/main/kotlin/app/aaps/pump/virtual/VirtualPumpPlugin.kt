@@ -145,6 +145,7 @@ open class VirtualPumpPlugin @Inject constructor(
 
     override fun connect(reason: String) {
         lastDataTime = System.currentTimeMillis()
+        rxBus.send(EventVirtualPumpUpdateGui())
     }
 
     override fun waitForDisconnectionInSeconds(): Int = 0
@@ -369,6 +370,7 @@ open class VirtualPumpPlugin @Inject constructor(
             aapsLogger.debug(LTag.PUMP, "New pump configuration found ($pumpTypeNew), changing from previous (${this.pumpType})")
             pumpDescription.fillFor(pumpTypeNew)
             this.pumpType = pumpTypeNew
+            rxBus.send(EventVirtualPumpUpdateGui())
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
