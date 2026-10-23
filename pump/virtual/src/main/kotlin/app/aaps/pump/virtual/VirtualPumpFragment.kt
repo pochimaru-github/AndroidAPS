@@ -86,9 +86,18 @@ class VirtualPumpFragment : DaggerFragment() {
 
             val pumpSuspended = pumpSuspendedView
             if (pumpSuspended != null) {
-                pumpSuspended.isChecked = try { preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended) } catch (_: Exception) { false }
+                pumpSuspended.isChecked = try {
+                    if (::preferences.isInitialized) {
+                        preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended)
+                    } else false
+                } catch (_: Exception) { false }
+
                 pumpSuspended.setOnClickListener {
-                    try { preferences.put(VirtualBooleanNonPreferenceKey.IsSuspended, pumpSuspended.isChecked) } catch (_: Exception) {}
+                    try {
+                        if (::preferences.isInitialized) {
+                            preferences.put(VirtualBooleanNonPreferenceKey.IsSuspended, pumpSuspended.isChecked)
+                        }
+                    } catch (_: Exception) {}
                 }
             }
 
@@ -98,7 +107,9 @@ class VirtualPumpFragment : DaggerFragment() {
                 }
             }
         } catch (e: Exception) {
-            fabricPrivacy.logException(e)
+            if (::fabricPrivacy.isInitialized) {
+                fabricPrivacy.logException(e)
+            }
         }
     }
 
@@ -131,24 +142,35 @@ class VirtualPumpFragment : DaggerFragment() {
     override fun onResume() {
         super.onResume()
         try {
-            disposable += rxBus
-                .toObservable(EventVirtualPumpUpdateGui::class.java)
-                .observeOn(aapsSchedulers.main)
-                .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
-            disposable += rxBus
-                .toObservable(EventTempBasalChange::class.java)
-                .observeOn(aapsSchedulers.main)
-                .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
-            disposable += rxBus
-                .toObservable(EventExtendedBolusChange::class.java)
-                .observeOn(aapsSchedulers.main)
-                .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+            if (::rxBus.isInitialized && ::aapsSchedulers.isInitialized && ::fabricPrivacy.isInitialized) {
+                disposable += rxBus
+                    .toObservable(EventVirtualPumpUpdateGui::class.java)
+                    .observeOn(aapsSchedulers.main)
+                    .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+                disposable += rxBus
+                    .toObservable(EventTempBasalChange::class.java)
+                    .observeOn(aapsSchedulers.main)
+                    .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+                disposable += rxBus
+                    .toObservable(EventExtendedBolusChange::class.java)
+                    .observeOn(aapsSchedulers.main)
+                    .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+            }
 
             val pumpSuspended = pumpSuspendedView
             if (pumpSuspended != null) {
-                pumpSuspended.isChecked = try { preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended) } catch (_: Exception) { false }
+                pumpSuspended.isChecked = try {
+                    if (::preferences.isInitialized) {
+                        preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended)
+                    } else false
+                } catch (_: Exception) { false }
+
                 pumpSuspended.setOnClickListener {
-                    try { preferences.put(VirtualBooleanNonPreferenceKey.IsSuspended, pumpSuspended.isChecked) } catch (_: Exception) {}
+                    try {
+                        if (::preferences.isInitialized) {
+                            preferences.put(VirtualBooleanNonPreferenceKey.IsSuspended, pumpSuspended.isChecked)
+                        }
+                    } catch (_: Exception) {}
                 }
             }
 
@@ -158,7 +180,9 @@ class VirtualPumpFragment : DaggerFragment() {
                 }
             }
         } catch (e: Exception) {
-            fabricPrivacy.logException(e)
+            if (::fabricPrivacy.isInitialized) {
+                fabricPrivacy.logException(e)
+            }
         }
     }
 
