@@ -193,8 +193,11 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun safeUpdateGui() {
         if (isDetached || !isAdded || rootView == null || context == null) return
         try {
+            val plugin = try { virtualPumpPlugin } catch (_: Exception) { null }
+            if (plugin == null) return
+
             val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
-            val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
+            val pumpType = try { plugin.pumpType } catch (_: Exception) { null }
 
             val baseBasalRate = baseBasalRateView
             val tempbasal = tempbasalView
@@ -207,7 +210,7 @@ class VirtualPumpFragment : DaggerFragment() {
 
             if (baseBasalRate != null) {
                 baseBasalRate.text = try {
-                    val rate = virtualPumpPlugin.baseBasalRate
+                    val rate = plugin.baseBasalRate
                     try {
                         rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, rate)
                     } catch (_: Exception) {
@@ -242,7 +245,7 @@ class VirtualPumpFragment : DaggerFragment() {
 
             if (battery != null) {
                 battery.text = try {
-                    val bat = virtualPumpPlugin.batteryPercent
+                    val bat = plugin.batteryPercent
                     try {
                         rh.gs(app.aaps.core.ui.R.string.format_percent, bat)
                     } catch (_: Exception) { "$bat%" }
@@ -251,7 +254,7 @@ class VirtualPumpFragment : DaggerFragment() {
 
             if (reservoir != null) {
                 reservoir.text = try {
-                    val res = virtualPumpPlugin.reservoirInUnits.toDouble()
+                    val res = plugin.reservoirInUnits.toDouble()
                     try {
                         rh.gs(app.aaps.core.ui.R.string.format_insulin_units, res)
                     } catch (_: Exception) { "${decimalFormatter.to1Decimal(res)} U" }
@@ -270,7 +273,7 @@ class VirtualPumpFragment : DaggerFragment() {
 
             if (serialNumber != null) {
                 serialNumber.text = try {
-                    virtualPumpPlugin.serialNumber().ifEmpty { "VPUMP-001" }
+                    plugin.serialNumber().ifEmpty { "VPUMP-001" }
                 } catch (_: Exception) { "VPUMP-001" }
             }
         } catch (e: Exception) {
