@@ -205,10 +205,10 @@ class VirtualPumpFragment : DaggerFragment() {
 
     @Synchronized
     private fun safeUpdateGui() {
-        if (isDetached || rootView == null || context == null) return
-
-        val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
-        val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
+        if (isDetached || !isAdded || rootView == null || context == null) return
+        try {
+            val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
+            val pumpType = try { virtualPumpPlugin.pumpType } catch (_: Exception) { null }
 
         val baseBasalRate = baseBasalRateView
         val tempbasal = tempbasalView
