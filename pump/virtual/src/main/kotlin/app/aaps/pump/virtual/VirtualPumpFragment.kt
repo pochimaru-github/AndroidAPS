@@ -112,23 +112,6 @@ class VirtualPumpFragment : DaggerFragment() {
             }
         }
     }
-
-    private fun findViewByName(view: View, name: String): View? {
-        try {
-            if (view.id != View.NO_ID) {
-                val entryName = view.resources.getResourceEntryName(view.id)
-                if (entryName == name) return view
-            }
-        } catch (_: Throwable) {}
-        
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                val found = findViewByName(view.getChildAt(i), name)
-                if (found != null) return found
-            }
-        }
-        return null
-    }
     
     private fun getStringByName(name: String, fallback: String = ""): String {
         val ctx = context ?: return fallback
@@ -226,8 +209,8 @@ class VirtualPumpFragment : DaggerFragment() {
             if (!::fabricPrivacy.isInitialized) return
 
             val plugin = virtualPumpPlugin
-            val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
-            val pumpType = try { plugin.pumpType } catch (_: Exception) { null }
+            val profile = try { profileFunction.getProfile() } catch (_: Throwable) { null }
+            val pumpType = try { plugin.pumpType } catch (_: Throwable) { null }
 
             val baseBasalRate = baseBasalRateView
             val tempbasal = tempbasalView
@@ -243,34 +226,34 @@ class VirtualPumpFragment : DaggerFragment() {
                     val rate = plugin.baseBasalRate
                     try {
                         rh.gs(app.aaps.core.ui.R.string.pump_base_basal_rate, rate)
-                    } catch (_: Exception) {
+                    } catch (_: Throwable) {
                         decimalFormatter.to2Decimal(rate) + " U/h"
                     }
-                } catch (_: Exception) { "0.00 U/h" }
+                } catch (_: Throwable) { "0.00 U/h" }
             }
 
             if (tempbasal != null) {
                 tempbasal.text = try {
                     if (profile != null) {
-                        val activeTemp = persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now())
+                        val activeTemp = try { persistenceLayer.getTemporaryBasalActiveAt(dateUtil.now()) } catch (_: Throwable) { null }
                         if (activeTemp != null) {
                             activeTemp.toStringFull(profile, dateUtil, rh)
                         } else {
                             "None"
                         }
                     } else "None"
-                } catch (_: Exception) { "None" }
+                } catch (_: Throwable) { "None" }
             }
 
             if (extendedbolus != null) {
                 extendedbolus.text = try {
-                    val activeBolus = persistenceLayer.getExtendedBolusActiveAt(dateUtil.now())
+                    val activeBolus = try { persistenceLayer.getExtendedBolusActiveAt(dateUtil.now()) } catch (_: Throwable) { null }
                     if (activeBolus != null) {
                         activeBolus.toStringFull(dateUtil, rh)
                     } else {
                         "None"
                     }
-                } catch (_: Exception) { "None" }
+                } catch (_: Throwable) { "None" }
             }
 
             if (battery != null) {
@@ -278,8 +261,8 @@ class VirtualPumpFragment : DaggerFragment() {
                     val bat = plugin.batteryPercent
                     try {
                         rh.gs(app.aaps.core.ui.R.string.format_percent, bat)
-                    } catch (_: Exception) { "$bat%" }
-                } catch (_: Exception) { "100%" }
+                    } catch (_: Throwable) { "$bat%" }
+                } catch (_: Throwable) { "100%" }
             }
 
             if (reservoir != null) {
@@ -287,8 +270,8 @@ class VirtualPumpFragment : DaggerFragment() {
                     val res = plugin.reservoirInUnits.toDouble()
                     try {
                         rh.gs(app.aaps.core.ui.R.string.format_insulin_units, res)
-                    } catch (_: Exception) { "${decimalFormatter.to1Decimal(res)} U" }
-                } catch (_: Exception) { "100.0 U" }
+                    } catch (_: Throwable) { "${decimalFormatter.to1Decimal(res)} U" }
+                } catch (_: Throwable) { "100.0 U" }
             }
 
             if (type != null) {
@@ -298,16 +281,20 @@ class VirtualPumpFragment : DaggerFragment() {
             if (typeDef != null) {
                 typeDef.text = try {
                     pumpType?.getFullDescription(getStringByName("virtual_pump_pump_def"), pumpType.hasExtendedBasals(), rh) ?: "Virtual Pump System"
-                } catch (_: Exception) { "Virtual Pump System" }
+                } catch (_: Throwable) { "Virtual Pump System" }
             }
 
             if (serialNumber != null) {
                 serialNumber.text = try {
                     plugin.serialNumber().ifEmpty { "VPUMP-001" }
-                } catch (_: Exception) { "VPUMP-001" }
+                } catch (_: Throwable) { "VPUMP-001" }
             }
-        } catch (e: Exception) {
-            fabricPrivacy.logException(e)
+        } catch (e: Throwable) {
+            try {
+                if (::fabricPrivacy.isInitialized) {
+                    fabricPrivacy.logException(e)
+                }
+            } catch (_: Throwable) {}
         }
     }
 
