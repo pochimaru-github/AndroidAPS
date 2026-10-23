@@ -74,15 +74,15 @@ class VirtualPumpFragment : DaggerFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         try {
-            baseBasalRateView = findViewByTag(view, "base_basal_rate") as? TextView
-            tempbasalView = findViewByTag(view, "tempbasal") as? TextView
-            extendedbolusView = findViewByTag(view, "extendedbolus") as? TextView
-            batteryView = findViewByTag(view, "battery") as? TextView
-            reservoirView = findViewByTag(view, "reservoir") as? TextView
-            typeView = findViewByTag(view, "type") as? TextView
-            typeDefView = findViewByTag(view, "type_def") as? TextView
-            serialNumberView = findViewByTag(view, "serial_number") as? TextView
-            pumpSuspendedView = findViewByTag(view, "pump_suspended") as? CheckBox
+            baseBasalRateView = view.findViewById(app.aaps.pump.virtual.R.id.base_basal_rate) as? TextView
+            tempbasalView = view.findViewById(app.aaps.pump.virtual.R.id.tempbasal) as? TextView
+            extendedbolusView = view.findViewById(app.aaps.pump.virtual.R.id.extendedbolus) as? TextView
+            batteryView = view.findViewById(app.aaps.pump.virtual.R.id.battery) as? TextView
+            reservoirView = view.findViewById(app.aaps.pump.virtual.R.id.reservoir) as? TextView
+            typeView = view.findViewById(app.aaps.pump.virtual.R.id.type) as? TextView
+            typeDefView = view.findViewById(app.aaps.pump.virtual.R.id.type_def) as? TextView
+            serialNumberView = view.findViewById(app.aaps.pump.virtual.R.id.serial_number) as? TextView
+            pumpSuspendedView = view.findViewById(app.aaps.pump.virtual.R.id.pump_suspended) as? CheckBox
 
             val pumpSuspended = pumpSuspendedView
             if (pumpSuspended != null) {
@@ -100,20 +100,6 @@ class VirtualPumpFragment : DaggerFragment() {
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
-    }
-
-    private fun findViewByTag(view: View, tag: String): View? {
-        try {
-            if (view.tag == tag) return view
-        } catch (_: Throwable) {}
-
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                val found = findViewByTag(view.getChildAt(i), tag)
-                if (found != null) return found
-            }
-        }
-        return null
     }
 
     private fun findViewByName(view: View, name: String): View? {
