@@ -1,8 +1,6 @@
 package app.aaps.pump.virtual
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,10 +55,6 @@ class VirtualPumpFragment : DaggerFragment() {
     @Inject lateinit var preferences: Preferences
 
     private val disposable = CompositeDisposable()
-
-    private var refreshLoop: Runnable? = null
-    private var handler: Handler? = null
-    private var handlerThread: HandlerThread? = null
 
     private var rootView: View? = null
     private var retryCount = 0
@@ -164,19 +158,6 @@ class VirtualPumpFragment : DaggerFragment() {
                 .observeOn(aapsSchedulers.main)
                 .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
 
-            if (handlerThread == null || handlerThread?.isAlive == false) {
-                handlerThread = HandlerThread(this::class.java.simpleName + "Handler").also { it.start() }
-                handler = Handler(handlerThread!!.looper)
-            }
-
-            refreshLoop = Runnable {
-                if (isAdded && !isDetached && rootView != null) {
-                    activity?.runOnUiThread { safeUpdateGui() }
-                }
-                handler?.postDelayed(refreshLoop!!, T.mins(1).msecs())
-            }
-            handler?.postDelayed(refreshLoop!!, T.mins(1).msecs())
-
             val pumpSuspended = pumpSuspendedView
             if (pumpSuspended != null) {
                 pumpSuspended.isChecked = try { preferences.get(VirtualBooleanNonPreferenceKey.IsSuspended) } catch (_: Exception) { false }
@@ -200,8 +181,6 @@ class VirtualPumpFragment : DaggerFragment() {
         super.onPause()
         try {
             disposable.clear()
-            refreshLoop?.let { handler?.removeCallbacks(it) }
-            handler?.removeCallbacksAndMessages(null)
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
@@ -212,8 +191,6 @@ class VirtualPumpFragment : DaggerFragment() {
         super.onDestroyView()
         try {
             disposable.clear()
-            refreshLoop?.let { handler?.removeCallbacks(it) }
-            handler?.removeCallbacksAndMessages(null)
             rootView = null
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
@@ -223,10 +200,6 @@ class VirtualPumpFragment : DaggerFragment() {
     override fun onDestroy() {
         super.onDestroy()
         try {
-            handler?.removeCallbacksAndMessages(null)
-            handlerThread?.quitSafely()
-            handlerThread = null
-            handler = null
         } catch (_: Exception) { }
     }
 
