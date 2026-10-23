@@ -193,9 +193,15 @@ class VirtualPumpFragment : DaggerFragment() {
     private fun safeUpdateGui() {
         if (isDetached || !isAdded || rootView == null || context == null) return
         try {
-            val plugin = try { virtualPumpPlugin } catch (_: Exception) { null }
-            if (plugin == null) return
+            if (!::virtualPumpPlugin.isInitialized) return
+            if (!::profileFunction.isInitialized) return
+            if (!::persistenceLayer.isInitialized) return
+            if (!::dateUtil.isInitialized) return
+            if (!::decimalFormatter.isInitialized) return
+            if (!::rh.isInitialized) return
+            if (!::fabricPrivacy.isInitialized) return
 
+            val plugin = virtualPumpPlugin
             val profile = try { profileFunction.getProfile() } catch (_: Exception) { null }
             val pumpType = try { plugin.pumpType } catch (_: Exception) { null }
 
