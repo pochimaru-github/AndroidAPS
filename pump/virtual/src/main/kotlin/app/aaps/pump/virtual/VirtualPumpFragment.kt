@@ -142,7 +142,7 @@ class VirtualPumpFragment : DaggerFragment() {
                     .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
 
                 disposable += rxBus
-                    .toObservable(app.aaps.core.interfaces.rx.events.EventProfileChange::class.java)
+                    .toObservable(app.aaps.core.interfaces.rx.events.EventNewBG::class.java)
                     .observeOn(aapsSchedulers.main)
                     .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
             }
