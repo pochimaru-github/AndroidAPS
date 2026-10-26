@@ -35,6 +35,7 @@ import app.aaps.core.interfaces.resources.ResourceHelper
 import app.aaps.core.interfaces.rx.AapsSchedulers
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.events.EventNewNotification
+import app.aaps.core.interfaces.rx.events.EventRefreshOverview
 import app.aaps.core.interfaces.rx.events.EventOverviewBolusProgress
 import app.aaps.core.interfaces.rx.events.EventPreferenceChange
 import app.aaps.core.interfaces.utils.DateUtil
@@ -156,6 +157,16 @@ open class VirtualPumpPlugin @Inject constructor(
     }
 
     override fun setNewBasalProfile(profile: Profile): PumpEnactResult {
+        lastDataTime = System.currentTimeMillis()
+        try {
+            rxBus.send(EventNewNotification(Notification(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)))
+            rxBus.send(EventVirtualPumpUpdateGui())
+            rxBus.send(EventRefreshOverview("VirtualPumpPlugin::setNewBasalProfile", false))
+        } catch (e: Exception) {
+            fabricPrivacy.logException(e)
+        }
+        return pumpEnactResultProvider.get().success(true).enacted(true)
+    }
         lastDataTime = System.currentTimeMillis()
         try {
             rxBus.send(EventNewNotification(Notification(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)))
