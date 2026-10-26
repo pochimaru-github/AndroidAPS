@@ -130,6 +130,16 @@ class VirtualPumpFragment : DaggerFragment() {
                     .toObservable(EventVirtualPumpUpdateGui::class.java)
                     .observeOn(aapsSchedulers.main)
                     .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+
+                disposable += rxBus
+                    .toObservable(EventTempBasalChange::class.java)
+                    .observeOn(aapsSchedulers.main)
+                    .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
+
+                disposable += rxBus
+                    .toObservable(EventExtendedBolusChange::class.java)
+                    .observeOn(aapsSchedulers.main)
+                    .subscribe({ safeUpdateGui() }, fabricPrivacy::logException)
             }
 
             val pumpSuspended = pumpSuspendedView
