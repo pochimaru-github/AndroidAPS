@@ -159,17 +159,6 @@ open class VirtualPumpPlugin @Inject constructor(
         lastDataTime = System.currentTimeMillis()
         try {
             rxBus.send(EventNewNotification(Notification(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)))
-            pumpSync.syncTemporaryBasalWithPumpId(
-                timestamp = dateUtil.now(),
-                rate = baseBasalRate,
-                duration = 0,
-                isAbsolute = true,
-                type = PumpSync.TemporaryBasalType.ABSOLUTE,
-                pumpId = dateUtil.now(),
-                pumpType = pumpType ?: PumpType.GENERIC_AAPS,
-                pumpSerial = serialNumber()
-            )
-            rxBus.send(EventVirtualPumpUpdateGui())
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
