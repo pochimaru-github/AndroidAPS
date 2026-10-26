@@ -171,6 +171,21 @@ open class VirtualPumpPlugin @Inject constructor(
                     listValues = emptyList()
                 )
             } catch (_: Throwable) {}
+
+            try {
+                val now = dateUtil.now()
+                val ps = persistenceLayer.getProfileSwitchActiveAt(now)
+                if (ps != null) {
+                    persistenceLayer.insertOrUpdateProfileSwitch(
+                        profileSwitch = ps,
+                        action = Action.PROFILE_SWITCH,
+                        source = Sources.Pump,
+                        note = "VirtualPump update active profile switch",
+                        listValues = emptyList()
+                    ).subscribe({}, fabricPrivacy::logException)
+                }
+            } catch (_: Throwable) {}
+
             rxBus.send(EventVirtualPumpUpdateGui())
             rxBus.send(EventRefreshOverview("VirtualPumpPlugin::setNewBasalProfile", false))
         } catch (e: Exception) {
