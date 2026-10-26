@@ -219,6 +219,17 @@ class VirtualPumpFragment : DaggerFragment() {
             val profile = try { profileFunction.getProfile() } catch (_: Throwable) { null }
             val pumpType = try { plugin.pumpType } catch (_: Throwable) { null }
 
+            if (profile == null && retryCount < 5) {
+                retryCount++
+                rootView?.postDelayed({
+                    if (isAdded && !isDetached) {
+                        safeUpdateGui()
+                    }
+                }, 500)
+                return
+            }
+            retryCount = 0
+
             val baseBasalRate = baseBasalRateView
             val tempbasal = tempbasalView
             val extendedbolus = extendedbolusView
