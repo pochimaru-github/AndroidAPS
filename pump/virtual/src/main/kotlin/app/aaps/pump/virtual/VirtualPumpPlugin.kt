@@ -159,7 +159,6 @@ open class VirtualPumpPlugin @Inject constructor(
         lastDataTime = System.currentTimeMillis()
         try {
             rxBus.send(EventNewNotification(Notification(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)))
-            rxBus.send(EventVirtualPumpUpdateGui())
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
