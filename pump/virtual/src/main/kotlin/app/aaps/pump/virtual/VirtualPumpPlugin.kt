@@ -160,15 +160,17 @@ open class VirtualPumpPlugin @Inject constructor(
         lastDataTime = System.currentTimeMillis()
         try {
             rxBus.send(EventNewNotification(Notification(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)))
-            profileFunction.createProfileSwitch(
-                durationInMinutes = 0,
-                percentage = 100,
-                timeShiftInHours = 0,
-                action = Action.PROFILE_SWITCH,
-                source = Sources.Pump,
-                note = "VirtualPump setNewBasalProfile",
-                listValues = emptyList()
-            )
+            try {
+                profileFunction.createProfileSwitch(
+                    durationInMinutes = 0,
+                    percentage = profile.percentage,
+                    timeShiftInHours = profile.timeshift,
+                    action = Action.PROFILE_SWITCH,
+                    source = Sources.Pump,
+                    note = "VirtualPump setNewBasalProfile",
+                    listValues = emptyList()
+                )
+            } catch (_: Throwable) {}
             rxBus.send(EventVirtualPumpUpdateGui())
             rxBus.send(EventRefreshOverview("VirtualPumpPlugin::setNewBasalProfile", false))
         } catch (e: Exception) {
