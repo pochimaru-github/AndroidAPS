@@ -158,7 +158,20 @@ open class VirtualPumpPlugin @Inject constructor(
     override fun setNewBasalProfile(profile: Profile): PumpEnactResult {
         lastDataTime = System.currentTimeMillis()
         try {
+            // プロファイル変更に伴うベース基礎レートの取得と状態の強制同期
+            val currentBaseBasal = profile.getBasal()
+            pumpSync.syncTemporaryBasalWithPumpId(
+                timestamp = dateUtil.now(),
+                rate = currentBaseBasal,
+                duration = 0,
+                isAbsolute = true,
+                type = PumpSync.TemporaryBasalType.ABSOLUTE,
+                pumpId = dateUtil.now(),
+                pumpType = pumpType ?: PumpType.GENERIC_AAPS,
+                pumpSerial = serialNumber()
+            )
             rxBus.send(EventNewNotification(Notification(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)))
+            rxBus.send(EventVirtualPumpUpdateGui())
         } catch (e: Exception) {
             fabricPrivacy.logException(e)
         }
