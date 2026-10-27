@@ -160,7 +160,15 @@ open class VirtualPumpPlugin @Inject constructor(
         lastDataTime = System.currentTimeMillis()
         try {
             rxBus.send(EventNewNotification(Notification(Notification.PROFILE_SET_OK, rh.gs(app.aaps.core.ui.R.string.profile_set_ok), Notification.INFO, 60)))
+            
             try {
+                val basalValues = profile.getBasalValues()
+                val listValues = mutableListOf<app.aaps.core.data.ue.ValueWithUnit>()
+                for (bv in basalValues) {
+                    listValues.add(app.aaps.core.data.ue.ValueWithUnit.Minute(bv.timeAsSeconds / 60))
+                    listValues.add(app.aaps.core.data.ue.ValueWithUnit.UnitPerHour(bv.value))
+                }
+
                 profileFunction.createProfileSwitch(
                     durationInMinutes = 0,
                     percentage = profile.percentage,
@@ -168,23 +176,11 @@ open class VirtualPumpPlugin @Inject constructor(
                     action = Action.PROFILE_SWITCH,
                     source = Sources.Pump,
                     note = "VirtualPump setNewBasalProfile",
-                    listValues = emptyList()
+                    listValues = listValues
                 )
-            } catch (_: Throwable) {}
-
-            try {
-                val now = dateUtil.now()
-                val ps = persistenceLayer.getProfileSwitchActiveAt(now)
-                if (ps != null) {
-                    persistenceLayer.insertOrUpdateProfileSwitch(
-                        profileSwitch = ps,
-                        action = Action.PROFILE_SWITCH,
-                        source = Sources.Pump,
-                        note = "VirtualPump update active profile switch",
-                        listValues = emptyList()
-                    ).subscribe({}, fabricPrivacy::logException)
-                }
-            } catch (_: Throwable) {}
+            } catch (e: Throwable) {
+                fabricPrivacy.logException(e)
+            }
 
             rxBus.send(EventVirtualPumpUpdateGui())
             rxBus.send(EventRefreshOverview("VirtualPumpPlugin::setNewBasalProfile", false))
