@@ -189,6 +189,28 @@ open class VirtualPumpPlugin @Inject constructor(
                         listValues = listValues
                     ).subscribe({}, fabricPrivacy::logException)
                 }
+
+                val now = dateUtil.now()
+                val activeEps = persistenceLayer.getEffectiveProfileSwitchActiveAt(now)
+                if (activeEps != null) {
+                    val newEps = app.aaps.core.data.model.EPS(
+                        timestamp = now,
+                        basalBlocks = activeEps.basalBlocks,
+                        isfBlocks = activeEps.isfBlocks,
+                        icBlocks = activeEps.icBlocks,
+                        targetBlocks = activeEps.targetBlocks,
+                        glucoseUnit = profile.units,
+                        originalProfileName = activeEps.originalProfileName,
+                        originalCustomizedName = activeEps.originalCustomizedName,
+                        originalTimeshift = profile.timeshift.toLong() * 3600000L,
+                        originalPercentage = profile.percentage,
+                        originalDuration = 0L,
+                        originalEnd = 0L,
+                        iCfg = activeEps.iCfg
+                    )
+                    persistenceLayer.insertEffectiveProfileSwitch(newEps)
+                        .subscribe({}, fabricPrivacy::logException)
+                }
             } catch (e: Throwable) {
                 fabricPrivacy.logException(e)
             }
