@@ -178,6 +178,17 @@ open class VirtualPumpPlugin @Inject constructor(
                     note = "VirtualPump setNewBasalProfile",
                     listValues = listValues
                 )
+
+                val ps = profileFunction.getRequestedProfile()
+                if (ps != null) {
+                    persistenceLayer.insertOrUpdateProfileSwitch(
+                        profileSwitch = ps,
+                        action = Action.PROFILE_SWITCH,
+                        source = Sources.Pump,
+                        note = "VirtualPump force profile switch update",
+                        listValues = listValues
+                    ).subscribe({}, fabricPrivacy::logException)
+                }
             } catch (e: Throwable) {
                 fabricPrivacy.logException(e)
             }
