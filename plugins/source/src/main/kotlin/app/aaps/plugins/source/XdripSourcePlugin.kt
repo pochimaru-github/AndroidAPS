@@ -19,6 +19,8 @@ import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.plugin.PluginDescription
 import app.aaps.core.interfaces.receivers.Intents
 import app.aaps.core.interfaces.resources.ResourceHelper
+import app.aaps.core.interfaces.rx.bus.RxBus // 追加: RxBusのインポート
+import app.aaps.core.interfaces.rx.events.EventNewBG // 追加: EventNewBGのインポート
 import app.aaps.core.interfaces.source.BgSource
 import app.aaps.core.interfaces.source.XDripSource
 import app.aaps.core.interfaces.utils.DateUtil
@@ -80,9 +82,21 @@ class XdripSourcePlugin @Inject constructor(
         @Inject lateinit var preferences: Preferences
         @Inject lateinit var dateUtil: DateUtil
         @Inject lateinit var dataWorkerStorage: DataWorkerStorage
-        @Inject lateinit var rxBus: RxBus // 追加: イベント通知用
+        @Inject lateinit var rxBus: RxBus // インジェクション定義
 
-        // ... (中略: getSensorStartTime など) ...
+        fun getSensorStartTime(bundle: Bundle): Long? {
+            val now = dateUtil.now()
+            var sensorStartTime: Long? = if (preferences.get(BooleanKey.BgSourceCreateSensorChange)) {
+                bundle.getLong(Intents.EXTRA_SENSOR_STARTED_AT, 0)
+            } else {
+                null
+            }
+            // check start time validity
+            sensorStartTime?.let {
+                if (abs(it - now) > T.months(1).msecs() || it > now) sensorStartTime = null
+            }
+            return sensorStartTime
+        }
 
         @SuppressLint("CheckResult")
         override suspend fun doWorkAndLog(): Result {
@@ -103,16 +117,32 @@ class XdripSourcePlugin @Inject constructor(
                 sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
             )
             glucoseValues += newGv
-
-            // ... (中略: sensorStartTime の判定ロジック) ...
-
+            
+            val newSensorStartTime = getSensorStartTime(bundle)
+            // Retrieve last stored sensorStartTime from the database
+            val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
+            val lastStoredSensorStartTime = lastTherapyEvent?.timestamp
+            // Decide whether to update sensorStartTime or keep the last stored one
+            val finalSensorStartTime = when {
+                lastStoredSensorStartTime != null && newSensorStartTime != null &&
+                    abs(newSensorStartTime - lastStoredSensorStartTime) <= 300_000 -> {
+                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is within 5 minutes range, skipping update.")
+                    null
+                }
+                lastStoredSensorStartTime != null && newSensorStartTime != null &&
+                    newSensorStartTime < lastStoredSensorStartTime -> {
+                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is older than last stored time, skipping update.")
+                    null
+                }
+                else -> newSensorStartTime
+            }
             // Always update glucoseValues, but use the decided sensorStartTime
             if (glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0) {
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .doOnSuccess { savedValues ->
-                        // データベース保存成功時に新しい血糖値イベントを即時発火し、UIやループの即時計算を促す
-                        rxBus.send(app.aaps.core.interfaces.rx.events.EventNewBG(newGv))
+                        // データベース保存成功時に新しい血糖値イベントを即時発火
+                        rxBus.send(EventNewBG(newGv))
                     }
                     .blockingGet()
                     .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
