@@ -140,12 +140,6 @@ class XdripSourcePlugin @Inject constructor(
             if (glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0) {
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
-                    .doOnSuccess { savedValues ->
-                        // 保存されたデータのID（またはタイムスタンプ）をEventNewBGに渡す
-                        savedValues.all().firstOrNull()?.id?.let { id ->
-                            rxBus.send(EventNewBG(id))
-                        }
-                    }
                     .blockingGet()
                     .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
             } else {
