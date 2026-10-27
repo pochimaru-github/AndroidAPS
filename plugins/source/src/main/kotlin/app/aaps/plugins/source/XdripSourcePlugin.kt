@@ -80,7 +80,6 @@ class XdripSourcePlugin @Inject constructor(
         @Inject lateinit var preferences: Preferences
         @Inject lateinit var dateUtil: DateUtil
         @Inject lateinit var dataWorkerStorage: DataWorkerStorage
-        @Inject lateinit var rxBus: RxBus // インジェクション定義
 
         fun getSensorStartTime(bundle: Bundle): Long? {
             val now = dateUtil.now()
@@ -106,7 +105,7 @@ class XdripSourcePlugin @Inject constructor(
 
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
             val glucoseValues = mutableListOf<GV>()
-            val newGv = GV(
+            glucoseValues += GV(
                 timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
                 value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
@@ -114,8 +113,6 @@ class XdripSourcePlugin @Inject constructor(
                 trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
                 sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
             )
-            glucoseValues += newGv
-            
             val newSensorStartTime = getSensorStartTime(bundle)
             // Retrieve last stored sensorStartTime from the database
             val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
@@ -135,15 +132,12 @@ class XdripSourcePlugin @Inject constructor(
                 else -> newSensorStartTime
             }
             // Always update glucoseValues, but use the decided sensorStartTime
-            if (glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0) {
+            if (glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0)
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .blockingGet()
                     .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
-            } else {
-                return Result.failure(workDataOf("Error" to "missing glucoseValue"))
-            }
-            
+            else return Result.failure(workDataOf("Error" to "missing glucoseValue"))
             xdripSourcePlugin.sensorBatteryLevel = bundle.getInt(Intents.EXTRA_SENSOR_BATTERY, -1)
             return ret
         }
