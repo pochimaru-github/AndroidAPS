@@ -141,8 +141,24 @@ class XdripSourcePlugin @Inject constructor(
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .doOnSuccess { savedValues ->
-                        // データベース保存成功時に新しい血糖値イベントを即時発火
-                        rxBus.send(EventNewBG(newGv))
+                        // 保存されたデータのID（またはタイムスタンプ）をEventNewBGに渡す
+                        savedValues.all().firstOrNull()?.id?.let { id ->
+                            rxBus.send(EventNewBG(id))
+                        }
+                    }
+                    .blockingGet()
+                    .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
+            } else {
+                return Result.failure(workDataOf("Error" to "missing glucoseValue"))
+            }// Always update glucoseValues, but use the decided sensorStartTime
+            if (glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0) {
+                persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
+                    .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
+                    .doOnSuccess { savedValues ->
+                        // 保存されたデータのID（またはタイムスタンプ）をEventNewBGに渡す
+                        savedValues.all().firstOrNull()?.id?.let { id ->
+                            rxBus.send(EventNewBG(id))
+                        }
                     }
                     .blockingGet()
                     .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
