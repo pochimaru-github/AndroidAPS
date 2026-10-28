@@ -104,9 +104,14 @@ class XdripSourcePlugin @Inject constructor(
             val bundle = dataWorkerStorage.pickupBundle(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
                 ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
-            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
+            // xDrip+から送られてくる実際のBundleの中身を全件ログ出力して事実を確定する
+            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip bundle dump start -----")
+            for (key in bundle.keySet()) {
+                val obj = bundle.get(key)
+                aapsLogger.debug(LTag.BGSOURCE, "Key: [$key] | Value: [$obj] | Type: [${obj?.javaClass?.name}]")
+            }
+            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip bundle dump end -----")
 
-            // 課題2のデータ整合性を損なわないよう、安全にトレンド文字列を抽出する
             val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
                 ?: bundle.getString("direction") 
                 ?: bundle.getString("slope") 
