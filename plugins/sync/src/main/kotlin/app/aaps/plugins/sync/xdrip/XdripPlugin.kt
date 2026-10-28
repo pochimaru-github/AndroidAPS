@@ -252,7 +252,7 @@ class XdripPlugin @Inject constructor(
         // cancel waiting task to prevent sending multiple posts
         scheduledEventPost?.cancel(false)
         val task: Runnable = PostRunnable()
-        // 遅延なく即時実行するように変更
+        // 遅延をなくし、即時実行するよう変更
         scheduledEventPost = eventWorker?.schedule(task, 0, TimeUnit.MILLISECONDS)
     }
 
