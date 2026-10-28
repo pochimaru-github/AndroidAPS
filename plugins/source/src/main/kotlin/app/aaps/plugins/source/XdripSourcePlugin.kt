@@ -48,9 +48,8 @@ class XdripSourcePlugin @Inject constructor(
         .pluginName(R.string.source_xdrip)
         .preferencesVisibleInSimpleMode(false)
         .description(R.string.description_source_xdrip),
-    aapsLogger = aapsLogger,
-    rh = rh,
-    glucoseValueTimestamp = 0L
+    aapsLogger,
+    rh
 ), BgSource, XDripSource {
 
     @VisibleForTesting
@@ -110,4 +109,29 @@ class XdripSourcePlugin @Inject constructor(
 
         @SuppressLint("CheckResult")
         override suspend fun doWorkAndLog(): Result {
-            var ret = Result.success
+            var ret = Result.success()
+
+            if (!xdripSourcePlugin.isEnabled()) return Result.success(workDataOf("Result" to "Plugin not enabled"))
+            val bundle = dataWorkerStorage.pickupBundle(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
+                ?: return Result.failure(workDataOf("Error" to "missing input data"))
+
+            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
+
+            val rawSlopeStr = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
+                ?: bundle.getString("direction") 
+                ?: bundle.get("slope")?.toString() 
+                ?: ""
+
+            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip slope/trend raw: $rawSlopeStr")
+
+            val resolvedTrend = when {
+                rawSlopeStr.isEmpty() -> {
+                    val slopeVal = bundle.getDouble("slope", 0.0)
+                    when {
+                        slopeVal > 3.5 -> TrendArrow.DOUBLE_UP
+                        slopeVal > 1.5 -> TrendArrow.SINGLE_UP
+                        slopeVal > 0.75 -> TrendArrow.FORTY_FIVE_UP
+                        slopeVal >= -0.75 -> TrendArrow.FLAT
+                        slopeVal >= -1.5 -> TrendArrow.FORTY_FIVE_DOWN
+                        slopeVal >= -3.5 -> TrendArrow.SINGLE_DOWN
+                        slopeVal < -3.5 -> Trend
