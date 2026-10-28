@@ -134,4 +134,88 @@ class XdripSourcePlugin @Inject constructor(
                         slopeVal >= -0.75 -> TrendArrow.FLAT
                         slopeVal >= -1.5 -> TrendArrow.FORTY_FIVE_DOWN
                         slopeVal >= -3.5 -> TrendArrow.SINGLE_DOWN
-                        slopeVal < -3.5 -> Trend
+                        slopeVal < -3.5 -> TrendArrow.DOUBLE_DOWN
+                        else -> TrendArrow.NONE
+                    }
+                }
+                else -> {
+                    val trend = TrendArrow.fromString(rawSlopeStr)
+                    if (trend == TrendArrow.NONE) {
+                        when (rawSlopeStr.lowercase().trim()) {
+                            "flat", "rightarrow", "→", "stable", "0" -> TrendArrow.FLAT
+                            "singleup", "uparrow", "↑", "rising", "1" -> TrendArrow.SINGLE_UP
+                            "doubleup", "uparrows", "⇈", "fastrise", "2" -> TrendArrow.DOUBLE_UP
+                            "singledown", "downarrow", "↓", "falling", "3" -> TrendArrow.SINGLE_DOWN
+                            "doubledown", "downarrows", "⇊", "fastfall", "4" -> TrendArrow.DOUBLE_DOWN
+                            "fortyfiveup", "se", "↗", "fourtyfiveup", "5" -> TrendArrow.FORTY_FIVE_UP
+                            "fortyfivedown", "ne", "↘", "fourtyfivedown", "6" -> TrendArrow.FORTY_FIVE_DOWN
+                            else -> {
+                                val dVal = rawSlopeStr.toDoubleOrNull()
+                                if (dVal != null) {
+                                    when {
+                                        dVal > 3.5 -> TrendArrow.DOUBLE_UP
+                                        dVal > 1.5 -> TrendArrow.SINGLE_UP
+                                        dVal > 0.75 -> TrendArrow.FORTY_FIVE_UP
+                                        dVal >= -0.75 -> TrendArrow.FLAT
+                                        dVal >= -1.5 -> TrendArrow.FORTY_FIVE_DOWN
+                                        dVal >= -3.5 -> TrendArrow.SINGLE_DOWN
+                                        dVal < -3.5 -> TrendArrow.DOUBLE_DOWN
+                                        else -> TrendArrow.NONE
+                                    }
+                                } else TrendArrow.NONE
+                            }
+                        }
+                    } else trend
+                }
+            }
+
+            val glucoseValues = mutableListOf<GV>()
+            glucoseValues += GV(
+                timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
+                value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
+                raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
+                noise = null,
+                trendArrow = resolvedTrend,
+                sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
+            )
+            val newSensorStartTime = getSensorStartTime(bundle)
+            val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
+            val lastStoredSensorStartTime = lastTherapyEvent?.timestamp
+            val finalSensorStartTime = when {
+                lastStoredSensorStartTime != null && newSensorStartTime != null &&
+                    abs(newSensorStartTime - lastStoredSensorStartTime) <= 300_000 -> {
+                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is within 5 minutes range, skipping update.")
+                    null
+                }
+                lastStoredSensorStartTime != null && newSensorStartTime != null &&
+                    newSensorStartTime < lastStoredSensorStartTime -> {
+                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is older than last stored time, skipping update.")
+                    null
+                }
+                else -> newSensorStartTime
+            }
+            
+            if (glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0) {
+                persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
+                    .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
+                    .blockingGet()
+                    .also { savedValues -> 
+                        savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } 
+                    }
+                
+                try {
+                    xdripSourcePlugin.notifyNewBg()
+                    aapsLogger.debug(LTag.BGSOURCE, "New BG data successfully saved, EventNewBG sent immediately.")
+                } catch (e: Exception) {
+                    aapsLogger.error(LTag.BGSOURCE, "Failed to trigger immediate refresh after saving BG", e)
+                }
+
+            } else {
+                return Result.failure(workDataOf("Error" to "missing glucoseValue"))
+            }
+
+            xdripSourcePlugin.sensorBatteryLevel = bundle.getInt(Intents.EXTRA_SENSOR_BATTERY, -1)
+            return ret
+        }
+    }
+}
