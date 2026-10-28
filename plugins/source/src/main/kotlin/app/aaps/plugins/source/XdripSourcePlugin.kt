@@ -105,15 +105,12 @@ class XdripSourcePlugin @Inject constructor(
                 ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
-            for (key in bundle.keySet()) {
-                aapsLogger.debug(LTag.BGSOURCE, "Bundle key: $key, value: ${bundle.get(key)}")
-            }
 
+            // 課題2のデータ整合性を損なわないよう、安全にトレンド文字列を抽出する
             val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
                 ?: bundle.getString("direction") 
                 ?: bundle.getString("slope") 
                 ?: ""
-            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip slope/trend string: $rawSlope")
 
             val resolvedTrend = when {
                 rawSlope.isEmpty() -> TrendArrow.NONE
@@ -142,20 +139,15 @@ class XdripSourcePlugin @Inject constructor(
                 trendArrow = resolvedTrend,
                 sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
             )
+
             val newSensorStartTime = getSensorStartTime(bundle)
             val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
             val lastStoredSensorStartTime = lastTherapyEvent?.timestamp
             val finalSensorStartTime = when {
                 lastStoredSensorStartTime != null && newSensorStartTime != null &&
-                    abs(newSensorStartTime - lastStoredSensorStartTime) <= 300_000 -> {
-                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is within 5 minutes range, skipping update.")
-                    null
-                }
+                    abs(newSensorStartTime - lastStoredSensorStartTime) <= 300_000 -> null
                 lastStoredSensorStartTime != null && newSensorStartTime != null &&
-                    newSensorStartTime < lastStoredSensorStartTime -> {
-                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is older than last stored time, skipping update.")
-                    null
-                }
+                    newSensorStartTime < lastStoredSensorStartTime -> null
                 else -> newSensorStartTime
             }
             
@@ -166,14 +158,6 @@ class XdripSourcePlugin @Inject constructor(
                     .also { savedValues -> 
                         savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } 
                     }
-                
-                try {
-                    rxBus.send(app.aaps.core.interfaces.rx.events.EventNewBG(glucoseValues[0].timestamp))
-                    aapsLogger.debug(LTag.BGSOURCE, "New BG data successfully saved, EventNewBG sent for immediate update.")
-                } catch (e: Exception) {
-                    aapsLogger.debug(LTag.BGSOURCE, "Failed to send EventNewBG: ${e.message}")
-                }
-
             } else {
                 return Result.failure(workDataOf("Error" to "missing glucoseValue"))
             }
