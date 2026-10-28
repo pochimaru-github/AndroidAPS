@@ -19,6 +19,8 @@ import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.plugin.PluginDescription
 import app.aaps.core.interfaces.receivers.Intents
 import app.aaps.core.interfaces.resources.ResourceHelper
+import app.aaps.core.interfaces.rx.RxBus
+import app.aaps.core.interfaces.rx.events.EventNewBG
 import app.aaps.core.interfaces.source.BgSource
 import app.aaps.core.interfaces.source.XDripSource
 import app.aaps.core.interfaces.utils.DateUtil
@@ -35,7 +37,8 @@ import kotlin.math.round
 @Singleton
 class XdripSourcePlugin @Inject constructor(
     rh: ResourceHelper,
-    aapsLogger: AAPSLogger
+    aapsLogger: AAPSLogger,
+    private val rxBus: RxBus
 ) : AbstractBgSourceWithSensorInsertLogPlugin(
     PluginDescription()
         .mainType(PluginType.BGSOURCE)
@@ -53,6 +56,14 @@ class XdripSourcePlugin @Inject constructor(
     override var sensorBatteryLevel = -1
 
     override fun advancedFilteringSupported(): Boolean = advancedFiltering
+
+    fun notifyNewBg() {
+        try {
+            rxBus.send(EventNewBG())
+        } catch (e: Exception) {
+            aapsLogger.error(LTag.BGSOURCE, "Failed to send EventNewBG", e)
+        }
+    }
 
     @VisibleForTesting
     fun detectSource(glucoseValue: GV) {
@@ -80,7 +91,6 @@ class XdripSourcePlugin @Inject constructor(
         @Inject lateinit var preferences: Preferences
         @Inject lateinit var dateUtil: DateUtil
         @Inject lateinit var dataWorkerStorage: DataWorkerStorage
-        @Inject lateinit var rxBus: app.aaps.core.interfaces.rx.bus.RxBus
 
         fun getSensorStartTime(bundle: Bundle): Long? {
             val now = dateUtil.now()
@@ -104,32 +114,54 @@ class XdripSourcePlugin @Inject constructor(
             val bundle = dataWorkerStorage.pickupBundle(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
                 ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
-            // xDrip+から送られてくる実際のBundleの中身を全件ログ出力して事実を確定する
-            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip bundle dump start -----")
-            for (key in bundle.keySet()) {
-                val obj = bundle.get(key)
-                aapsLogger.debug(LTag.BGSOURCE, "Key: [$key] | Value: [$obj] | Type: [${obj?.javaClass?.name}]")
-            }
-            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip bundle dump end -----")
+            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
 
-            val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
+            val rawSlopeStr = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
                 ?: bundle.getString("direction") 
-                ?: bundle.getString("slope") 
+                ?: bundle.get("slope")?.toString() 
                 ?: ""
 
+            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip slope/trend raw: $rawSlopeStr")
+
             val resolvedTrend = when {
-                rawSlope.isEmpty() -> TrendArrow.NONE
-                else -> TrendArrow.fromString(rawSlope).let { trend ->
+                rawSlopeStr.isEmpty() -> {
+                    val slopeVal = bundle.getDouble("slope", 0.0)
+                    when {
+                        slopeVal > 3.5 -> TrendArrow.DOUBLE_UP
+                        slopeVal > 1.5 -> TrendArrow.SINGLE_UP
+                        slopeVal > 0.75 -> TrendArrow.FORTY_FIVE_UP
+                        slopeVal >= -0.75 -> TrendArrow.FLAT
+                        slopeVal >= -1.5 -> TrendArrow.FORTY_FIVE_DOWN
+                        slopeVal >= -3.5 -> TrendArrow.SINGLE_DOWN
+                        slopeVal < -3.5 -> TrendArrow.DOUBLE_DOWN
+                        else -> TrendArrow.NONE
+                    }
+                }
+                else -> TrendArrow.fromString(rawSlopeStr).let { trend ->
                     if (trend == TrendArrow.NONE) {
-                        when (rawSlope.lowercase().trim()) {
-                            "flat", "rightarrow", "→", "stable", "3" -> TrendArrow.FLAT
-                            "singleup", "uparrow", "↑", "rising", "2" -> TrendArrow.SINGLE_UP
-                            "doubleup", "uparrows", "⇈", "fastrise", "1" -> TrendArrow.DOUBLE_UP
-                            "singledown", "downarrow", "↓", "falling", "4" -> TrendArrow.SINGLE_DOWN
-                            "doubledown", "downarrows", "⇊", "fastfall", "5" -> TrendArrow.DOUBLE_DOWN
-                            "fortyfiveup", "se", "↗", "fourtyfiveup" -> TrendArrow.FORTY_FIVE_UP
-                            "fortyfivedown", "ne", "↘", "fourtyfivedown" -> TrendArrow.FORTY_FIVE_DOWN
-                            else -> TrendArrow.NONE
+                        when (rawSlopeStr.lowercase().trim()) {
+                            "flat", "rightarrow", "→", "stable", "0" -> TrendArrow.FLAT
+                            "singleup", "uparrow", "↑", "rising", "1" -> TrendArrow.SINGLE_UP
+                            "doubleup", "uparrows", "⇈", "fastrise", "2" -> TrendArrow.DOUBLE_UP
+                            "singledown", "downarrow", "↓", "falling", "3" -> TrendArrow.SINGLE_DOWN
+                            "doubledown", "downarrows", "⇊", "fastfall", "4" -> TrendArrow.DOUBLE_DOWN
+                            "fortyfiveup", "se", "↗", "fourtyfiveup", "5" -> TrendArrow.FORTY_FIVE_UP
+                            "fortyfivedown", "ne", "↘", "fourtyfivedown", "6" -> TrendArrow.FORTY_FIVE_DOWN
+                            else -> {
+                                val dVal = rawSlopeStr.toDoubleOrNull()
+                                if (dVal != null) {
+                                    when {
+                                        dVal > 3.5 -> TrendArrow.DOUBLE_UP
+                                        dVal > 1.5 -> TrendArrow.SINGLE_UP
+                                        dVal > 0.75 -> TrendArrow.FORTY_FIVE_UP
+                                        dVal >= -0.75 -> TrendArrow.FLAT
+                                        dVal >= -1.5 -> TrendArrow.FORTY_FIVE_DOWN
+                                        dVal >= -3.5 -> TrendArrow.SINGLE_DOWN
+                                        dVal < -3.5 -> TrendArrow.DOUBLE_DOWN
+                                        else -> TrendArrow.NONE
+                                    }
+                                } else TrendArrow.NONE
+                            }
                         }
                     } else trend
                 }
@@ -144,15 +176,20 @@ class XdripSourcePlugin @Inject constructor(
                 trendArrow = resolvedTrend,
                 sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
             )
-
             val newSensorStartTime = getSensorStartTime(bundle)
             val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
             val lastStoredSensorStartTime = lastTherapyEvent?.timestamp
             val finalSensorStartTime = when {
                 lastStoredSensorStartTime != null && newSensorStartTime != null &&
-                    abs(newSensorStartTime - lastStoredSensorStartTime) <= 300_000 -> null
+                    abs(newSensorStartTime - lastStoredSensorStartTime) <= 300_000 -> {
+                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is within 5 minutes range, skipping update.")
+                    null
+                }
                 lastStoredSensorStartTime != null && newSensorStartTime != null &&
-                    newSensorStartTime < lastStoredSensorStartTime -> null
+                    newSensorStartTime < lastStoredSensorStartTime -> {
+                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is older than last stored time, skipping update.")
+                    null
+                }
                 else -> newSensorStartTime
             }
             
@@ -163,6 +200,14 @@ class XdripSourcePlugin @Inject constructor(
                     .also { savedValues -> 
                         savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } 
                     }
+                
+                try {
+                    xdripSourcePlugin.notifyNewBg()
+                    aapsLogger.debug(LTag.BGSOURCE, "New BG data successfully saved, EventNewBG sent immediately.")
+                } catch (e: Exception) {
+                    aapsLogger.error(LTag.BGSOURCE, "Failed to trigger immediate refresh after saving BG", e)
+                }
+
             } else {
                 return Result.failure(workDataOf("Error" to "missing glucoseValue"))
             }
