@@ -137,7 +137,8 @@ class XdripSourcePlugin @Inject constructor(
                         else -> TrendArrow.NONE
                     }
                 }
-                else -> TrendArrow.fromString(rawSlopeStr).let { trend ->
+                else -> {
+                    val trend = TrendArrow.fromString(rawSlopeStr)
                     if (trend == TrendArrow.NONE) {
                         when (rawSlopeStr.lowercase().trim()) {
                             "flat", "rightarrow", "→", "stable", "0" -> TrendArrow.FLAT
@@ -198,4 +199,22 @@ class XdripSourcePlugin @Inject constructor(
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .blockingGet()
                     .also { savedValues -> 
-                        savedValues.all().forEach { xdripSourcePlugin.detectSource(
+                        savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } 
+                    }
+                
+                try {
+                    xdripSourcePlugin.notifyNewBg()
+                    aapsLogger.debug(LTag.BGSOURCE, "New BG data successfully saved, EventNewBG sent immediately.")
+                } catch (e: Exception) {
+                    aapsLogger.error(LTag.BGSOURCE, "Failed to trigger immediate refresh after saving BG", e)
+                }
+
+            } else {
+                return Result.failure(workDataOf("Error" to "missing glucoseValue"))
+            }
+
+            xdripSourcePlugin.sensorBatteryLevel = bundle.getInt(Intents.EXTRA_SENSOR_BATTERY, -1)
+            return ret
+        }
+    }
+}
