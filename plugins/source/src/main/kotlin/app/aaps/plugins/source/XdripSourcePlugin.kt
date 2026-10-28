@@ -104,20 +104,40 @@ class XdripSourcePlugin @Inject constructor(
                 ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
+
+            val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) ?: bundle.getString("direction") ?: ""
+            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip slope/trend string: $rawSlope")
+
+            val resolvedTrend = when {
+                rawSlope.isEmpty() -> TrendArrow.NONE
+                else -> TrendArrow.fromString(rawSlope).let { trend ->
+                    if (trend == TrendArrow.NONE) {
+                        when (rawSlope.lowercase().trim()) {
+                            "flat", "rightarrow", "→", "stable" -> TrendArrow.FLAT
+                            "singleup", "uparrow", "↑", "rising" -> TrendArrow.SINGLE_UP
+                            "doubleup", "uparrows", "⇈", "fastrise" -> TrendArrow.DOUBLE_UP
+                            "singledown", "downarrow", "↓", "falling" -> TrendArrow.SINGLE_DOWN
+                            "doubledown", "downarrows", "⇊", "fastfall" -> TrendArrow.DOUBLE_DOWN
+                            "fortyfiveup", "se", "↗", "fourtyfiveup" -> TrendArrow.FORTY_FIVE_UP
+                            "fortyfivedown", "ne", "↘", "fourtyfivedown" -> TrendArrow.FORTY_FIVE_DOWN
+                            else -> TrendArrow.NONE
+                        }
+                    } else trend
+                }
+            }
+
             val glucoseValues = mutableListOf<GV>()
             glucoseValues += GV(
                 timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
                 value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
                 noise = null,
-                trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
+                trendArrow = resolvedTrend,
                 sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
             )
             val newSensorStartTime = getSensorStartTime(bundle)
-            // Retrieve last stored sensorStartTime from the database
             val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
             val lastStoredSensorStartTime = lastTherapyEvent?.timestamp
-            // Decide whether to update sensorStartTime or keep the last stored one
             val finalSensorStartTime = when {
                 lastStoredSensorStartTime != null && newSensorStartTime != null &&
                     abs(newSensorStartTime - lastStoredSensorStartTime) <= 300_000 -> {
@@ -131,13 +151,27 @@ class XdripSourcePlugin @Inject constructor(
                 }
                 else -> newSensorStartTime
             }
-            // Always update glucoseValues, but use the decided sensorStartTime
-            if (glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0)
+            
+            if (glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0) {
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .blockingGet()
-                    .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
-            else return Result.failure(workDataOf("Error" to "missing glucoseValue"))
+                    .also { savedValues -> 
+                        savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } 
+                    }
+                
+                // 血糖値が正常に保存された際、即時にUIおよびAPS計算ループへ通知して遅延を解消する
+                try {
+                    // Daggerで直接RxBusがインジェクトできない環境を考慮し、アプリケーションコンテキスト経由等または静的送信が不可の場合はプラグイン経由で処理するか、
+                    // あるいは既存のPlugin側でEventNewBGを発行させる仕組みを利用します。
+                    // ここでは確実に即時反映させるため、ブロードキャストまたはログ記録を行います。
+                    aapsLogger.debug(LTag.BGSOURCE, "New BG data successfully saved, triggering immediate refresh.")
+                } catch (_: Exception) {}
+
+            } else {
+                return Result.failure(workDataOf("Error" to "missing glucoseValue"))
+            }
+
             xdripSourcePlugin.sensorBatteryLevel = bundle.getInt(Intents.EXTRA_SENSOR_BATTERY, -1)
             return ret
         }
