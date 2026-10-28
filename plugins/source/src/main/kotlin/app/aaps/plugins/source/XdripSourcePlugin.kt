@@ -168,7 +168,7 @@ class XdripSourcePlugin @Inject constructor(
                     }
                 
                 try {
-                    rxBus.send(app.aaps.core.interfaces.rx.events.EventNewBG())
+                    rxBus.send(app.aaps.core.interfaces.rx.events.EventNewBG(glucoseValues[0].timestamp))
                     aapsLogger.debug(LTag.BGSOURCE, "New BG data successfully saved, EventNewBG sent for immediate update.")
                 } catch (e: Exception) {
                     aapsLogger.debug(LTag.BGSOURCE, "Failed to send EventNewBG: ${e.message}")
