@@ -80,6 +80,7 @@ class XdripSourcePlugin @Inject constructor(
         @Inject lateinit var preferences: Preferences
         @Inject lateinit var dateUtil: DateUtil
         @Inject lateinit var dataWorkerStorage: DataWorkerStorage
+        @Inject lateinit var rxBus: app.aaps.core.interfaces.rx.bus.RxBus
 
         fun getSensorStartTime(bundle: Bundle): Long? {
             val now = dateUtil.now()
@@ -104,8 +105,14 @@ class XdripSourcePlugin @Inject constructor(
                 ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
+            for (key in bundle.keySet()) {
+                aapsLogger.debug(LTag.BGSOURCE, "Bundle key: $key, value: ${bundle.get(key)}")
+            }
 
-            val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) ?: bundle.getString("direction") ?: ""
+            val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
+                ?: bundle.getString("direction") 
+                ?: bundle.getString("slope") 
+                ?: ""
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip slope/trend string: $rawSlope")
 
             val resolvedTrend = when {
@@ -113,11 +120,11 @@ class XdripSourcePlugin @Inject constructor(
                 else -> TrendArrow.fromString(rawSlope).let { trend ->
                     if (trend == TrendArrow.NONE) {
                         when (rawSlope.lowercase().trim()) {
-                            "flat", "rightarrow", "→", "stable" -> TrendArrow.FLAT
-                            "singleup", "uparrow", "↑", "rising" -> TrendArrow.SINGLE_UP
-                            "doubleup", "uparrows", "⇈", "fastrise" -> TrendArrow.DOUBLE_UP
-                            "singledown", "downarrow", "↓", "falling" -> TrendArrow.SINGLE_DOWN
-                            "doubledown", "downarrows", "⇊", "fastfall" -> TrendArrow.DOUBLE_DOWN
+                            "flat", "rightarrow", "→", "stable", "3" -> TrendArrow.FLAT
+                            "singleup", "uparrow", "↑", "rising", "2" -> TrendArrow.SINGLE_UP
+                            "doubleup", "uparrows", "⇈", "fastrise", "1" -> TrendArrow.DOUBLE_UP
+                            "singledown", "downarrow", "↓", "falling", "4" -> TrendArrow.SINGLE_DOWN
+                            "doubledown", "downarrows", "⇊", "fastfall", "5" -> TrendArrow.DOUBLE_DOWN
                             "fortyfiveup", "se", "↗", "fourtyfiveup" -> TrendArrow.FORTY_FIVE_UP
                             "fortyfivedown", "ne", "↘", "fourtyfivedown" -> TrendArrow.FORTY_FIVE_DOWN
                             else -> TrendArrow.NONE
@@ -160,13 +167,12 @@ class XdripSourcePlugin @Inject constructor(
                         savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } 
                     }
                 
-                // 血糖値が正常に保存された際、即時にUIおよびAPS計算ループへ通知して遅延を解消する
                 try {
-                    // Daggerで直接RxBusがインジェクトできない環境を考慮し、アプリケーションコンテキスト経由等または静的送信が不可の場合はプラグイン経由で処理するか、
-                    // あるいは既存のPlugin側でEventNewBGを発行させる仕組みを利用します。
-                    // ここでは確実に即時反映させるため、ブロードキャストまたはログ記録を行います。
-                    aapsLogger.debug(LTag.BGSOURCE, "New BG data successfully saved, triggering immediate refresh.")
-                } catch (_: Exception) {}
+                    rxBus.send(app.aaps.core.interfaces.rx.events.EventNewBG())
+                    aapsLogger.debug(LTag.BGSOURCE, "New BG data successfully saved, EventNewBG sent for immediate update.")
+                } catch (e: Exception) {
+                    aapsLogger.debug(LTag.BGSOURCE, "Failed to send EventNewBG: ${e.message}")
+                }
 
             } else {
                 return Result.failure(workDataOf("Error" to "missing glucoseValue"))
