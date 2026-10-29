@@ -40,7 +40,7 @@ class XdripSourcePlugin @Inject constructor(
     aapsLogger: AAPSLogger,
     private val rxBus: RxBus
 ) : AbstractBgSourceWithSensorInsertLogPlugin(
-    PluginDescription()
+    pluginDescription = PluginDescription()
         .mainType(PluginType.BGSOURCE)
         .fragmentClass(BGSourceFragment::class.java.name)
         .pluginIcon((app.aaps.core.objects.R.drawable.ic_blooddrop_48))
@@ -48,8 +48,8 @@ class XdripSourcePlugin @Inject constructor(
         .pluginName(R.string.source_xdrip)
         .preferencesVisibleInSimpleMode(false)
         .description(R.string.description_source_xdrip),
-    aapsLogger,
-    rh
+    aapsLogger = aapsLogger,
+    rh = rh
 ), BgSource, XDripSource {
 
     @VisibleForTesting
