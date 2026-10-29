@@ -52,6 +52,8 @@ class XdripSourcePlugin @Inject constructor(
     rh
 ), BgSource, XDripSource {
 
+    override val glucoseValueTimestamp: Long = 0L
+
     @VisibleForTesting
     var advancedFiltering = false
     override var sensorBatteryLevel = -1
