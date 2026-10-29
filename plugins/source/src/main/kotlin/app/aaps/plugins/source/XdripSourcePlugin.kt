@@ -120,7 +120,11 @@ class XdripSourcePlugin @Inject constructor(
 
             val rawSlopeStr = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
                 ?: bundle.getString("direction") 
+                ?: bundle.getString("trend")
+                ?: bundle.getString("trend_arrow")
+                ?: bundle.getString("slopeStr")
                 ?: bundle.get("slope")?.toString() 
+                ?: bundle.get("slopeOrdinal")?.toString()
                 ?: ""
 
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip slope/trend raw: $rawSlopeStr")
@@ -170,14 +174,44 @@ class XdripSourcePlugin @Inject constructor(
                 }
             }
 
+            val timestamp = when {
+                bundle.containsKey(Intents.EXTRA_TIMESTAMP) && bundle.getLong(Intents.EXTRA_TIMESTAMP, 0) > 0 -> bundle.getLong(Intents.EXTRA_TIMESTAMP, 0)
+                bundle.containsKey("timestamp") -> bundle.getLong("timestamp", 0)
+                bundle.containsKey("date") -> bundle.getLong("date", 0)
+                bundle.containsKey("time") -> bundle.getLong("time", 0)
+                else -> bundle.get("timestamp")?.toString()?.toLongOrNull() ?: bundle.get("date")?.toString()?.toLongOrNull() ?: 0L
+            }
+
+            val bgValue = when {
+                bundle.containsKey(Intents.EXTRA_BG_ESTIMATE) && bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0) > 0.0 -> bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)
+                bundle.containsKey("sgv") -> bundle.getDouble("sgv", 0.0)
+                bundle.containsKey("glucose") -> bundle.getDouble("glucose", 0.0)
+                bundle.containsKey("mbg") -> bundle.getDouble("mbg", 0.0)
+                bundle.containsKey("value") -> bundle.getDouble("value", 0.0)
+                else -> bundle.get(Intents.EXTRA_BG_ESTIMATE)?.toString()?.toDoubleOrNull()
+                    ?: bundle.get("sgv")?.toString()?.toDoubleOrNull()
+                    ?: bundle.get("glucose")?.toString()?.toDoubleOrNull()
+                    ?: bundle.get("value")?.toString()?.toDoubleOrNull()
+                    ?: 0.0
+            }
+
+            val rawValue = when {
+                bundle.containsKey(Intents.EXTRA_RAW) -> bundle.getDouble(Intents.EXTRA_RAW, 0.0)
+                bundle.containsKey("raw") -> bundle.getDouble("raw", 0.0)
+                bundle.containsKey("filtered") -> bundle.getDouble("filtered", 0.0)
+                else -> bundle.get(Intents.EXTRA_RAW)?.toString()?.toDoubleOrNull()
+                    ?: bundle.get("raw")?.toString()?.toDoubleOrNull()
+                    ?: 0.0
+            }
+
             val glucoseValues = mutableListOf<GV>()
             glucoseValues += GV(
-                timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
-                value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
-                raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
+                timestamp = timestamp,
+                value = round(bgValue),
+                raw = round(rawValue),
                 noise = null,
                 trendArrow = resolvedTrend,
-                sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
+                sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: bundle.getString("source") ?: "")
             )
             val newSensorStartTime = getSensorStartTime(bundle)
             val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
