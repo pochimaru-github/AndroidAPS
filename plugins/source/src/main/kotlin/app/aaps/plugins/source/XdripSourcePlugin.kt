@@ -49,7 +49,8 @@ class XdripSourcePlugin @Inject constructor(
         .preferencesVisibleInSimpleMode(false)
         .description(R.string.description_source_xdrip),
     aapsLogger,
-    rh
+    rh,
+    0L
 ), BgSource, XDripSource {
 
     @VisibleForTesting
