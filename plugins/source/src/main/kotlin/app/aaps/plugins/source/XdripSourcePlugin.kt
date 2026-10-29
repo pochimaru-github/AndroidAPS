@@ -49,8 +49,7 @@ class XdripSourcePlugin @Inject constructor(
         .preferencesVisibleInSimpleMode(false)
         .description(R.string.description_source_xdrip),
     aapsLogger,
-    rh,
-    0L
+    rh
 ), BgSource, XDripSource {
 
     @VisibleForTesting
@@ -232,9 +231,8 @@ class XdripSourcePlugin @Inject constructor(
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .blockingGet()
-                    .also { savedValues -> 
-                        savedValues.forEach { xdripSourcePlugin.detectSource(it) } 
-                    }
+                
+                xdripSourcePlugin.detectSource(glucoseValues[0])
                 
                 try {
                     xdripSourcePlugin.notifyNewBg()
