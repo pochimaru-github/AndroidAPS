@@ -232,8 +232,8 @@ class XdripSourcePlugin @Inject constructor(
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .blockingGet()
                     .also { savedValues -> 
-                        savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } 
-                    }
+                    savedValues.forEach { xdripSourcePlugin.detectSource(it) } 
+                }
                 
                 try {
                     xdripSourcePlugin.notifyNewBg()
