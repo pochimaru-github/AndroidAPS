@@ -49,8 +49,7 @@ class XdripSourcePlugin @Inject constructor(
         .preferencesVisibleInSimpleMode(false)
         .description(R.string.description_source_xdrip),
     aapsLogger,
-    rh,
-    glucoseValueTimestamp = 0L
+    rh
 ), BgSource, XDripSource {
 
     @VisibleForTesting
@@ -82,7 +81,6 @@ class XdripSourcePlugin @Inject constructor(
         ).any { it == glucoseValue.sourceSensor }
     }
 
-    // cannot be inner class because of needed injection
     class XdripSourceWorker(
         context: Context,
         params: WorkerParameters
@@ -101,7 +99,6 @@ class XdripSourcePlugin @Inject constructor(
             } else {
                 null
             }
-            // check start time validity
             sensorStartTime?.let {
                 if (abs(it - now) > T.months(1).msecs() || it > now) sensorStartTime = null
             }
