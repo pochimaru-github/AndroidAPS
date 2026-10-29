@@ -49,7 +49,8 @@ class XdripSourcePlugin @Inject constructor(
         .preferencesVisibleInSimpleMode(false)
         .description(R.string.description_source_xdrip),
     aapsLogger,
-    rh
+    rh,
+    0L
 ), BgSource, XDripSource {
 
     @VisibleForTesting
@@ -232,8 +233,8 @@ class XdripSourcePlugin @Inject constructor(
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .blockingGet()
                     .also { savedValues -> 
-                    savedValues.forEach { xdripSourcePlugin.detectSource(it) } 
-                }
+                        savedValues.forEach { xdripSourcePlugin.detectSource(it) } 
+                    }
                 
                 try {
                     xdripSourcePlugin.notifyNewBg()
