@@ -15,8 +15,9 @@ import app.aaps.core.validators.preferences.AdaptiveSwitchPreference
 abstract class AbstractBgSourceWithSensorInsertLogPlugin(
     pluginDescription: PluginDescription,
     aapsLogger: AAPSLogger,
-    rh: ResourceHelper
-) : PluginBase(pluginDescription, aapsLogger, rh), BgSource {
+    rh: ResourceHelper,
+    glucoseValueTimestamp: Long
+) : Plugin(pluginDescription, aapsLogger, rh) {
 
     override fun addPreferenceScreen(preferenceManager: PreferenceManager, parent: PreferenceScreen, context: Context, requiredKey: String?) {
         if (requiredKey != null) return
