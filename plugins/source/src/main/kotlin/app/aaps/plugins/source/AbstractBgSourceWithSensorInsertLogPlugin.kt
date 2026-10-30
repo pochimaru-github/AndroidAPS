@@ -5,7 +5,6 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import app.aaps.core.interfaces.logging.AAPSLogger
-import app.aaps.core.interfaces.plugin.Plugin
 import app.aaps.core.interfaces.plugin.PluginBase
 import app.aaps.core.interfaces.plugin.PluginDescription
 import app.aaps.core.interfaces.resources.ResourceHelper
@@ -16,9 +15,8 @@ import app.aaps.core.validators.preferences.AdaptiveSwitchPreference
 abstract class AbstractBgSourceWithSensorInsertLogPlugin(
     pluginDescription: PluginDescription,
     aapsLogger: AAPSLogger,
-    rh: ResourceHelper,
-    glucoseValueTimestamp: Long = 0L
-) : Plugin(pluginDescription, aapsLogger, rh) {
+    rh: ResourceHelper
+) : PluginBase(pluginDescription, aapsLogger, rh), BgSource {
 
     override fun addPreferenceScreen(preferenceManager: PreferenceManager, parent: PreferenceScreen, context: Context, requiredKey: String?) {
         if (requiredKey != null) return
