@@ -50,7 +50,7 @@ class XdripSourcePlugin @Inject constructor(
         .description(R.string.description_source_xdrip),
     aapsLogger,
     rh,
-    0L
+    glucoseValueTimestamp = 0L
 ), BgSource, XDripSource {
 
     @VisibleForTesting
