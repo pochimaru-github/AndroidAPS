@@ -208,7 +208,8 @@ class XdripSourcePlugin @Inject constructor(
                 raw = round(rawValue),
                 noise = null,
                 trendArrow = resolvedTrend,
-                sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: bundle.getString("source") ?: "")
+                sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: bundle.getString("source") ?: ""),
+                glucoseValueTimestamp = timestamp
             )
             val newSensorStartTime = getSensorStartTime(bundle)
             val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
