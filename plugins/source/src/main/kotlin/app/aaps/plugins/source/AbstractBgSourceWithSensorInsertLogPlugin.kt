@@ -17,7 +17,7 @@ abstract class AbstractBgSourceWithSensorInsertLogPlugin(
     pluginDescription: PluginDescription,
     aapsLogger: AAPSLogger,
     rh: ResourceHelper,
-    glucoseValueTimestamp: Long
+    glucoseValueTimestamp: Long = 0L
 ) : Plugin(pluginDescription, aapsLogger, rh) {
 
     override fun addPreferenceScreen(preferenceManager: PreferenceManager, parent: PreferenceScreen, context: Context, requiredKey: String?) {
