@@ -97,26 +97,31 @@ class XdripSourcePlugin @Inject constructor(
 
         @SuppressLint("CheckResult")
         override suspend fun doWorkAndLog(): Result {
+            aapsLogger.debug(LTag.BGSOURCE, "XdripSourceWorker doWorkAndLog started")
             var ret = Result.success()
 
-            if (!xdripSourcePlugin.isEnabled()) return Result.success(workDataOf("Result" to "Plugin not enabled"))
+            if (!xdripSourcePlugin.isEnabled()) {
+                aapsLogger.debug(LTag.BGSOURCE, "XdripSourcePlugin is not enabled")
+                return Result.success(workDataOf("Result" to "Plugin not enabled"))
+            }
             val bundle = dataWorkerStorage.pickupBundle(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
-                ?: return Result.failure(workDataOf("Error" to "missing input data"))
+            if (bundle == null) {
+                aapsLogger.debug(LTag.BGSOURCE, "XdripSourceWorker bundle is missing")
+                return Result.failure(workDataOf("Error" to "missing input data"))
+            }
 
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
-            val rawTimestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0)
-            val correctedTimestamp = when {
-                rawTimestamp <= 0 -> dateUtil.now()
-                rawTimestamp < 10_000_000_000L -> rawTimestamp * 1000L
-                else -> rawTimestamp
-            }
+            val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)
+            val parsedTrend = TrendArrow.fromString(rawSlope)
+            aapsLogger.debug(LTag.BGSOURCE, "xDrip raw slope: $rawSlope, parsed trend: $parsedTrend")
+
             val glucoseValues = mutableListOf<GV>()
             glucoseValues += GV(
-                timestamp = correctedTimestamp,
+                timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
                 value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
                 noise = null,
-                trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
+                trendArrow = parsedTrend,
                 sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
             )
             val newSensorStartTime = getSensorStartTime(bundle)
