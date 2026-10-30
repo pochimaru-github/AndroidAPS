@@ -172,12 +172,19 @@ class XdripSourcePlugin @Inject constructor(
                 }
             }
 
-            val timestamp = when {
+            val rawTimestamp = when {
                 bundle.containsKey(Intents.EXTRA_TIMESTAMP) && bundle.getLong(Intents.EXTRA_TIMESTAMP, 0) > 0 -> bundle.getLong(Intents.EXTRA_TIMESTAMP, 0)
                 bundle.containsKey("timestamp") -> bundle.getLong("timestamp", 0)
                 bundle.containsKey("date") -> bundle.getLong("date", 0)
                 bundle.containsKey("time") -> bundle.getLong("time", 0)
                 else -> bundle.get("timestamp")?.toString()?.toLongOrNull() ?: bundle.get("date")?.toString()?.toLongOrNull() ?: 0L
+            }
+            val timestamp = if (rawTimestamp > 0 && rawTimestamp < 10_000_000_000L) {
+                rawTimestamp * 1000L
+            } else if (rawTimestamp <= 0) {
+                dateUtil.now()
+            } else {
+                rawTimestamp
             }
 
             val bgValue = when {
