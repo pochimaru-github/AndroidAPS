@@ -104,9 +104,15 @@ class XdripSourcePlugin @Inject constructor(
                 ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
+            val rawTimestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0)
+            val correctedTimestamp = when {
+                rawTimestamp <= 0 -> dateUtil.now()
+                rawTimestamp < 10_000_000_000L -> rawTimestamp * 1000L
+                else -> rawTimestamp
+            }
             val glucoseValues = mutableListOf<GV>()
             glucoseValues += GV(
-                timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
+                timestamp = correctedTimestamp,
                 value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
                 noise = null,
