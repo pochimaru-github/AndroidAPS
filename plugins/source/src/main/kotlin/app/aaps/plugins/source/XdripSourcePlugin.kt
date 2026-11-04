@@ -97,22 +97,88 @@ class XdripSourcePlugin @Inject constructor(
 
         @SuppressLint("CheckResult")
         override suspend fun doWorkAndLog(): Result {
+            aapsLogger.debug(LTag.BGSOURCE, "XdripSourceWorker doWorkAndLog started")
             var ret = Result.success()
 
-            if (!xdripSourcePlugin.isEnabled()) return Result.success(workDataOf("Result" to "Plugin not enabled"))
+            if (!xdripSourcePlugin.isEnabled()) {
+                aapsLogger.debug(LTag.BGSOURCE, "XdripSourcePlugin is not enabled")
+                return Result.success(workDataOf("Result" to "Plugin not enabled"))
+            }
             val bundle = dataWorkerStorage.pickupBundle(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
-                ?: return Result.failure(workDataOf("Error" to "missing input data"))
+            if (bundle == null) {
+                aapsLogger.debug(LTag.BGSOURCE, "XdripSourceWorker bundle is missing")
+                return Result.failure(workDataOf("Error" to "missing input data"))
+            }
 
-            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
+            // --- 【改善】あらゆる型の混入に対応した安全なパラメータ抽出 ---
+            
+            // トレンド（文字列）
+            val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)
+                ?: bundle.getString("slopeName")
+                ?: bundle.getString("direction")
+                ?: bundle.getString("slope")
+                ?: bundle.get(Intents.EXTRA_BG_SLOPE_NAME)?.toString()
+                ?: ""
+
+            val trendArrow = when (rawSlope.lowercase().trim()) {
+                "flat", "rightarrow", "→", "stable" -> TrendArrow.FLAT
+                "singleup", "uparrow", "↑", "rising" -> TrendArrow.SINGLE_UP
+                "doubleup", "uparrowuparrow", "↑↑", "fastrising" -> TrendArrow.DOUBLE_UP
+                "fortyfiveup", "sentryup", "↗", "slightrise" -> TrendArrow.FORTY_FIVE_UP
+                "singledown", "downarrow", "↓", "falling" -> TrendArrow.SINGLE_DOWN
+                "doubledown", "downarrowdownarrow", "↓↓", "fastfalling" -> TrendArrow.DOUBLE_DOWN
+                "fortyfivedown", "sentrydown", "↘", "slightfall" -> TrendArrow.FORTY_FIVE_DOWN
+                else -> TrendArrow.fromString(rawSlope)
+            }
+
+            // タイムスタンプ（Long / String / Int のいずれにも対応）
+            val rawTimestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0L)
+                .takeIf { it > 0L } ?: bundle.getLong("timestamp", 0L)
+                .takeIf { it > 0L } ?: bundle.getLong("time", 0L)
+                .takeIf { it > 0L } ?: bundle.get(Intents.EXTRA_TIMESTAMP)?.toString()?.toLongOrNull()
+                ?: bundle.get("timestamp")?.toString()?.toLongOrNull()
+                ?: 0L
+
+            val correctedTimestamp = if (rawTimestamp > 0 && rawTimestamp < 10000000000L) {
+                rawTimestamp * 1000L
+            } else if (rawTimestamp <= 0) {
+                dateUtil.now()
+            } else {
+                rawTimestamp
+            }
+
+            // 血糖値 (Double / Int / String のいずれにも対応)
+            val bgEstimate = bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)
+                .takeIf { it > 0.0 } ?: bundle.getDouble("glucose", 0.0)
+                .takeIf { it > 0.0 } ?: bundle.getDouble("sgv", 0.0)
+                .takeIf { it > 0.0 } ?: bundle.get(Intents.EXTRA_BG_ESTIMATE)?.toString()?.toDoubleOrNull()
+                ?: bundle.get("glucose")?.toString()?.toDoubleOrNull()
+                ?: bundle.get("sgv")?.toString()?.toDoubleOrNull()
+                ?: 0.0
+
+            // 生データ値
+            val rawValue = bundle.getDouble(Intents.EXTRA_RAW, 0.0)
+                .takeIf { it > 0.0 } ?: bundle.getDouble("raw", 0.0)
+                .takeIf { it > 0.0 } ?: bundle.get(Intents.EXTRA_RAW)?.toString()?.toDoubleOrNull()
+                ?: bundle.get("raw")?.toString()?.toDoubleOrNull()
+                ?: 0.0
+
+            val sourceStr = bundle.getString(Intents.XDRIP_DATA_SOURCE)
+                ?: bundle.getString("source")
+                ?: ""
+
             val glucoseValues = mutableListOf<GV>()
-            glucoseValues += GV(
-                timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
-                value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
-                raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
-                noise = null,
-                trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
-                sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
-            )
+            if (correctedTimestamp > 0 && bgEstimate > 0.0) {
+                glucoseValues += GV(
+                    timestamp = correctedTimestamp,
+                    value = round(bgEstimate),
+                    raw = round(rawValue),
+                    noise = null,
+                    trendArrow = trendArrow,
+                    sourceSensor = SourceSensor.fromString(sourceStr)
+                )
+            }
+            
             val newSensorStartTime = getSensorStartTime(bundle)
             // Retrieve last stored sensorStartTime from the database
             val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
@@ -132,7 +198,7 @@ class XdripSourcePlugin @Inject constructor(
                 else -> newSensorStartTime
             }
             // Always update glucoseValues, but use the decided sensorStartTime
-            if (glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0)
+            if (glucoseValues.isNotEmpty() && glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0)
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .blockingGet()
