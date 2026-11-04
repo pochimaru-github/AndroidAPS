@@ -185,4 +185,5 @@ class XdripSourcePlugin @Inject constructor(
             xdripSourcePlugin.sensorBatteryLevel = bundle.getInt(Intents.EXTRA_SENSOR_BATTERY, -1)
             return ret
         }
+    }
 }
