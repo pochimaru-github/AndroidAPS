@@ -110,10 +110,22 @@ class XdripSourcePlugin @Inject constructor(
                 return Result.failure(workDataOf("Error" to "missing input data"))
             }
 
-            aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
             val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)
-            val parsedTrend = TrendArrow.fromString(rawSlope)
-            aapsLogger.debug(LTag.BGSOURCE, "xDrip raw slope: $rawSlope, parsed trend: $parsedTrend")
+                ?: bundle.getString("slopeName")
+                ?: bundle.getString("direction")
+                ?: bundle.getString("slope")
+                ?: ""
+
+            val trendArrow = when (rawSlope.lowercase().trim()) {
+                "flat", "rightarrow", "→", "stable" -> TrendArrow.FLAT
+                "singleup", "uparrow", "↑", "rising" -> TrendArrow.SINGLE_UP
+                "doubleup", "uparrowuparrow", "↑↑", "fastrising" -> TrendArrow.DOUBLE_UP
+                "fortyfiveup", "sentryup", "↗", "slightrise" -> TrendArrow.FORTY_FIVE_UP
+                "singledown", "downarrow", "↓", "falling" -> TrendArrow.SINGLE_DOWN
+                "doubledown", "downarrowdownarrow", "↓↓", "fastfalling" -> TrendArrow.DOUBLE_DOWN
+                "fortyfivedown", "sentrydown", "↘", "slightfall" -> TrendArrow.FORTY_FIVE_DOWN
+                else -> TrendArrow.fromString(rawSlope)
+            }
 
             val rawTimestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0)
                 .takeIf { it > 0 } ?: bundle.getLong("timestamp", 0)
@@ -134,80 +146,20 @@ class XdripSourcePlugin @Inject constructor(
             val rawValue = bundle.getDouble(Intents.EXTRA_RAW, 0.0)
                 .takeIf { it > 0.0 } ?: bundle.getDouble("raw", 0.0)
 
-            val slopeStr = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
-                ?: bundle.getString("slopeName") 
-                ?: bundle.getString("direction") 
-                ?: bundle.getString("slope")
-                ?: ""
-
-            val trendArrow = when (slopeStr.lowercase()) {
-                "flat", "rightarrow", "→" -> TrendArrow.FLAT
-                "singleup", "uparrow", "↑" -> TrendArrow.SINGLE_UP
-                "doubleup", "uparrowuparrow", "↑↑" -> TrendArrow.DOUBLE_UP
-                "fortyfiveup", "sentryup", "↗" -> TrendArrow.FORTY_FIVE_UP
-                "singledown", "downarrow", "↓" -> TrendArrow.SINGLE_DOWN
-                "doubledown", "downarrowdownarrow", "↓↓" -> TrendArrow.DOUBLE_DOWN
-                "fortyfivedown", "sentrydown", "↘" -> TrendArrow.FORTY_FIVE_DOWN
-                else -> TrendArrow.fromString(slopeStr)
-            }
-
             val sourceStr = bundle.getString(Intents.XDRIP_DATA_SOURCE)
                 ?: bundle.getString("source")
                 ?: ""
 
             val glucoseValues = mutableListOf<GV>()
-            
-            val timestampsArray = bundle.getLongArray("timestamps")
-            val bgsArray = bundle.getDoubleArray("bgs") ?: bundle.getDoubleArray("bg_estimates")
-            
-            if (timestampsArray != null && bgsArray != null && timestampsArray.size == bgsArray.size) {
-                for (i in timestampsArray.indices) {
-                    val ts = timestampsArray[i]
-                    val correctedTs = if (ts > 0 && ts < 10000000000L) ts * 1000L else if (ts <= 0) dateUtil.now() else ts
-                    val valEst = bgsArray[i]
-                    if (correctedTs > 0 && valEst > 0.0) {
-                        glucoseValues += GV(
-                            timestamp = correctedTs,
-                            value = round(valEst),
-                            raw = 0.0,
-                            noise = null,
-                            trendArrow = TrendArrow.fromString(""),
-                            sourceSensor = SourceSensor.fromString(sourceStr)
-                        )
-                    }
-                }
-            }
-            
-            if (glucoseValues.isEmpty()) {
-                val rawTimestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0)
-                    .takeIf { it > 0 } ?: bundle.getLong("timestamp", 0)
-                    .takeIf { it > 0 } ?: bundle.getLong("time", 0)
-
-                val correctedTimestamp = if (rawTimestamp > 0 && rawTimestamp < 10000000000L) {
-                    rawTimestamp * 1000L
-                } else if (rawTimestamp <= 0) {
-                    dateUtil.now()
-                } else {
-                    rawTimestamp
-                }
-
-                val bgEstimate = bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)
-                    .takeIf { it > 0.0 } ?: bundle.getDouble("glucose", 0.0)
-                    .takeIf { it > 0.0 } ?: bundle.getDouble("sgv", 0.0)
-
-                val rawValue = bundle.getDouble(Intents.EXTRA_RAW, 0.0)
-                    .takeIf { it > 0.0 } ?: bundle.getDouble("raw", 0.0)
-
-                if (correctedTimestamp > 0 && bgEstimate > 0.0) {
-                    glucoseValues += GV(
-                        timestamp = correctedTimestamp,
-                        value = round(bgEstimate),
-                        raw = round(rawValue),
-                        noise = null,
-                        trendArrow = trendArrow,
-                        sourceSensor = SourceSensor.fromString(sourceStr)
-                    )
-                }
+            if (correctedTimestamp > 0 && bgEstimate > 0.0) {
+                glucoseValues += GV(
+                    timestamp = correctedTimestamp,
+                    value = round(bgEstimate),
+                    raw = round(rawValue),
+                    noise = null,
+                    trendArrow = trendArrow,
+                    sourceSensor = SourceSensor.fromString(sourceStr)
+                )
             }
             
             val newSensorStartTime = getSensorStartTime(bundle)
