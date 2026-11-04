@@ -197,15 +197,34 @@ class XdripSourcePlugin @Inject constructor(
                 }
                 else -> newSensorStartTime
             }
-            // Always update glucoseValues, but use the decided sensorStartTime
-            if (glucoseValues.isNotEmpty() && glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0)
-                persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
-                    .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
-                    .blockingGet()
-                    .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
-            else return Result.failure(workDataOf("Error" to "missing glucoseValue"))
+
+            // --- 【改善】データベース保存処理の確実な実行とログ詳細化 ---
+            if (glucoseValues.isNotEmpty() && glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0) {
+                val targetValue = glucoseValues[0]
+                aapsLogger.debug(LTag.BGSOURCE, "Attempting to insert CGM data: timestamp=${targetValue.timestamp}, value=${targetValue.value}, trend=${targetValue.trendArrow}")
+
+                try {
+                    persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
+                        .doOnSuccess { savedValues ->
+                            val count = savedValues.all().size
+                            aapsLogger.debug(LTag.BGSOURCE, "Successfully inserted CGM data to DB. Saved count: $count")
+                            savedValues.all().forEach { xdripSourcePlugin.detectSource(it) }
+                        }
+                        .doOnError { throwable ->
+                            aapsLogger.error(LTag.BGSOURCE, "Error inserting CGM data to DB: ${throwable.message}", throwable)
+                            ret = Result.failure(workDataOf("Error" to throwable.toString()))
+                        }
+                        .blockingGet()
+                } catch (e: Exception) {
+                    aapsLogger.error(LTag.BGSOURCE, "Exception during CGM data insertion: ${e.message}", e)
+                    ret = Result.failure(workDataOf("Error" to e.toString()))
+                }
+            } else {
+                aapsLogger.debug(LTag.BGSOURCE, "Missing or invalid glucoseValue: ${glucoseValues.getOrNull(0)}")
+                return Result.failure(workDataOf("Error" to "missing glucoseValue"))
+            }
+
             xdripSourcePlugin.sensorBatteryLevel = bundle.getInt(Intents.EXTRA_SENSOR_BATTERY, -1)
             return ret
-        }
     }
 }
