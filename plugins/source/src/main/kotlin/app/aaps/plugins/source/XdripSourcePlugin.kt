@@ -116,6 +116,9 @@ class XdripSourcePlugin @Inject constructor(
             aapsLogger.debug(LTag.BGSOURCE, "xDrip raw slope: $rawSlope, parsed trend: $parsedTrend")
 
             val rawTimestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0)
+                .takeIf { it > 0 } ?: bundle.getLong("timestamp", 0)
+                .takeIf { it > 0 } ?: bundle.getLong("time", 0)
+
             val correctedTimestamp = if (rawTimestamp > 0 && rawTimestamp < 10000000000L) {
                 rawTimestamp * 1000L
             } else if (rawTimestamp <= 0) {
@@ -124,19 +127,31 @@ class XdripSourcePlugin @Inject constructor(
                 rawTimestamp
             }
 
+            val bgEstimate = bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)
+                .takeIf { it > 0.0 } ?: bundle.getDouble("glucose", 0.0)
+                .takeIf { it > 0.0 } ?: bundle.getDouble("sgv", 0.0)
+
+            val rawValue = bundle.getDouble(Intents.EXTRA_RAW, 0.0)
+                .takeIf { it > 0.0 } ?: bundle.getDouble("raw", 0.0)
+
             val slopeStr = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
                 ?: bundle.getString("slopeName") 
                 ?: bundle.getString("direction") 
+                ?: bundle.getString("slope")
+                ?: ""
+
+            val sourceStr = bundle.getString(Intents.XDRIP_DATA_SOURCE)
+                ?: bundle.getString("source")
                 ?: ""
 
             val glucoseValues = mutableListOf<GV>()
             glucoseValues += GV(
                 timestamp = correctedTimestamp,
-                value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
-                raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
+                value = round(bgEstimate),
+                raw = round(rawValue),
                 noise = null,
                 trendArrow = TrendArrow.fromString(slopeStr),
-                sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
+                sourceSensor = SourceSensor.fromString(sourceStr)
             )
             
             val newSensorStartTime = getSensorStartTime(bundle)
