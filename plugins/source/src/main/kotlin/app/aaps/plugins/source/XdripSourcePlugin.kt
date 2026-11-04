@@ -147,7 +147,7 @@ class XdripSourcePlugin @Inject constructor(
             val glucoseValues = mutableListOf<GV>()
             
             val timestampsArray = bundle.getLongArray("timestamps") ?: bundle.getLongArray(Intents.EXTRA_TIMESTAMPS)
-            val bgsArray = bundle.getDoubleArray("bgs") ?: bundle.getDoubleArray(Intents.EXTRA_BG_ESTIMATES)
+            val bgsArray = bundle.getDoubleArray("bgs") ?: bundle.getDoubleArray("bg_estimates")
             
             if (timestampsArray != null && bgsArray != null && timestampsArray.size == bgsArray.size) {
                 for (i in timestampsArray.indices) {
@@ -160,7 +160,7 @@ class XdripSourcePlugin @Inject constructor(
                             value = round(valEst),
                             raw = 0.0,
                             noise = null,
-                            trendArrow = TrendArrow.UNKNOWN,
+                            trendArrow = TrendArrow.NONE,
                             sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: bundle.getString("source") ?: "")
                         )
                     }
