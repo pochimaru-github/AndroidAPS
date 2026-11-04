@@ -97,22 +97,17 @@ class XdripSourcePlugin @Inject constructor(
 
         @SuppressLint("CheckResult")
         override suspend fun doWorkAndLog(): Result {
-            aapsLogger.debug(LTag.BGSOURCE, "XdripSourceWorker doWorkAndLog started")
             var ret = Result.success()
 
             if (!xdripSourcePlugin.isEnabled()) {
-                aapsLogger.debug(LTag.BGSOURCE, "XdripSourcePlugin is not enabled")
                 return Result.success(workDataOf("Result" to "Plugin not enabled"))
             }
             val bundle = dataWorkerStorage.pickupBundle(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
             if (bundle == null) {
-                aapsLogger.debug(LTag.BGSOURCE, "XdripSourceWorker bundle is missing")
                 return Result.failure(workDataOf("Error" to "missing input data"))
             }
 
-            // --- 【改善】あらゆる型の混入に対応した安全なパラメータ抽出 ---
-            
-            // トレンド（文字列）
+            // トレンド（文字列）の柔軟な取得
             val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)
                 ?: bundle.getString("slopeName")
                 ?: bundle.getString("direction")
@@ -131,23 +126,10 @@ class XdripSourcePlugin @Inject constructor(
                 else -> TrendArrow.fromString(rawSlope)
             }
 
-            // タイムスタンプ（Long / String / Int のいずれにも対応）
-            val rawTimestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0L)
-                .takeIf { it > 0L } ?: bundle.getLong("timestamp", 0L)
-                .takeIf { it > 0L } ?: bundle.getLong("time", 0L)
-                .takeIf { it > 0L } ?: bundle.get(Intents.EXTRA_TIMESTAMP)?.toString()?.toLongOrNull()
-                ?: bundle.get("timestamp")?.toString()?.toLongOrNull()
-                ?: 0L
+            // --- 【強制バイパス】タイムスタンプの重複・古さによる破棄を防ぐため、現在時刻を強制適用 ---
+            val correctedTimestamp = dateUtil.now()
 
-            val correctedTimestamp = if (rawTimestamp > 0 && rawTimestamp < 10000000000L) {
-                rawTimestamp * 1000L
-            } else if (rawTimestamp <= 0) {
-                dateUtil.now()
-            } else {
-                rawTimestamp
-            }
-
-            // 血糖値 (Double / Int / String のいずれにも対応)
+            // 血糖値の柔軟な取得
             val bgEstimate = bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)
                 .takeIf { it > 0.0 } ?: bundle.getDouble("glucose", 0.0)
                 .takeIf { it > 0.0 } ?: bundle.getDouble("sgv", 0.0)
@@ -156,7 +138,7 @@ class XdripSourcePlugin @Inject constructor(
                 ?: bundle.get("sgv")?.toString()?.toDoubleOrNull()
                 ?: 0.0
 
-            // 生データ値
+            // 生データの取得
             val rawValue = bundle.getDouble(Intents.EXTRA_RAW, 0.0)
                 .takeIf { it > 0.0 } ?: bundle.getDouble("raw", 0.0)
                 .takeIf { it > 0.0 } ?: bundle.get(Intents.EXTRA_RAW)?.toString()?.toDoubleOrNull()
@@ -168,7 +150,7 @@ class XdripSourcePlugin @Inject constructor(
                 ?: ""
 
             val glucoseValues = mutableListOf<GV>()
-            if (correctedTimestamp > 0 && bgEstimate > 0.0) {
+            if (bgEstimate > 0.0) {
                 glucoseValues += GV(
                     timestamp = correctedTimestamp,
                     value = round(bgEstimate),
@@ -180,51 +162,27 @@ class XdripSourcePlugin @Inject constructor(
             }
             
             val newSensorStartTime = getSensorStartTime(bundle)
-            // Retrieve last stored sensorStartTime from the database
             val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
             val lastStoredSensorStartTime = lastTherapyEvent?.timestamp
-            // Decide whether to update sensorStartTime or keep the last stored one
             val finalSensorStartTime = when {
                 lastStoredSensorStartTime != null && newSensorStartTime != null &&
-                    abs(newSensorStartTime - lastStoredSensorStartTime) <= 300_000 -> {
-                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is within 5 minutes range, skipping update.")
-                    null
-                }
+                    abs(newSensorStartTime - lastStoredSensorStartTime) <= 300_000 -> null
                 lastStoredSensorStartTime != null && newSensorStartTime != null &&
-                    newSensorStartTime < lastStoredSensorStartTime -> {
-                    aapsLogger.debug(LTag.BGSOURCE, "Sensor start time is older than last stored time, skipping update.")
-                    null
-                }
+                    newSensorStartTime < lastStoredSensorStartTime -> null
                 else -> newSensorStartTime
             }
 
-            // --- 【改善】データベース保存処理の確実な実行とログ詳細化 ---
-            if (glucoseValues.isNotEmpty() && glucoseValues[0].timestamp > 0 && glucoseValues[0].value > 0.0) {
-                val targetValue = glucoseValues[0]
-                aapsLogger.debug(LTag.BGSOURCE, "Attempting to insert CGM data: timestamp=${targetValue.timestamp}, value=${targetValue.value}, trend=${targetValue.trendArrow}")
-
-                try {
-                    persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
-                        .doOnSuccess { savedValues ->
-                            val count = savedValues.all().size
-                            aapsLogger.debug(LTag.BGSOURCE, "Successfully inserted CGM data to DB. Saved count: $count")
-                            savedValues.all().forEach { xdripSourcePlugin.detectSource(it) }
-                        }
-                        .doOnError { throwable ->
-                            aapsLogger.error(LTag.BGSOURCE, "Error inserting CGM data to DB: ${throwable.message}", throwable)
-                            ret = Result.failure(workDataOf("Error" to throwable.toString()))
-                        }
-                        .blockingGet()
-                } catch (e: Exception) {
-                    aapsLogger.error(LTag.BGSOURCE, "Exception during CGM data insertion: ${e.message}", e)
-                    ret = Result.failure(workDataOf("Error" to e.toString()))
-                }
+            // --- データベースへの強制保存 ---
+            if (glucoseValues.isNotEmpty() && glucoseValues[0].value > 0.0) {
+                persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
+                    .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
+                    .blockingGet()
+                    .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
             } else {
-                aapsLogger.debug(LTag.BGSOURCE, "Missing or invalid glucoseValue: ${glucoseValues.getOrNull(0)}")
                 return Result.failure(workDataOf("Error" to "missing glucoseValue"))
             }
 
             xdripSourcePlugin.sensorBatteryLevel = bundle.getInt(Intents.EXTRA_SENSOR_BATTERY, -1)
             return ret
-    }
+        }
 }
