@@ -140,6 +140,17 @@ class XdripSourcePlugin @Inject constructor(
                 ?: bundle.getString("slope")
                 ?: ""
 
+            val trendArrow = when (slopeStr.lowercase()) {
+                "flat", "rightarrow", "→" -> TrendArrow.FLAT
+                "singleup", "uparrow", "↑" -> TrendArrow.SINGLE_UP
+                "doubleup", "uparrowuparrow", "↑↑" -> TrendArrow.DOUBLE_UP
+                "fortyfiveup", "sentryup", "↗" -> TrendArrow.FORTY_FIVE_UP
+                "singledown", "downarrow", "↓" -> TrendArrow.SINGLE_DOWN
+                "doubledown", "downarrowdownarrow", "↓↓" -> TrendArrow.DOUBLE_DOWN
+                "fortyfivedown", "sentrydown", "↘" -> TrendArrow.FORTY_FIVE_DOWN
+                else -> TrendArrow.fromString(slopeStr)
+            }
+
             val sourceStr = bundle.getString(Intents.XDRIP_DATA_SOURCE)
                 ?: bundle.getString("source")
                 ?: ""
@@ -161,7 +172,7 @@ class XdripSourcePlugin @Inject constructor(
                             raw = 0.0,
                             noise = null,
                             trendArrow = TrendArrow.fromString(""),
-                            sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: bundle.getString("source") ?: "")
+                            sourceSensor = SourceSensor.fromString(sourceStr)
                         )
                     }
                 }
@@ -187,23 +198,13 @@ class XdripSourcePlugin @Inject constructor(
                 val rawValue = bundle.getDouble(Intents.EXTRA_RAW, 0.0)
                     .takeIf { it > 0.0 } ?: bundle.getDouble("raw", 0.0)
 
-                val slopeStr = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
-                    ?: bundle.getString("slopeName") 
-                    ?: bundle.getString("direction") 
-                    ?: bundle.getString("slope")
-                    ?: ""
-
-                val sourceStr = bundle.getString(Intents.XDRIP_DATA_SOURCE)
-                    ?: bundle.getString("source")
-                    ?: ""
-
                 if (correctedTimestamp > 0 && bgEstimate > 0.0) {
                     glucoseValues += GV(
                         timestamp = correctedTimestamp,
                         value = round(bgEstimate),
                         raw = round(rawValue),
                         noise = null,
-                        trendArrow = TrendArrow.fromString(slopeStr),
+                        trendArrow = trendArrow,
                         sourceSensor = SourceSensor.fromString(sourceStr)
                     )
                 }
