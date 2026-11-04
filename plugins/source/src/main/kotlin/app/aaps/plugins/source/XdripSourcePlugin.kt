@@ -124,13 +124,18 @@ class XdripSourcePlugin @Inject constructor(
                 rawTimestamp
             }
 
+            val slopeStr = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME) 
+                ?: bundle.getString("slopeName") 
+                ?: bundle.getString("direction") 
+                ?: ""
+
             val glucoseValues = mutableListOf<GV>()
             glucoseValues += GV(
                 timestamp = correctedTimestamp,
                 value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
                 noise = null,
-                trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
+                trendArrow = TrendArrow.fromString(slopeStr),
                 sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
             )
             
