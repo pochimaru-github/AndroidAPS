@@ -115,15 +115,25 @@ class XdripSourcePlugin @Inject constructor(
             val parsedTrend = TrendArrow.fromString(rawSlope)
             aapsLogger.debug(LTag.BGSOURCE, "xDrip raw slope: $rawSlope, parsed trend: $parsedTrend")
 
+            val rawTimestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0)
+            val correctedTimestamp = if (rawTimestamp > 0 && rawTimestamp < 10000000000L) {
+                rawTimestamp * 1000L
+            } else if (rawTimestamp <= 0) {
+                dateUtil.now()
+            } else {
+                rawTimestamp
+            }
+
             val glucoseValues = mutableListOf<GV>()
             glucoseValues += GV(
-                timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
+                timestamp = correctedTimestamp,
                 value = round(bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)),
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
                 noise = null,
-                trendArrow = parsedTrend,
+                trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
                 sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
             )
+            
             val newSensorStartTime = getSensorStartTime(bundle)
             // Retrieve last stored sensorStartTime from the database
             val lastTherapyEvent = persistenceLayer.getLastTherapyRecordUpToNow(TE.Type.SENSOR_CHANGE)
