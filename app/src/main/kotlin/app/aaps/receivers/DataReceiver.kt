@@ -43,8 +43,13 @@ open class DataReceiver : DaggerBroadcastReceiver() {
     fun processIntent(context: Context, intent: Intent) {
         val bundle = intent.extras ?: return
         aapsLogger.debug(LTag.CORE, "onReceive ${intent.action} ${BundleLogger.log(bundle)}")
-        when (intent.action) {
-            Intents.ACTION_NEW_BG_ESTIMATE            ->
+        
+        val action = intent.action
+        when (action) {
+            Intents.ACTION_NEW_BG_ESTIMATE,
+            "com.eveningoutpost.dexdrip.BgEstimate",
+            "com.eveningoutpost.dexdrip.Model.GlucoseUpdate",
+            "com.eveningoutpost.dexdrip.action.NEW_BG_ESTIMATE" ->
                 OneTimeWorkRequest.Builder(XdripSourcePlugin.XdripSourceWorker::class.java)
                     .setInputData(dataWorkerStorage.storeInputData(bundle, intent.action)).build()
 
