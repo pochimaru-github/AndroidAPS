@@ -6,7 +6,6 @@ import android.provider.Telephony
 import androidx.annotation.VisibleForTesting
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
-import androidx.work.OutOfQuotaPolicy
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.receivers.Intents
@@ -43,13 +42,16 @@ open class DataReceiver : DaggerBroadcastReceiver() {
     @VisibleForTesting
     fun processIntent(context: Context, intent: Intent) {
         val bundle = intent.extras ?: return
-        aapsLogger.debug(LTag.CORE, "onReceive ${intent.action} ${BundleLogger.log(bundle)}")
-        when (intent.action) {
-            Intents.ACTION_NEW_BG_ESTIMATE            ->
+        aapsLogger.debug(LTag.CORE, "DataReceiver onReceive action: ${intent.action}, content: ${BundleLogger.log(bundle)}")
+        
+        val workRequest = when (intent.action) {
+            Intents.ACTION_NEW_BG_ESTIMATE            -> {
+                val storedKey = dataWorkerStorage.storeInputData(bundle, intent.action)
+                aapsLogger.debug(LTag.CORE, "DataReceiver stored Xdrip input data key: $storedKey")
                 OneTimeWorkRequest.Builder(XdripSourcePlugin.XdripSourceWorker::class.java)
-                    .setInputData(dataWorkerStorage.storeInputData(bundle, intent.action))
-                    .setExpedited(OutOfQuotaPolicy.DROP_WORK_REQUEST)
+                    .setInputData(storedKey)
                     .build()
+            }
 
             Intents.POCTECH_BG                        ->
                 OneTimeWorkRequest.Builder(PoctechPlugin.PoctechWorker::class.java)
@@ -110,7 +112,12 @@ open class DataReceiver : DaggerBroadcastReceiver() {
                     .setInputData(dataWorkerStorage.storeInputData(bundle, intent.action)).build()
 
             else                                      -> null
-        }?.let { request -> dataWorkerStorage.enqueue(request) }
+        }
+
+        workRequest?.let { request -> 
+            aapsLogger.debug(LTag.CORE, "DataReceiver enqueuing work request for action: ${intent.action}")
+            dataWorkerStorage.enqueue(request) 
+        }
 
         // Verify KeepAlive is running
         // Sometimes the schedule fail
