@@ -99,15 +99,16 @@ class XdripSourcePlugin @Inject constructor(
         override suspend fun doWorkAndLog(): Result {
             var ret = Result.success()
 
-            if (!xdripSourcePlugin.isEnabled()) {
-                return Result.success(workDataOf("Result" to "Plugin not enabled"))
-            }
+            // プラグイン有効性チェックを一時的にバイパスして切り分けを行う
+            // if (!xdripSourcePlugin.isEnabled()) {
+            //     return Result.success(workDataOf("Result" to "Plugin not enabled"))
+            // }
+
             val bundle = dataWorkerStorage.pickupBundle(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
             if (bundle == null) {
                 return Result.failure(workDataOf("Error" to "missing input data"))
             }
 
-            // トレンド（文字列）の柔軟な取得
             val rawSlope = bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)
                 ?: bundle.getString("slopeName")
                 ?: bundle.getString("direction")
@@ -126,10 +127,8 @@ class XdripSourcePlugin @Inject constructor(
                 else -> TrendArrow.fromString(rawSlope)
             }
 
-            // --- 【強制バイパス】タイムスタンプの重複・古さによる破棄を防ぐため、現在時刻を強制適用 ---
             val correctedTimestamp = dateUtil.now()
 
-            // 血糖値の柔軟な取得
             val bgEstimate = bundle.getDouble(Intents.EXTRA_BG_ESTIMATE, 0.0)
                 .takeIf { it > 0.0 } ?: bundle.getDouble("glucose", 0.0)
                 .takeIf { it > 0.0 } ?: bundle.getDouble("sgv", 0.0)
@@ -138,7 +137,6 @@ class XdripSourcePlugin @Inject constructor(
                 ?: bundle.get("sgv")?.toString()?.toDoubleOrNull()
                 ?: 0.0
 
-            // 生データの取得
             val rawValue = bundle.getDouble(Intents.EXTRA_RAW, 0.0)
                 .takeIf { it > 0.0 } ?: bundle.getDouble("raw", 0.0)
                 .takeIf { it > 0.0 } ?: bundle.get(Intents.EXTRA_RAW)?.toString()?.toDoubleOrNull()
@@ -172,7 +170,6 @@ class XdripSourcePlugin @Inject constructor(
                 else -> newSensorStartTime
             }
 
-            // --- データベースへの強制保存 ---
             if (glucoseValues.isNotEmpty() && glucoseValues[0].value > 0.0) {
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
