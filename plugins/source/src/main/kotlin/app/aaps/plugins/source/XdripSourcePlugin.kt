@@ -99,11 +99,6 @@ class XdripSourcePlugin @Inject constructor(
         override suspend fun doWorkAndLog(): Result {
             var ret = Result.success()
 
-            // プラグイン有効性チェックを一時的にバイパスして切り分けを行う
-            // if (!xdripSourcePlugin.isEnabled()) {
-            //     return Result.success(workDataOf("Result" to "Plugin not enabled"))
-            // }
-
             val bundle = dataWorkerStorage.pickupBundle(inputData.getLong(DataWorkerStorage.STORE_KEY, -1))
             if (bundle == null) {
                 return Result.failure(workDataOf("Error" to "missing input data"))
@@ -174,7 +169,23 @@ class XdripSourcePlugin @Inject constructor(
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .blockingGet()
-                    .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
+                    .also { savedValues ->
+                        savedValues.all().forEach { 
+                            xdripSourcePlugin.detectSource(it) 
+                        }
+                    }
+
+                // データベース保存後にAAPS内部へブロードキャストを送信してUIおよび監視ループの更新を確実にする
+                try {
+                    val updateIntent = Intent(Intents.ACTION_NEW_BG_ESTIMATE).apply {
+                        putExtras(bundle)
+                        setPackage(applicationContext.packageName)
+                    }
+                    applicationContext.sendBroadcast(updateIntent)
+                } catch (e: Exception) {
+                    // ignore
+                }
+
             } else {
                 return Result.failure(workDataOf("Error" to "missing glucoseValue"))
             }
