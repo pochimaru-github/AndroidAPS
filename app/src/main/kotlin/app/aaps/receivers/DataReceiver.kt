@@ -6,6 +6,7 @@ import android.provider.Telephony
 import androidx.annotation.VisibleForTesting
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
+import androidx.work.OutOfQuotaPolicy
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
 import app.aaps.core.interfaces.receivers.Intents
@@ -46,7 +47,9 @@ open class DataReceiver : DaggerBroadcastReceiver() {
         when (intent.action) {
             Intents.ACTION_NEW_BG_ESTIMATE            ->
                 OneTimeWorkRequest.Builder(XdripSourcePlugin.XdripSourceWorker::class.java)
-                    .setInputData(dataWorkerStorage.storeInputData(bundle, intent.action)).build()
+                    .setInputData(dataWorkerStorage.storeInputData(bundle, intent.action))
+                    .setExpedited(OutOfQuotaPolicy.DROP_WORK_REQUEST)
+                    .build()
 
             Intents.POCTECH_BG                        ->
                 OneTimeWorkRequest.Builder(PoctechPlugin.PoctechWorker::class.java)
