@@ -2,6 +2,7 @@ package app.aaps.plugins.source
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import androidx.work.WorkerParameters
@@ -175,7 +176,6 @@ class XdripSourcePlugin @Inject constructor(
                         }
                     }
 
-                // データベース保存後にAAPS内部へブロードキャストを送信してUIおよび監視ループの更新を確実にする
                 try {
                     val updateIntent = Intent(Intents.ACTION_NEW_BG_ESTIMATE).apply {
                         putExtras(bundle)
