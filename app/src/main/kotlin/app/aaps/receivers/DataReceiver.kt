@@ -42,16 +42,11 @@ open class DataReceiver : DaggerBroadcastReceiver() {
     @VisibleForTesting
     fun processIntent(context: Context, intent: Intent) {
         val bundle = intent.extras ?: return
-        aapsLogger.debug(LTag.CORE, "DataReceiver onReceive action: ${intent.action}, content: ${BundleLogger.log(bundle)}")
-        
-        val workRequest = when (intent.action) {
-            Intents.ACTION_NEW_BG_ESTIMATE            -> {
-                val storedKey = dataWorkerStorage.storeInputData(bundle, intent.action)
-                aapsLogger.debug(LTag.CORE, "DataReceiver stored Xdrip input data key: $storedKey")
+        aapsLogger.debug(LTag.CORE, "onReceive ${intent.action} ${BundleLogger.log(bundle)}")
+        when (intent.action) {
+            Intents.ACTION_NEW_BG_ESTIMATE            ->
                 OneTimeWorkRequest.Builder(XdripSourcePlugin.XdripSourceWorker::class.java)
-                    .setInputData(storedKey)
-                    .build()
-            }
+                    .setInputData(dataWorkerStorage.storeInputData(bundle, intent.action)).build()
 
             Intents.POCTECH_BG                        ->
                 OneTimeWorkRequest.Builder(PoctechPlugin.PoctechWorker::class.java)
@@ -112,12 +107,7 @@ open class DataReceiver : DaggerBroadcastReceiver() {
                     .setInputData(dataWorkerStorage.storeInputData(bundle, intent.action)).build()
 
             else                                      -> null
-        }
-
-        workRequest?.let { request -> 
-            aapsLogger.debug(LTag.CORE, "DataReceiver enqueuing work request for action: ${intent.action}")
-            dataWorkerStorage.enqueue(request) 
-        }
+        }?.let { request -> dataWorkerStorage.enqueue(request) }
 
         // Verify KeepAlive is running
         // Sometimes the schedule fail
